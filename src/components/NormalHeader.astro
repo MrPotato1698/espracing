@@ -1,0 +1,103 @@
+---
+import Chevron from "./Chevron.astro";
+---
+
+<!-- Nombre Inicial + Redes -->
+<header class="RedesUp">
+  <div class="RedesUp1">
+    <a
+      class="fa-brands fa-x-twitter"
+      href="https://twitter.com/EspRacingCom"
+      target="_blank"></a>
+    <a
+      class="fa-brands fa-instagram"
+      href="https://www.instagram.com/espsimracingoficial/"
+      target="_blank"></a>
+    <a
+      class="fa-brands fa-cc-paypal"
+      href="https://www.paypal.com/es/home"
+      target="_blank"></a>
+  </div>
+  <div class="RedesUp2">
+    <a
+      class="fa-brands fa-discord"
+      href="https://discord.gg/hjawMXGU6k"
+      target="_blank"></a>
+    <a
+      class="fa-brands fa-youtube"
+      href="https://www.youtube.com/@esp-racing-com-es"
+      target="_blank"></a>
+    <a
+      class="fa-brands fa-twitch"
+      href="https://www.twitch.tv/sergig_"
+      target="_blank"></a>
+  </div>
+</header>
+<!-- GIF INICIAL -->
+<div class="LogoCentral">
+  <a href="/ProyectoFinal/app/home"
+    ><img
+      src="/ProyectoFinal/image/ESPLogo.svg"
+      alt="Logo ESP Racing Central"
+    /></a
+  >
+</div>
+
+<div class="Gifini">
+  <img src="/ProyectoFinal/image/PortadaESP.png" alt="Gif Inicio ESP Racing" />
+</div>
+
+<!-- NAVBAR -->
+<nav role="navigation" class="navbar">
+  <button onclick="toggleMenu()" class="burger"></button>
+  <div class="dropdowns">
+    <div class="dropdown">
+      <a class="button" href="/index">
+        Inicio
+        <Chevron />
+      </a>
+      <div class="dropdown-menu">
+        <a href="/ProyectoFinal/app/news">Noticias</a>
+        <a href="/ProyectoFinal/app/aboutus">Sobre Nosotros</a>
+        <a href="/ProyectoFinal/app/faq">Preguntas Frecuentes</a>
+        <a href="/ProyectoFinal/app/contacto">Contacto</a>
+      </div>
+    </div>
+    <div class="dropdown">
+      <a class="button">
+        Campeonato Actual
+        <Chevron />
+      </a>
+      <div class="dropdown-menu">
+        <a href="/ProyectoFinal/app/actualinfo">Información</a>
+        <a href="/ProyectoFinal/app/rules">Normativa</a>
+        <a href="/ProyectoFinal/app/clasificaciones">Clasificaciones</a>
+      </div>
+    </div>
+    <div class="dropdown">
+      <a class="button">
+        Campeonatos Pasados
+        <Chevron />
+      </a>
+      <div class="dropdown-menu">
+        <a href="/ProyectoFinal/app/pastchamps">Lista de Campeonatos</a>
+      </div>
+    </div>
+    <div class="dropdown">
+      <a class="button">
+        Pilotos/Equipos
+        <Chevron />
+      </a>
+      <div class="dropdown-menu">
+        <a href="/ProyectoFinal/app/tpilotos">Pilotos</a>
+        <a href="/ProyectoFinal/app/tequipos">Equipos</a>
+      </div>
+    </div>
+    <div class="dropdown">
+      <a class="button" href="<%=rutaPerfil%>">Mi Perfil</a>
+    </div>
+  </div>
+</nav>
+<script>
+  const toggleMenu = () => document.body.classList.toggle("open");
+</script>
