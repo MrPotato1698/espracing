@@ -3,101 +3,259 @@ import Chevron from "./Chevron.astro";
 ---
 
 <!-- Nombre Inicial + Redes -->
-<header class="RedesUp">
-  <div class="RedesUp1">
+<header class="flex flex-row-reverse z-20 md:flex-none">
+  <div class="flex gap-6 mr-4">
     <a
-      class="fa-brands fa-x-twitter"
-      href="https://twitter.com/EspRacingCom"
-      target="_blank"></a>
+      href="https://twitter.com/EspRacingCom" target="_blank">
+      <img class="w-8 .p-2 invert" src="/public/img/social/brand-x.svg" alt="Twitter ESP Racing" />
+    </a>
+
     <a
-      class="fa-brands fa-instagram"
       href="https://www.instagram.com/espsimracingoficial/"
-      target="_blank"></a>
+      target="_blank"
+    >
+      <img class="w-8 .p-2 invert" src="/public/img/social/brand-instagram.svg" alt="Instagram ESP Racing" />
+    </a>
+
     <a
-      class="fa-brands fa-cc-paypal"
       href="https://www.paypal.com/es/home"
-      target="_blank"></a>
+      target="_blank"
+    >
+      <img class="w-8 .p-2 invert" src="/public/img/social/brand-paypal.svg" alt="Paypal ESP Racing" />
+    </a>
   </div>
-  <div class="RedesUp2">
+
+  <div class="flex gap-6 mr-4 md:flex-row">
     <a
-      class="fa-brands fa-discord"
       href="https://discord.gg/hjawMXGU6k"
-      target="_blank"></a>
+      target="_blank"
+    >
+      <img class="w-8 .p-2 invert" src="/public/img/social/brand-discord.svg" alt="Discord ESP Racing" />
+    </a>
+
     <a
-      class="fa-brands fa-youtube"
       href="https://www.youtube.com/@esp-racing-com-es"
-      target="_blank"></a>
+      target="_blank"
+    >
+      <img class="w-8 .p-2 invert" src="/public/img/social/brand-youtube.svg" alt="Youtube ESP Racing" />
+    </a>
+
     <a
-      class="fa-brands fa-twitch"
       href="https://www.twitch.tv/sergig_"
-      target="_blank"></a>
+      target="_blank"
+    >
+      <img class="w-8 .p-2 invert" src="/public/img/social/brand-twitch.svg" alt="Twitch ESP Racing" />
+    </a>
   </div>
 </header>
-<!-- GIF INICIAL -->
-<div class="LogoCentral">
-  <a href="/ProyectoFinal/app/home"
-    ><img
-      src="/ProyectoFinal/image/ESPLogo.svg"
-      alt="Logo ESP Racing Central"
-    /></a
-  >
-</div>
 
-<div class="Gifini">
-  <img src="/ProyectoFinal/image/PortadaESP.png" alt="Gif Inicio ESP Racing" />
+<!-- LOGO ESP RACING
+<div class="absolute block left-1/2 -translate-x-1/2 w-64">
+  <a href="/ProyectoFinal/app/home">
+    <img
+      src="/public/img/ESPRACINGLogo.webp"
+      alt="Logo ESP Racing Central"
+    />
+    </a>
+</div>
+-->
+
+<!-- PORTADA -->
+<div class="flex justify-center">
+  <img class = "mx-0 mt-0 mb-auto h-60 w-screen object-cover" src="/public/PortadaESP.webp" alt="Gif Inicio ESP Racing" />
 </div>
 
 <!-- NAVBAR -->
-<nav role="navigation" class="navbar">
-  <button onclick="toggleMenu()" class="burger"></button>
-  <div class="dropdowns">
-    <div class="dropdown">
-      <a class="button" href="/index">
-        Inicio
-        <Chevron />
-      </a>
-      <div class="dropdown-menu">
-        <a href="/ProyectoFinal/app/news">Noticias</a>
-        <a href="/ProyectoFinal/app/aboutus">Sobre Nosotros</a>
-        <a href="/ProyectoFinal/app/faq">Preguntas Frecuentes</a>
-        <a href="/ProyectoFinal/app/contacto">Contacto</a>
-      </div>
-    </div>
-    <div class="dropdown">
-      <a class="button">
-        Campeonato Actual
-        <Chevron />
-      </a>
-      <div class="dropdown-menu">
-        <a href="/ProyectoFinal/app/actualinfo">Información</a>
-        <a href="/ProyectoFinal/app/rules">Normativa</a>
-        <a href="/ProyectoFinal/app/clasificaciones">Clasificaciones</a>
-      </div>
-    </div>
-    <div class="dropdown">
-      <a class="button">
-        Campeonatos Pasados
-        <Chevron />
-      </a>
-      <div class="dropdown-menu">
-        <a href="/ProyectoFinal/app/pastchamps">Lista de Campeonatos</a>
-      </div>
-    </div>
-    <div class="dropdown">
-      <a class="button">
-        Pilotos/Equipos
-        <Chevron />
-      </a>
-      <div class="dropdown-menu">
-        <a href="/ProyectoFinal/app/tpilotos">Pilotos</a>
-        <a href="/ProyectoFinal/app/tequipos">Equipos</a>
-      </div>
-    </div>
-    <div class="dropdown">
-      <a class="button" href="<%=rutaPerfil%>">Mi Perfil</a>
+<nav role="navigation" class="bg-white border-gray-200 dark:bg-gray-900 dark:border-gray-700">
+  <div class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
+
+    <a href="#" class="flex items-center space-x-3 rtl:space-x-reverse">
+      <img
+        src="/public/img/ESPRACINGLogo.webp"
+        class="h-8"
+        alt="Flowbite Logo"
+      />
+      <span
+        class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white"
+        >ESP Racing
+      </span>
+    </a>
+
+    <button
+      data-collapse-toggle="navbar-dropdown"
+      type="button"
+      class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
+      aria-controls="navbar-dropdown"
+      aria-expanded="false"
+    >
+      <span class="sr-only">Abrir Menu Principal</span>
+      <svg
+        class="w-5 h-5"
+        aria-hidden="true"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 17 14"
+      >
+        <path
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M1 1h15M1 7h15M1 13h15"
+        />
+      </svg>
+    </button>
+
+    <div class = "hidden w-full md:block md:w-auto" id = "navbar-dropdown">
+      <ul class="flex flex-col font-medium p-4 md:p-0 mt-4 border border-gray-100 rounded-lg bg-gray-50 md:space-x-8 rtl:space-x-reverse md:flex-row md:mt-0 md:border-0 md:bg-white dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700">
+        <li>
+          <button
+            id="dropdownInicioLink"
+            data-dropdown-toggle="dropdownInicio"
+            aria-expanded="true"
+            aria-haspopup="true"
+            class ="flex items-center justify-between w-full py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 md:w-auto dark:text-white md:dark:hover:text-blue-500 dark:focus:text-white dark:border-gray-700 dark:hover:bg-gray-700 md:dark:hover:bg-transparent">
+            Inicio
+            <Chevron />
+          </button>
+          <!-- Dropdown Inicio -->
+          <div
+            id="dropdownInicio"
+            class="z-10 hidden font-normal bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700 dark:divide-gray-600">
+            <ul
+              class = "py-2 text-sm text-gray-700 dark:text-gray-400"
+              aria-labelledby="dropdownLargeButton">
+              <li>
+                <a
+                  href = "#"
+                  class = "block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                > Noticias
+                </a>
+              </li>
+              <li>
+                <a
+                  href = "#"
+                  class = "block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                > Sobre Nosotros
+                </a>
+              </li>
+              <li>
+                <a
+                  href = "#"
+                  class = "block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                > Preguntas Frecuentes
+                </a>
+              </li>
+              <li>
+                <a
+                  href = "#"
+                  class = "block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                > Contacto
+                </a>
+              </li>
+            </ul>
+          </div>
+        </li>
+
+        <li>
+          <button
+            id="dropdownCampeonatoActualLink"
+            data-dropdown-toggle="dropdownCampeonatoActual"
+            aria-expanded="true"
+            aria-haspopup="true"
+            class ="flex items-center justify-between w-full py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 md:w-auto dark:text-white md:dark:hover:text-blue-500 dark:focus:text-white dark:border-gray-700 dark:hover:bg-gray-700 md:dark:hover:bg-transparent"
+          >
+          Campeto Actual
+          <Chevron />
+          </button>
+          <!-- Dropdown CampetoActual -->
+          <div
+            id="dropdownCampeonatoActual"
+            class="z-10 hidden font-normal bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700 dark:divide-gray-600"
+          >
+            <ul
+              class = "py-2 text-sm text-gray-700 dark:text-gray-400"
+              aria-labelledby="dropdownLargeButton"
+            >
+              <li>
+                <a
+                  href = "#"
+                  class = "block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                > Información
+                </a>
+              </li>
+              <li>
+                <a
+                  href = "#"
+                  class = "block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                > Normativa
+                </a>
+              </li>
+              <li>
+                <a
+                  href = "#"
+                  class = "block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                > Clasificaciones
+                </a>
+              </li>
+            </ul>
+          </div>
+        </li>
+
+        <li>
+          <a
+            href="#"
+            class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
+            >Campeonatos Pasados</a
+          >
+        </li>
+
+        <li>
+          <button
+            id="dropdownPilotosEquiposLink"
+            data-dropdown-toggle="dropdownPilotosEquipos"
+            class ="flex items-center justify-between w-full py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 md:w-auto dark:text-white md:dark:hover:text-blue-500 dark:focus:text-white dark:border-gray-700 dark:hover:bg-gray-700 md:dark:hover:bg-transparent"
+          >
+          Pilotos / Equipos
+          <Chevron />
+          </button>
+          <!-- Dropdown PilotosEquipos -->
+          <div
+            id="dropdownPilotosEquipos"
+            class="z-10 hidden font-normal bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700 dark:divide-gray-600"
+          >
+            <ul
+              class = "py-2 text-sm text-gray-700 dark:text-gray-400"
+              aria-labelledby="dropdownLargeButton"
+            >
+              <li>
+                <a
+                  href = "#"
+                  class = "block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                > Pilotos
+                </a>
+              </li>
+              <li>
+                <a
+                  href = "#"
+                  class = "block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                > Equipos
+                </a>
+              </li>
+            </ul>
+          </div>
+        </li>
+
+        <li>
+          <a
+            href="#"
+            class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
+            >Mi Perfil</a
+          >
+        </li>
+
+      </ul>
     </div>
   </div>
 </nav>
-<script>
-  const toggleMenu = () => document.body.classList.toggle("open");
-</script>
+<script src="https://unpkg.com/@themesberg/flowbite@1.1.1/dist/flowbite.bundle.js"></script>
