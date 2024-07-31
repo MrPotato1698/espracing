@@ -6,6 +6,8 @@ export default {
 			atomic: ["Atomic", "cursive"],
 		},
 		color:{
+			transparent: 'transparent',
+			current: 'currentColor',
 			'redESP': '#da392b',
 			'black0f': '#0f0f0f',
 			'black19': '#19191c',
