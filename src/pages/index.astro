@@ -1,11 +1,11 @@
 ---
-import Layout from "../layouts/NormalLayout.astro";
-import Card from "../components/Card.astro";
+import Layout from "@/layouts/NormalLayout.astro";
+import CardIndex from "@/sections/CardsIndex.astro";
 ---
 
 <Layout title="ESP Racing: Inicio">
   <div>
-		<h1>
+		<h1 class = "font-atomic">
 			ESP RACING: Tu comunidad de iniciación al mundo del Simracing
 		</h1>
 		<p>
@@ -18,66 +18,5 @@ import Card from "../components/Card.astro";
 			nuestro Discord podrás encontrar toda la información que necesites..
 		</p>
 	</div>
-
-  <div class="max-w-screen-2xl p-3 mb-24 grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-8">
-    <div>
-      <Card
-        title="ESP Racing"
-        subtitle="Nuestro Discord"
-        body="Nuestro discord, donde encontraras el punto neuralgico de todas las carreras, donde encontraras el contenido para correr con nosotros, y mucho más"
-        imgbg="/img/ESPRACINGLogo.webp"
-        linkbutton="https://discord.gg/hjawMXGU6k"
-				buttonname="Unete a nosotros"
-				altimg="Card ESP Racing"
-      />
-    </div>
-
-    <div>
-			<Card
-				title="Sergig_"
-				subtitle="Retransmisión de Carreras"
-				body="Para ver todas nuestras carreras en directo, este es el canal oficial de retransmisiones, comentado por el gran Sergig_."
-				imgbg="/img/social/TwitchBackGPurple.webp"
-				linkbutton="https://www.twitch.tv/sergig_"
-				buttonname="Visita su Canal"
-				altimg="Card Twitch Sergig_"
-			/>
-		</div>
-
-    <div>
-			<Card
-				title="FunACCommunity"
-				subtitle="Comunidad Recomendada"
-				body="Comunidad Hermana de ESP Racing. Para disfrutar de carreras más relajadas, pero con el mismo nivel y respeto, este es tu lugar."
-				imgbg="/img/social/FUNAC.webp"
-				linkbutton="https://discord.com/invite/pFBPuxt28g"
-				buttonname="Echa un vistazo"
-				altimg="Card FunACCommunity"
-			/>
-		</div>
-
-    <div>
-			<Card
-				title="Iberian Twingo Cup 2"
-				subtitle="Campeonato Actual"
-				body="Campeonato Iberian Twingo Cup 2 ESP Racing 2024. Campeonato actual, que discurre entre los meses de Septiembre y Octubre por toda la peninsula iberica."
-				imgbg="/img/actualchamp/CartelCampeonato.webp"
-				linkbutton="#"
-				buttonname="Más Información"
-				altimg = "Car Info Campeonato Actual"
-			/>
-		</div>
-
-    <div>
-			<Card
-				title="Ultima Carrera"
-				subtitle="¿No vistes la anterior carrera?"
-				body="Campeonato Iberian Twingo Cup 2 ESP Racing 2024. Campeonato actual, que discurre entre los meses de Septiembre y Octubre por toda la peninsula iberica."
-				imgbg="/img/raceresources/previewraces.webp"
-				linkbutton="https://www.youtube.com/@esp-racing-com-es/videos"
-				buttonname="Visitar Canal Youtube"
-				altimg="Card Ultima Carrera Youtube"
-			/>
-		</div>
-  </div>
+	<CardIndex />
 </Layout>
