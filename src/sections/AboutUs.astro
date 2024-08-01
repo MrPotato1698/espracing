@@ -1,4 +1,195 @@
 ---
-import Card from "@/components/AboutUsCard.astro";
+import Card from "@/components/Card.astro";
 
 ---
+<h2 class = "text-center text-white text-2xl py-4 font-bold sm:text-5xl">
+  Adminisitradores de ESP Racing
+</h2>
+<div class="max-w-screen-3xl p-3 mb-24 grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-8 xl:grid-cols-5">
+  <div>
+    <Card
+      title="Negan"
+      subtitle="Administrador Supremo de ESP Racing"
+      body="El más veterano de ESP Racing, es el unico que queda de la administración anterior, y es el creador de este rinconcito de carreras renovado. Gracias a él, podemos seguir disfrutando de carreras maravillosas, y es el encargado de mantener la paz y la armonia entre los pilotos."
+      imgbg="/img/aboutus/Negan.webp"
+      linkbutton="#"
+      buttonname="Contactar"
+      altimg="Card Negan"
+      targetpage="_self"
+    />
+  </div>
+
+  <div>
+    <Card
+      title="Manu Gonzalez"
+      subtitle="Administrador y Organizador Principal de ESP Racing"
+      body="Empezó en ESP Racing como corredor en 2020, y en la nueva gestión, pasó de ser un consultor en los campeonatos, a realizar por completo las combinaciones y estructura de campeonatos, asi como reglamentación y diseños para la comunidad."
+      imgbg="/img/aboutus/ManuGonzalez.webp"
+      linkbutton="#"
+      buttonname="Contactar"
+      altimg="Card Manu Gonzalez"
+      targetpage="_self"
+    />
+  </div>
+
+  <div>
+    <Card
+      title="Royal Hunt"
+      subtitle="Administrador y Especilista en clásicos de ESP Racing"
+      body="Royal Hunt se caracteriza principalmente por ser la mano dura de las sanciones. Es la persona indicada para hablar sobre carreras con coches clásicos. Tambien, es uno de los organizadores en la comunidad FunAC."
+      imgbg="/img/aboutus/royalhunt.webp"
+      linkbutton="#"
+      buttonname="Contactar"
+      altimg="Card Royal Hunt"
+      targetpage="_self"
+    />
+  </div>
+
+  <div>
+    <Card
+      title="David Coro"
+      subtitle="Administrador de ESP Racing y antiguo caster"
+      body="David Coro es uno de los administradores que tomaron el testigo de la nueva administración junto a Negan, Royal Hunt y Jjojuanjo. Antes de nuestro caster oficial, junto con Negan se encargaba de la narración de las carreras."
+      imgbg="/img/aboutus/dcoro.webp"
+      linkbutton="#"
+      buttonname="Contactar"
+      altimg="Card DCoro"
+      targetpage="_self"
+    />
+  </div>
+
+  <div>
+    <Card
+      title="Jjojuanjo"
+      subtitle="Administrador de ESP Racing y preparador de coches tuning"
+      body="Jjojuanjo es parte de la administración de ESP Racing y FunAC. Organiza carreras en la comunidad de FunAC, y es nuestro experto en coches con modificaciones dignas de ver en los poligonos más reconditos de España."
+      imgbg="/img/aboutus/jjojuanjo.webp"
+      linkbutton="#"
+      buttonname="Contactar"
+      altimg="Card jjojuanjo"
+      targetpage="_self"
+    />
+  </div>
+</div>
+
+<h2 class = "text-center text-white text-2xl py-4 font-bold sm:text-5xl">
+  Equipo extra que trabaja en ESP Racing
+</h2>
+<div class="max-w-screen-3xl p-3 mb-24 grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-8 xl:grid-cols-5">
+  <div>
+    <Card
+      title="Sergig_"
+      subtitle="Caster Oficial de ESP Racing"
+      body="Sergig_ es nuestro encargado para la realización de la retransmisión de las carreras por su canal de Twitch desde 2022."
+      imgbg="/img/aboutus/Sergig.webp"
+      linkbutton="https://www.twitch.tv/sergig_"
+      buttonname="Contactar"
+      altimg="Card Negan"
+      targetpage="_black"
+    />
+  </div>
+
+</div>
+
+<h2 class = "text-center text-white text-2xl py-4 font-bold sm:text-5xl">
+  Redes Sociales Esp Racing
+</h2>
+<div class="max-w-screen-3xl p-3 mb-24 grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-8 xl:grid-cols-4">
+  <div>
+    <Card
+      title="Discord"
+      subtitle="Donde se encuentra la comunidad"
+      body = ""
+      imgbg = "/img/social/brand-discord-white.svg"
+      linkbutton="https://www.twitch.tv/sergig_"
+      buttonname="Discord"
+      altimg="Card Discord"
+      targetpage="_black"
+    />
+  </div>
+
+  <div>
+    <Card
+      title="Youtube"
+      subtitle="Donde se ver carreras pasadas"
+      body = ""
+      imgbg = "/img/social/brand-youtube-white.svg"
+      linkbutton="https://www.youtube.com/@esp-racing-com-es"
+      buttonname="Youtube"
+      altimg="Card Youtube"
+      targetpage="_black"
+    />
+  </div>
+
+  <div>
+    <Card
+      title="X / Twitter"
+      subtitle="Donde enterarse de lo ultimo"
+      body = ""
+      imgbg = "/img/social/brand-x-white.svg"
+      linkbutton="https://www.x.com/EspRacingCom"
+      buttonname="X/Twitter"
+      altimg="Card Twitter"
+      targetpage="_black"
+    />
+  </div>
+
+  <div>
+    <Card
+      title="Instagram"
+      subtitle="Para ver las fotos de las carreras"
+      body = ""
+      imgbg = "/img/social/brand-instagram-white.svg"
+      linkbutton="https://www.instagram.com/espsimracingoficial/"
+      buttonname="Instagram"
+      altimg="Card Instagram"
+      targetpage="_black"
+    />
+  </div>
+
+</div>
+
+<h2 class = "text-center text-white text-2xl py-4 font-bold sm:text-5xl">
+  Comunidades amigas de ESP Racing
+</h2>
+<div class="max-w-screen-3xl p-3 mb-24 grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-8">
+  <div>
+    <Card
+      title="FunAC Community"
+      subtitle="Comunidad hermana de ESP Racing"
+      body="Comunidad llevada por varios administradores de ESP Racing, donde las carreras realizadas son más tranquilas y sin tanta seriedad, pero no por ello, menos divertidas."
+      imgbg="/img/social/FUNAC.webp"
+      linkbutton="https://discord.com/invite/pFBPuxt28g"
+      buttonname="Visitar"
+      altimg="Card FunAC"
+      targetpage="_black"
+    />
+  </div>
+
+  <div>
+    <Card
+      title="Nacho&Factor"
+      subtitle="Comunidad de diseño y modelado de coches"
+      body="Comunidad de diseño de coches y modelado 3D, donde hay una gran comunidad de modders y diseñadores para poder contactar y poder hacer realidad tus proyectos con grandes profesionales."
+      imgbg="/img/aboutus/NF.webp"
+      linkbutton="https://discord.gg/ekrzrYdXan"
+      buttonname="Visitar"
+      altimg="Card NF"
+      targetpage="_black"
+    />
+  </div>
+
+  <div>
+    <Card
+      title="Kalendas"
+      subtitle="Comunidad para buscar que y donde correr"
+      body="Comunidad dedicada a recolectar información sobre campeonatos, para que pilotos que quieran correr en sitios diferentes, u horarios distintos, puedan encontrar cualquier carrera que se acomode a sus necesidades."
+      imgbg="/img/aboutus/Kalendas.webp"
+      linkbutton="https://discord.com/invite/3eACDgA7Xu"
+      buttonname="Visitar"
+      altimg="Card Kalendas"
+      targetpage="_black"
+    />
+  </div>
+
+</div>
