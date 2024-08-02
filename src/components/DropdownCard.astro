@@ -16,13 +16,13 @@ if (isClosed === "true"){
 ---
 
 {detailsVisible ?
-  <details class="ml-auto group border-s-4 border-[#da392b] p-6 bg-gray-900 [&_summary::-webkit-details-marker]:hidden" open >
+  <details class="max-w-screen-2xl mx-auto group border-s-4 border-[#da392b] p-6 bg-[#19191c] [&_summary::-webkit-details-marker]:hidden" open >
     <summary class="flex cursor-pointer items-center justify-between gap-1.5">
       <h2 class="text-lg font-medium text-white">
         {title}
       </h2>
 
-      <span class="shrink-0 rounded-full bg-white p-1.5 text-gray-900 sm:p-3">
+      <span class="shrink-0 rounded-full bg-white p-1.5 text-[#0f0f0f] sm:p-3">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           class="size-5 shrink-0 transition duration-300 group-open:-rotate-45"
@@ -38,18 +38,18 @@ if (isClosed === "true"){
       </span>
     </summary>
 
-    <p class="mt-4 leading-relaxed text-gray-700">
+    <p class="mt-4 leading-relaxed text-gray-300">
       {subtitle}
     </p>
   </details>
   :
-  <details class="group border-s-4 border-[#da392b] p-6 bg-gray-900 [&_summary::-webkit-details-marker]:hidden">
+  <details class="max-w-screen-2xl mx-auto group border-s-4 border-[#da392b] p-6 bg-[#19191c] [&_summary::-webkit-details-marker]:hidden">
     <summary class="flex cursor-pointer items-center justify-between gap-1.5">
       <h2 class="text-lg font-medium text-white">
         {title}
       </h2>
 
-      <span class="shrink-0 rounded-full bg-white p-1.5 text-gray-900 sm:p-3">
+      <span class="shrink-0 rounded-full bg-white p-1.5 text-[#0f0f0f] sm:p-3">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           class="size-5 shrink-0 transition duration-300 group-open:-rotate-45"
@@ -65,7 +65,7 @@ if (isClosed === "true"){
       </span>
     </summary>
 
-    <p class="mt-4 leading-relaxed text-gray-700">
+    <p class="mt-4 leading-relaxed text-gray-300">
       {subtitle}
     </p>
   </details>
