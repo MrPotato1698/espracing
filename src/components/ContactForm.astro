@@ -1,0 +1,63 @@
+---
+
+---
+
+<div class="m-auto p-5 box-border rounded-md bg-white max-w-screen-2xl">
+  <form action="/">
+    <label class = "text-[#0f0f0f] text-lg font-medium" for="fname">Nombre</label>
+    <input
+      class = "w-full p-3 border border-solid border-[#19191c] rounded-md mt-2 mb-4 resize-y"
+      type="text"
+      id="fname"
+      name="fname"
+      placeholder="Tu nombre..."
+    />
+
+    <label class = "text-[#0f0f0f] text-lg font-medium" for="discordname">Usuario Discord</label>
+    <input
+      class = "w-full p-3 border border-solid border-[#19191c] rounded-md mt-2 mb-4 resize-y"
+      type="text"
+      id="discordname"
+      name="discordname"
+      placeholder="@example123"
+    />
+
+    <label class = "text-[#0f0f0f] text-lg font-medium" for="country">Región de Procedencia</label>
+    <select id="country" name="country" class = "w-full p-3 border border-solid border-[#19191c] rounded-md mt-2 mb-4 resize-y">
+      <option value="spain">España</option>
+      <option value="latinoamerica">Latino America</option>
+      <option value="portugal">Portugal</option>
+      <option value="europe">Europa</option>
+      <option value="russia">Rusia</option>
+      <option value="usa">Estados Unidos/Canada</option>
+      <option value="africa">Africa</option>
+      <option value="asia">Asia</option>
+      <option value="oceania">Oceania</option>
+    </select>
+
+    <label class = "text-[#0f0f0f] text-lg font-medium" for="contactwho">¿Con quien quiere contactar?</label>
+    <select
+      class = "w-full p-3 border border-solid border-[#19191c] rounded-md mt-2 mb-4 resize-y"
+      id="contactwho"
+      name="contactwho"
+      >
+      <option value="admin">Administrador</option>
+      <option value="mod">Moderador</option>
+      <option value="user">Usuario</option>
+    </select>
+
+    <label class = "text-[#0f0f0f] text-lg font-medium" for="subject">Mensaje a escribir</label>
+    <textarea
+      class = "w-full h-52 max-h-96 min-h-28 p-3 border border-solid border-[#19191c] rounded-md mt-2 mb-4 resize-y"
+      id="subject"
+      name="subject"
+      placeholder="Escriba lo que sea..."
+    ></textarea>
+
+    <input
+      class = "bg-[#da392b] text-white font-bold py-3 px-5 border-solid border-[#da392b] border-2 rounded-md hover:bg-white hover:text-[#19191c] mt-4"
+      type="submit"
+      value="Enviar"
+    />
+  </form>
+</div>
