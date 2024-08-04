@@ -14,9 +14,14 @@ export default {
 			'whitef9': '#f9f9f9',
 			'whitef7': '#f7f7f7',
 		},
+
 		extend: {},
 	},
-	plugins: [,
+
+	corePlugins: {
+		container: false,
+	},
+	plugins: [
 		require('@tailwindcss/aspect-ratio'),
 	],
 }
