@@ -1,6 +1,4 @@
-import { reference } from 'astro:content';
-import { defineDb, column, desc } from 'astro:db';
-import { defineTable } from 'node_modules/@astrojs/db/dist/_internal/runtime/virtual';
+import { defineDb, column, defineTable } from 'astro:db';
 
 const Role = defineTable({
   columns: {
@@ -111,11 +109,8 @@ const CircuitLayout = defineTable({
     circuit: column.number({ references: () => Circuit.columns.id }),
     length: column.number(),
     capacity: column.number(),
-    description: column.text(),
   }
 })
-
-
 
 // https://astro.build/db/config
 export default defineDb({
