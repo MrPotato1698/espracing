@@ -1,4 +1,5 @@
-import { db, Role, User, Race, Championship, Car, Circuit, CircuitLayout } from 'astro:db';
+import { nullable } from 'astro/zod';
+import { db, Role, Team, User, Race, Championship, Car, Circuit, CircuitLayout, isNull } from 'astro:db';
 
 // https://astro.build/db/seed
 export default async function seed() {
@@ -7,6 +8,29 @@ export default async function seed() {
     { id: 2, name: 'Admin' },
     { id: 3, name: 'TeamManager' },
     { id: 4, name: 'Driver' },
+  ]);
+
+  await db.insert(Team).values([
+    {
+      id: 1,
+      name: 'ESP Racing',
+      image:'/img/team/esp-racing.webp',
+      description:'ESP RACING es el equipo matriz de la comunidad.'
+    },
+
+    {
+      id: 2,
+      name: 'Scuderia FunAC Community',
+      image:'/img/team/funac.webp',
+      description:'La Scuderia FunAC Community es un equipo de carreras virtuales que compite en diferentes campeonatos.'
+    },
+
+    {
+      id: 3,
+      name: 'Psytake',
+      image:'/img/team/psytake.webp',
+      description:'Psytake es un equipo de carreras virtuales que compite en diferentes campeonatos, muy laureado alla por donde pase.'
+    },
   ]);
 
   await db.insert(User).values([
@@ -64,7 +88,33 @@ export default async function seed() {
       top10: 0,
       dnf: 0,
       role: 2,
-      team: 0,
+      team: null,
+    },
+  ]);
+
+  await db.insert(Championship).values([
+    {
+      id: 1,
+      name: 'Campeonato DTM 2020 ESP Racing 2023',
+      keysearch: '+ks_audi_dtm_2020 +ks_bmw_dtm_2020 +RACE',
+    },
+
+    {
+      id: 2,
+      name: 'Campeonato Civic JTC ESP Racing 2023',
+      keysearch: '+jtc_honda_civic_eg_gra +RACE',
+    },
+
+    {
+      id: 3,
+      name: 'Campeonato Tatuus FT-60 ESP Racing 2024',
+      keysearch: '+tatuus_ft_60 +RACE',
+    },
+
+    {
+      id: 4,
+      name: 'Super Campeonato de Mini Resistencia ESP Racing 2024',
+      keysearch: '+trr_ferrrari_499p +trr_porsche_963 +trr_acura_arx-06 +RACE',
     },
   ]);
 
@@ -134,7 +184,7 @@ export default async function seed() {
 
     {
       id: 10,
-      name: 'Manfield Circuit',
+      name: 'Manfeild Circuit',
       filename: '2024_2_4_18_46_RACE',
       champ: 3,
     },
@@ -202,32 +252,6 @@ export default async function seed() {
       champ: 4,
     },
 
-  ]);
-
-  await db.insert(Championship).values([
-    {
-      id: 1,
-      name: 'Campeonato DTM 2020 ESP Racing 2023',
-      key_search: '+ks_audi_dtm_2020 +ks_bmw_dtm_2020 +RACE',
-    },
-
-    {
-      id: 2,
-      name: 'Campeonato Civic JTC ESP Racing 2023',
-      key_search: '+jtc_honda_civic_eg_gra +RACE',
-    },
-
-    {
-      id: 3,
-      name: 'Campeonato Tatuus FT-60 ESP Racing 2024',
-      key_search: '+tatuus_ft_60 +RACE',
-    },
-
-    {
-      id: 4,
-      name: 'Super Campeonato de Mini Resistencia ESP Racing 2024',
-      key_search: '+trr_ferrrari_499p +trr_porsche_963 +trr_acura_arx-06 +RACE',
-    },
   ]);
 
   await db.insert(Car).values([
@@ -390,21 +414,879 @@ export default async function seed() {
   await db.insert(Circuit).values([
     {
       id: 1,
-      name: 'Lausitzring',
+      name: 'Eurospeedway Lausitzring',
       filename: 'lausitzring',
-      location: 'Klettwitz, Germany',
+      location: 'Klettwitz, Alemania',
     },
+
+    {
+      id: 2,
+      name: 'Norisring',
+      filename: 'norisring',
+      location: 'Nuremberg, Alemania',
+    },
+
+    {
+      id: 3,
+      name: 'Hockenheimring Baden-Württemberg',
+      filename: 't78_hockenheimring',
+      location: 'Hockenheim, Alemania',
+    },
+
+    {
+      id: 4,
+      name: 'Circuito de Nurgurgring',
+      filename: 'ks_nurburgring',
+      location: 'Nurburg, Alemania',
+    },
+
+    {
+      id: 5,
+      name: 'Ahvenisto',
+      filename: 'ahvenisto_rc',
+      location: 'Hämeenlinna, Finlandia',
+    },
+
+    {
+      id: 6,
+      name: 'Tsukuba Circuit',
+      filename: 'ddm_gts_tsukuba',
+      location: 'Shimotsuma, Japón',
+    },
+
+    {
+      id: 7,
+      name: 'Sportsland SUGO',
+      filename: 'sportsland-sugo',
+      location: 'Murata, Japón',
+    },
+
+    {
+      id: 8,
+      name: 'Barcelona City Circuit',
+      filename: 'acu_barcelona-city',
+      location: 'Barcelona, España',
+    },
+
+    {
+      id: 9,
+      name: 'Sydney Motorsport Park',
+      filename: 'rmi_sydney_motorsport_park',
+      location: 'Eastern Creek NSW, Australia',
+    },
+
+    {
+      id: 10,
+      name: 'Manfeild Circuit',
+      filename: 'manfeild',
+      location: 'Feilding, Nueva Zelanda',
+    },
+
+    {
+      id: 11,
+      name: 'Autodromo Nazionale di Monza',
+      filename: 'monza',
+      location: 'Monza, Italia',
+    },
+
+    {
+      id: 12,
+      name: 'Macau Circuit da Guia',
+      filename: 'rt_macau',
+      location: 'Macau, China',
+    },
+
+    {
+      id: 13,
+      name: 'Daytona International Speedway',
+      filename: 'rt_daytona',
+      location: 'Daytona Beach, FL, Estados Unidos',
+    },
+
+    {
+      id: 14,
+      name: 'Nurburgring Nordschleife',
+      filename: 'ks_nordschleife',
+      location: 'Nurburg, Alemania',
+    },
+
+    {
+      id: 15,
+      name: 'Sebring International Raceway',
+      filename: 'rt_sebring',
+      location: 'Sebring, FL, Estados Unidos',
+    },
+
+    {
+      id: 16,
+      name: 'Road America',
+      filename: 'lilski_road_america',
+      location: 'Elkhart Lake, WI, Estados Unidos',
+    },
+
+    {
+      id: 17,
+      name: 'Fuji International Speedway',
+      filename: 'rt_fuji_speedway',
+      location: 'Oyama-Cho, Japón',
+    },
+
+    {
+      id: 18,
+      name: 'Spa-Francorchamps',
+      filename: 'spa',
+      location: 'Stavelot, Bélgica',
+    },
+
+    {
+      id: 19,
+      name: 'Circuit de la Sarthe (Le Mans)',
+      filename: 'sx_lemans',
+      location: 'Le Mans, Francia',
+    },
+
   ]);
 
-await db.insert(CircuitLayout).values([
-  {
-    id: 1,
-    name: 'DTM',
-    filename: '2023_9_10',
-    circuit: 1,
-    length: 4.570,
-    capacity: 42,
-  },
-]);
+  await db.insert(CircuitLayout).values([
+    {
+      id: 1,
+      name: 'DTM 2021',
+      filename: 'layout_dtm21',
+      circuit: 1,
+      length: 4570,
+      capacity: 42,
+    },
+
+    {
+      id: 2,
+      name: 'GP',
+      filename: 'layout_gp',
+      circuit: 1,
+      length: 4445,
+      capacity: 42,
+    },
+
+    {
+      id: 3,
+      name: 'DTM',
+      filename: 'layout_dtm',
+      circuit: 1,
+      length: 3288,
+      capacity: 42,
+    },
+
+    {
+      id: 4,
+      name: 'GP Multiplayer',
+      filename: 'layout_gp_mp',
+      circuit: 1,
+      length: 4445,
+      capacity: 42,
+    },
+
+    {
+      id: 5,
+      name: 'Oval',
+      filename: 'layout_oval',
+      circuit: 1,
+      length: 3231,
+      capacity: 42,
+    },
+
+    {
+      id: 6,
+      name: '',
+      filename: '',
+      circuit: 2,
+      length: 2170,
+      capacity: 36,
+    },
+
+    {
+      id: 7,
+      name: 'GP',
+      filename: 'gp',
+      circuit: 3,
+      length: 4574,
+      capacity: 27,
+    },
+
+    {
+      id: 8,
+      name: '',
+      filename: 'dcgp',
+      circuit: 3,
+      length: 4574,
+      capacity: 32,
+    },
+
+    {
+      id: 9,
+      name: 'GP OSRW',
+      filename: 'gp_osrw',
+      circuit: 3,
+      length: 4574,
+      capacity: 32,
+    },
+
+    {
+      id: 10,
+      name: 'National',
+      filename: 'national',
+      circuit: 3,
+      length: 3693,
+      capacity: 27,
+    },
+
+    {
+      id: 11,
+      name: 'Short 1',
+      filename: 'short1',
+      circuit: 3,
+      length: 2608,
+      capacity: 27,
+    },
+
+    {
+      id: 12,
+      name: 'Short 2',
+      filename: 'short2',
+      circuit: 3,
+      length: 2624,
+      capacity: 27,
+    },
+
+    {
+      id: 13,
+      name: 'GP',
+      filename: 'layout_gp_a',
+      circuit: 4,
+      length: 5148,
+      capacity: 24,
+    },
+
+    {
+      id: 14,
+      name: 'GP (Formula) OSWR',
+      filename: 'layout_gp_a_osrw',
+      circuit: 4,
+      length: 5148,
+      capacity: 36,
+    },
+
+    {
+      id: 15,
+      name: 'GP (GT)',
+      filename: 'layout_gp_b',
+      circuit: 4,
+      length: 5137,
+      capacity: 24,
+    },
+
+    {
+      id: 16,
+      name: 'GP (GT) OSRW',
+      filename: 'layout_gp_b_osrw',
+      circuit: 4,
+      length: 5137,
+      capacity: 36,
+    },
+
+    {
+      id: 17,
+      name: 'Reverse GT',
+      filename: 'layout_reversegp_gt',
+      circuit: 4,
+      length: 5137,
+      capacity: 28,
+    },
+
+    {
+      id: 18,
+      name: 'Reverse Sprint (GT)',
+      filename: 'layout_reversesprint_gt',
+      circuit: 4,
+      length: 3618,
+      capacity: 28,
+    },
+
+    {
+      id: 19,
+      name: 'Sprint',
+      filename: 'layout_sprint_a',
+      circuit: 4,
+      length: 3629,
+      capacity: 24,
+    },
+
+    {
+      id: 20,
+      name: 'Sprint (Formula) ETRC',
+      filename: 'layout_sprint_a_etrc',
+      circuit: 4,
+      length: 3618,
+      capacity: 36,
+    },
+
+    {
+      id: 21,
+      name: 'Sprint (Formula) OSRW',
+      filename: 'layout_sprint_a_osrw',
+      circuit: 4,
+      length: 3629,
+      capacity: 36,
+    },
+
+    {
+      id: 22,
+      name: 'Sprint (GT)',
+      filename: 'layout_sprint_b',
+      circuit: 4,
+      length: 3618,
+      capacity: 24,
+    },
+
+    {
+      id: 23,
+      name: 'Sprint (GT) OSRW',
+      filename: 'layout_sprint_b_osrw',
+      circuit: 4,
+      length: 3618,
+      capacity: 36,
+    },
+
+    {
+      id: 24,
+      name: '',
+      filename: 'normal',
+      circuit: 5,
+      length: 2800,
+      capacity: 30,
+    },
+
+    {
+      id: 25,
+      name: 'Pit Online',
+      filename: 'pit',
+      circuit: 5,
+      length: 2800,
+      capacity: 31,
+    },
+
+    {
+      id: 26,
+      name: 'Full',
+      filename: 'full',
+      circuit: 6,
+      length: 2045,
+      capacity: 31,
+    },
+
+    {
+      id: 27,
+      name: 'Short',
+      filename: 'short',
+      circuit: 6,
+      length: 1560,
+      capacity: 30,
+    },
+
+    {
+      id: 28,
+      name: 'Full',
+      filename: 'sugo',
+      circuit: 7,
+      length: 3704,
+      capacity: 31,
+    },
+
+    {
+      id: 29,
+      name: 'West',
+      filename: 'sugo_west',
+      circuit: 7,
+      length: 984,
+      capacity: 15,
+    },
+
+    {
+      id: 30,
+      name: '',
+      filename: 'normal',
+      circuit: 8,
+      length: 5194,
+      capacity: 31,
+    },
+
+    {
+      id: 31,
+      name: 'Reverse',
+      filename: 'reverse',
+      circuit: 8,
+      length: 5194,
+      capacity: 30,
+    },
+
+    {
+      id: 32,
+      name: 'Gardner GP Circuit',
+      filename: 'gardner',
+      circuit: 9,
+      length: 3930,
+      capacity: 34,
+    },
+
+    {
+      id: 33,
+      name: 'Amaroo South Circuit',
+      filename: 'amaroo',
+      circuit: 9,
+      length: 1800,
+      capacity: 24,
+    },
+
+    {
+      id: 34,
+      name: 'Brabham Circuit',
+      filename: 'brabham',
+      circuit: 9,
+      length: 4500,
+      capacity: 34,
+    },
+
+    {
+      id: 35,
+      name: 'Druitt North Circuit',
+      filename: 'druitt',
+      circuit: 9,
+      length: 2800,
+      capacity: 34,
+    },
+
+    {
+      id: 36,
+      name: 'Grand Prix',
+      filename: 'gp',
+      circuit: 10,
+      length: 3030,
+      capacity: 32,
+    },
+
+    {
+      id: 37,
+      name: 'Full',
+      filename: 'full',
+      circuit: 10,
+      length: 4511,
+      capacity: 32,
+    },
+
+    {
+      id: 38,
+      name: 'Club',
+      filename: 'club',
+      circuit: 10,
+      length: 1500,
+      capacity: 20,
+    },
+
+    {
+      id: 39,
+      name: 'Grand Prix Reverse',
+      filename: 'grp_reverse',
+      circuit: 10,
+      length: 3030,
+      capacity: 32,
+    },
+
+    {
+      id: 40,
+      name: '',
+      filename: '',
+      circuit: 11,
+      length: 5793,
+      capacity: 26,
+    },
+
+    {
+      id: 41,
+      name: '2021',
+      filename: '2021',
+      circuit: 11,
+      length: 5793,
+      capacity: 26,
+    },
+
+    {
+      id: 42,
+      name: 'OSRW',
+      filename: 'monza_osrw',
+      circuit: 11,
+      length: 5793,
+      capacity: 36,
+    },
+
+    {
+      id: 43,
+      name: 'Reverse Layout',
+      filename: 'monza_reverse',
+      circuit: 11,
+      length: 5793,
+      capacity: 26,
+    },
+
+    {
+      id: 44,
+      name: 'Wet',
+      filename: 'monza_wet',
+      circuit: 11,
+      length: 5793,
+      capacity: 36,
+    },
+
+    {
+      id: 45,
+      name: '',
+      filename: '',
+      circuit: 12,
+      length: 6102,
+      capacity: 31,
+    },
+
+    {
+      id: 46,
+      name: 'Moto',
+      filename: 'moto',
+      circuit: 13,
+      length: 5626,
+      capacity: 40,
+    },
+
+    {
+      id: 47,
+      name: 'Moto 2008',
+      filename: 'motohist',
+      circuit: 13,
+      length: 5729,
+      capacity: 40,
+    },
+
+    {
+      id: 48,
+      name: 'Moto 2008 (with Nascar Chicanes)',
+      filename: 'motohistnascar',
+      circuit: 13,
+      length: 5727,
+      capacity: 50,
+    },
+
+    {
+      id: 49,
+      name: 'Nascar',
+      filename: 'nascar',
+      circuit: 13,
+      length: 5710,
+      capacity: 40,
+    },
+
+    {
+      id: 50,
+      name: 'Road Course',
+      filename: 'sportscar',
+      circuit: 13,
+      length: 5729,
+      capacity: 50,
+    },
+
+    {
+      id: 51,
+      name: 'Tri-Oval',
+      filename: 'tri-oval',
+      circuit: 13,
+      length: 4023,
+      capacity: 50,
+    },
+
+    {
+      id: 52,
+      name: 'Endurance',
+      filename: 'endurance',
+      circuit: 14,
+      length: 25375,
+      capacity: 24,
+    },
+
+    {
+      id: 53,
+      name: 'Endurance 108',
+      filename: 'endurance_108',
+      circuit: 14,
+      length: 25375,
+      capacity: 108,
+    },
+
+    {
+      id: 54,
+      name: 'Endurance Cup',
+      filename: 'endurance_cup',
+      circuit: 14,
+      length: 24433,
+      capacity: 24,
+    },
+
+    {
+      id: 55,
+      name: 'Endurance Cup 108',
+      filename: 'endurance_cup_108',
+      circuit: 14,
+      length: 24433,
+      capacity: 108,
+    },
+
+    {
+      id: 56,
+      name: '',
+      filename: 'nordschleife',
+      circuit: 14,
+      length: 20832,
+      capacity: 24,
+    },
+
+    {
+      id: 57,
+      name: '24h 2022',
+      filename: 'nordschleife_24hours_2022',
+      circuit: 14,
+      length: 25375,
+      capacity: 72,
+    },
+
+    {
+      id: 58,
+      name: 'Wet',
+      filename: 'nordschleife_wet',
+      circuit: 14,
+      length: 20832,
+      capacity: 24,
+    },
+
+    {
+      id: 59,
+      name: 'Reverse Tourist',
+      filename: 'reverse_touristenfahrten',
+      circuit: 14,
+      length: 19100,
+      capacity: 32,
+    },
+
+    {
+      id: 60,
+      name: 'Tourist',
+      filename: 'touristenfahrten',
+      circuit: 14,
+      length: 19100,
+      capacity: 32,
+    },
+
+    {
+      id: 61,
+      name: 'Tourist Wet',
+      filename: 'touristenfahrten_wet',
+      circuit: 14,
+      length: 19100,
+      capacity: 32,
+    },
+
+    {
+      id: 62,
+      name: 'Raceday',
+      filename: 'raceday',
+      circuit: 15,
+      length: 6004,
+      capacity: 32,
+    },
+
+    {
+      id: 63,
+      name: 'IMSA 12 Hours 2023',
+      filename: 'imsa2023',
+      circuit: 15,
+      length: 6004,
+      capacity: 60,
+    },
+
+    {
+      id: 64,
+      name: 'Raceday 50 pits',
+      filename: 'raceday_rs_50',
+      circuit: 15,
+      length: 6004,
+      capacity: 50,
+    },
+
+    {
+      id: 65,
+      name: 'Trackday',
+      filename: 'trackday',
+      circuit: 15,
+      length: 6004,
+      capacity: 32,
+    },
+
+    {
+      id: 66,
+      name: 'WEC 1000 miles 2023',
+      filename: 'wec2023',
+      circuit: 15,
+      length: 6004,
+      capacity: 60,
+    },
+
+    {
+      id: 67,
+      name: '',
+      filename: '',
+      circuit: 16,
+      length: 6515,
+      capacity: 43,
+    },
+
+    {
+      id: 68,
+      name: 'Moto',
+      filename: 'moto',
+      circuit: 16,
+      length: 6515,
+      capacity: 43,
+    },
+
+    {
+      id: 69,
+      name: 'GP',
+      filename: 'layout_gp',
+      circuit: 17,
+      length: 4549,
+      capacity: 36,
+    },
+
+    {
+      id: 70,
+      name: 'GP Short',
+      filename: 'layout_gpshort',
+      circuit: 18,
+      length: 4526,
+      capacity: 36,
+    },
+
+    {
+      id: 71,
+      name: '',
+      filename: '',
+      circuit: 18,
+      length: 7004,
+      capacity: 24,
+    },
+
+    {
+      id: 72,
+      name: '2022',
+      filename: '2022',
+      circuit: 18,
+      length: 7004,
+      capacity: 47,
+    },
+
+    {
+      id: 73,
+      name: 'WEC 2022',
+      filename: 'layout_wec_2022',
+      circuit: 18,
+      length: 7004,
+      capacity: 48,
+    },
+
+    {
+      id: 74,
+      name: 'WEC 2023',
+      filename: 'layout_wec_2023',
+      circuit: 18,
+      length: 7004,
+      capacity: 48,
+    },
+
+    {
+      id: 75,
+      name: 'OSRW',
+      filename: 'spa_osrw',
+      circuit: 18,
+      length: 7004,
+      capacity: 40,
+    },
+
+    {
+      id: 76,
+      name: 'Reverse Layout',
+      filename: 'spa_reverse',
+      circuit: 18,
+      length: 7004,
+      capacity: 24,
+    },
+
+    {
+      id: 77,
+      name: 'Wet',
+      filename: 'spa_wet',
+      circuit: 18,
+      length: 7004,
+      capacity: 40,
+    },
+
+    {
+      id: 78,
+      name: '24h Layout',
+      filename: 'chicane',
+      circuit: 19,
+      length: 13626,
+      capacity: 70,
+    },
+
+    {
+      id: 79,
+      name: '24h Special Start',
+      filename: 'chicane_24h_race',
+      circuit: 19,
+      length: 13626,
+      capacity: 70,
+    },
+
+    {
+      id: 80,
+      name: '24h Layout Performance',
+      filename: 'chicaneperf',
+      circuit: 19,
+      length: 13626,
+      capacity: 70,
+    },
+
+    {
+      id: 81,
+      name: 'No Chicane',
+      filename: 'nochicane',
+      circuit: 19,
+      length: 3100,
+      capacity: 70,
+    },
+
+    {
+      id: 82,
+      name: 'Wet',
+      filename: 'nochicaneperf',
+      circuit: 19,
+      length: 3100,
+      capacity: 70,
+    },
+
+
+  ]);
 
 }
