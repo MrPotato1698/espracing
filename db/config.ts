@@ -22,7 +22,7 @@ const User = defineTable({
     email: column.text(),
     password: column.text(),
     name: column.text(),
-    steam_id: column.number(),
+    steam_id: column.number({ optional: true }),
     image: column.text(),
     races: column.number(),
     poles: column.number(),
@@ -33,7 +33,7 @@ const User = defineTable({
     top10: column.number(),
     dnf: column.number(),
     role: column.number({ references: () => Role.columns.id }),
-    team: column.number({ references: () => Team.columns.id }),
+    team: column.number({ references: () => Team.columns.id, optional: true }),
   }
 })
 
@@ -59,20 +59,20 @@ const Inscription = defineTable({
   }
 })
 
+const Championship = defineTable({
+  columns: {
+    id: column.number({ primaryKey: true }),
+    name: column.text(),
+    keysearch: column.text(),
+  }
+})
+
 const Race = defineTable({
   columns: {
     id: column.number({ primaryKey: true }),
     name: column.text(),
     filename: column.text(),
     champ: column.number({ references: () => Championship.columns.id }),
-  }
-})
-
-const Championship = defineTable({
-  columns: {
-    id: column.number({ primaryKey: true }),
-    name: column.text(),
-    key_search: column.text(),
   }
 })
 
@@ -88,7 +88,7 @@ const Car = defineTable({
     power: column.number(),
     torque: column.number(),
     weight: column.number(),
-    description: column.text(),
+    description: column.text({ optional: true }),
   }
 })
 
@@ -120,8 +120,8 @@ export default defineDb({
     User,
     Message,
     Inscription,
-    Race,
     Championship,
+    Race,
     Car,
     Circuit,
     CircuitLayout,
