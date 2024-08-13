@@ -20,5 +20,22 @@ pnpm-debug.log*
 # macOS-specific files
 .DS_Store
 
-# jetbrains setting folder
-.idea/
+# packages
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+
+# .vs folder
+.vs/
+.idea
+
+# generated vercel output
+.vercel/
+
+.env.local
+
+.config/*
+
+local-images/*
+src/middleware.tsall
+.vercel
