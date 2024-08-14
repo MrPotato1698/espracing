@@ -1,5 +1,7 @@
 ---
+import { getSession } from "auth-astro/server";
 
+const session = await getSession(Astro.request);
 ---
 
 <footer class="bg-[#0f0f0f] relative">
@@ -146,14 +148,21 @@
           <p class="font-medium text-white">Perfil Usuario</p>
 
           <ul class="mt-6 space-y-4 text-sm">
-            <li>
-              <a href="#" class="text-gray-300 transition hover:text-[#da392b]"> Ver mi Perfil </a>
-            </li>
+            {
+              session ?(
+              <li>
+                <a href="/myprofile" class="text-gray-300 transition hover:text-[#da392b]"> Ver mi Perfil </a>
+              </li>
 
-            <li>
-              <a href="#" id = logout class="text-gray-300 transition hover:text-[#da392b]"> Salir de sesión </a>
-            </li>
-
+              <li>
+                <a href="/" id = logout class="text-gray-300 transition hover:text-[#da392b]"> Salir de sesión </a>
+              </li>
+              ):(
+              <li>
+                <a href="/login" class="text-gray-300 transition hover:text-[#da392b]"> Iniciar Sesión </a>
+              </li>
+              )
+            }
           </ul>
         </div>
 
