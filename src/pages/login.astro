@@ -5,8 +5,9 @@ import CloseEye from "@/icons/CloseEye.astro";
 ---
 
 <Layout title="ESP Racing: Login">
-  <div class="absolute bottom-0 left-0 w-full h-full overflow-hidden leading-5 bg-[#f0f0f0] top-72 -z-10 bg-gradient-to-b from-[#da392b] via-[#da392b] to-[#0f0f0f]">
-
+  <div
+    class="absolute bottom-0 left-0 w-full h-full overflow-hidden leading-5 bg-[#f0f0f0] top-72 -z-10 bg-gradient-to-b from-[#da392b] via-[#da392b] to-[#0f0f0f]"
+  >
   </div>
 
   <div
@@ -66,6 +67,7 @@ import CloseEye from "@/icons/CloseEye.astro";
           </div>
           <div>
             <button
+              id="login"
               type="submit"
               class="flex justify-center w-full p-3 font-semibold tracking-wide text-gray-100 transition duration-300 ease-in bg-[#da392b] border-2 border-white rounded-lg cursor-pointer hover:border-[#da392b] hover:bg-white hover:text-[#da392b]"
             >
@@ -74,22 +76,18 @@ import CloseEye from "@/icons/CloseEye.astro";
           </div>
           <div class="flex items-center justify-center my-5 space-x-2">
             <span class="w-8 h-px bg-gray-100"></span>
-            <span class="font-normal text-gray-300">o inicia sesión también</span>
+            <span class="font-normal text-gray-300"
+              >o inicia sesión también</span
+            >
             <span class="w-8 h-px bg-gray-100"></span>
           </div>
           <div class="flex justify-center w-full gap-5">
             <button
+              id="loginGoogle"
               type="submit"
               class="flex items-center justify-center w-full p-3 mb-6 text-sm font-medium tracking-wide text-gray-500 transition duration-300 ease-in border border-gray-300 rounded-lg cursor-pointer md:mb-0 hover:border-white hover:bg-[#EA4335] hover:text-white"
             >
               <span>Google</span>
-            </button>
-
-            <button
-              type="submit"
-              class="flex items-center justify-center w-full p-3 mb-6 text-sm font-medium tracking-wide text-gray-500 transition duration-300 ease-in border border-gray-300 rounded-lg cursor-pointer md:mb-0 hover:border-white hover:bg-[#1877F2] hover:text-white"
-            >
-              <span>Facebook</span>
             </button>
           </div>
         </div>
@@ -98,5 +96,22 @@ import CloseEye from "@/icons/CloseEye.astro";
   </div>
 </Layout>
 
-<script is:inline data-astro-rerun src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.js"
-></script>
+<script
+  is:inline
+  data-astro-rerun
+  src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.js"
+>
+</script>
+<script>
+  import { $ } from "@/lib/dom-selector";
+
+  const { signIn, signOut } = await import("auth-astro/client");
+
+  const $login = $("#login");
+  const $loginGoogle = $("#loginGoogle");
+  const $logout = $("#logout");
+
+  if($login) $login.onclick = () => signIn("email");
+  if($loginGoogle) $loginGoogle.onclick = () => signIn("google");
+  if($logout) $logout.onclick = () => signOut();
+</script>
