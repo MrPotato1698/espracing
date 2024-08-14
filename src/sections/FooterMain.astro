@@ -1,7 +1,5 @@
 ---
-import { getSession } from "auth-astro/server";
 
-const session = await getSession(Astro.request);
 ---
 
 <footer class="bg-[#0f0f0f] relative">
@@ -148,21 +146,12 @@ const session = await getSession(Astro.request);
           <p class="font-medium text-white">Perfil Usuario</p>
 
           <ul class="mt-6 space-y-4 text-sm">
-            {
-              session ?(
-              <li>
-                <a href="/myprofile" class="text-gray-300 transition hover:text-[#da392b]"> Ver mi Perfil </a>
-              </li>
 
-              <li>
-                <a href="/" id = logout class="text-gray-300 transition hover:text-[#da392b]"> Salir de sesión </a>
-              </li>
-              ):(
               <li>
                 <a href="/login" class="text-gray-300 transition hover:text-[#da392b]"> Iniciar Sesión </a>
               </li>
               )
-            }
+
           </ul>
         </div>
 
@@ -172,13 +161,3 @@ const session = await getSession(Astro.request);
     <p class="text-xs text-gray-500">&copy; 2024. ESP Racing. All rights reserved.</p>
   </div>
 </footer>
-
-<script>
-  import { $ } from "@/lib/dom-selector";
-
-  const { signOut } = await import("auth-astro/client");
-
-  const $logout = $("#logout");
-
-  if($logout) $logout.onclick = () => signOut();
-</script>
