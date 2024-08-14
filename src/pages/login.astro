@@ -9,7 +9,7 @@ const accessToken = cookies.get("sb-access-token");
 const refreshToken = cookies.get("sb-refresh-token");
 
 if (accessToken && refreshToken) {
-  return redirect("/dashboard");
+  return redirect("/myprofile");
 }
 ---
 
@@ -28,8 +28,8 @@ if (accessToken && refreshToken) {
       <div class="flex-col self-start hidden text-[#f9f9f9] lg:flex">
         <h1 class="my-3 text-4xl font-semibold">Bienvenido de vuelta</h1>
         <p class="pr-3 text-sm opacity-90">
-          Lorem ipsum is placeholder text commonly used in the graphic, print,
-          and publishing industries for previewing layouts and visual mockups
+          En ESP Racing nos alegra volver a verte de nuevo por aquí, esperando a que
+          disfrutes de las mejores carreras que puedes encontrar.
         </p>
       </div>
     </div>
@@ -44,7 +44,7 @@ if (accessToken && refreshToken) {
           <h3 class="text-2xl font-semibold text-gray-800">Inicia Sesión</h3>
           <p class="text-gray-400">
             ¿Aun no tienes cuenta? <a
-              href="#"
+              href="/register"
               class="text-sm text-[#0f0f0f] hover:text-[#da392b]">Registrate</a
             >
           </p>
