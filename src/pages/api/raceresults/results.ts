@@ -8,8 +8,8 @@ function cargarJSON() {
     const opciones = document.querySelector('#select-champs');
 
     //console.log((opciones as HTMLSelectElement)?.value);
-    //var ruta = 'http://es2.assettohosting.com:10018/results/download/' + (opciones as HTMLSelectElement)?.value + '.json';
-    var ruta = 'G:/Universidad/TFG/db/2024_3_17_19_38_RACE.json';
+    var ruta = 'http://es2.assettohosting.com:10018/results/download/' + (opciones as HTMLSelectElement)?.value + '.json';
+    //var ruta = 'G:/Universidad/TFG/db/2024_3_17_19_38_RACE.json';
     xhttp.open('GET', ruta, true);
     xhttp.send();
     xhttp.onreadystatechange = function () {
