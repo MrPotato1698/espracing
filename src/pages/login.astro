@@ -1,0 +1,123 @@
+---
+import Layout from "@/layouts/NormalLayout.astro";
+import OpenEye from "@/icons/OpenEye.astro";
+import CloseEye from "@/icons/CloseEye.astro";
+
+const { cookies, redirect } = Astro;
+
+const accessToken = cookies.get("sb-access-token");
+const refreshToken = cookies.get("sb-refresh-token");
+
+if (accessToken && refreshToken) {
+  return redirect("/myprofile");
+}
+---
+
+<Layout title="ESP Racing: Login">
+  <div
+    class="absolute bottom-0 left-0 w-full h-full overflow-hidden leading-5 bg-[#f0f0f0] top-72 -z-10 bg-gradient-to-b from-[#da392b] via-[#da392b] to-[#0f0f0f]"
+  >
+  </div>
+
+  <div
+    class="relative justify-center min-h-screen bg-transparent shadow-xl sm:flex sm:flex-row rounded-3xl"
+  >
+    <div
+      class="z-10 flex flex-col self-center lg:px-14 sm:max-w-4xl xl:max-w-md"
+    >
+      <div class="flex-col self-start hidden text-[#f9f9f9] lg:flex">
+        <h1 class="my-3 text-4xl font-semibold">Bienvenido de vuelta</h1>
+        <p class="pr-3 text-sm opacity-90">
+          En ESP Racing nos alegra volver a verte de nuevo por aquí, esperando a que
+          disfrutes de las mejores carreras que puedes encontrar.
+        </p>
+      </div>
+    </div>
+
+    <form
+      action="/api/auth/signin"
+      method="post"
+      class="z-10 flex self-center justify-center"
+      data-astro-reload
+    >
+      <div class="p-12 mx-auto bg-white rounded-3xl w-96">
+        <div class="mb-7">
+          <h3 class="text-2xl font-semibold text-gray-800">Inicia Sesión</h3>
+          <p class="text-gray-400">
+            ¿Aun no tienes cuenta? <a
+              href="/register"
+              class="text-sm text-[#0f0f0f] hover:text-[#da392b]">Registrate</a
+            >
+          </p>
+        </div>
+
+        <div class="space-y-6">
+          <div class="">
+            <input
+              class="w-full px-4 py-3 text-sm text-black bg-gray-200 border border-gray-200 rounded-lg focus:bg-gray-100 focus:outline-none focus:border-[#0f0f0f] focus:text-black"
+              type="text"
+              name="email"
+              id="email"
+              placeholder="Email"
+            />
+          </div>
+
+          <div class="relative" x-data="{ show: true }">
+            <input
+              :type="show ? 'password' : 'text'"
+              name="password"
+              id="password"
+              class="w-full px-4 py-3 text-sm text-black bg-gray-200 border border-gray-200 rounded-lg focus:bg-gray-100 focus:outline-none focus:border-[#0f0f0f] focus:text-black"
+              placeholder="Contraseña"
+              />
+            <div
+              class="absolute inset-y-0 right-0 flex items-center mr-3 text-sm leading-5"
+            >
+              <OpenEye />
+              <CloseEye />
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between">
+            <div class="ml-auto text-sm">
+              <a href="#" class="text-[#0f0f0f] hover:text-[#da392b]">
+                ¿Olvidaste tu contraseña?
+              </a>
+            </div>
+          </div>
+          <div>
+            <button
+              id="login"
+              type="submit"
+              class="flex justify-center w-full p-3 font-semibold tracking-wide text-gray-100 transition duration-300 ease-in bg-[#da392b] border-2 border-white rounded-lg cursor-pointer hover:border-[#da392b] hover:bg-white hover:text-[#da392b]"
+            >
+              Inicia Sesión
+            </button>
+          </div>
+          <div class="flex items-center justify-center my-5 space-x-2">
+            <span class="w-8 h-px bg-gray-100"></span>
+            <span class="font-normal text-gray-300"
+              >o inicia sesión también</span
+            >
+            <span class="w-8 h-px bg-gray-100"></span>
+          </div>
+          <div class="flex justify-center w-full gap-5">
+            <button
+              id="loginGoogle"
+              type="submit"
+              class="flex items-center justify-center w-full p-3 mb-6 text-sm font-medium tracking-wide text-gray-500 transition duration-300 ease-in border border-gray-300 rounded-lg cursor-pointer md:mb-0 hover:border-white hover:bg-[#EA4335] hover:text-white"
+            >
+              <span>Google</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</Layout>
+
+<script
+  is:inline
+  data-astro-rerun
+  src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.js"
+></script>
