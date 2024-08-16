@@ -1,0 +1,79 @@
+---
+import { turso } from "../turso";
+
+const { rows: RacesData } = await turso.execute(
+  "SELECT DISTINCT R.name AS RaceName, R.filename, C.name AS ChampName FROM Championship AS C INNER JOIN Race AS R ON C.id = R.championship"
+);
+
+// console.log("Tamaño de RaceData: "+ RacesData.length)
+---
+
+<p class="py-4 text-2xl font-bold text-center">
+  Selecciona la carrera a revisar
+</p>
+<select
+  id="select-champs"
+  class="block m-auto w-4/5 px-4 py-3 text-lg font-medium rounded-xl pe-9 focus:border-[#da392b] disabled:opacity-50 disabled:pointer-events-none bg-[#19191c] border-neutral-700 text-white placeholder-neutral-500"
+>
+  {
+    RacesData.map((race) => (
+      <option value={race.filename?.toString()}>
+        {race.ChampName + " - " + race.RaceName}
+      </option>
+    ))
+  }
+</select>
+
+<!-- Tabla de resultados -->
+<div class="container mx-auto">
+  <div class="section">
+    <button
+      class="cargarselector no-underline bg-[#19191c] rounded-xl my-4 font-medium text-white text-lg py-4 px-8 block mx-auto"
+      id="btnCargarTabla"
+    >
+      Cargar Datos
+    </button>
+
+    <table class="w-full border-collapse border border-[#f9f9f9]">
+      <thead class="font-medium bg-[#da392b]">
+        <tr class="tabletitle">
+          <th>Pos</th>
+          <th>Nombre</th>
+          <th>Equipo</th>
+          <th>Coche</th>
+          <th>Gain/Lost</th>
+          <th>Tiempo Total</th>
+          <th>Nº Vueltas</th>
+          <th>Vuelta Rápida</th>
+          <th>Media Vueltas</th>
+          <th>Golpes</th>
+          <th>Lastres</th>
+        </tr>
+      </thead>
+      <tbody id="resultado" class="font-normal"> </tbody>
+    </table>
+  </div>
+</div>
+
+<style>
+  .container {
+    width: 99%;
+  }
+  td {
+    text-align: center;
+  }
+
+  tbody tr td:nth-child(1) {
+    font-family: "500";
+  }
+
+  tbody tr:nth-child(odd) {
+    background-color: "#0f0f0f";
+  }
+
+  tbody tr:nth-child(even) {
+    background-color: "#19191c";
+  }
+</style>
+
+<script src="../pages/api/raceresults/results.ts"></script>
