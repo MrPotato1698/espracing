@@ -34,6 +34,8 @@ const { rows: RacesData } = await turso.execute(
       Cargar Datos
     </button>
 
+    <div id="resultado2"></div>
+
     <table class="w-full border-collapse border border-[#f9f9f9]">
       <thead class="font-medium bg-[#da392b]">
         <tr class="tabletitle">
@@ -41,7 +43,7 @@ const { rows: RacesData } = await turso.execute(
           <th>Nombre</th>
           <th>Equipo</th>
           <th>Coche</th>
-          <th>Gain/Lost</th>
+          <th colspan="2">Gain/Lost</th>
           <th>Tiempo Total</th>
           <th>Nº Vueltas</th>
           <th>Vuelta Rápida</th>
@@ -50,8 +52,9 @@ const { rows: RacesData } = await turso.execute(
           <th>Lastres</th>
         </tr>
       </thead>
-      <tbody id="resultado" class="font-normal"> </tbody>
+      <tbody id="resultado" class="font-normal justify-center"> </tbody>
     </table>
+
   </div>
 </div>
 
@@ -59,6 +62,15 @@ const { rows: RacesData } = await turso.execute(
   .container {
     width: 99%;
   }
+
+  &::-ms-expand {
+    display: none;
+}
+
+/* Remove focus outline */
+&:focus {
+    outline: none;
+}
   td {
     text-align: center;
   }
