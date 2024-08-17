@@ -17,6 +17,7 @@ async function cargarJSON() {
     console.log(ruta);
     await fetch(ruta, {
         method: "GET",
+        referrerPolicy: "unsafe-url",
     }).then(async (response) => {
         let data = await response.text();
         //console.log(data);
