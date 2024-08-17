@@ -22,7 +22,7 @@ async function cargarJSON() {
         let data = await response.text();
         //console.log(data);
         let datos = JSON.parse(data);
-        console.log(datos);
+        //console.log(datos);
 
         let dcars = datos.Cars;
         let devents = datos.Events;
