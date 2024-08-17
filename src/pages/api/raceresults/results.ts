@@ -12,8 +12,8 @@ async function cargarJSON() {
     const opciones = document.querySelector('#select-champs');
 
     //console.log((opciones as HTMLSelectElement)?.value);
-    //var ruta = 'http://es2.assettohosting.com:10018/results/download/' + (opciones as HTMLSelectElement)?.value + '.json';
-    var ruta = '../../testRace.json';
+    var ruta = 'http://es2.assettohosting.com:10018/results/download/' + (opciones as HTMLSelectElement)?.value + '.json';
+    //var ruta = '../../testRace.json';
     console.log(ruta);
     await fetch(ruta, {
         method: "GET",
