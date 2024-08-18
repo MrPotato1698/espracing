@@ -1,5 +1,6 @@
 import type { APIRoute } from "astro";
-import { supabase } from "../../../lib/supabase";
+import { supabase } from "@/lib/supabase";
+import { turso } from "@/turso";
 
 
 export const POST: APIRoute = async ({ request, cookies, redirect }) => {
@@ -32,6 +33,8 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   cookies.set("sb-refresh-token", refresh_token, {
     path: "/",
   });
+
+  // TODO: Asign ID to user in Turso if it doesn't exist
 
   return redirect("/myprofile");
 };
