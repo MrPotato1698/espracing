@@ -7,33 +7,37 @@ const { rows: AdminsData } = await turso.execute(
 ---
 
 <div class="box-border p-5 m-auto bg-white rounded-md max-w-screen-2xl">
-  <form action="/">
-    <label class="text-[#0f0f0f] text-lg font-medium" for="fname">Nombre</label>
+  <form
+    action="/api/contact/sendMsg"
+    method="post"
+    data-astro-reload
+  >
+    <label class="text-[#0f0f0f] text-lg font-medium" for="nameemissor">Nombre</label>
     <input
       class="w-full p-3 border border-solid border-[#19191c] rounded-md mt-2 mb-4 resize-y text-black bg-white"
       type="text"
-      id="fname"
-      name="fname"
+      id="nameemissor"
+      name="nameemissor"
       placeholder="Tu nombre..."
     />
 
-    <label class="text-[#0f0f0f] text-lg font-medium" for="discordname"
+    <label class="text-[#0f0f0f] text-lg font-medium" for="discord"
       >Usuario Discord</label
     >
     <input
       class="w-full p-3 border border-solid border-[#19191c] rounded-md mt-2 mb-4 resize-y text-black bg-white"
       type="text"
-      id="discordname"
-      name="discordname"
+      id="discord"
+      name="discord"
       placeholder="@example123"
     />
 
-    <label class="text-[#0f0f0f] text-lg font-medium" for="country"
+    <label class="text-[#0f0f0f] text-lg font-medium" for="region"
       >Región de Procedencia</label
     >
     <select
-      id="country"
-      name="country"
+      id="region"
+      name="region"
       class="w-full p-3 border border-solid border-[#19191c] rounded-md mt-2 mb-4 resize-y text-black bg-white"
     >
       <option value="spain">España</option>
@@ -62,13 +66,13 @@ const { rows: AdminsData } = await turso.execute(
       }
     </select>
 
-    <label class="text-[#0f0f0f] text-lg font-medium" for="subject"
+    <label class="text-[#0f0f0f] text-lg font-medium" for="description"
       >Mensaje a escribir</label
     >
     <textarea
       class="w-full h-52 max-h-96 min-h-28 p-3 border border-solid border-[#19191c] rounded-md mt-2 mb-4 resize-y text-black bg-white"
-      id="subject"
-      name="subject"
+      id="description"
+      name="description"
       placeholder="Escriba lo que sea..."></textarea>
 
     <input
