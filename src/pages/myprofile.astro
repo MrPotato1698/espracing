@@ -67,7 +67,7 @@ const { rows: TeamData } = await turso.execute({
   <div class = "pt-4 pl-3 ml-64">
     <h2 class = "text-5xl font-extrabold border-b-2 border-[#da392b] w-full">Mi Perfil</h2>
 
-      <img src = "" alt = "Avatar" class = "w-16 rounded-2xl"/>
+      <img src ="" alt = "Avatar" class = "w-16 rounded-2xl"/>
       <div class = "grid w-11/12 grid-cols-1 my-5 lg:grid-cols-2 xl:grid-cols-3">
           <div class = "mb-2">
           <h3 class = "text-4xl font-semibold border-b-2 border-[#da392b] w-3/4">Nombre</h3>
@@ -79,11 +79,20 @@ const { rows: TeamData } = await turso.execute({
           <p class = "pl-2 text-2xl font-medium">{UserData[0].steam_id}</p>
         </div>
 
-        <div class = "blockdata">
-          <h3 class = "text-4xl font-semibold border-b-2 border-[#da392b] w-3/4">Equipo</h3>
-          <p class = "pl-2 text-2xl font-medium">{TeamData[0].name}</p>
+        {
+          TeamData[0]?.name===null || TeamData[0]?.name ===undefined || TeamData[0]?.name==="" ?(
+          <div class = "blockdata">
+            <h3 class = "text-4xl font-semibold border-b-2 border-[#da392b] w-3/4">Equipo</h3>
+            <p class = "pl-2 text-2xl font-medium">Sin Equipo</p>
+          </div>
+          ):(
+          <div class = "blockdata">
+            <h3 class = "text-4xl font-semibold border-b-2 border-[#da392b] w-3/4">Equipo</h3>
+            <p class = "pl-2 text-2xl font-medium">{TeamData[0].name}</p>
+          </div>
+          )
+        }
 
-        </div>
       </div>
 
       <h2 class = "text-5xl font-extrabold border-b-2 border-[#da392b] w-full mt-12">Estadisticas de Carrera</h2>
