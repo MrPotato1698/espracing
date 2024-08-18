@@ -32,7 +32,7 @@ export const POST: APIRoute = async ({ request, redirect }) => {
 
   const transaction = await turso.transaction("write");
   await transaction.execute({
-    sql: `INSERT INTO User (email, name, steamId, role) VALUES (?, ?, ?, ?)`,
+    sql: `INSERT INTO User (email, name, steam_id, role) VALUES (?, ?, ?, ?)`,
     args: [email, name, steamId, 4],
   });
 

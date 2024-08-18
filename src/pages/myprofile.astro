@@ -12,11 +12,13 @@ if (!accessToken || !refreshToken) {
   return redirect("/login");
 }
 
+// Set the session with the cookies
 const { data: dataAuth, error: errorAuth } = await supabase.auth.setSession({
   refresh_token: refreshToken.value,
   access_token: accessToken.value,
 });
 
+// If there is an error, delete the cookies and redirect to login
 if (errorAuth) {
   cookies.delete("sb-access-token", {
     path: "/",
@@ -29,7 +31,26 @@ if (errorAuth) {
 }
 
 const id = dataAuth?.user?.id || "";
+const email = dataAuth?.user?.email || "";
 
+// Asign ID to user in Turso if it doesn't exist
+const emailSearchQuery = await turso.execute({
+  sql: 'SELECT id FROM User WHERE email = ?',
+  args: [email],
+});
+
+const idSearch = emailSearchQuery.rows[0].email;
+
+if(idSearch === undefined || idSearch === null) {
+  const transaction = await turso.transaction("write");
+  await transaction.execute({
+    sql: 'UPDATE User SET id = ? WHERE email = ?',
+    args: [id, email],
+  });
+  await transaction.commit();
+}
+
+// Get user data
 const {rows: UserData} = await turso.execute({
   sql: 'SELECT * FROM User WHERE id = ?',
   args: [id]
@@ -42,7 +63,6 @@ const { rows: TeamData } = await turso.execute({
 
 ---
 
-<!-- <h1>Bienvenido {email}</h1> -->
 <Layout title = "ESP Racing: Mi Perfil">
   <div class = "pt-4 pl-3 ml-64">
     <h2 class = "text-5xl font-extrabold border-b-2 border-[#da392b] w-full">Mi Perfil</h2>

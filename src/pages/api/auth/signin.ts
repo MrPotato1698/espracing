@@ -34,7 +34,5 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     path: "/",
   });
 
-  // TODO: Asign ID to user in Turso if it doesn't exist
-
   return redirect("/myprofile");
 };
