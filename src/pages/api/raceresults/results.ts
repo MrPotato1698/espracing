@@ -1,13 +1,16 @@
 import { cars } from "@/consts/cars";
 import { circuits } from "@/consts/circuits";
 import { circuitlayouts } from "@/consts/circuitlayouts";
+//import fetch from 'node-fetch';
+//import https from 'https';
 
 const btnCargaTabla = document.querySelector('#btnCargarTabla');
 if (btnCargaTabla) {
     btnCargaTabla.addEventListener('click', cargarJSON);
 }
+
 async function cargarJSON() {
-    //console.log('Dentro de funcion cargarJSON');
+    console.log('Dentro de funcion cargarJSON');
     const xhttp = new XMLHttpRequest();
     const opciones = document.querySelector('#select-champs');
 
@@ -15,9 +18,18 @@ async function cargarJSON() {
     var ruta = 'http://es2.assettohosting.com:10018/results/download/' + (opciones as HTMLSelectElement)?.value + '.json';
     //var ruta = '../../testRace3.json';
     console.log(ruta);
+
+    // const fetch = require('node-fetch');
+    // const https = require('https');
+
+    // const httpsAgent = new https.Agent({
+    //     rejectUnauthorized: false,
+    // });
+
     await fetch(ruta, {
         method: "GET",
-        referrerPolicy: "unsafe-url",
+        //referrerPolicy: "unsafe-url",
+        //agent: httpsAgent,
     }).then(async (response) => {
         let data = await response.text();
         //console.log(data);
@@ -72,10 +84,10 @@ async function cargarJSON() {
             const isCarExists = cars.find((car) => car.filename === item.CarModel);
             let carName: string;
             let carBrand: string;
-            if(isCarExists){
+            if (isCarExists) {
                 carName = isCarExists.brand + " " + isCarExists.model;
                 carBrand = isCarExists.imgbrand;
-            } else{
+            } else {
                 carName = item.CarModel;
                 carBrand = "";
             }
@@ -85,7 +97,7 @@ async function cargarJSON() {
             if (item.Disqualified === false) {
                 timeadjust = (item.TotalTime / 1000) + (item.PenaltyTime / 1000000000);
                 let seconds = formatTwoIntegersPlusThreeDecimals(timeadjust % 60);
-                let minutes = formatTwoIntegers(Math.trunc((timeadjust / 60)%60));
+                let minutes = formatTwoIntegers(Math.trunc((timeadjust / 60) % 60));
                 let hours = formatTwoIntegers(Math.trunc(timeadjust / 3600));
                 //console.log("Pos: "+pos+" ->"+hours+":"+minutes+":"+seconds);
 
@@ -129,25 +141,25 @@ async function cargarJSON() {
                 }
             }
 
-            if(pos===1){
+            if (pos === 1) {
                 vueltasLider = vueltastotales;
-            }else{
-                if(timeadjust ==='DQ'){
-                    posicionFinal='DQ';
-                } else if(vueltastotales<vueltasLider*0.9)
-                    posicionFinal='DNF';
+            } else {
+                if (timeadjust === 'DQ') {
+                    posicionFinal = 'DQ';
+                } else if (vueltastotales < vueltasLider * 0.9)
+                    posicionFinal = 'DNF';
             }
 
             bestlap = (bestlap / 1000);
             let secondsbl = formatTwoIntegersPlusThreeDecimals(bestlap % 60);
-            let minutesbl = formatTwoIntegers(Math.trunc((bestlap / 60)%60));
+            let minutesbl = formatTwoIntegers(Math.trunc((bestlap / 60) % 60));
 
             bestlapToString = minutesbl.toString() + ":" + secondsbl.toString();
             //bestlap = minutesbl.toString + ":" + secondsbl.toString;
             mediavueltas = mediavueltas / (vueltastotales - cuts);
             mediavueltas = (mediavueltas / 1000);
             let secondsmv = formatTwoIntegersPlusThreeDecimals(mediavueltas % 60);
-            let minutesmv = formatTwoIntegers(Math.trunc((mediavueltas / 60)%60));
+            let minutesmv = formatTwoIntegers(Math.trunc((mediavueltas / 60) % 60));
             mediavueltasToString = minutesmv + ":" + secondsmv;
             //console.log(mediavueltas+"/"+vueltastotales+"/"+cuts);
             //console.log(item.DriverName + ": " + vueltastotales);
@@ -200,13 +212,13 @@ async function cargarJSON() {
         // Pista y datos de la carrera
 
         const isCircuitExists = circuits.find((circuit) => circuit.filename === datos.TrackName);
-        if(isCircuitExists){
+        if (isCircuitExists) {
             const circuitName = isCircuitExists.name;
             const circuitLocation = isCircuitExists.location;
-            if(datos.TrackConfig === null || datos.TrackConfig === undefined || datos.TrackConfig === ""){
+            if (datos.TrackConfig === null || datos.TrackConfig === undefined || datos.TrackConfig === "") {
                 datos.TrackConfig = "noname_trackconfig";
             }
-            const layout = circuitlayouts.find((layout) => (layout.filename === datos.TrackConfig)&&(layout.circuit === isCircuitExists.id));
+            const layout = circuitlayouts.find((layout) => (layout.filename === datos.TrackConfig) && (layout.circuit === isCircuitExists.id));
             const layoutName = layout?.name;
             const layoutLength = layout?.length;
             const layoutCapacity = layout?.capacity;
@@ -235,7 +247,7 @@ async function cargarJSON() {
 }
 
 
-function formatTwoIntegersPlusThreeDecimals(num: number){
+function formatTwoIntegersPlusThreeDecimals(num: number) {
     const integerPart = Math.floor(Math.abs(num)).toString().padStart(2, '0');
     const decimalPart = Math.abs(num % 1).toFixed(3).slice(2);
     const sign = num < 0 ? '-' : '';
@@ -245,4 +257,3 @@ function formatTwoIntegersPlusThreeDecimals(num: number){
 function formatTwoIntegers(num: number): string {
     return Math.abs(num).toString().padStart(2, '0').slice(-2);
 }
-
