@@ -1,8 +1,6 @@
 import { cars } from "@/consts/cars";
 import { circuits } from "@/consts/circuits";
 import { circuitlayouts } from "@/consts/circuitlayouts";
-//import fetch from 'node-fetch';
-//import https from 'https';
 
 const btnCargaTabla = document.querySelector('#btnCargarTabla');
 if (btnCargaTabla) {
@@ -11,7 +9,6 @@ if (btnCargaTabla) {
 
 async function cargarJSON() {
     console.log('Dentro de funcion cargarJSON');
-    const xhttp = new XMLHttpRequest();
     const opciones = document.querySelector('#select-champs');
 
     //console.log((opciones as HTMLSelectElement)?.value);
@@ -19,17 +16,8 @@ async function cargarJSON() {
     //var ruta = '../../testRace3.json';
     console.log(ruta);
 
-    // const fetch = require('node-fetch');
-    // const https = require('https');
-
-    // const httpsAgent = new https.Agent({
-    //     rejectUnauthorized: false,
-    // });
-
     await fetch(ruta, {
         method: "GET",
-        //referrerPolicy: "unsafe-url",
-        //agent: httpsAgent,
     }).then(async (response) => {
         let data = await response.text();
         //console.log(data);
@@ -257,3 +245,4 @@ function formatTwoIntegersPlusThreeDecimals(num: number) {
 function formatTwoIntegers(num: number): string {
     return Math.abs(num).toString().padStart(2, '0').slice(-2);
 }
+
