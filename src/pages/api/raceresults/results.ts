@@ -13,7 +13,7 @@ async function cargarJSON() {
 
     //console.log((opciones as HTMLSelectElement)?.value);
     var ruta = 'http://es2.assettohosting.com:10018/results/download/' + (opciones as HTMLSelectElement)?.value + '.json';
-    //var ruta = '../../testRace.json';
+    //var ruta = '../../testRace3.json';
     console.log(ruta);
     await fetch(ruta, {
         method: "GET",
@@ -43,10 +43,12 @@ async function cargarJSON() {
             throw new Error('Element with id "resultado2" not found.');
         }
 
-        let pos = 0;
+        let pos: number = 0;
+        let vueltasLider: number = 0;
         for (let item of dresult) {
             //console.log(item.DriverName);
             pos = pos + 1;
+            let posicionFinal = pos.toString();
             let gridPositionClass;
             if ((item.GridPosition - pos) > 0) {
                 gridPositionClass = '<svg viewBox="0 0 24 24" fill="#00f000" class="w-6 float mx-auto"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M11.375 6.22l-5 4a1 1 0 0 0 -.375 .78v6l.006 .112a1 1 0 0 0 1.619 .669l4.375 -3.501l4.375 3.5a1 1 0 0 0 1.625 -.78v-6a1 1 0 0 0 -.375 -.78l-5 -4a1 1 0 0 0 -1.25 0z" /></svg>';
@@ -69,10 +71,13 @@ async function cargarJSON() {
             // Obtener el nombre real del coche
             const isCarExists = cars.find((car) => car.filename === item.CarModel);
             let carName: string;
+            let carBrand: string;
             if(isCarExists){
                 carName = isCarExists.brand + " " + isCarExists.model;
+                carBrand = isCarExists.imgbrand;
             } else{
                 carName = item.CarModel;
+                carBrand = "";
             }
 
             // Obtener tiempo total de carrera
@@ -124,6 +129,15 @@ async function cargarJSON() {
                 }
             }
 
+            if(pos===1){
+                vueltasLider = vueltastotales;
+            }else{
+                if(timeadjust ==='DQ'){
+                    posicionFinal='DQ';
+                } else if(vueltastotales<vueltasLider*0.9)
+                    posicionFinal='DNF';
+            }
+
             bestlap = (bestlap / 1000);
             let secondsbl = formatTwoIntegersPlusThreeDecimals(bestlap % 60);
             let minutesbl = formatTwoIntegers(Math.trunc((bestlap / 60)%60));
@@ -147,9 +161,10 @@ async function cargarJSON() {
             if (pos % 2 === 0) {
                 resultado.innerHTML += `
                     <tr class="bg-[#0f0f0f] text-center">
-                        <td class = "font-medium">${pos.toString()}</td>                     <!-- Posicion -->
+                        <td class = "font-medium">${posicionFinal.toString()}</td>                     <!-- Posicion -->
                         <td>${item.DriverName}</td>         <!-- Nombre -->
                         <td>${equipo}</td>                  <!-- Equipo -->
+                        <td><img class='w-4 justify-end' src='${carBrand}' alt=''></img></td>           <!-- Logo Coche -->
                         <td>${carName}</td>           <!-- Coche -->
                         <td>${gridPositionClass}</td>     <!-- Gan/Per (Flechas)-->
                         <td class = "text-start">${Math.abs(item.GridPosition - pos)}</td> <!-- Gan/Per (Número)-->
@@ -164,9 +179,10 @@ async function cargarJSON() {
             } else {
                 resultado.innerHTML += `
                     <tr class="bg-[#19191c] text-center">
-                        <td>${pos}</td>                     <!-- Posicion -->
+                        <td class = "font-medium">${posicionFinal.toString()}</td>                     <!-- Posicion -->
                         <td>${item.DriverName}</td>         <!-- Nombre -->
                         <td>${equipo}</td>                  <!-- Equipo -->
+                        <td><img class='w-4 justify-end' src='${carBrand}' alt=''></img></td>           <!-- Logo Coche -->
                         <td>${carName}</td>           <!-- Coche -->
                         <td>${gridPositionClass}</td>     <!-- Gan/Per (Flechas)-->
                         <td class = "text-start">${Math.abs(item.GridPosition - pos)}</td> <!-- Gan/Per (Número)-->
