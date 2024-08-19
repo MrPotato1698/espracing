@@ -1,7 +1,7 @@
 import { cars } from "@/consts/cars";
 import { circuits } from "@/consts/circuits";
 import { circuitlayouts } from "@/consts/circuitlayouts";
-import fetch from 'node-fetch';
+//import fetch from 'node-fetch';
 //import https from 'https';
 
 const btnCargaTabla = document.querySelector('#btnCargarTabla');
