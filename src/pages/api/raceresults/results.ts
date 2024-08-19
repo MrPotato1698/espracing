@@ -1,7 +1,7 @@
 import { cars } from "@/consts/cars";
 import { circuits } from "@/consts/circuits";
 import { circuitlayouts } from "@/consts/circuitlayouts";
-//import fetch from 'node-fetch';
+import fetch from 'node-fetch';
 //import https from 'https';
 
 const btnCargaTabla = document.querySelector('#btnCargarTabla');
@@ -19,18 +19,18 @@ async function cargarJSON() {
     //var ruta = '../../testRace3.json';
     console.log(ruta);
 
-    // const fetch = require('node-fetch');
-    // const https = require('https');
+    const fetch = require('node-fetch');
+    const https = require('https');
 
-    // const httpsAgent = new https.Agent({
-    //     rejectUnauthorized: false,
-    // });
+    const httpsAgent = new https.Agent({
+        rejectUnauthorized: false,
+    });
 
     await fetch(ruta, {
         method: "GET",
         //referrerPolicy: "unsafe-url",
         //agent: httpsAgent,
-    }).then(async (response) => {
+    }).then(async (response: Response) => {
         let data = await response.text();
         //console.log(data);
         let datos = JSON.parse(data);
@@ -241,7 +241,7 @@ async function cargarJSON() {
 
 
 
-    }).catch((error) => {
+    }).catch((error: any) => {
         console.error(error);
     });
 }
@@ -257,3 +257,4 @@ function formatTwoIntegersPlusThreeDecimals(num: number) {
 function formatTwoIntegers(num: number): string {
     return Math.abs(num).toString().padStart(2, '0').slice(-2);
 }
+
