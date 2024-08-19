@@ -19,18 +19,18 @@ async function cargarJSON() {
     //var ruta = '../../testRace3.json';
     console.log(ruta);
 
-    const fetch = require('node-fetch');
-    const https = require('https');
+    // const fetch = require('node-fetch');
+    // const https = require('https');
 
-    const httpsAgent = new https.Agent({
-        rejectUnauthorized: false,
-    });
+    // const httpsAgent = new https.Agent({
+    //     rejectUnauthorized: false,
+    // });
 
     await fetch(ruta, {
         method: "GET",
-        referrerPolicy: "unsafe-url",
-        agent: httpsAgent,
-    }).then(async (response: Response) => {
+        //referrerPolicy: "unsafe-url",
+        //agent: httpsAgent,
+    }).then(async (response) => {
         let data = await response.text();
         //console.log(data);
         let datos = JSON.parse(data);
@@ -241,7 +241,7 @@ async function cargarJSON() {
 
 
 
-    }).catch((error: any) => {
+    }).catch((error) => {
         console.error(error);
     });
 }
