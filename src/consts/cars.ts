@@ -17,7 +17,7 @@ export const cars: Car[] = [
 
   {
     id: 2,
-    filename: 'ks_audi_dtm_2020',
+    filename: 'ks_bmw_dtm_2020',
     brand: 'BMW',
     imgbrand: '/img/brand/bmw.webp',
     model: 'M4 DTM 2020',
@@ -33,7 +33,7 @@ export const cars: Car[] = [
     id: 3,
     filename: 'jtc_honda_civic_eg_gra',
     brand: 'Honda',
-    imgbrand: '/img/brand/audi.webp',
+    imgbrand: '/img/brand/honda.webp',
     model: 'Civic SiR-II (JTC Div.III)',
     year: 1991,
     class: 'JTC Div.III',
@@ -153,5 +153,33 @@ export const cars: Car[] = [
     torque: 777,
     weight: 1030,
     description: 'El Toyota GR010 Hybrid es un prototipo de coche de carreras deportivo desarrollado para las reglas Le Mans Hypercar 2021 en el Campeonato Mundial de Resistencia de la FIA. Es el sucesor del Toyota TS050 Hybrid, que compitió en el WEC de 2016 a 2020, logrando 2 dobles títulos mundiales del WEC y 3 victorias consecutivas en las 24 Horas de Le Mans de 2018 a 2020. El GR010 HYBRID fue desarrollado por TOYOTA GAZOO Racing (TGR) para la serie 2021 del Campeonato Mundial de Resistencia (WEC) de la FIA de acuerdo con las regulaciones de Le Mans Hypercar (LMH), para competir en la clase cumbre de Hypercar.',
+  },
+
+  {
+    id: 12,
+    filename: 'renault_twingo_rs_twincup2',
+    brand: 'Renault',
+    imgbrand: '/img/brand/renault.webp',
+    model: 'Twingo RS Twincup2',
+    year: 2014,
+    class: 'Twingo Cup',
+    power: 202,
+    torque: 211,
+    weight: 988,
+    description: 'Twingo Rs Under 8 Especificaciones: Motor:Clio 3 RS 203 cv<br/>-Transmisión:<br/>-Tipo: Tracción delantera con caja de cambios manual de 6 velocidades<br/><br/>Chasis:<br/>-Tipo: Chasis monocasco de acero 20CDF2 con jaula antivuelco. Carrocería de acero hatchback de 3 puertas con parachoques de plástico.<br/>-Suspensión Delantera: Puntal Macpherson con horquilla inferior, resorte helicoidal, amortiguador de gas telescópico y barra estabilizadora.<br/>-Suspensión Trasera: Brazo de arrastre con barra de torsión, amortiguador telescópico de gas y barra estabilizadora.<br/>-Sistema de Giro: Dirección asistida de correa y piñones<br/><br/>-Dimensiones:<br/>- Longitud: 3.607m <br/>Anchura: 1.688m <br/>Altura: 1.460m<br/>- Distancia entre ejes: 2.368 m <br/>front track: 1.460 m (54.4") <br/>rear track: 1.445 m (52.7") <br/>-Llantas - Gomas: 195/40/17Peso: 988 kg <br/>Tanque de Combustible: 45 L'
+  },
+
+  {
+    id: 13,
+    filename: 'alpine_europa_cup',
+    brand: 'Alpine',
+    imgbrand: '/img/brand/alpine.webp',
+    model: 'A110 Europa Cup',
+    year: 2018,
+    class: 'A110 Cup',
+    power: 270,
+    torque: 320,
+    weight: 1050,
+    description:""
   },
 ];

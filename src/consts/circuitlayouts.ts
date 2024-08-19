@@ -48,7 +48,7 @@ export const circuitlayouts: CircuitLayout[] = [
 
   {
     id: 6,
-    name: '',
+    name: 'Normal',
     filename: 'noname_trackconfig',
     circuit: 2,
     length: 2170,
@@ -66,7 +66,7 @@ export const circuitlayouts: CircuitLayout[] = [
 
   {
     id: 8,
-    name: '',
+    name: 'Normal',
     filename: 'dcgp',
     circuit: 3,
     length: 4574,
@@ -210,7 +210,7 @@ export const circuitlayouts: CircuitLayout[] = [
 
   {
     id: 24,
-    name: '',
+    name: 'Normal',
     filename: 'normal',
     circuit: 5,
     length: 2800,
@@ -264,7 +264,7 @@ export const circuitlayouts: CircuitLayout[] = [
 
   {
     id: 30,
-    name: '',
+    name: 'Normal',
     filename: 'normal',
     circuit: 8,
     length: 5194,
@@ -399,7 +399,7 @@ export const circuitlayouts: CircuitLayout[] = [
 
   {
     id: 45,
-    name: '',
+    name: 'Normal',
     filename: 'noname_trackconfig',
     circuit: 12,
     length: 6102,
@@ -498,7 +498,7 @@ export const circuitlayouts: CircuitLayout[] = [
 
   {
     id: 56,
-    name: '',
+    name: 'Normal',
     filename: 'nordschleife',
     circuit: 14,
     length: 20832,
@@ -597,7 +597,7 @@ export const circuitlayouts: CircuitLayout[] = [
 
   {
     id: 67,
-    name: '',
+    name: 'Normal',
     filename: 'noname_trackconfig',
     circuit: 16,
     length: 6515,
@@ -633,7 +633,7 @@ export const circuitlayouts: CircuitLayout[] = [
 
   {
     id: 71,
-    name: '',
+    name: 'Normal',
     filename: 'noname_trackconfig',
     circuit: 18,
     length: 7004,

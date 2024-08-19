@@ -12,11 +12,13 @@ if (!accessToken || !refreshToken) {
   return redirect("/login");
 }
 
+// Set the session with the cookies
 const { data: dataAuth, error: errorAuth } = await supabase.auth.setSession({
   refresh_token: refreshToken.value,
   access_token: accessToken.value,
 });
 
+// If there is an error, delete the cookies and redirect to login
 if (errorAuth) {
   cookies.delete("sb-access-token", {
     path: "/",
@@ -29,7 +31,26 @@ if (errorAuth) {
 }
 
 const id = dataAuth?.user?.id || "";
+const email = dataAuth?.user?.email || "";
 
+// Asign ID to user in Turso if it doesn't exist
+const emailSearchQuery = await turso.execute({
+  sql: 'SELECT id FROM User WHERE email = ?',
+  args: [email],
+});
+
+const idSearch = emailSearchQuery.rows[0].email;
+
+if(idSearch === undefined || idSearch === null) {
+  const transaction = await turso.transaction("write");
+  await transaction.execute({
+    sql: 'UPDATE User SET id = ? WHERE email = ?',
+    args: [id, email],
+  });
+  await transaction.commit();
+}
+
+// Get user data
 const {rows: UserData} = await turso.execute({
   sql: 'SELECT * FROM User WHERE id = ?',
   args: [id]
@@ -42,12 +63,11 @@ const { rows: TeamData } = await turso.execute({
 
 ---
 
-<!-- <h1>Bienvenido {email}</h1> -->
 <Layout title = "ESP Racing: Mi Perfil">
   <div class = "pt-4 pl-3 ml-64">
     <h2 class = "text-5xl font-extrabold border-b-2 border-[#da392b] w-full">Mi Perfil</h2>
 
-      <img src = "" alt = "Avatar" class = "w-16 rounded-2xl"/>
+      <img src ="" alt = "Avatar" class = "w-16 rounded-2xl"/>
       <div class = "grid w-11/12 grid-cols-1 my-5 lg:grid-cols-2 xl:grid-cols-3">
           <div class = "mb-2">
           <h3 class = "text-4xl font-semibold border-b-2 border-[#da392b] w-3/4">Nombre</h3>
@@ -59,11 +79,20 @@ const { rows: TeamData } = await turso.execute({
           <p class = "pl-2 text-2xl font-medium">{UserData[0].steam_id}</p>
         </div>
 
-        <div class = "blockdata">
-          <h3 class = "text-4xl font-semibold border-b-2 border-[#da392b] w-3/4">Equipo</h3>
-          <p class = "pl-2 text-2xl font-medium">{TeamData[0].name}</p>
+        {
+          TeamData[0]?.name===null || TeamData[0]?.name ===undefined || TeamData[0]?.name==="" ?(
+          <div class = "blockdata">
+            <h3 class = "text-4xl font-semibold border-b-2 border-[#da392b] w-3/4">Equipo</h3>
+            <p class = "pl-2 text-2xl font-medium">Sin Equipo</p>
+          </div>
+          ):(
+          <div class = "blockdata">
+            <h3 class = "text-4xl font-semibold border-b-2 border-[#da392b] w-3/4">Equipo</h3>
+            <p class = "pl-2 text-2xl font-medium">{TeamData[0].name}</p>
+          </div>
+          )
+        }
 
-        </div>
       </div>
 
       <h2 class = "text-5xl font-extrabold border-b-2 border-[#da392b] w-full mt-12">Estadisticas de Carrera</h2>

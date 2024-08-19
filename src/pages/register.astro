@@ -52,8 +52,15 @@ if (accessToken && refreshToken) {
             >
           </p>
         </div>
-
         <div class="space-y-6">
+        <input
+            class="w-full px-4 py-3 text-sm text-black bg-gray-200 border border-gray-200 rounded-lg focus:bg-gray-100 focus:outline-none focus:border-[#0f0f0f] focus:text-black"
+            type="text"
+            name="name"
+            id="name"
+            placeholder="Nombre Completo"
+          />
+
           <input
             class="w-full px-4 py-3 text-sm text-black bg-gray-200 border border-gray-200 rounded-lg focus:bg-gray-100 focus:outline-none focus:border-[#0f0f0f] focus:text-black"
             type="text"
@@ -77,6 +84,34 @@ if (accessToken && refreshToken) {
               <CloseEye />
             </div>
           </div>
+
+          <input
+            class="w-full px-4 py-3 text-sm text-black bg-gray-200 border border-gray-200 rounded-lg focus:bg-gray-100 focus:outline-none focus:border-[#0f0f0f] focus:text-black"
+            type="text"
+            name="steam_id"
+            id="steam_id"
+            placeholder="Steam ID"
+          />
+          <a href="https://www.steamidfinder.com/"
+            target="_blank"
+            title="AYUDA: si no sabes como mirar tu SteamID, pincha aqui"
+            class = "text-black flex-grow">
+            Donde sacar tu SteamID:
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="black"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="w-4 h-4 justify-end no-underline">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+              <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" />
+              <path d="M12 16v.01" />
+              <path d="M12 13a2 2 0 0 0 .914 -3.782a1.98 1.98 0 0 0 -2.414 .483" />
+            </svg>
+          </a>
+
 
           <button
             type="submit"
