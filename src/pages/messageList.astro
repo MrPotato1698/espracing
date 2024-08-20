@@ -142,12 +142,12 @@ const { rows: MessageListData } = await turso.execute({
 <script>
   document.querySelectorAll("a[data-action]").forEach((link) => {
     console.log(link);
-    link.addEventListener("click", (e) => {
+    link.addEventListener("onClick", (e) => {
       e.preventDefault();
       const action = (e.target as HTMLElement)?.getAttribute("data-action");
       const id = (e.target as HTMLElement)?.getAttribute("data-id");
       if (action && id) {
-        const handleAction = async (action: string, id: any) => {
+        async (action: string, id: any) => {
           try {
             let response;
             if (action === "update") {
