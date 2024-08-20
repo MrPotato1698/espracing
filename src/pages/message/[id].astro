@@ -1,0 +1,143 @@
+---
+import Layout from "@/layouts/ProfileLayout.astro";
+import { supabase } from "@/lib/supabase";
+import { turso } from "@/turso";
+
+const { id } = Astro.params;
+
+//**  Protocol to check if the user is logged in
+const { cookies, redirect } = Astro;
+
+const accessToken = cookies.get("sb-access-token");
+const refreshToken = cookies.get("sb-refresh-token");
+
+if (!accessToken || !refreshToken) {
+  return redirect("/login");
+}
+
+// Set the session with the cookies
+const { data: dataAuth, error: errorAuth } = await supabase.auth.setSession({
+  refresh_token: refreshToken.value,
+  access_token: accessToken.value,
+});
+
+// If there is an error, delete the cookies and redirect to login
+if (errorAuth) {
+  cookies.delete("sb-access-token", {
+    path: "/",
+  });
+  cookies.delete("sb-refresh-token", {
+    path: "/",
+  });
+
+  return redirect("/login");
+}
+
+const idAuth = dataAuth?.user?.id || "";
+const email = dataAuth?.user?.email || "";
+
+// Asign ID to user in Turso if it doesn't exist
+const emailSearchQuery = await turso.execute({
+  sql: "SELECT id FROM User WHERE email = ?",
+  args: [email],
+});
+
+const idSearch = emailSearchQuery.rows[0].email;
+
+if (idSearch === undefined || idSearch === null) {
+  const transaction = await turso.transaction("write");
+  await transaction.execute({
+    sql: "UPDATE User SET id = ? WHERE email = ?",
+    args: [idAuth, email],
+  });
+  await transaction.commit();
+}
+//**  End of Protocol to check if the user is logged in
+
+if (id === null || id === undefined) {
+  return redirect("/messageList");
+}
+
+const { rows: MessageData } = await turso.execute({
+  sql: "SELECT * FROM Message WHERE id = ?",
+  args: [id],
+});
+
+let region: string;
+
+switch (MessageData[0].region) {
+  case "spain":
+    region = "España";
+    break;
+  case "latinoamerica":
+    region = "Latino America";
+    break;
+  case "portugal":
+    region = "Portugal";
+    break;
+  case "europe":
+    region = "Europa";
+    break;
+  case "russia":
+    region = "Rusia";
+    break;
+  case "usa":
+    region = "Estados Unidos/Canada";
+    break;
+  case "africa":
+    region = "Africa";
+    break;
+  case "asia":
+    region = "Asia";
+    break;
+  case "oceania":
+    region = "Oceania";
+    break;
+  default:
+    region = "Desconocida";
+    break;
+}
+---
+
+<Layout title={`ESP Racing: Mensaje Nº${id}`}>
+  <form
+    action="../api/messages/messageReaded"
+    method="post"
+    data-astro-reload
+    class="pt-4 pl-3 ml-64"
+  >
+    <h2 class="text-5xl font-extrabold border-b-2 border-[#da392b] w-full">
+      Mensaje
+    </h2>
+
+    <div class="grid w-11/12 grid-cols-1 my-5">
+      <h3 class="text-4xl font-semibold border-b-2 border-[#da392b] w-3/4">
+        Nombre Emisor / Discord
+      </h3>
+      <p class="pl-2 text-2xl font-medium">
+        {MessageData[0].name_emissor} / {MessageData[0].discord}
+      </p>
+
+      <h3 class="mt-5 text-4xl font-semibold border-b-2 border-[#da392b] w-3/4">
+        Regíon/Pais de Procedencia
+      </h3>
+      <p class="pl-2 text-2xl font-medium">{region}</p>
+    </div>
+
+    <div class="grid w-11/12 grid-cols-1 my-5">
+      <h3 class="text-4xl font-semibold border-b-2 border-[#da392b] w-3/4">
+        Mensaje
+      </h3>
+      <p class="pl-2 text-2xl font-medium">{MessageData[0].description}</p>
+    </div>
+
+    <input type="hidden" name="id" value={id} />
+
+    <button
+      type="submit"
+      class="bg-[#0f0f0f] text-white border-[#da392b] border rounded-md my-4 font-medium text-lg py-1.5 px-1"
+    >
+      Volver Atras y Marcar como leido
+    </button>
+  </form>
+</Layout>
