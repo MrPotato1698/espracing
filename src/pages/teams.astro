@@ -24,24 +24,25 @@ const { rows: TeamsData } = await turso.execute(
       <tbody>
         {
           TeamsData.map((team, index) =>
-            index % 2 === 0 ? (
-              <tr class="bg-[#0f0f0f]">
-                <td class = "font-semibold">{index + 1}</td>
-                <td>{team.name}</td>
-                <td>{team.TeamMembers}</td>
-                <td>{team.description}</td>
-              </tr>
-            ) : (
-              <tr class="bg-[#19191c]">
-                <td class = "font-semibold">{index + 1}</td>
-                <td>{team.name}</td>
-                <td>{team.TeamMembers}</td>
-                <td>{team.description}</td>
-              </tr>
-            )
+            <tr class="bg-[#0f0f0f]">
+              <td class = "font-semibold">{index + 1}</td>
+              <td>{team.name}</td>
+              <td>{team.TeamMembers}</td>
+              <td>{team.description}</td>
+            </tr>
           )
         }
       </tbody>
     </table>
   </div>
 </Layout>
+
+<style>
+  tbody tr:nth-child(odd) {
+    background-color: #0f0f0f;
+  }
+
+  tbody tr:nth-child(even) {
+    background-color: #19191c;
+  }
+</style>
