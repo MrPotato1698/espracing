@@ -3,7 +3,7 @@ import Layout from "@/layouts/NormalLayout.astro";
 import { turso } from "@/turso";
 
 const { rows: TeamsData } = await turso.execute(
-  "SELECT T.name, COUNT (U.team) AS TeamMembers, T.description FROM User AS U RIGHT JOIN Team AS T ON T.id = U.team GROUP BY T.name"
+  "SELECT T.name, COUNT (U.team) AS TeamMembers, T.description, T.image FROM User AS U RIGHT JOIN Team AS T ON T.id = U.team GROUP BY T.name"
 );
 ---
 
@@ -16,7 +16,7 @@ const { rows: TeamsData } = await turso.execute(
       <thead class="font-medium bg-[#da392b]">
         <tr>
           <th>Nº</th>
-          <th>Nombre</th>
+          <th colspan="2">Nombre</th>
           <th>Nº Pilotos</th>
           <th>Descripción</th>
         </tr>
@@ -26,6 +26,7 @@ const { rows: TeamsData } = await turso.execute(
           TeamsData.map((team, index) =>
             <tr class="bg-[#0f0f0f]">
               <td class = "font-semibold">{index + 1}</td>
+              <td><img src={String(team.image)} alt="Avatar" class="w-8 py-1"/></td>
               <td>{team.name}</td>
               <td>{team.TeamMembers}</td>
               <td>{team.description}</td>
