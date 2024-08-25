@@ -1,6 +1,7 @@
 ---
 import Layout from "@/layouts/ProfileLayout.astro";
 import { supabase } from "@/lib/supabase";
+import { type Database } from "@/types/database-generated.types";
 import { turso } from '@/turso';
 
 const { cookies, redirect } = Astro;
@@ -54,12 +55,28 @@ if(idSearch === undefined || idSearch === null) {
 const {rows: UserData} = await turso.execute({
   sql: 'SELECT * FROM User WHERE id = ?',
   args: [id]
-})
+});
 
 const { rows: TeamData } = await turso.execute({
   sql: 'SELECT T.name FROM User AS U INNER JOIN Team AS T WHERE U.id = ? AND U.team = T.id',
   args: [id]
-})
+});
+
+//Integración unica con Supabase (Para evitar usar Turso)
+
+// const { data: UserData, error: errorData } = await supabase
+//   .from('profiles')
+//   .select('*')
+//   .eq('id', id);
+
+//   console.log(UserData, id);
+
+// const teamID = UserData?.team;
+
+// const { data: TeamData, error: errorTeamData } = await supabase
+//   .from('profiles')
+//   .select('team!inner(name)')
+//   .eq('id', teamID);
 
 ---
 
@@ -67,7 +84,7 @@ const { rows: TeamData } = await turso.execute({
   <div class = "pt-4 pl-3 ml-64">
     <h2 class = "text-5xl font-extrabold border-b-2 border-[#da392b] w-full">Mi Perfil</h2>
 
-      <img src ={String(UserData[0].image)} alt = "Avatar" class = "w-20 rounded-full mt-5"/>
+      <img src ={String(UserData[0].avatar)} alt = "Avatar" class = "w-20 rounded-full mt-5"/>
       <div class = "grid w-11/12 grid-cols-1 my-5 lg:grid-cols-2 xl:grid-cols-3">
           <div class = "mb-2">
           <h3 class = "text-4xl font-semibold border-b-2 border-[#da392b] w-3/4">Nombre</h3>
@@ -80,7 +97,7 @@ const { rows: TeamData } = await turso.execute({
         </div>
 
         {
-          TeamData[0]?.name===null || TeamData[0]?.name ===undefined || TeamData[0]?.name==="" ?(
+          TeamData[0]?.name===null || TeamData[0]?.name ===undefined || TeamData[0]?.name==="" ? (
           <div class = "blockdata">
             <h3 class = "text-4xl font-semibold border-b-2 border-[#da392b] w-3/4">Equipo</h3>
             <p class = "pl-2 text-2xl font-medium">Sin Equipo</p>
