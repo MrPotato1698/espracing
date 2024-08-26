@@ -2,7 +2,7 @@ import type { APIRoute } from "astro";
 import { turso } from "@/turso";
 
 
-export const POST: APIRoute = async ({ redirect, request }) => {
+export const POST: APIRoute = async ({ request }) => {
 
   const { action, id } = await request.json();
   if(!id) {
@@ -14,5 +14,5 @@ export const POST: APIRoute = async ({ redirect, request }) => {
   });
 
 
-  return redirect("/messageList");
+  return new Response("Mensaje eliminado con exito", { status: 200 });
 };

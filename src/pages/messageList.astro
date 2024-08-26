@@ -62,7 +62,7 @@ const { rows: MessageListData } = await turso.execute({
 ---
 
 <Layout title="ESP Racing: Bandeja de Mensajes">
-  <div class="text-center pt-4 px-3 ml-64 mr-auto">
+  <div class="px-3 pt-4 ml-64 mr-auto text-center">
     <p2 class="text-5xl font-bold border-b border-[#da392b] w-fit mx-auto"
       >Bandeja de Mensajes</p2
     >
@@ -78,51 +78,35 @@ const { rows: MessageListData } = await turso.execute({
       </thead>
       <tbody>
         {
-          MessageListData.map((msg, index) =>
-            msg.readed === 1 ? (
-              <tr class="">
-                <td class="font-semibold">
-                  <a href={`/message/${msg.id}`}>{index + 1}</a>
-                </td>
-                <td>{msg.name_emissor}</td>
-                <td>
-                  <a href={`/message/${msg.id}`}>
-                    <Open moreClass="w-6 text-center mx-auto" />
-                  </a>
-                </td>
-                <td>
-                  <a href="#" data-action="update" data-id={msg.id}>
+          MessageListData.map((msg, index) => (
+            <tr class="">
+              <td class="font-semibold">
+                <a href={`/message/${msg.id}`}>{index + 1}</a>
+              </td>
+              <td>{msg.name_emissor}</td>
+              <td>
+                <a href={`/message/${msg.id}`}>
+                  <Open moreClass="w-6 text-center mx-auto" />
+                </a>
+              </td>
+
+              <td>
+                <button class = "align-middle change-status" data-id={msg.id} data-readed={msg.readed}>
+                  {msg.readed === 1 ? (
                     <Unreaded moreClass="w-6 text-center mx-auto" />
-                  </a>
-                </td>
-                <td>
-                  <a href="#" data-action="delete" data-id={msg.id}>
-                    <Trash moreClass="w-6 text-center mx-auto" />
-                  </a>
-                </td>
-              </tr>
-            ) : (
-              <tr class="">
-                <td class="font-semibold">{index + 1}</td>
-                <td>{msg.name_emissor}</td>
-                <td>
-                  <a href={`/message/${msg.id}`}>
-                    <Open moreClass="w-6 text-center mx-auto" />
-                  </a>
-                </td>
-                <td>
-                  <a href="#" data-action="update" data-id={msg.id}>
+                  ) : (
                     <Readed moreClass="w-6 text-center mx-auto" />
-                  </a>
-                </td>
-                <td>
-                  <a href="#" data-action="delete" data-id={msg.id}>
-                    <Trash moreClass="w-6 text-center mx-auto" />
-                  </a>
-                </td>
-              </tr>
-            )
-          )
+                  )}
+                </button>
+              </td>
+
+              <td>
+                <button class="align-middle delete-message" data-id={msg.id}>
+                  <Trash moreClass="w-6 text-center mx-auto" />
+                </button>
+              </td>
+            </tr>
+          ))
         }
       </tbody>
     </table>
@@ -139,33 +123,86 @@ const { rows: MessageListData } = await turso.execute({
   }
 </style>
 
-<script>
-  document.querySelectorAll("a[data-action]").forEach((link) => {
-    console.log(link);
-    link.addEventListener("onClick", (e) => {
-      e.preventDefault();
-      const action = (e.target as HTMLElement)?.getAttribute("data-action");
-      const id = (e.target as HTMLElement)?.getAttribute("data-id");
-      if (action && id) {
-        async (action: string, id: any) => {
+<script is:inline data-astro-rerun>
+  document.addEventListener('astro:page-load', () => {
+    const changeStatusButtons = document.querySelectorAll('.change-status');
+    const deleteButtons = document.querySelectorAll('.delete-message');
+
+    changeStatusButtons.forEach(button => {
+      button.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const id = button.getAttribute('data-id');
+        const currentReaded = button.getAttribute('data-readed');
+        const newReaded = currentReaded === '1' ? '0' : '1';
+
+        try {
+          const response = await fetch('/api/messages/changeReaded', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ id, readed: newReaded }),
+          });
+
+          if (response.ok) {
+            // Update UI
+            button.setAttribute('data-readed', newReaded);
+            const icon = button.querySelector('svg');
+            if (newReaded === '1') {
+              if (icon) {
+                icon.outerHTML = '<Unreaded moreClass="w-6 text-center mx-auto" />';
+              }
+            } else {
+              if (icon) {
+                icon.outerHTML = '<Readed moreClass="w-6 text-center mx-auto" />';
+              }
+            }
+            const closestTr = button.closest('tr');
+            if (closestTr) {
+              closestTr.classList.toggle('read');
+              closestTr.classList.toggle('unread');
+            }
+            window.location.reload();
+          } else {
+            console.error('Error updating message status');
+          }
+        } catch (error) {
+          console.error('Error:', error);
+        }
+      });
+    });
+
+    deleteButtons.forEach(button => {
+      button.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const id = button.getAttribute('data-id');
+
+        if (confirm('¿Estás seguro de que quieres eliminar este mensaje?')) {
           try {
-            let response;
-            if (action === "update") {
-              response = await fetch("../api/messages/changeReaded", {
-                method: "POST",
-                body: JSON.stringify({ action, id }),
-              });
-            } else if (action === "delete") {
-              response = await fetch("../api/messages/deleteMsg", {
-                method: "POST",
-                body: JSON.stringify({ action, id }),
-              });
+            const response = await fetch('/api/messages/deleteMsg', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ id }),
+            });
+
+            if (response.ok) {
+              // Remove the row from the table
+              const closestTr = button.closest('tr');
+              if (closestTr) {
+                closestTr.remove();
+              }
+              window.location.reload();
+            } else {
+              console.error('Error deleting message');
             }
           } catch (error) {
-            console.error("Error:", error);
+            console.error('Error:', error);
           }
-        };
-      }
+        }
+      });
     });
   });
+
 </script>
