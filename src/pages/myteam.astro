@@ -70,8 +70,6 @@ const { rows: TeamUsersData } = await turso.execute({
   args: [idTeam],
 });
 
-
-
 ---
 
 <Layout title = "ESP Racing: Mi Equipo">
@@ -85,11 +83,12 @@ const { rows: TeamUsersData } = await turso.execute({
         <p class = "pl-2 text-2xl font-medium">{TeamData[0].name}</p>
       </div>
 
-    <h2 class = "text-5xl font-extrabold w-full mt-12"></h2>
+    <h2 class = "w-full mt-12 text-5xl font-extrabold"></h2>
     <div class="grid w-11/12 grid-cols-1 my-5">
       <div class = "blockdata">
         <h3 class = "text-4xl font-semibold border-b-2 border-[#da392b] w-3/4">Descripción</h3>
         <p class = "pl-2 text-2xl font-medium">{TeamData[0].description}</p>
+      </div>
     </div>
 
     <div class="py-4 mx-auto text-center" style="width: 99%">
