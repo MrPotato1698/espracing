@@ -53,9 +53,9 @@ if (idSearch === undefined || idSearch === null) {
 }
 
 // Get user data
-const {rows: userData} = await turso.execute({
-  sql: 'SELECT * FROM User WHERE id = ?',
-  args: [id]
+const { rows: userData } = await turso.execute({
+  sql: "SELECT * FROM User WHERE id = ?",
+  args: [id],
 });
 
 //Integración unica con Supabase (Para evitar usar Turso)
@@ -94,108 +94,115 @@ const { rows: TeamData } = await turso.execute({
 ---
 
 <Layout title="ESP Racing: Mi Perfil">
-  <div class="pt-4 pl-3 ml-64">
-    <h2 class="text-5xl font-extrabold border-b-2 border-[#da392b] w-full">
-      Mi Perfil
-    </h2>
+  <h2 class="text-5xl font-extrabold border-b-2 border-[#da392b] w-full">
+    Mi Perfil
+  </h2>
 
-    <img src={String(userData[0].image)} alt="Avatar" class="w-20 mt-5 rounded-full" />
-    <div class="grid w-11/12 grid-cols-1 my-5 lg:grid-cols-2 xl:grid-cols-3">
-      <div class="mb-2">
-        <h3 class="text-4xl font-semibold border-b-2 border-[#da392b] w-3/4">
-          Nombre
-        </h3>
-        <p class="pl-2 text-2xl font-medium">{userData[0].name}</p>
-      </div>
-
-      <div class="blockdata">
-        <h3 class="text-4xl font-semibold border-b-2 border-[#da392b] w-3/4">
-          Steam ID
-        </h3>
-        <p class="pl-2 text-2xl font-medium">{userData[0].steam_id}</p>
-      </div>
-
-      {
-        TeamData[0]?.name === null ||
-        TeamData[0]?.name === undefined ||
-        TeamData[0]?.name === "" ? (
-          <div class="blockdata">
-            <h3 class="text-4xl font-semibold border-b-2 border-[#da392b] w-3/4">
-              Equipo
-            </h3>
-            <p class="pl-2 text-2xl font-medium">Sin Equipo</p>
-          </div>
-        ) : (
-          <div class="blockdata">
-            <h3 class="text-4xl font-semibold border-b-2 border-[#da392b] w-3/4">
-              Equipo
-            </h3>
-            <p class="pl-2 text-2xl font-medium">{TeamData[0].name}</p>
-          </div>
-        )
-      }
+  <img
+    src={String(userData[0].image)}
+    alt="Avatar"
+    class="w-20 mt-5 rounded-full"
+  />
+  <div class="grid w-11/12 grid-cols-1 my-5 lg:grid-cols-2 xl:grid-cols-3">
+    <div class="mb-2">
+      <h3 class="text-4xl font-semibold border-b-2 border-[#da392b] w-3/4">
+        Nombre
+      </h3>
+      <p class="pl-2 text-2xl font-medium">{userData[0].name}</p>
     </div>
 
-    <h2
-      class="text-5xl font-extrabold border-b-2 border-[#da392b] w-full mt-12"
-    >
-      Estadisticas de Carrera
-    </h2>
-    <div class="grid w-11/12 grid-cols-1 my-5 lg:grid-cols-2 xl:grid-cols-3">
-      <div class="blockdata">
-        <h3 class="text-4xl font-semibold border-b-2 border-[#da392b] w-3/4">
-          Carreras
-        </h3>
-        <p class="pl-2 text-2xl font-medium">{userData[0].races}</p>
-      </div>
-
-      <div class="blockdata">
-        <h3 class="text-4xl font-semibold border-b-2 border-[#da392b] w-3/4">
-          Victorias
-        </h3>
-        <p class="pl-2 text-2xl font-medium">{userData[0].wins}</p>
-      </div>
-
-      <div class="blockdata">
-        <h3 class="text-4xl font-semibold border-b-2 border-[#da392b] w-3/4">
-          Podios
-        </h3>
-        <p class="pl-2 text-2xl font-medium">{userData[0].podiums}</p>
-      </div>
-
-      <div class="blockdata">
-        <h3 class="text-4xl font-semibold border-b-2 border-[#da392b] w-3/4">
-          Top 5
-        </h3>
-        <p class="pl-2 text-2xl font-medium">{userData[0].top5}</p>
-      </div>
-
-      <div class="blockdata">
-        <h3 class="text-4xl font-semibold border-b-2 border-[#da392b] w-3/4">
-          Top 10
-        </h3>
-        <p class="pl-2 text-2xl font-medium">{userData[0].top10}</p>
-      </div>
-
-      <div class="blockdata">
-        <h3 class="text-4xl font-semibold border-b-2 border-[#da392b] w-3/4">
-          Vueltas Rápidas
-        </h3>
-        <p class="pl-2 text-2xl font-medium">{userData[0].flaps}</p>
-      </div>
-
-      <div class="blockdata">
-        <h3 class="text-4xl font-semibold border-b-2 border-[#da392b] w-3/4">
-          DNF
-        </h3>
-        <p class="pl-2 text-2xl font-medium">{userData[0].dnf}</p>
-      </div>
+    <div class="blockdata">
+      <h3 class="text-4xl font-semibold border-b-2 border-[#da392b] w-3/4">
+        Steam ID
+      </h3>
+      <p class="pl-2 text-2xl font-medium">{userData[0].steam_id}</p>
     </div>
 
-    <div class = "grid grid-flow-col mt-8">
-      <a href="#" class="bg-[#0f0f0f] text-white border-[#da392b] border-2 rounded-md font-medium text-lg py-4 px-2 w-fit">Modificar Perfil</a>
-      <a href="#" class="bg-[#0f0f0f] text-white border-[#da392b] border-2 rounded-md font-medium text-lg py-4 px-2 w-fit">Modificar Contraseña</a>
+    {
+      TeamData[0]?.name === null ||
+      TeamData[0]?.name === undefined ||
+      TeamData[0]?.name === "" ? (
+        <div class="blockdata">
+          <h3 class="text-4xl font-semibold border-b-2 border-[#da392b] w-3/4">
+            Equipo
+          </h3>
+          <p class="pl-2 text-2xl font-medium">Sin Equipo</p>
+        </div>
+      ) : (
+        <div class="blockdata">
+          <h3 class="text-4xl font-semibold border-b-2 border-[#da392b] w-3/4">
+            Equipo
+          </h3>
+          <p class="pl-2 text-2xl font-medium">{TeamData[0].name}</p>
+        </div>
+      )
+    }
+  </div>
+
+  <h2 class="text-5xl font-extrabold border-b-2 border-[#da392b] w-full mt-12">
+    Estadisticas de Carrera
+  </h2>
+  <div class="grid w-11/12 grid-cols-1 my-5 lg:grid-cols-2 xl:grid-cols-3">
+    <div class="blockdata">
+      <h3 class="text-4xl font-semibold border-b-2 border-[#da392b] w-3/4">
+        Carreras
+      </h3>
+      <p class="pl-2 text-2xl font-medium">{userData[0].races}</p>
+    </div>
+
+    <div class="blockdata">
+      <h3 class="text-4xl font-semibold border-b-2 border-[#da392b] w-3/4">
+        Victorias
+      </h3>
+      <p class="pl-2 text-2xl font-medium">{userData[0].wins}</p>
+    </div>
+
+    <div class="blockdata">
+      <h3 class="text-4xl font-semibold border-b-2 border-[#da392b] w-3/4">
+        Podios
+      </h3>
+      <p class="pl-2 text-2xl font-medium">{userData[0].podiums}</p>
+    </div>
+
+    <div class="blockdata">
+      <h3 class="text-4xl font-semibold border-b-2 border-[#da392b] w-3/4">
+        Top 5
+      </h3>
+      <p class="pl-2 text-2xl font-medium">{userData[0].top5}</p>
+    </div>
+
+    <div class="blockdata">
+      <h3 class="text-4xl font-semibold border-b-2 border-[#da392b] w-3/4">
+        Top 10
+      </h3>
+      <p class="pl-2 text-2xl font-medium">{userData[0].top10}</p>
+    </div>
+
+    <div class="blockdata">
+      <h3 class="text-4xl font-semibold border-b-2 border-[#da392b] w-3/4">
+        Vueltas Rápidas
+      </h3>
+      <p class="pl-2 text-2xl font-medium">{userData[0].flaps}</p>
+    </div>
+
+    <div class="blockdata">
+      <h3 class="text-4xl font-semibold border-b-2 border-[#da392b] w-3/4">
+        DNF
+      </h3>
+      <p class="pl-2 text-2xl font-medium">{userData[0].dnf}</p>
     </div>
   </div>
 
+  <div class="grid grid-flow-col mt-8">
+    <a
+      href="/modprofile"
+      class="py-1.5 px-2 w-fit bg-[#0f0f0f] text-white border-[#da392b] border-2 rounded-md font-medium text-lg hover:bg-[#19191c]"
+      >Modificar Perfil</a
+    >
+    <a
+      href="/modpassword"
+      class="py-1.5 px-2 w-fit bg-[#0f0f0f] text-white border-[#da392b] border-2 rounded-md font-medium text-lg hover:bg-[#19191c]"
+      >Modificar Contraseña</a
+    >
+  </div>
 </Layout>

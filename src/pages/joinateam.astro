@@ -66,61 +66,59 @@ const { rows: TeamsData } = await turso.execute(
 ---
 
 <Layout title = "ESP Racing: Unirse a un equipo">
-  <div class = "pt-4 pl-3 ml-64">
-    <div class="py-4 mx-auto text-center" style="width: 99%">
-      <p class="text-5xl font-bold border-b border-[#da392b] w-fit mx-auto"
-        >Unirse a un equipo</p
-      >
-      <table class="mt-6 w-full border-collapse border border-[#f9f9f9]">
-        <thead class="font-medium bg-[#da392b]">
-          <tr>
-            <th>Nº</th>
-            <th colspan="2">Nombre</th>
-            <th>Nº Pilotos</th>
-            <th>Descripción</th>
-          </tr>
-        </thead>
-        <tbody>
-          {
-            TeamsData.map((team, index) =>
-              <tr class="bg-[#0f0f0f]">
-                <td class = "font-semibold">{index + 1}</td>
-                <td><img src={String(team.image)} alt="Avatar" class="w-8 py-1"/></td>
-                <td>{team.name}</td>
-                <td>{team.TeamMembers}</td>
-                <td>{team.description}</td>
-              </tr>
-            )
-          }
-        </tbody>
-      </table>
-    </div>
-
-    <p class="text-5xl font-bold border-b border-[#da392b] w-fit mx-auto">
-    Selecciona un equipo
-    </p>
-
-    <form action = "/api/teams/getInsideTeam"
-      method = "post"
-      class = "grid grid-flow-col"
+  <div class="py-4 mx-auto text-center" style="width: 99%">
+    <p class="text-5xl font-bold border-b border-[#da392b] w-fit mx-auto"
+      >Unirse a un equipo</p
     >
-      <select
-      id="select-team"
-      class="block m-auto w-4/5 px-4 py-3 mt-2 text-lg font-medium rounded-xl pe-9 focus:border-[#da392b] disabled:opacity-50 disabled:pointer-events-none bg-[#19191c] border-neutral-700 text-white placeholder-neutral-500"
-      >
+    <table class="mt-6 w-full border-collapse border border-[#f9f9f9]">
+      <thead class="font-medium bg-[#da392b]">
+        <tr>
+          <th>Nº</th>
+          <th colspan="2">Nombre</th>
+          <th>Nº Pilotos</th>
+          <th>Descripción</th>
+        </tr>
+      </thead>
+      <tbody>
         {
-          TeamsData.map((team) => (
-            <option value={team.id?.toString()}>{team.name}</option>
-          ))
+          TeamsData.map((team, index) =>
+            <tr class="bg-[#0f0f0f]">
+              <td class = "font-semibold">{index + 1}</td>
+              <td><img src={String(team.image)} alt="Avatar" class="w-8 py-1"/></td>
+              <td>{team.name}</td>
+              <td>{team.TeamMembers}</td>
+              <td>{team.description}</td>
+            </tr>
+          )
         }
-      </select>
-      <button
-        class="cargarselector no-underline bg-[#19191c] rounded-xl my-4 font-medium text-white text-lg py-4 px-8 block mx-auto"
-        id="btnCargarTabla"
-        type="submit"
-      >
-        Cargar Datos
-      </button>
-    </form>
+      </tbody>
+    </table>
   </div>
+
+  <p class="text-5xl font-bold border-b border-[#da392b] w-fit mx-auto">
+  Selecciona un equipo
+  </p>
+
+  <form action = "/api/teams/getInsideTeam"
+    method = "post"
+    class = "grid grid-flow-col"
+  >
+    <select
+    id="select-team"
+    class="block m-auto w-4/5 px-4 py-3 mt-2 text-lg font-medium rounded-xl pe-9 focus:border-[#da392b] disabled:opacity-50 disabled:pointer-events-none bg-[#19191c] border-neutral-700 text-white placeholder-neutral-500"
+    >
+      {
+        TeamsData.map((team) => (
+          <option value={team.id?.toString()}>{team.name}</option>
+        ))
+      }
+    </select>
+    <button
+      class="cargarselector no-underline bg-[#19191c] rounded-xl my-4 font-medium text-white text-lg py-4 px-8 block mx-auto"
+      id="btnCargarTabla"
+      type="submit"
+    >
+      Cargar Datos
+    </button>
+  </form>
 </Layout>
