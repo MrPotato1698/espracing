@@ -738,4 +738,238 @@ export const circuitlayouts: CircuitLayout[] = [
     length: 3100,
     capacity: 70,
   },
+
+  {
+    id: 83,
+    name: '2009 Layout',
+    filename: '2009',
+    circuit: 20,
+    length: 3849,
+    capacity: 43,
+  },
+
+  {
+    id: 84,
+    name: '2022 Layout',
+    filename: '2022',
+    circuit: 20,
+    length: 3849,
+    capacity: 43,
+  },
+
+  {
+    id: 85,
+    name: 'Normal',
+    filename: '',
+    circuit: 21,
+    length: 4051,
+    capacity: 38,
+  },
+
+  {
+    id: 86,
+    name: 'Versión GP',
+    filename: 'layout_gp',
+    circuit: 22,
+    length: 4428,
+    capacity: 35,
+  },
+
+  {
+    id: 87,
+    name: 'Versión Moto',
+    filename: 'layout_moto',
+    circuit: 22,
+    length: 4423,
+    capacity: 35,
+  },
+
+  {
+    id: 88,
+    name: 'Normal',
+    filename: '',
+    circuit: 23,
+    length: 4300,
+    capacity: 36,
+  },
+
+  {
+    id: 89,
+    name: 'Versión GP',
+    filename: 'layout_wec_2021',
+    circuit: 23,
+    length: 4300,
+    capacity: 36,
+  },
+
+  {
+    id: 90,
+    name: 'Versión Moto',
+    filename: 'layout_wec_2023',
+    circuit: 23,
+    length: 4300,
+    capacity: 36,
+  },
+
+  {
+    id: 91,
+    name: 'Full Circuit Chicane',
+    filename: 'chicane',
+    circuit: 24,
+    length: 4721,
+    capacity: 43,
+  },
+
+  {
+    id: 92,
+    name: 'Full Circuit',
+    filename: 'full',
+    circuit: 24,
+    length: 4723,
+    capacity: 43,
+  },
+
+  {
+    id: 93,
+    name: 'North Circuit',
+    filename: 'north',
+    circuit: 24,
+    length: 2437,
+    capacity: 30,
+  },
+
+  {
+    id: 94,
+    name: 'North Circuit Chicane',
+    filename: 'north_chicane',
+    circuit: 24,
+    length: 2435,
+    capacity: 36,
+  },
+
+  {
+    id: 95,
+    name: 'South Circuit',
+    filename: 'south',
+    circuit: 24,
+    length: 1849,
+    capacity: 21,
+  },
+
+  {
+    id: 96,
+    name: 'Bathurst',
+    filename: '',
+    circuit: 25,
+    length: 6213,
+    capacity: 36,
+  },
+
+  {
+    id: 97,
+    name: 'Indy Circuit',
+    filename: 'indy',
+    circuit: 26,
+    length: 3838,
+    capacity: 40,
+  },
+
+  {
+    id: 98,
+    name: 'Long Circuit',
+    filename: 'long',
+    circuit: 26,
+    length: 4056,
+    capacity: 40,
+  },
+
+  {
+    id: 99,
+    name: 'Nascar Circuit',
+    filename: 'nascar',
+    circuit: 26,
+    length: 3203,
+    capacity: 40,
+  },
+
+  {
+    id: 100,
+    name: 'WTCC Circuit',
+    filename: 'wtcc',
+    circuit: 26,
+    length: 4025,
+    capacity: 40,
+  },
+
+  {
+    id: 101,
+    name: 'Boot',
+    filename: 'boot',
+    circuit: 27,
+    length: 5430,
+    capacity: 43,
+  },
+
+  {
+    id: 102,
+    name: 'Boot Classic',
+    filename: 'boot_classic',
+    circuit: 27,
+    length: 5430,
+    capacity: 43,
+  },
+
+  {
+    id: 103,
+    name: 'Boot Classic Endurance',
+    filename: 'boot_classic_end',
+    circuit: 27,
+    length: 5430,
+    capacity: 43,
+  },
+
+  {
+    id: 104,
+    name: 'Boot Endurance',
+    filename: 'boot_end',
+    circuit: 27,
+    length: 5430,
+    capacity: 43,
+  },
+
+  {
+    id: 105,
+    name: 'Short',
+    filename: 'short',
+    circuit: 27,
+    length: 3950,
+    capacity: 43,
+  },
+
+  {
+    id: 106,
+    name: 'Short Classic',
+    filename: 'short_classic',
+    circuit: 27,
+    length: 3950,
+    capacity: 43,
+  },
+
+  {
+    id: 107,
+    name: 'Short Classic Endurance',
+    filename: 'short_classic_end',
+    circuit: 27,
+    length: 3950,
+    capacity: 43,
+  },
+
+  {
+    id: 108,
+    name: 'Short Endurance',
+    filename: 'short_end',
+    circuit: 27,
+    length: 3950,
+    capacity: 43,
+  },
 ]

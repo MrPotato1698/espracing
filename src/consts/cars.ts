@@ -182,4 +182,46 @@ export const cars: Car[] = [
     weight: 1050,
     description:""
   },
+
+  {
+    id: 14,
+    filename: 'Le_Mans_Nascar_Camaro',
+    brand: 'Chevrolet',
+    imgbrand: '/img/brand/chevrolet.webp',
+    model: 'Camaro Nascar Garage56',
+    year: 2023,
+    class: 'Nascar Le Mans',
+    power: 650,
+    torque: 1000,
+    weight: 1450,
+    description:"Hendrick Motorsports, socio de Chevrolet desde hace mucho tiempo, líder de todos los tiempos en campeonatos de la Copa NASCAR y victorias en carreras, fue seleccionado para formar el equipo y construir el auto de carreras Garage 56 Camaro ZL1. Los pilotos de renombre Jimmie Johnson, siete veces campeón de la Copa NASCAR; Jenson Button, Campeón del Mundo de Fórmula Uno 2009; y el múltiples veces ganador de Le Mans, Mike Rockenfeller, conducirá el Garage 56 Camaro ZL1 en Le Mans. Goodyear, el neumático oficial de NASCAR y el fabricante de neumáticos para todas las variantes del Camaro de sexta generación, proporciona neumáticos Goodyear Eagle para el auto de carreras Garage 56. El equipo de Ingeniería de Competición de Deportes de Motor de Chevrolet aportó más de dos décadas de conocimiento, experiencia y éxito en Le Mans con Corvette Racing para ayudar a optimizar el auto de carreras Garage 56. Los ingenieros de Chevrolet también están muy involucrados en lo que puede ser el aspecto más memorable del Garage 56 Camaro: el rugido gutural y totalmente estadounidense producido por el R07 Small Block V-8. El R07 sirve a los equipos Chevrolet en la NASCAR Cup Series, y la variante utilizada en Le Mans fue desarrollada y probada para maximizar el rendimiento y la durabilidad para la carrera de 24 horas. Convertir el Cup Camaro ZL1 en el auto de carreras Garage 56 requirió iluminación funcional específica, nuevos tratamientos aerodinámicos y una decoración destacada. El estudio de diseño de GM Motorsport ejecutó esta visión con la ayuda de Hendrick Motorsports para llevar las proporciones características del Camaro a la pista de carreras."
+  },
+
+  {
+    id: 15,
+    filename: '2023_Le_Mans_Nascar_Mustang',
+    brand: 'Ford',
+    imgbrand: '/img/brand/ford.webp',
+    model: 'Mustang Nascar Garage56',
+    year: 2023,
+    class: 'Nascar Le Mans',
+    power: 650,
+    torque: 1000,
+    weight: 1450,
+    description:"Mustang de resistencia para Le Mans. Este Mustang tendrá muchas de las mismas cualidades de rendimiento que el Camaro y el Camry."
+  },
+
+  {
+    id: 16,
+    filename: '2023_Le_Mans_Nascar_Camry',
+    brand: 'Toyota',
+    imgbrand: '/img/brand/toyota.webp',
+    model: 'Camry Nascar Garage56',
+    year: 2023,
+    class: 'Nascar Le Mans',
+    power: 650,
+    torque: 1000,
+    weight: 1450,
+    description:"Camry de resistencia para Le Mans. Este Camry tendrá muchas de las mismas cualidades de rendimiento que igualan tanto al Camaro original como al Mustang."
+  },
 ];

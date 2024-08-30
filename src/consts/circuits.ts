@@ -133,4 +133,60 @@ export const circuits: Circuit[] = [
     filename: 'sx_lemans',
     location: 'Le Mans, Francia',
   },
+
+  {
+    id: 20,
+    name: 'Circuito de Madrid RACE Jarama',
+    filename: 'jarama_2009',
+    location: 'Madrid, España',
+  },
+
+  {
+    id: 21,
+    name: 'Circuito de Ricardo Tormo',
+    filename: 'circuito_ricardo_tormo',
+    location: 'Cheste, España',
+  },
+
+  {
+    id: 22,
+    name: 'Circuito Angel Nieto de Jerez',
+    filename: 'jerez',
+    location: 'Jerez de la Frontera, España',
+  },
+
+  {
+    id: 23,
+    name: 'Circuito del Algarve',
+    filename: 'acf_portimao',
+    location: 'Portimao, Portugal',
+  },
+
+  {
+    id: 24,
+    name: 'Pittsburgh International Race Complex',
+    filename: 'pittrace',
+    location: 'Pittsburgh, PA, Estados Unidos',
+  },
+
+  {
+    id: 25,
+    name: 'Mount Panorama Circuit',
+    filename: 'rt_bathurst',
+    location: 'Bathurst, NSW, Australia',
+  },
+
+  {
+    id: 26,
+    name: 'Sonoma Raceway',
+    filename: 'rt_sonoma',
+    location: 'Sonoma, CA, Estados Unidos',
+  },
+
+  {
+    id: 27,
+    name: 'Watkins Glen International',
+    filename: 'lilski_watkins_glen',
+    location: 'Watkins Glen, NY, Estados Unidos',
+  },
 ]
