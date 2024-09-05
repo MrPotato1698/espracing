@@ -180,7 +180,7 @@ export const cars: Car[] = [
     power: 270,
     torque: 320,
     weight: 1050,
-    description:""
+    description: ""
   },
 
   {
@@ -194,7 +194,7 @@ export const cars: Car[] = [
     power: 650,
     torque: 1000,
     weight: 1450,
-    description:"Hendrick Motorsports, socio de Chevrolet desde hace mucho tiempo, líder de todos los tiempos en campeonatos de la Copa NASCAR y victorias en carreras, fue seleccionado para formar el equipo y construir el auto de carreras Garage 56 Camaro ZL1. Los pilotos de renombre Jimmie Johnson, siete veces campeón de la Copa NASCAR; Jenson Button, Campeón del Mundo de Fórmula Uno 2009; y el múltiples veces ganador de Le Mans, Mike Rockenfeller, conducirá el Garage 56 Camaro ZL1 en Le Mans. Goodyear, el neumático oficial de NASCAR y el fabricante de neumáticos para todas las variantes del Camaro de sexta generación, proporciona neumáticos Goodyear Eagle para el auto de carreras Garage 56. El equipo de Ingeniería de Competición de Deportes de Motor de Chevrolet aportó más de dos décadas de conocimiento, experiencia y éxito en Le Mans con Corvette Racing para ayudar a optimizar el auto de carreras Garage 56. Los ingenieros de Chevrolet también están muy involucrados en lo que puede ser el aspecto más memorable del Garage 56 Camaro: el rugido gutural y totalmente estadounidense producido por el R07 Small Block V-8. El R07 sirve a los equipos Chevrolet en la NASCAR Cup Series, y la variante utilizada en Le Mans fue desarrollada y probada para maximizar el rendimiento y la durabilidad para la carrera de 24 horas. Convertir el Cup Camaro ZL1 en el auto de carreras Garage 56 requirió iluminación funcional específica, nuevos tratamientos aerodinámicos y una decoración destacada. El estudio de diseño de GM Motorsport ejecutó esta visión con la ayuda de Hendrick Motorsports para llevar las proporciones características del Camaro a la pista de carreras."
+    description: "Hendrick Motorsports, socio de Chevrolet desde hace mucho tiempo, líder de todos los tiempos en campeonatos de la Copa NASCAR y victorias en carreras, fue seleccionado para formar el equipo y construir el auto de carreras Garage 56 Camaro ZL1. Los pilotos de renombre Jimmie Johnson, siete veces campeón de la Copa NASCAR; Jenson Button, Campeón del Mundo de Fórmula Uno 2009; y el múltiples veces ganador de Le Mans, Mike Rockenfeller, conducirá el Garage 56 Camaro ZL1 en Le Mans. Goodyear, el neumático oficial de NASCAR y el fabricante de neumáticos para todas las variantes del Camaro de sexta generación, proporciona neumáticos Goodyear Eagle para el auto de carreras Garage 56. El equipo de Ingeniería de Competición de Deportes de Motor de Chevrolet aportó más de dos décadas de conocimiento, experiencia y éxito en Le Mans con Corvette Racing para ayudar a optimizar el auto de carreras Garage 56. Los ingenieros de Chevrolet también están muy involucrados en lo que puede ser el aspecto más memorable del Garage 56 Camaro: el rugido gutural y totalmente estadounidense producido por el R07 Small Block V-8. El R07 sirve a los equipos Chevrolet en la NASCAR Cup Series, y la variante utilizada en Le Mans fue desarrollada y probada para maximizar el rendimiento y la durabilidad para la carrera de 24 horas. Convertir el Cup Camaro ZL1 en el auto de carreras Garage 56 requirió iluminación funcional específica, nuevos tratamientos aerodinámicos y una decoración destacada. El estudio de diseño de GM Motorsport ejecutó esta visión con la ayuda de Hendrick Motorsports para llevar las proporciones características del Camaro a la pista de carreras."
   },
 
   {
@@ -208,7 +208,7 @@ export const cars: Car[] = [
     power: 650,
     torque: 1000,
     weight: 1450,
-    description:"Mustang de resistencia para Le Mans. Este Mustang tendrá muchas de las mismas cualidades de rendimiento que el Camaro y el Camry."
+    description: "Mustang de resistencia para Le Mans. Este Mustang tendrá muchas de las mismas cualidades de rendimiento que el Camaro y el Camry."
   },
 
   {
@@ -222,6 +222,76 @@ export const cars: Car[] = [
     power: 650,
     torque: 1000,
     weight: 1450,
-    description:"Camry de resistencia para Le Mans. Este Camry tendrá muchas de las mismas cualidades de rendimiento que igualan tanto al Camaro original como al Mustang."
+    description: "Camry de resistencia para Le Mans. Este Camry tendrá muchas de las mismas cualidades de rendimiento que igualan tanto al Camaro original como al Mustang."
+  },
+
+  {
+    id: 17,
+    filename: 'trr_amr_vantage_gt3_evo',
+    brand: 'Aston Martin',
+    imgbrand: '/img/brand/astonmartin.webp',
+    model: 'Vantage GT3 EVO',
+    year: 2024,
+    class: 'GT3',
+    power: 447,
+    torque: 603,
+    weight: 1265,
+    description: ""
+  },
+
+  {
+    id: 18,
+    filename: 'trr_ferrari_296_gt3',
+    brand: 'Ferrari',
+    imgbrand: '/img/brand/ferrari.webp',
+    model: '296 GT3',
+    year: 2023,
+    class: 'GT3',
+    power: 477,
+    torque: 554,
+    weight: 1260,
+    description: "El Ferrari 296 GT3 es una versión de competición del 296 GTB, con mejoras que redefinen el rendimiento del coche en términos de preparación para la pista y exigencias estéticas. Fue presentado en el Circuito de Spa-Francorchamps antes de las 24 Horas de Spa de TotalEnergies. El 296 GT3 cuenta con un V-6 de 24 válvulas como el 296GTB de carretera, pero sin el motor eléctrico que lo acompaña, para cumplir con las regulaciones técnicas. Según Ferrari, el 296 GT3 produce un 20 por ciento más de carga aerodinámica que el 488 GT3 anterior. El motor está ubicado más adelante y más abajo, en una configuración de 120 grados con los turbos dentro de la V, para bajar el centro de gravedad y mejorar la rigidez torsional en comparación con el 488 GT3. El coche utiliza un chasis de aluminio completamente nuevo y tiene una distancia entre ejes ligeramente más larga que el coche de carretera para tener en cuenta las restricciones reglamentarias. El sistema de frenos también ha sido rediseñado para el GT3, ahora de 400 mm en el eje delantero. El Ferrari 296 GT3 representa el futuro del Cavallino Rampante en las carreras de GT, un sector que siempre ha sido testigo de la relación más estrecha con los clientes y de la mayor transferencia de tecnología y soluciones innovadoras a los coches de producción."
+  },
+
+  {
+    id: 19,
+    filename: 'trr_ford_mustang_gt3',
+    brand: 'Ford',
+    imgbrand: '/img/brand/ford.webp',
+    model: 'Mustang GT3',
+    year: 2024,
+    class: 'GT3',
+    power: 600,
+    torque: 628,
+    weight: 1300,
+    description: "El Ford Mustang GT3 2024 es un coche de carreras desarrollado por Ford Performance para las carreras de coches deportivos a nivel mundial. Está basado en el modelo Ford Mustang Dark Horse 2024 y se ofrece a equipos de carreras privados. El coche está propulsado por un motor V8 atmosférico de 5,4 litros basado en el Coyote desarrollado por Ford Performance y M-Sport. Este motor está listo para destrozar la pista con un rendimiento emocionante y una potencia emocionante. El Mustang GT3 cuenta con una suspensión de brazo corto-largo a medida y una caja de cambios transeje montada en la parte trasera. Los paneles de la carrocería están hechos de fibra de carbono y tiene un paquete aerodinámico único. El coche está programado para comenzar a competir a nivel mundial en 2024, con participaciones en el Campeonato Mundial de Resistencia de 2024 y las 24 Horas de Le Mans. Las primeras unidades estarán disponibles para las 24 Horas de Daytona en 2024. Ford Performance continuó su asociación con Multimatic para producir este coche de carreras de precisión. Las ventas y el servicio de este vehículo estarán a cargo de Multimatic. El coche está diseñado para ayudarte a establecer récords personales en cada vuelta."
+  },
+
+  {
+    id: 20,
+    filename: 'trr_lexus_rcf_gt3',
+    brand: 'Lexus',
+    imgbrand: '/img/brand/lexus.webp',
+    model: 'RC F GT3',
+    year: 2016,
+    class: 'GT3',
+    power: 515,
+    torque: 539,
+    weight: 1237,
+    description: "El Lexus RC F GT3 es un coche de carreras basado en el modelo de producción Lexus RC F. Cuenta con un motor V8 con más de 500 CV de potencia y una cilindrada de 5400 cc. El coche mide 4.846 mm de largo, 2.030 mm de ancho y 1.271 mm de alto, con un peso de 1.300 kg y una distancia entre ejes de 2.770 mm. La transmisión es una transeje secuencial de 6 velocidades con levas en el volante y el diseño de la tracción es 2WD. La carrocería utiliza carbono para reducir el peso y tiene formas aerodinámicas. El motor tiene un sistema de lubricación por cárter seco y está montado más abajo en el chasis que en el modelo de producción para aumentar el rendimiento en marcha. La parte trasera del coche está diseñada para producir una fuerte carga aerodinámica, con características como un alerón trasero y difusores. La cabina utiliza el mismo monocasco que el modelo de producción base e incluye una jaula antivuelco con fines de seguridad. El asiento está diseñado para una buena protección del conductor y los interruptores permiten realizar ajustes precisos en el rendimiento."
+  },
+
+  {
+    id: 21,
+    filename: 'trr_amg_evo_gt3',
+    brand: 'Mercedes-Benz',
+    imgbrand: '/img/brand/mercedes.webp',
+    model: 'AMG GT3 Evo',
+    year: 2020,
+    class: 'GT3',
+    power: 550,
+    torque: 576,
+    weight: 1160,
+    description: "El Mercedes-AMG GT3 EVO es un extraordinario vehículo de competición que se presentó en 2020 para sustituir al anterior Mercedes-AMG GT3. Cuenta con el mismo motor que su predecesor, pero con un estilo actualizado, frenos mejorados y sistemas electrónicos. Este coche es conocido por su rendimiento y fiabilidad, gracias a su motor AMG V8 de 6,3 litros y a la lubricación por cárter seco. El motor se ha colocado especialmente bajo, lo que contribuye a una conducción precisa. Los sistemas electrónicos de control de la dinámica de conducción, desde el control de tracción hasta el ABS, se han desarrollado específicamente para fines de competición. El GT3 EVO destaca en situaciones de baja velocidad, con un potente tren delantero que mantiene el coche bajo control mientras el motor proporciona un par amplio para la aceleración. A pesar de su potencia y rendimiento, la naturaleza predecible del coche lo hace adecuado para todo tipo de conductores, desde aficionados hasta profesionales. Sin embargo, cuando se configura de forma agresiva, puede convertirse en un auténtico reto, incluso para los conductores de nivel profesional."
   },
 ];

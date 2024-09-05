@@ -189,4 +189,39 @@ export const circuits: Circuit[] = [
     filename: 'lilski_watkins_glen',
     location: 'Watkins Glen, NY, Estados Unidos',
   },
+
+  {
+    id: 28,
+    name: 'Virginia International Raceway',
+    filename: 'vir',
+    location: 'Alton, VA, Estados Unidos',
+  },
+
+  {
+    id: 29,
+    name: 'Misano World Circuit Marco Simoncelli',
+    filename: 'rt_misano',
+    location: 'Misano Adriatico, Italia',
+  },
+
+  {
+    id: 30,
+    name: 'Okayama International Circuit',
+    filename: 'okayama',
+    location: 'Mimasaka, Japón',
+  },
+
+  {
+    id: 31,
+    name: 'Silverstone Circuit',
+    filename: 'ks_silverstone',
+    location: 'Silverstone, Reino Unido',
+  },
+
+  {
+    id: 32,
+    name: 'Motorsport Arena Oschersleben',
+    filename: 'tmm_oschersleben',
+    location: 'Oschersleben, Alemania',
+  },
 ]

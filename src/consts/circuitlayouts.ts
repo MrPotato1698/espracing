@@ -972,4 +972,292 @@ export const circuitlayouts: CircuitLayout[] = [
     length: 3950,
     capacity: 43,
   },
+
+  {
+    id: 109,
+    name: 'Full Course',
+    filename: 'full course',
+    circuit: 28,
+    length: 5260,
+    capacity: 33,
+  },
+
+  {
+    id: 110,
+    name: 'Short Classic Endurance',
+    filename: 'grand east course',
+    circuit: 28,
+    length: 6759,
+    capacity: 33,
+  },
+
+  {
+    id: 111,
+    name: 'Short Endurance',
+    filename: 'grand west course',
+    circuit: 28,
+    length: 6760,
+    capacity: 33,
+  },
+
+  {
+    id: 112,
+    name: 'Short Endurance',
+    filename: 'north course',
+    circuit: 28,
+    length: 3621,
+    capacity: 33,
+  },
+
+  {
+    id: 113,
+    name: 'Short Classic Endurance',
+    filename: 'patriot course',
+    circuit: 28,
+    length: 1770,
+    capacity: 10,
+  },
+
+  {
+    id: 114,
+    name: 'Short Endurance',
+    filename: 'patriot reverse course',
+    circuit: 28,
+    length: 1770,
+    capacity: 10,
+  },
+
+  {
+    id: 115,
+    name: 'Short Endurance',
+    filename: 'south course',
+    circuit: 28,
+    length: 2655,
+    capacity: 25,
+  },
+
+  {
+    id: 116,
+    name: 'Normal',
+    filename: '',
+    circuit: 29,
+    length: 4011,
+    capacity: 38,
+  },
+
+  {
+    id: 117,
+    name: 'Grand Prix',
+    filename: 'circuit_gp',
+    circuit: 30,
+    length: 3703,
+    capacity: 36,
+  },
+
+  {
+    id: 118,
+    name: 'Piper Circuit',
+    filename: 'circuit_piper',
+    circuit: 30,
+    length: 1950,
+    capacity: 36,
+  },
+
+  {
+    id: 119,
+    name: 'Drift Circuit',
+    filename: 'circuit_piper_drift',
+    circuit: 30,
+    length: 800,
+    capacity: 24,
+  },
+
+  {
+    id: 120,
+    name: 'Classic',
+    filename: 'classic',
+    circuit: 31,
+    length: 5040,
+    capacity: 24,
+  },
+
+  {
+    id: 121,
+    name: 'GP',
+    filename: 'gp',
+    circuit: 31,
+    length: 5901,
+    capacity: 24,
+  },
+
+  {
+    id: 122,
+    name: 'GP OSRW',
+    filename: 'gp_osrw',
+    circuit: 31,
+    length: 5901,
+    capacity: 32,
+  },
+
+  {
+    id: 123,
+    name: 'GP Wet',
+    filename: 'gp_wet',
+    circuit: 31,
+    length: 5901,
+    capacity: 32,
+  },
+
+  {
+    id: 124,
+    name: 'Historic Original Pits',
+    filename: 'historic_orig',
+    circuit: 31,
+    length: 5800,
+    capacity: 32,
+  },
+
+  {
+    id: 125,
+    name: 'Historic Wing Pits',
+    filename: 'historic_wing',
+    circuit: 31,
+    length: 5801,
+    capacity: 32,
+  },
+
+  {
+    id: 126,
+    name: 'International Layout',
+    filename: 'international',
+    circuit: 31,
+    length: 3619,
+    capacity: 24,
+  },
+
+  {
+    id: 127,
+    name: 'International OSRW',
+    filename: 'international_osrw',
+    circuit: 31,
+    length: 3619,
+    capacity: 32,
+  },
+
+  {
+    id: 128,
+    name: 'International Wet',
+    filename: 'international_wet',
+    circuit: 31,
+    length: 3619,
+    capacity: 32,
+  },
+
+  {
+    id: 129,
+    name: 'National Layout',
+    filename: 'national',
+    circuit: 31,
+    length: 2638,
+    capacity: 24,
+  },
+
+  {
+    id: 130,
+    name: 'National OSRW',
+    filename: 'national_osrw',
+    circuit: 31,
+    length: 2638,
+    capacity: 32,
+  },
+
+  {
+    id: 131,
+    name: 'National Wet',
+    filename: 'national_wet',
+    circuit: 31,
+    length: 2638,
+    capacity: 32,
+  },
+
+  {
+    id: 132,
+    name: 'Reverse GP',
+    filename: 'reverse_gp',
+    circuit: 31,
+    length: 5901,
+    capacity: 36,
+  },
+
+  {
+    id: 133,
+    name: 'Reverse International',
+    filename: 'reverse_international',
+    circuit: 31,
+    length: 3619,
+    capacity: 36,
+  },
+
+  {
+    id: 134,
+    name: 'Reverse National',
+    filename: 'reverse_national',
+    circuit: 31,
+    length: 2638,
+    capacity: 27,
+  },
+
+  {
+    id: 135,
+    name: 'F1 2021',
+    filename: 'silverstone_f1_2021',
+    circuit: 31,
+    length: 5901,
+    capacity: 40,
+  },
+
+  {
+    id: 136,
+    name: 'F1 2022',
+    filename: 'silvestone_f1_2022',
+    circuit: 31,
+    length: 5901,
+    capacity: 40,
+  },
+
+  {
+    id: 137,
+    name: 'Stowe',
+    filename: 'stowe',
+    circuit: 31,
+    length: 1691,
+    capacity: 16,
+  },
+
+  {
+    id: 138,
+    name: 'Club',
+    filename: 'layout_club',
+    circuit: 32,
+    length: 2600,
+    capacity: 40,
+  },
+
+  {
+    id: 139,
+    name: 'GP',
+    filename: 'layout_gp',
+    circuit: 32,
+    length: 3696,
+    capacity: 40,
+  },
+
+  {
+    id: 140,
+    name: 'Moto',
+    filename: 'layout_mt',
+    circuit: 32,
+    length: 3668,
+    capacity: 40,
+  },
 ]
