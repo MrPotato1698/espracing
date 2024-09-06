@@ -8,13 +8,12 @@ if (btnCargaTabla) {
 }
 
 async function cargarJSON() {
-    console.log('Dentro de funcion cargarJSON');
     const opciones = document.querySelector('#select-champs');
 
     //console.log((opciones as HTMLSelectElement)?.value);
-    var ruta = 'http://es2.assettohosting.com:10018/results/download/' + (opciones as HTMLSelectElement)?.value + '.json';
+    var ruta = 'https://es2.assettohosting.com:10018/results/download/' + (opciones as HTMLSelectElement)?.value + '.json';
     //var ruta = '../../testRace3.json';
-    console.log(ruta);
+    //console.log(ruta);
 
     await fetch(ruta, {
         method: "GET",
