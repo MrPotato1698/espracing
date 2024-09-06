@@ -1,0 +1,207 @@
+---
+import Layout from "@/layouts/ProfileLayout.astro";
+import { supabase } from "@/lib/supabase";
+import { turso } from "@/turso";
+import Open from "@/icons/Open.astro";
+import Readed from "@/icons/Marked.astro";
+import Unreaded from "@/icons/NoMark.astro";
+import Trash from "@/icons/Trash.astro";
+
+const { cookies, redirect } = Astro;
+
+const accessToken = cookies.get("sb-access-token");
+const refreshToken = cookies.get("sb-refresh-token");
+
+if (!accessToken || !refreshToken) {
+  return redirect("/login");
+}
+
+// Set the session with the cookies
+const { data: dataAuth, error: errorAuth } = await supabase.auth.setSession({
+  refresh_token: refreshToken.value,
+  access_token: accessToken.value,
+});
+
+// If there is an error, delete the cookies and redirect to login
+if (errorAuth) {
+  cookies.delete("sb-access-token", {
+    path: "/",
+  });
+  cookies.delete("sb-refresh-token", {
+    path: "/",
+  });
+
+  return redirect("/login");
+}
+
+const id = dataAuth?.user?.id || "";
+const email = dataAuth?.user?.email || "";
+
+// Asign ID to user in Turso if it doesn't exist
+const emailSearchQuery = await turso.execute({
+  sql: "SELECT id FROM User WHERE email = ?",
+  args: [email],
+});
+
+const idSearch = emailSearchQuery.rows[0].email;
+
+if (idSearch === undefined || idSearch === null) {
+  const transaction = await turso.transaction("write");
+  await transaction.execute({
+    sql: "UPDATE User SET id = ? WHERE email = ?",
+    args: [id, email],
+  });
+  await transaction.commit();
+}
+
+// Get user data
+const { rows: MessageListData } = await turso.execute({
+  sql: "SELECT id, name_emissor, readed FROM Message WHERE name_receiver = ?",
+  args: [email],
+});
+---
+
+<Layout title="ESP Racing: Bandeja de Mensajes">
+  <div class="mr-auto text-center">
+    <p2 class="text-5xl font-bold border-b border-[#da392b] w-fit mx-auto"
+      >Bandeja de Mensajes</p2
+    >
+    <table class="mt-6 w-full border-collapse border border-[#f9f9f9]">
+      <thead class="font-medium bg-[#da392b]">
+        <tr>
+          <th>Nº</th>
+          <th>Emisor</th>
+          <th>Abrir</th>
+          <th>Cambiar Leido</th>
+          <th>Eliminar</th>
+        </tr>
+      </thead>
+      <tbody>
+        {
+          MessageListData.map((msg, index) => (
+            <tr class="">
+              <td class="font-semibold">
+                <a href={`/message/${msg.id}`}>{index + 1}</a>
+              </td>
+              <td>{msg.name_emissor}</td>
+              <td>
+                <a href={`/message/${msg.id}`}>
+                  <Open moreClass="w-6 text-center mx-auto" />
+                </a>
+              </td>
+
+              <td>
+                <button class = "align-middle change-status" data-id={msg.id} data-readed={msg.readed}>
+                  {msg.readed === 1 ? (
+                    <Unreaded moreClass="w-6 text-center mx-auto" />
+                  ) : (
+                    <Readed moreClass="w-6 text-center mx-auto" />
+                  )}
+                </button>
+              </td>
+
+              <td>
+                <button class="align-middle delete-message" data-id={msg.id}>
+                  <Trash moreClass="w-6 text-center mx-auto" />
+                </button>
+              </td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+</Layout>
+
+<style>
+  tbody tr:nth-child(odd) {
+    background-color: #0f0f0f;
+  }
+
+  tbody tr:nth-child(even) {
+    background-color: #19191c;
+  }
+</style>
+
+<script is:inline data-astro-rerun>
+  document.addEventListener('astro:page-load', () => {
+    const changeStatusButtons = document.querySelectorAll('.change-status');
+    const deleteButtons = document.querySelectorAll('.delete-message');
+
+    changeStatusButtons.forEach(button => {
+      button.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const id = button.getAttribute('data-id');
+        const currentReaded = button.getAttribute('data-readed');
+        const newReaded = currentReaded === '1' ? '0' : '1';
+
+        try {
+          const response = await fetch('/api/messages/changeReaded', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ id, readed: newReaded }),
+          });
+
+          if (response.ok) {
+            // Update UI
+            button.setAttribute('data-readed', newReaded);
+            const icon = button.querySelector('svg');
+            if (newReaded === '1') {
+              if (icon) {
+                icon.outerHTML = '<Unreaded moreClass="w-6 text-center mx-auto" />';
+              }
+            } else {
+              if (icon) {
+                icon.outerHTML = '<Readed moreClass="w-6 text-center mx-auto" />';
+              }
+            }
+            const closestTr = button.closest('tr');
+            if (closestTr) {
+              closestTr.classList.toggle('read');
+              closestTr.classList.toggle('unread');
+            }
+            window.location.reload();
+          } else {
+            console.error('Error updating message status');
+          }
+        } catch (error) {
+          console.error('Error:', error);
+        }
+      });
+    });
+
+    deleteButtons.forEach(button => {
+      button.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const id = button.getAttribute('data-id');
+
+        if (confirm('¿Estás seguro de que quieres eliminar este mensaje?')) {
+          try {
+            const response = await fetch('/api/messages/deleteMsg', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ id }),
+            });
+
+            if (response.ok) {
+              // Remove the row from the table
+              const closestTr = button.closest('tr');
+              if (closestTr) {
+                closestTr.remove();
+              }
+              window.location.reload();
+            } else {
+              console.error('Error deleting message');
+            }
+          } catch (error) {
+            console.error('Error:', error);
+          }
+        }
+      });
+    });
+  });
+
+</script>

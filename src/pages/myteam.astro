@@ -1,0 +1,134 @@
+---
+import Layout from "@/layouts/ProfileLayout.astro";
+import { supabase } from "@/lib/supabase";
+import { turso } from '@/turso';
+
+const { cookies, redirect } = Astro;
+
+const accessToken = cookies.get("sb-access-token");
+const refreshToken = cookies.get("sb-refresh-token");
+
+if (!accessToken || !refreshToken) {
+  return redirect("/login");
+}
+
+// Set the session with the cookies
+const { data: dataAuth, error: errorAuth } = await supabase.auth.setSession({
+  refresh_token: refreshToken.value,
+  access_token: accessToken.value,
+});
+
+// If there is an error, delete the cookies and redirect to login
+if (errorAuth) {
+  cookies.delete("sb-access-token", {
+    path: "/",
+  });
+  cookies.delete("sb-refresh-token", {
+    path: "/",
+  });
+
+  return redirect("/login");
+}
+
+const id = dataAuth?.user?.id || "";
+const email = dataAuth?.user?.email || "";
+const role = dataAuth?.user?.role || "";
+
+// Asign ID to user in Turso if it doesn't exist
+const emailSearchQuery = await turso.execute({
+  sql: 'SELECT id FROM User WHERE email = ?',
+  args: [email],
+});
+
+const idSearch = emailSearchQuery.rows[0].email;
+
+if(idSearch === undefined || idSearch === null) {
+  const transaction = await turso.transaction("write");
+  await transaction.execute({
+    sql: 'UPDATE User SET id = ? WHERE email = ?',
+    args: [id, email],
+  });
+  await transaction.commit();
+}
+
+// Get user data
+const { rows: TeamData } = await turso.execute({
+  sql: 'SELECT T.name, T.id, T.description, T.image FROM User AS U RIGHT JOIN Team AS T WHERE U.id = ? AND U.team = T.id',
+  args: [id],
+});
+
+let idTeam;
+
+if(TeamData === null || TeamData === undefined || TeamData.length === 0) {
+  return redirect("/joinateam");
+} else {
+  idTeam = TeamData[0].id;
+}
+
+const { rows: TeamUsersData } = await turso.execute({
+  sql: 'SELECT U.name, U.races, U.wins, U.podiums, U.top5, U.top10, U.image, U.number_plate, U.poles FROM User AS U FULL OUTER JOIN Team AS T ON U.Team = T.id WHERE T.id = ?',
+  args: [idTeam],
+});
+
+---
+
+<Layout title = "ESP Racing: Mi Equipo">
+  <h2 class = "text-5xl font-extrabold border-b-2 border-[#da392b] w-full">Mi Equipo</h2>
+
+  <img src ={String(TeamData[0].image)} alt = "Avatar" class = "w-20 pt-5"/>
+  <div class = "grid w-11/12 grid-cols-1 my-5">
+      <div class = "mb-2">
+      <h3 class = "text-4xl font-semibold border-b-2 border-[#da392b] w-3/4">Nombre</h3>
+      <p class = "pl-2 text-2xl font-medium">{TeamData[0].name}</p>
+    </div>
+
+  <h2 class = "w-full mt-12 text-5xl font-extrabold"></h2>
+  <div class="grid w-11/12 grid-cols-1 my-5">
+    <div class = "blockdata">
+      <h3 class = "text-4xl font-semibold border-b-2 border-[#da392b] w-3/4">Descripción</h3>
+      <p class = "pl-2 text-2xl font-medium">{TeamData[0].description}</p>
+    </div>
+  </div>
+
+  <div class="py-4 mx-auto text-center" style="width: 99%">
+    <p2 class="text-5xl font-bold border-b border-[#da392b] w-fit mx-auto"
+      >Tabla de Pilotos</p2
+    >
+    <table class="mt-6 w-full border-collapse border border-[#f9f9f9]">
+      <thead class="font-medium bg-[#da392b]">
+        <tr>
+          <th>Nº</th>
+          <th>Nombre</th>
+          <th>Carreras</th>
+          <th>Victorias</th>
+          <th>Podios</th>
+          <th>Poles</th>
+          <th>Top 5</th>
+          <th>Top 10</th>
+        </tr>
+      </thead>
+      <tbody>
+        {
+          TeamUsersData.map((user, index) => (
+            <tr class="bg-[#19191c]">
+              <td class="font-semibold">{index + 1}</td>
+              {user.number_plate === null || user.number_plate === 0 ? (
+                <td>#0 - {user.name}</td>
+              ) : (
+                <td>
+                  #{user.number_plate} - {user.name}
+                </td>
+              )}
+              <td>{user.races}</td>
+              <td>{user.wins}</td>
+              <td>{user.podiums}</td>
+              <td>{user.poles}</td>
+              <td>{user.top5}</td>
+              <td>{user.top10}</td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </div>
+</Layout>

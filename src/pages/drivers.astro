@@ -3,7 +3,7 @@ import Layout from "@/layouts/NormalLayout.astro";
 import { turso } from "@/turso";
 
 const { rows: UsersData } = await turso.execute(
-  "SELECT DISTINCT U.name AS UserName, U.number_plate, U.races, U.wins, U.podiums, U.flaps, U.poles, U.top5, U.top10, U.dnf, T.name AS TeamName FROM User AS U INNER JOIN Team AS T ON U.team = T.id ORDER BY U.number_plate ASC"
+  "SELECT DISTINCT U.image, U.name AS UserName, U.number_plate, U.races, U.wins, U.podiums, U.flaps, U.poles, U.top5, U.top10, U.dnf, T.name AS TeamName FROM User AS U LEFT JOIN Team AS T ON U.team = T.id ORDER BY U.races DESC"
 );
 ---
 
@@ -30,39 +30,40 @@ const { rows: UsersData } = await turso.execute(
       </thead>
       <tbody>
         {
-          UsersData.map((user, index) =>
-            index % 2 === 0 ? (
-              <tr class="bg-[#0f0f0f]">
-                <td class = "font-semibold">{index + 1}</td>
-                <td>#{user.number_plate} - {user.UserName}</td>
-                <td>{user.TeamName}</td>
-                <td>{user.races}</td>
-                <td>{user.wins}</td>
-                <td>{user.podiums}</td>
-                <td>{user.flaps}</td>
-                <td>{user.poles}</td>
-                <td>{user.top5}</td>
-                <td>{user.top10}</td>
-                <td>{user.dnf}</td>
-              </tr>
-            ) : (
-              <tr class="bg-[#19191c]">
-                <td class = "font-semibold">{index + 1}</td>
-                <td>{user.UserName}</td>
-                <td>{user.TeamName}</td>
-                <td>{user.races}</td>
-                <td>{user.wins}</td>
-                <td>{user.podiums}</td>
-                <td>{user.flaps}</td>
-                <td>{user.poles}</td>
-                <td>{user.top5}</td>
-                <td>{user.top10}</td>
-                <td>{user.dnf}</td>
-              </tr>
-            )
-          )
+          UsersData.map((user, index) => (
+            <tr class="bg-[#19191c]">
+              <td class="font-semibold">{index + 1}</td>
+              <td><img src={String(user.image)} alt="Avatar" class="w-8 py-1 rounded-full"/></td>
+              {user.number_plate === null || user.number_plate === 0 ? (
+                <td>#0 - {user.UserName}</td>
+              ) : (
+                <td>
+                  #{user.number_plate} - {user.UserName}
+                </td>
+              )}
+              <td>{user.TeamName}</td>
+              <td>{user.races}</td>
+              <td>{user.wins}</td>
+              <td>{user.podiums}</td>
+              <td>{user.flaps}</td>
+              <td>{user.poles}</td>
+              <td>{user.top5}</td>
+              <td>{user.top10}</td>
+              <td>{user.dnf}</td>
+            </tr>
+          ))
         }
       </tbody>
     </table>
   </div>
 </Layout>
+
+<style>
+  tbody tr:nth-child(odd) {
+    background-color: #0f0f0f;
+  }
+
+  tbody tr:nth-child(even) {
+    background-color: #19191c;
+  }
+</style>

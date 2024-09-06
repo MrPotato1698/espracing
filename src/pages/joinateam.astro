@@ -1,0 +1,124 @@
+---
+import Layout from "@/layouts/ProfileLayout.astro";
+import { supabase } from "@/lib/supabase";
+import { turso } from '@/turso';
+
+const { cookies, redirect } = Astro;
+
+const accessToken = cookies.get("sb-access-token");
+const refreshToken = cookies.get("sb-refresh-token");
+
+if (!accessToken || !refreshToken) {
+  return redirect("/login");
+}
+
+// Set the session with the cookies
+const { data: dataAuth, error: errorAuth } = await supabase.auth.setSession({
+  refresh_token: refreshToken.value,
+  access_token: accessToken.value,
+});
+
+// If there is an error, delete the cookies and redirect to login
+if (errorAuth) {
+  cookies.delete("sb-access-token", {
+    path: "/",
+  });
+  cookies.delete("sb-refresh-token", {
+    path: "/",
+  });
+
+  return redirect("/login");
+}
+
+const id = dataAuth?.user?.id || "";
+const email = dataAuth?.user?.email || "";
+
+// Asign ID to user in Turso if it doesn't exist
+const emailSearchQuery = await turso.execute({
+  sql: 'SELECT id FROM User WHERE email = ?',
+  args: [email],
+});
+
+const idSearch = emailSearchQuery.rows[0].email;
+
+if(idSearch === undefined || idSearch === null) {
+  const transaction = await turso.transaction("write");
+  await transaction.execute({
+    sql: 'UPDATE User SET id = ? WHERE email = ?',
+    args: [id, email],
+  });
+  await transaction.commit();
+}
+
+// Get user data
+const { rows: TeamData } = await turso.execute({
+  sql: 'SELECT T.name, T.id, T.description, T.image FROM User AS U RIGHT JOIN Team AS T WHERE U.id = ? AND U.team = T.id',
+  args: [id],
+});
+
+if(TeamData.length > 0) {
+  return redirect("/joinateam");
+}
+
+const { rows: TeamsData } = await turso.execute(
+  "SELECT T.name, COUNT (U.team) AS TeamMembers, T.description, T.image FROM User AS U RIGHT JOIN Team AS T ON T.id = U.team GROUP BY T.name"
+);
+---
+
+<Layout title = "ESP Racing: Unirse a un equipo">
+  <div class="py-4 mx-auto text-center" style="width: 99%">
+    <p class="text-5xl font-bold border-b border-[#da392b] w-fit mx-auto"
+      >Unirse a un equipo</p
+    >
+    <table class="mt-6 w-full border-collapse border border-[#f9f9f9]">
+      <thead class="font-medium bg-[#da392b]">
+        <tr>
+          <th>Nº</th>
+          <th colspan="2">Nombre</th>
+          <th>Nº Pilotos</th>
+          <th>Descripción</th>
+        </tr>
+      </thead>
+      <tbody>
+        {
+          TeamsData.map((team, index) =>
+            <tr class="bg-[#0f0f0f]">
+              <td class = "font-semibold">{index + 1}</td>
+              <td><img src={String(team.image)} alt="Avatar" class="w-8 py-1"/></td>
+              <td>{team.name}</td>
+              <td>{team.TeamMembers}</td>
+              <td>{team.description}</td>
+            </tr>
+          )
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <p class="text-5xl font-bold border-b border-[#da392b] w-fit mx-auto">
+  Selecciona un equipo
+  </p>
+
+  <form action = "/api/teams/getInsideTeam"
+    method = "post"
+    class = "grid grid-flow-col"
+  >
+    <select
+    id="select-team"
+    class="block m-auto w-4/5 px-4 py-3 mt-2 text-lg font-medium rounded-xl pe-9 focus:border-[#da392b] disabled:opacity-50 disabled:pointer-events-none bg-[#19191c] border-neutral-700 text-white placeholder-neutral-500"
+    >
+      {
+        TeamsData.map((team) => (
+          <option value={team.id?.toString()}>{team.name}</option>
+        ))
+      }
+    </select>
+    <button
+      class="cargarselector no-underline bg-[#19191c] rounded-xl my-4 font-medium text-white text-lg py-4 px-8 block mx-auto"
+      id="btnCargarTabla"
+      type="submit"
+    >
+      Cargar Datos
+    </button>
+  </form>
+</Layout>
