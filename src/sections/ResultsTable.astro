@@ -28,11 +28,19 @@ const { rows: RacesData } = await turso.execute(
 <div class="container mx-auto">
   <div class="section">
     <button
-      class="cargarselector no-underline bg-[#19191c] rounded-xl my-4 font-medium text-white text-lg py-4 px-8 block mx-auto"
+      class="no-underline bg-[#19191c] rounded-xl my-4 font-medium text-white text-lg py-4 px-8 block mx-auto"
       id="btnCargarTabla"
     >
       Cargar Datos
     </button>
+
+    <!-- <button
+      class="no-underline bg-[#19191c] rounded-xl my-4 font-medium text-white text-lg py-4 px-8 block mx-auto"
+      id="btnCargarTabla"
+    >
+      Cargar Datos
+    </button>
+    <pre id="'jsonOutput"></pre> -->
 
     <div id="resultado2"></div>
 
@@ -42,7 +50,7 @@ const { rows: RacesData } = await turso.execute(
           <th>Pos</th>
           <th>Nombre</th>
           <th>Equipo</th>
-          <th colspan="2" =>Coche</th>
+          <th colspan="2">Coche</th>
           <th colspan="2">Gain/Lost</th>
           <th>Tiempo Total</th>
           <th>Nº Vueltas</th>
@@ -54,7 +62,6 @@ const { rows: RacesData } = await turso.execute(
       </thead>
       <tbody id="resultado" class="font-normal"> </tbody>
     </table>
-
   </div>
 </div>
 
@@ -65,12 +72,12 @@ const { rows: RacesData } = await turso.execute(
 
   &::-ms-expand {
     display: none;
-}
+  }
 
-/* Remove focus outline */
-&:focus {
+  /* Remove focus outline */
+  &:focus {
     outline: none;
-}
+  }
   td {
     text-align: center;
   }
@@ -89,3 +96,33 @@ const { rows: RacesData } = await turso.execute(
 </style>
 
 <script src="../pages/api/raceresults/results.ts"></script>
+<!-- <script>
+console.log("Cargando tabla de resultados");
+
+  const btnCargarTabla = document.getElementById("btnCargarTabla");
+  const output = document.getElementById("jsonOutput");
+
+
+  btnCargarTabla.addEventListener("click", async () => {
+    try{
+      btnCargarTabla.disabled = true;
+      btnCargarTabla.textContent = 'Cargando...';
+
+      const response = await fetch('../pages/api/raceresults/simresultsCSV.ts');
+      if(!response.ok){
+        throw new Error('Error al obtener los datos');
+      }
+      const output = await response.json();
+      console.log(output);
+
+      //output.textContent = JSON.stringify(data, null, 2);
+
+    }catch(error){
+      console.error('Error al obtener los datos: ',error);
+      output.textContent = 'Error al procesar los datos';
+    }finally{
+      btnCargarTabla.disabled = false;
+      btnCargarTabla.textContent = 'Cargar Datos';
+    }
+  });
+</script> -->
