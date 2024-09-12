@@ -50,7 +50,7 @@ if(idSearch === undefined || idSearch === null) {
   await transaction.commit();
 }
 
-// Get user data
+// Get team data
 const { rows: TeamData } = await turso.execute({
   sql: 'SELECT T.name, T.id, T.description, T.image FROM User AS U RIGHT JOIN Team AS T WHERE U.id = ? AND U.team = T.id',
   args: [id],
@@ -60,8 +60,9 @@ if(TeamData.length > 0) {
   return redirect("/joinateam");
 }
 
+// Get every teams data
 const { rows: TeamsData } = await turso.execute(
-  "SELECT T.name, COUNT (U.team) AS TeamMembers, T.description, T.image FROM User AS U RIGHT JOIN Team AS T ON T.id = U.team GROUP BY T.name"
+  "SELECT T.name, COUNT (U.team) AS TeamMembers, T.description, T.image, T.id FROM User AS U RIGHT JOIN Team AS T ON T.id = U.team GROUP BY T.name"
 );
 ---
 
@@ -105,6 +106,7 @@ const { rows: TeamsData } = await turso.execute(
   >
     <select
     id="select-team"
+    name="select_team"
     class="block m-auto w-4/5 px-4 py-3 mt-2 text-lg font-medium rounded-xl pe-9 focus:border-[#da392b] disabled:opacity-50 disabled:pointer-events-none bg-[#19191c] border-neutral-700 text-white placeholder-neutral-500"
     >
       {
@@ -113,8 +115,9 @@ const { rows: TeamsData } = await turso.execute(
         ))
       }
     </select>
+    <input type="hidden" name="user_id" value={id}>
     <button
-      class="cargarselector no-underline bg-[#19191c] rounded-xl my-4 font-medium text-white text-lg py-4 px-8 block mx-auto"
+      class="cargarselector no-underline bg-[#19191c] rounded-xl my-4 font-medium text-white text-lg py-4 px-8 block mx-auto mt-2"
       id="btnCargarTabla"
       type="submit"
     >
