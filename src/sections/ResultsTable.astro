@@ -28,8 +28,8 @@ const { rows: RacesData } = await turso.execute(
 <div class="container mx-auto">
   <div class="section">
     <button
-      class="no-underline bg-[#19191c] rounded-xl my-4 font-medium text-white text-lg py-4 px-8 block mx-auto"
-      id="btnCargarTabla"
+      id="loadButton"
+      class="no-underline bg-[#19191c] rounded-xl my-4 font-medium text-white text-lg py-4 px-8 block mx-auto hover:text-[#0f0f0f] hover:bg-[#da392b]"
     >
       Cargar Datos
     </button>
@@ -43,27 +43,13 @@ const { rows: RacesData } = await turso.execute(
     <pre id="'jsonOutput"></pre> -->
 
     <div id="resultado2"></div>
-
-    <table class="w-full border-collapse border border-[#f9f9f9]">
-      <thead class="font-medium bg-[#da392b]">
-        <tr class="tabletitle">
-          <th>Pos</th>
-          <th>Nombre</th>
-          <th>Equipo</th>
-          <th colspan="2">Coche</th>
-          <th colspan="2">Gain/Lost</th>
-          <th>Tiempo Total</th>
-          <th>Nº Vueltas</th>
-          <th>Vuelta Rápida</th>
-          <th>Media Vueltas</th>
-          <th>Golpes</th>
-          <th>Lastres</th>
-        </tr>
-      </thead>
-      <tbody id="resultado" class="font-normal"> </tbody>
-    </table>
+    <div id="resultado"></div>
   </div>
 </div>
+
+<script>
+  import "@/pages/api/raceresults/results.ts"
+</script>
 
 <style>
   .container {
@@ -94,35 +80,3 @@ const { rows: RacesData } = await turso.execute(
     background-color: "#19191c";
   }
 </style>
-
-<script src="../pages/api/raceresults/results.ts"></script>
-<!-- <script>
-console.log("Cargando tabla de resultados");
-
-  const btnCargarTabla = document.getElementById("btnCargarTabla");
-  const output = document.getElementById("jsonOutput");
-
-
-  btnCargarTabla.addEventListener("click", async () => {
-    try{
-      btnCargarTabla.disabled = true;
-      btnCargarTabla.textContent = 'Cargando...';
-
-      const response = await fetch('../pages/api/raceresults/simresultsCSV.ts');
-      if(!response.ok){
-        throw new Error('Error al obtener los datos');
-      }
-      const output = await response.json();
-      console.log(output);
-
-      //output.textContent = JSON.stringify(data, null, 2);
-
-    }catch(error){
-      console.error('Error al obtener los datos: ',error);
-      output.textContent = 'Error al procesar los datos';
-    }finally{
-      btnCargarTabla.disabled = false;
-      btnCargarTabla.textContent = 'Cargar Datos';
-    }
-  });
-</script> -->
