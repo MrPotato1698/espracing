@@ -763,11 +763,29 @@ export const circuitlayouts: CircuitLayout[] = [
     filename: '',
     circuit: 21,
     length: 4051,
-    capacity: 38,
+    capacity: 45,
   },
 
   {
     id: 86,
+    name: 'GP',
+    filename: 'gp',
+    circuit: 21,
+    length: 4005,
+    capacity: 45,
+  },
+
+  {
+    id: 87,
+    name: 'Nacional',
+    filename: 'national',
+    circuit: 21,
+    length: 3099,
+    capacity: 45,
+  },
+
+  {
+    id: 88,
     name: 'Versión GP',
     filename: 'layout_gp',
     circuit: 22,
@@ -776,7 +794,7 @@ export const circuitlayouts: CircuitLayout[] = [
   },
 
   {
-    id: 87,
+    id: 89,
     name: 'Versión Moto',
     filename: 'layout_moto',
     circuit: 22,
@@ -785,7 +803,7 @@ export const circuitlayouts: CircuitLayout[] = [
   },
 
   {
-    id: 88,
+    id: 90,
     name: 'Normal',
     filename: '',
     circuit: 23,
@@ -794,7 +812,7 @@ export const circuitlayouts: CircuitLayout[] = [
   },
 
   {
-    id: 89,
+    id: 91,
     name: 'Versión GP',
     filename: 'layout_wec_2021',
     circuit: 23,
@@ -803,7 +821,7 @@ export const circuitlayouts: CircuitLayout[] = [
   },
 
   {
-    id: 90,
+    id: 92,
     name: 'Versión Moto',
     filename: 'layout_wec_2023',
     circuit: 23,
@@ -812,7 +830,7 @@ export const circuitlayouts: CircuitLayout[] = [
   },
 
   {
-    id: 91,
+    id: 93,
     name: 'Full Circuit Chicane',
     filename: 'chicane',
     circuit: 24,
@@ -821,7 +839,7 @@ export const circuitlayouts: CircuitLayout[] = [
   },
 
   {
-    id: 92,
+    id: 94,
     name: 'Full Circuit',
     filename: 'full',
     circuit: 24,
@@ -830,7 +848,7 @@ export const circuitlayouts: CircuitLayout[] = [
   },
 
   {
-    id: 93,
+    id: 95,
     name: 'North Circuit',
     filename: 'north',
     circuit: 24,
@@ -839,7 +857,7 @@ export const circuitlayouts: CircuitLayout[] = [
   },
 
   {
-    id: 94,
+    id: 96,
     name: 'North Circuit Chicane',
     filename: 'north_chicane',
     circuit: 24,
@@ -848,7 +866,7 @@ export const circuitlayouts: CircuitLayout[] = [
   },
 
   {
-    id: 95,
+    id: 97,
     name: 'South Circuit',
     filename: 'south',
     circuit: 24,
@@ -857,7 +875,7 @@ export const circuitlayouts: CircuitLayout[] = [
   },
 
   {
-    id: 96,
+    id: 98,
     name: 'Bathurst',
     filename: '',
     circuit: 25,
@@ -866,7 +884,7 @@ export const circuitlayouts: CircuitLayout[] = [
   },
 
   {
-    id: 97,
+    id: 99,
     name: 'Indy Circuit',
     filename: 'indy',
     circuit: 26,
@@ -875,7 +893,7 @@ export const circuitlayouts: CircuitLayout[] = [
   },
 
   {
-    id: 98,
+    id: 100,
     name: 'Long Circuit',
     filename: 'long',
     circuit: 26,
@@ -884,7 +902,7 @@ export const circuitlayouts: CircuitLayout[] = [
   },
 
   {
-    id: 99,
+    id: 101,
     name: 'Nascar Circuit',
     filename: 'nascar',
     circuit: 26,
@@ -893,7 +911,7 @@ export const circuitlayouts: CircuitLayout[] = [
   },
 
   {
-    id: 100,
+    id: 102,
     name: 'WTCC Circuit',
     filename: 'wtcc',
     circuit: 26,
@@ -902,7 +920,7 @@ export const circuitlayouts: CircuitLayout[] = [
   },
 
   {
-    id: 101,
+    id: 103,
     name: 'Boot',
     filename: 'boot',
     circuit: 27,
@@ -911,7 +929,7 @@ export const circuitlayouts: CircuitLayout[] = [
   },
 
   {
-    id: 102,
+    id: 104,
     name: 'Boot Classic',
     filename: 'boot_classic',
     circuit: 27,
@@ -920,7 +938,7 @@ export const circuitlayouts: CircuitLayout[] = [
   },
 
   {
-    id: 103,
+    id: 105,
     name: 'Boot Classic Endurance',
     filename: 'boot_classic_end',
     circuit: 27,
@@ -929,7 +947,7 @@ export const circuitlayouts: CircuitLayout[] = [
   },
 
   {
-    id: 104,
+    id: 106,
     name: 'Boot Endurance',
     filename: 'boot_end',
     circuit: 27,
@@ -938,7 +956,7 @@ export const circuitlayouts: CircuitLayout[] = [
   },
 
   {
-    id: 105,
+    id: 107,
     name: 'Short',
     filename: 'short',
     circuit: 27,
@@ -947,7 +965,7 @@ export const circuitlayouts: CircuitLayout[] = [
   },
 
   {
-    id: 106,
+    id: 108,
     name: 'Short Classic',
     filename: 'short_classic',
     circuit: 27,
@@ -956,7 +974,7 @@ export const circuitlayouts: CircuitLayout[] = [
   },
 
   {
-    id: 107,
+    id: 109,
     name: 'Short Classic Endurance',
     filename: 'short_classic_end',
     circuit: 27,
@@ -965,7 +983,7 @@ export const circuitlayouts: CircuitLayout[] = [
   },
 
   {
-    id: 108,
+    id: 110,
     name: 'Short Endurance',
     filename: 'short_end',
     circuit: 27,
@@ -974,7 +992,7 @@ export const circuitlayouts: CircuitLayout[] = [
   },
 
   {
-    id: 109,
+    id: 111,
     name: 'Full Course',
     filename: 'full course',
     circuit: 28,
@@ -983,7 +1001,7 @@ export const circuitlayouts: CircuitLayout[] = [
   },
 
   {
-    id: 110,
+    id: 112,
     name: 'Short Classic Endurance',
     filename: 'grand east course',
     circuit: 28,
@@ -992,7 +1010,7 @@ export const circuitlayouts: CircuitLayout[] = [
   },
 
   {
-    id: 111,
+    id: 113,
     name: 'Short Endurance',
     filename: 'grand west course',
     circuit: 28,
@@ -1001,7 +1019,7 @@ export const circuitlayouts: CircuitLayout[] = [
   },
 
   {
-    id: 112,
+    id: 114,
     name: 'Short Endurance',
     filename: 'north course',
     circuit: 28,
@@ -1010,7 +1028,7 @@ export const circuitlayouts: CircuitLayout[] = [
   },
 
   {
-    id: 113,
+    id: 115,
     name: 'Short Classic Endurance',
     filename: 'patriot course',
     circuit: 28,
@@ -1019,7 +1037,7 @@ export const circuitlayouts: CircuitLayout[] = [
   },
 
   {
-    id: 114,
+    id: 116,
     name: 'Short Endurance',
     filename: 'patriot reverse course',
     circuit: 28,
@@ -1028,7 +1046,7 @@ export const circuitlayouts: CircuitLayout[] = [
   },
 
   {
-    id: 115,
+    id: 117,
     name: 'Short Endurance',
     filename: 'south course',
     circuit: 28,
@@ -1037,7 +1055,7 @@ export const circuitlayouts: CircuitLayout[] = [
   },
 
   {
-    id: 116,
+    id: 118,
     name: 'Normal',
     filename: '',
     circuit: 29,
@@ -1046,7 +1064,7 @@ export const circuitlayouts: CircuitLayout[] = [
   },
 
   {
-    id: 117,
+    id: 119,
     name: 'Grand Prix',
     filename: 'circuit_gp',
     circuit: 30,
@@ -1055,7 +1073,7 @@ export const circuitlayouts: CircuitLayout[] = [
   },
 
   {
-    id: 118,
+    id: 120,
     name: 'Piper Circuit',
     filename: 'circuit_piper',
     circuit: 30,
@@ -1064,7 +1082,7 @@ export const circuitlayouts: CircuitLayout[] = [
   },
 
   {
-    id: 119,
+    id: 121,
     name: 'Drift Circuit',
     filename: 'circuit_piper_drift',
     circuit: 30,
@@ -1073,7 +1091,7 @@ export const circuitlayouts: CircuitLayout[] = [
   },
 
   {
-    id: 120,
+    id: 122,
     name: 'Classic',
     filename: 'classic',
     circuit: 31,
@@ -1082,7 +1100,7 @@ export const circuitlayouts: CircuitLayout[] = [
   },
 
   {
-    id: 121,
+    id: 123,
     name: 'GP',
     filename: 'gp',
     circuit: 31,
@@ -1091,7 +1109,7 @@ export const circuitlayouts: CircuitLayout[] = [
   },
 
   {
-    id: 122,
+    id: 124,
     name: 'GP OSRW',
     filename: 'gp_osrw',
     circuit: 31,
@@ -1100,7 +1118,7 @@ export const circuitlayouts: CircuitLayout[] = [
   },
 
   {
-    id: 123,
+    id: 125,
     name: 'GP Wet',
     filename: 'gp_wet',
     circuit: 31,
@@ -1109,7 +1127,7 @@ export const circuitlayouts: CircuitLayout[] = [
   },
 
   {
-    id: 124,
+    id: 126,
     name: 'Historic Original Pits',
     filename: 'historic_orig',
     circuit: 31,
@@ -1118,7 +1136,7 @@ export const circuitlayouts: CircuitLayout[] = [
   },
 
   {
-    id: 125,
+    id: 127,
     name: 'Historic Wing Pits',
     filename: 'historic_wing',
     circuit: 31,
@@ -1127,7 +1145,7 @@ export const circuitlayouts: CircuitLayout[] = [
   },
 
   {
-    id: 126,
+    id: 128,
     name: 'International Layout',
     filename: 'international',
     circuit: 31,
@@ -1136,7 +1154,7 @@ export const circuitlayouts: CircuitLayout[] = [
   },
 
   {
-    id: 127,
+    id: 129,
     name: 'International OSRW',
     filename: 'international_osrw',
     circuit: 31,
@@ -1145,7 +1163,7 @@ export const circuitlayouts: CircuitLayout[] = [
   },
 
   {
-    id: 128,
+    id: 130,
     name: 'International Wet',
     filename: 'international_wet',
     circuit: 31,
@@ -1154,7 +1172,7 @@ export const circuitlayouts: CircuitLayout[] = [
   },
 
   {
-    id: 129,
+    id: 131,
     name: 'National Layout',
     filename: 'national',
     circuit: 31,
@@ -1163,7 +1181,7 @@ export const circuitlayouts: CircuitLayout[] = [
   },
 
   {
-    id: 130,
+    id: 132,
     name: 'National OSRW',
     filename: 'national_osrw',
     circuit: 31,
@@ -1172,7 +1190,7 @@ export const circuitlayouts: CircuitLayout[] = [
   },
 
   {
-    id: 131,
+    id: 133,
     name: 'National Wet',
     filename: 'national_wet',
     circuit: 31,
@@ -1181,7 +1199,7 @@ export const circuitlayouts: CircuitLayout[] = [
   },
 
   {
-    id: 132,
+    id: 134,
     name: 'Reverse GP',
     filename: 'reverse_gp',
     circuit: 31,
@@ -1190,7 +1208,7 @@ export const circuitlayouts: CircuitLayout[] = [
   },
 
   {
-    id: 133,
+    id: 135,
     name: 'Reverse International',
     filename: 'reverse_international',
     circuit: 31,
@@ -1199,7 +1217,7 @@ export const circuitlayouts: CircuitLayout[] = [
   },
 
   {
-    id: 134,
+    id: 136,
     name: 'Reverse National',
     filename: 'reverse_national',
     circuit: 31,
@@ -1208,7 +1226,7 @@ export const circuitlayouts: CircuitLayout[] = [
   },
 
   {
-    id: 135,
+    id: 137,
     name: 'F1 2021',
     filename: 'silverstone_f1_2021',
     circuit: 31,
@@ -1217,7 +1235,7 @@ export const circuitlayouts: CircuitLayout[] = [
   },
 
   {
-    id: 136,
+    id: 138,
     name: 'F1 2022',
     filename: 'silvestone_f1_2022',
     circuit: 31,
@@ -1226,7 +1244,7 @@ export const circuitlayouts: CircuitLayout[] = [
   },
 
   {
-    id: 137,
+    id: 139,
     name: 'Stowe',
     filename: 'stowe',
     circuit: 31,
@@ -1235,7 +1253,7 @@ export const circuitlayouts: CircuitLayout[] = [
   },
 
   {
-    id: 138,
+    id: 140,
     name: 'Club',
     filename: 'layout_club',
     circuit: 32,
@@ -1244,7 +1262,7 @@ export const circuitlayouts: CircuitLayout[] = [
   },
 
   {
-    id: 139,
+    id: 141,
     name: 'GP',
     filename: 'layout_gp',
     circuit: 32,
@@ -1253,7 +1271,7 @@ export const circuitlayouts: CircuitLayout[] = [
   },
 
   {
-    id: 140,
+    id: 142,
     name: 'Moto',
     filename: 'layout_mt',
     circuit: 32,

@@ -143,8 +143,8 @@ export const circuits: Circuit[] = [
 
   {
     id: 21,
-    name: 'Circuito de Ricardo Tormo',
-    filename: 'circuito_ricardo_tormo',
+    name: 'Circuit Ricardo Tormo',
+    filename: 'fn_valencia',
     location: 'Cheste, España',
   },
 
