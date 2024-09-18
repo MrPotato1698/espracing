@@ -23,13 +23,6 @@ const initApp = () => {
     return initializeApp()
   }
 
-  console.info('Loading service account from env.')
-  if (serviceAccount.private_key) {
-    console.log("Private key starts with:", serviceAccount.private_key);
-  } else {
-    console.warn("Private key is undefined.");
-  }
-
   return initializeApp({
     credential: cert(serviceAccount as ServiceAccount)
   })
