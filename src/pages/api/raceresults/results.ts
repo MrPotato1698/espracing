@@ -1,9 +1,43 @@
-import type { Welcome, Car, Driver, Event, Position, Lap, Conditions, Result, SessionConfig } from "@/types/Result";
-
 import { cars } from "@/consts/cars";
 import { circuits } from "@/consts/circuits";
 import { circuitlayouts } from "@/consts/circuitlayouts";
 /* *************************** */
+
+interface RaceResult {
+    SteamID: string;
+    CarId: number;
+    Pos: number;
+    DriverName: string;
+    Team: string;
+    CarFileName: string;
+    GridPositionClass: string;
+    GridPosition: number;
+    TotalTime: number;
+    Penalties: number;
+    Laps: number;
+    BestLap: number;
+    AvgLap: number;
+    Collisions: number;
+    Ballast: number;
+    Restrictor: string;
+}
+
+interface RaceLap{
+    DriverName: string;
+    SteamID: string;
+    Laps: Lap [];
+    Average: number[];
+    Best: number[];
+}
+
+interface Lap {
+    LapNumber: number;
+    Position: number;
+    CarFileName: string;
+    LapTime: number;
+    Sector: number[];
+    Tyre: string;
+}
 
 function initializeScript() {
     const loadButton = document.getElementById('loadButton');
@@ -20,19 +54,17 @@ function initializeScript() {
         }
 
         try {
-            console.log("Intentando fetch a:", `/api/raceresults/getRaceResults?race=${seleccion}`);
             const response = await fetch(`/api/raceresults/getRaceResults?race=${seleccion}`);
-            console.log("Respuesta:", response);
-            const datos = await response.json() as Welcome;
-            console.log(datos);
+            const datos = await response.json();
+            //console.log('Datos a usar: ', datos);
 
-            let dcars = datos.Cars as Car[];
-            let devents = datos.Events as Event[];
-            let dlaps = datos.Laps as Lap[];
-            let dresult = datos.Result as Result[];
+            let dcars = datos.Cars.arrayValue.values;
+            let devents = datos.Events.arrayValue.values;
+            let dlaps = datos.Laps.arrayValue.values;
+            let dresult = datos.Result.arrayValue.values;
 
             if (resultado) {
-                resultado.innerHTML = '<table class="w-full border-collapse border border-[#f9f9f9]"><thead class="font-medium bg-[#da392b]"><tr class="tabletitle"><th>Pos</th><th>Nombre</th><th>Equipo</th><th colspan="2">Coche</th><th colspan="2">Gain/Lost</th><th>Tiempo Total</th><th>Nº Vueltas</th><th>Vuelta Rápida</th><th>Media Vueltas</th><th>Golpes</th><th>Lastres</th></tr></thead><tbody class="font-normal"></tbody></table>';
+                resultado.innerHTML = '';
             } else {
                 throw new Error('Elemento con id "resultado" no encontrado.');
             }
@@ -46,30 +78,32 @@ function initializeScript() {
             let pos: number = 0;
             let vueltasLider: number = 0;
             for (let item of dresult) {
-                //console.log(item.DriverName);
                 pos = pos + 1;
+                item = item.mapValue.fields;
+                //console.log('Item ',pos, '. Nombre: ',item.DriverName.stringValue);
                 let posicionFinal = pos.toString();
                 let gridPositionClass;
-                if ((item.GridPosition - pos) > 0) {
+                if ((item.GridPosition.integerValue - pos) > 0) {
                     gridPositionClass = '<svg viewBox="0 0 24 24" fill="#00f000" class="w-6 float mx-auto"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M11.375 6.22l-5 4a1 1 0 0 0 -.375 .78v6l.006 .112a1 1 0 0 0 1.619 .669l4.375 -3.501l4.375 3.5a1 1 0 0 0 1.625 -.78v-6a1 1 0 0 0 -.375 -.78l-5 -4a1 1 0 0 0 -1.25 0z" /></svg>';
-                } else if ((item.GridPosition - pos) < 0) {
+                } else if ((item.GridPosition.integerValue - pos) < 0) {
                     gridPositionClass = '<svg viewBox="0 0 24 24" fill="#ff0000" class="w-6 float mx-auto rotate-180"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M11.375 6.22l-5 4a1 1 0 0 0 -.375 .78v6l.006 .112a1 1 0 0 0 1.619 .669l4.375 -3.501l4.375 3.5a1 1 0 0 0 1.625 -.78v-6a1 1 0 0 0 -.375 -.78l-5 -4a1 1 0 0 0 -1.25 0z" /></svg>';
-                } else if ((item.GridPosition - pos) === 0) {
+                } else if ((item.GridPosition.integerValue - pos) === 0) {
                     gridPositionClass = '<svg viewBox="0 0 24 24" fill="#ffc800" class="w-6 float mx-auto rotate-90"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M11.375 6.22l-5 4a1 1 0 0 0 -.375 .78v6l.006 .112a1 1 0 0 0 1.619 .669l4.375 -3.501l4.375 3.5a1 1 0 0 0 1.625 -.78v-6a1 1 0 0 0 -.375 -.78l-5 -4a1 1 0 0 0 -1.25 0z" /></svg>';
                 }
 
                 // Obtener nombre de equipo + Ping Min-Max
-                let carID = item.CarId;
-                let equipo;
+                let carID = item.CarId.integerValue;
+                let equipo = "";
                 for (let item2 of dcars) {
-                    if (item2.CarId === carID) {
-                        equipo = item2.Driver.Team;
+                    item2 = item2.mapValue.fields;
+                    if (item2.CarId.integerValue === carID) {
+                        equipo = item2.Driver.mapValue.fields.Team.stringValue;
                         break;
                     }
                 }
 
                 // Obtener el nombre real del coche
-                const isCarExists = cars.find((car) => car.filename === item.CarModel);
+                const isCarExists = cars.find((car) => car.filename === item.CarModel.stringValue);
                 let carName: string;
                 let carBrand: string;
                 if (isCarExists) {
@@ -82,22 +116,22 @@ function initializeScript() {
 
                 // Obtener tiempo total de carrera
                 let timeadjust;
-                if (item.Disqualified === false) {
-                    timeadjust = (item.TotalTime / 1000) + (item.PenaltyTime / 1000000000);
+                if (item.Disqualified.booleanValue === false) {
+                    timeadjust = (item.TotalTime.integerValue / 1000) + (item.PenaltyTime.integerValue / 1000000000);
                     let seconds = formatTwoIntegersPlusThreeDecimals(timeadjust % 60);
                     let minutes = formatTwoIntegers(Math.trunc((timeadjust / 60) % 60));
                     let hours = formatTwoIntegers(Math.trunc(timeadjust / 3600));
                     //console.log("Pos: "+pos+" ->"+hours+":"+minutes+":"+seconds);
 
                     if (Number(hours) > 0) {
-                        if (item.PenaltyTime !== 0) {
-                            timeadjust = hours + ":" + minutes + ":" + seconds + " (+ " + (item.PenaltyTime / 1000000000) + "s)";
+                        if (parseInt(item.PenaltyTime.integerValue) !== 0) {
+                            timeadjust = hours + ":" + minutes + ":" + seconds + " <span class='rounded bg-[#da392b] text-xs px-1 py-0.5 ml-1'> + " + (item.PenaltyTime.integerValue / 1000000000) + "s</span>";
                         } else {
                             timeadjust = hours + ":" + minutes + ":" + seconds;
                         }
                     } else {
-                        if (item.PenaltyTime !== 0) {
-                            timeadjust = minutes + ":" + seconds + " (+ " + (item.PenaltyTime / 1000000000) + "s)";
+                        if (parseInt(item.PenaltyTime.integerValue) !== 0) {
+                            timeadjust = minutes + ":" + seconds + " (+ " + (item.PenaltyTime.integerValue / 1000000000) + "s)";
                         } else {
                             timeadjust = minutes + ":" + seconds;
                         }
@@ -111,22 +145,27 @@ function initializeScript() {
                 let bestlap = 0;
                 let bestlapToString: string;
                 let tyre;
-                let mediavueltas = 0;
+                let mediavueltas: number = 0;
                 let mediavueltasToString: string;
                 let cuts = 0;
                 for (let item3 of dlaps) {
-                    if (item3.CarId === carID) {
+                    item3 = item3.mapValue.fields;
+                    if (item3.CarId.integerValue === carID) {
                         vueltastotales++;
-                        if (item3.Cuts < 1) {
-                            mediavueltas += item3.LapTime;
-                            if (bestlap === 0 || bestlap > item3.LapTime) {
-                                bestlap = item3.LapTime;
-                                tyre = item3.Tyre;
+                        if (item3.Cuts.integerValue < 1) {
+                            const currentLap = parseInt(item3.LapTime.integerValue);
+                            mediavueltas = mediavueltas + currentLap;
+                            if (bestlap === 0 || bestlap > currentLap) {
+                                bestlap = currentLap;
+                                tyre = item3.Tyre.stringValue;
                             }
                         } else {
                             cuts += 1;
                         }
                     }
+                }
+                if (tyre === undefined || tyre === null || tyre === "") {
+                    tyre = "ND";
                 }
 
                 if (pos === 1) {
@@ -142,19 +181,28 @@ function initializeScript() {
                 let secondsbl = formatTwoIntegersPlusThreeDecimals(bestlap % 60);
                 let minutesbl = formatTwoIntegers(Math.trunc((bestlap / 60) % 60));
 
+                //console.log("Mejor vuelta Usuario ", pos, ": " + bestlap);
+
                 bestlapToString = minutesbl.toString() + ":" + secondsbl.toString();
                 //bestlap = minutesbl.toString + ":" + secondsbl.toString;
                 mediavueltas = mediavueltas / (vueltastotales - cuts);
                 mediavueltas = (mediavueltas / 1000);
+                // console.log("Media vueltas Usuario ", pos, ": " + mediavueltas);
                 let secondsmv = formatTwoIntegersPlusThreeDecimals(mediavueltas % 60);
                 let minutesmv = formatTwoIntegers(Math.trunc((mediavueltas / 60) % 60));
-                mediavueltasToString = minutesmv + ":" + secondsmv;
+
+                if (mediavueltas === 0 || isNaN(mediavueltas)) {
+                    mediavueltasToString = "ND";
+                } else {
+                    mediavueltasToString = minutesmv + ":" + secondsmv;
+                }
                 //console.log(mediavueltas+"/"+vueltastotales+"/"+cuts);
                 //console.log(item.DriverName + ": " + vueltastotales);
 
                 let collisions = 0;
                 for (let item4 of devents) {
-                    if (item4.CarId === carID) {
+                    item4 = item4.mapValue.fields;
+                    if (item4.CarId.integerValue === carID) {
                         collisions += 1;
                     }
                 }
@@ -162,36 +210,36 @@ function initializeScript() {
                     resultado.innerHTML += `
                     <tr class="bg-[#0f0f0f] text-center">
                         <td class = "font-medium">${posicionFinal.toString()}</td>                     <!-- Posicion -->
-                        <td>${item.DriverName}</td>         <!-- Nombre -->
+                        <td>${item.DriverName.stringValue}</td>         <!-- Nombre -->
                         <td>${equipo}</td>                  <!-- Equipo -->
                         <td><img class='w-4 justify-end' src='${carBrand}' alt=''></img></td>           <!-- Logo Coche -->
                         <td>${carName}</td>           <!-- Coche -->
                         <td>${gridPositionClass}</td>     <!-- Gan/Per (Flechas)-->
-                        <td class = "text-start">${Math.abs(item.GridPosition - pos)}</td> <!-- Gan/Per (Número)-->
+                        <td class = "text-start">${Math.abs(item.GridPosition.integerValue - pos)}</td> <!-- Gan/Per (Número)-->
                         <td>${timeadjust}</td>              <!-- Tiempo Total -->
                         <td>${vueltastotales}</td>          <!-- Nº Vueltas -->
                         <td>${bestlapToString + " (" + tyre + ")"}</td> <!-- Vuelta Rapida  + Neumaticos-->
                         <td>${mediavueltasToString}</td>            <!-- Media VRapida -->
                         <td>${collisions}</td>              <!-- Colisiones -->
-                        <td>${item.BallastKG + " Kg / " + item.Restrictor + "%"}</td>  <!-- Ballast/Restrictor -->
+                        <td>${item.BallastKG.integerValue + " Kg / " + item.Restrictor.integerValue + "%"}</td>  <!-- Ballast/Restrictor -->
                     </tr>
             `;
                 } else {
                     resultado.innerHTML += `
                     <tr class="bg-[#19191c] text-center">
                         <td class = "font-medium">${posicionFinal.toString()}</td>                     <!-- Posicion -->
-                        <td>${item.DriverName}</td>         <!-- Nombre -->
+                        <td>${item.DriverName.stringValue}</td>         <!-- Nombre -->
                         <td>${equipo}</td>                  <!-- Equipo -->
                         <td><img class='w-4 justify-end' src='${carBrand}' alt=''></img></td>           <!-- Logo Coche -->
                         <td>${carName}</td>           <!-- Coche -->
                         <td>${gridPositionClass}</td>     <!-- Gan/Per (Flechas)-->
-                        <td class = "text-start">${Math.abs(item.GridPosition - pos)}</td> <!-- Gan/Per (Número)-->
+                        <td class = "text-start">${Math.abs(item.GridPosition.integerValue - pos)}</td> <!-- Gan/Per (Número)-->
                         <td>${timeadjust}</td>              <!-- Tiempo Total -->
                         <td>${vueltastotales}</td>          <!-- Nº Vueltas -->
                         <td>${bestlapToString + " (" + tyre + ")"}</td> <!-- Vuelta Rapida  + Neumaticos-->
                         <td>${mediavueltasToString}</td>            <!-- Media VRapida -->
                         <td>${collisions}</td>              <!-- Colisiones -->
-                        <td>${item.BallastKG + " Kg / " + item.Restrictor + "%"}</td>  <!-- Ballast/Restrictor -->
+                        <td>${item.BallastKG.integerValue + " Kg / " + item.Restrictor.integerValue + "%"}</td>  <!-- Ballast/Restrictor -->
                     </tr>
             `;
                 }
@@ -199,14 +247,14 @@ function initializeScript() {
 
             // Pista y datos de la carrera
 
-            const isCircuitExists = circuits.find((circuit) => circuit.filename === datos.TrackName);
+            const isCircuitExists = circuits.find((circuit) => circuit.filename === datos.TrackName.stringValue);
             if (isCircuitExists) {
                 const circuitName = isCircuitExists.name;
                 const circuitLocation = isCircuitExists.location;
-                if (datos.TrackConfig === null || datos.TrackConfig === undefined || datos.TrackConfig === "") {
-                    datos.TrackConfig = "noname_trackconfig";
+                if (datos.TrackConfig.stringValue === null || datos.TrackConfig.stringValue === undefined || datos.TrackConfig.stringValue === "") {
+                    datos.TrackConfig.stringValue = "noname_trackconfig";
                 }
-                const layout = circuitlayouts.find((layout) => (layout.filename === datos.TrackConfig) && (layout.circuit === isCircuitExists.id));
+                const layout = circuitlayouts.find((layout) => (layout.filename === datos.TrackConfig.stringValue) && (layout.circuit === isCircuitExists.id));
                 const layoutName = layout?.name;
                 const layoutLength = layout?.length;
                 const layoutCapacity = layout?.capacity;

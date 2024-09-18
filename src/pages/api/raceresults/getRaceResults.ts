@@ -2,13 +2,11 @@ import type { APIRoute } from "astro";
 import { app } from "@/lib/firebase/server";
 import { getFirestore } from "firebase-admin/firestore";
 
-export const get: APIRoute = async ({ params, request }) => {
-  console.log('API called with query: ', params);
-
+export const GET: APIRoute = async ({ request }) => {
   const url = new URL(request.url);
   const raceId = url.searchParams.get('race');
-
-  console.log('Log 1');
+  const collection = 'ESPRacingRaceResults';
+  //console.log('API called with query: ', raceId);
 
   if (!raceId) {
     return new Response(JSON.stringify({ error: 'El nombre del fichero es obligatorio' }), {
@@ -19,17 +17,37 @@ export const get: APIRoute = async ({ params, request }) => {
     });
   }
 
-  console.log('Log 2');
-
   try {
     const db = getFirestore(app);
-    console.log('Log 1 Dentro de Try');
-    const raceresultRef = db.collection('ESPRacingRaceResults');
-    console.log('Log 2 dentro de Try');
-    const querySnapshot = await raceresultRef.doc(raceId).get();
-    const datos = querySnapshot.data();
+    //console.log('DB: ',db);
 
-    return new Response(JSON.stringify(datos), {
+    const projectID = "esp-racing-46042";
+    const apiKey = "AIzaSyBWOMmdgzvgwmwjt64M1Qhw8ArWstcsFXE";
+    const baseURL = `https://firestore.googleapis.com/v1/projects/${projectID}/databases/(default)/documents/`;
+
+    // const raceresultRef = db.collection(collection);
+    // console.log('RaceResultRef: ',raceresultRef);
+    // const querySnapshot = await raceresultRef.doc(raceId).get();
+    // console.log('QuerySnapshot: ',querySnapshot);
+    // //const querySnapshot = await raceresultRef.where('raceId', '==', raceId).get();
+    // const datos = querySnapshot.data();
+    // console.log('Datos: ',datos);
+
+    const response = await fetch(`${baseURL}${collection}/${raceId}?key=${apiKey}`);
+    if (!response.ok) {
+      return new Response(JSON.stringify({ error: 'Error al obtener los datos' }), {
+        status: 500,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+    }
+
+    const datos = await response.json();
+    // console.log('Datos: ',datos);
+    // console.log('Datos: ',datos.fields);
+
+    return new Response(JSON.stringify(datos.fields), {
       status: 200,
       headers: {
         'Content-Type': 'application/json'
