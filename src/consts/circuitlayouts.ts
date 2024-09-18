@@ -626,7 +626,7 @@ export const circuitlayouts: CircuitLayout[] = [
     id: 70,
     name: 'GP Short',
     filename: 'layout_gpshort',
-    circuit: 18,
+    circuit: 17,
     length: 4526,
     capacity: 36,
   },
@@ -1277,5 +1277,13 @@ export const circuitlayouts: CircuitLayout[] = [
     circuit: 32,
     length: 3668,
     capacity: 40,
+  },
+  {
+    id: 143,
+    name: 'WEC 2023 Layout',
+    filename: 'layout_wec_2023',
+    circuit: 17,
+    length: 4526,
+    capacity: 36,
   },
 ]
