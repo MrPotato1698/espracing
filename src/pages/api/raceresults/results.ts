@@ -131,7 +131,7 @@ function initializeScript() {
                         }
                     } else {
                         if (parseInt(item.PenaltyTime.integerValue) !== 0) {
-                            timeadjust = minutes + ":" + seconds + " (+ " + (item.PenaltyTime.integerValue / 1000000000) + "s)";
+                            timeadjust = minutes + ":" + seconds + " <span class='rounded bg-[#da392b] text-xs px-1 py-0.5 ml-1'> + " + (item.PenaltyTime.integerValue / 1000000000) + "s";
                         } else {
                             timeadjust = minutes + ":" + seconds;
                         }
