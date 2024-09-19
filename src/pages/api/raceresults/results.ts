@@ -1,43 +1,8 @@
 import { cars } from "@/consts/cars";
 import { circuits } from "@/consts/circuits";
 import { circuitlayouts } from "@/consts/circuitlayouts";
+import type { RaceResult, RaceLap, Lap, BestLap, Consistency, BestSector, Incident, RaceData } from "@/types/Results";
 /* *************************** */
-
-interface RaceResult {
-    SteamID: string;
-    CarId: number;
-    Pos: number;
-    DriverName: string;
-    Team: string;
-    CarFileName: string;
-    GridPositionClass: string;
-    GridPosition: number;
-    TotalTime: number;
-    Penalties: number;
-    Laps: number;
-    BestLap: number;
-    AvgLap: number;
-    Collisions: number;
-    Ballast: number;
-    Restrictor: string;
-}
-
-interface RaceLap{
-    DriverName: string;
-    SteamID: string;
-    Laps: Lap [];
-    Average: number[];
-    Best: number[];
-}
-
-interface Lap {
-    LapNumber: number;
-    Position: number;
-    CarFileName: string;
-    LapTime: number;
-    Sector: number[];
-    Tyre: string;
-}
 
 function initializeScript() {
     const loadButton = document.getElementById('loadButton');
@@ -62,6 +27,7 @@ function initializeScript() {
             let devents = datos.Events.arrayValue.values;
             let dlaps = datos.Laps.arrayValue.values;
             let dresult = datos.Result.arrayValue.values;
+            let dpenalties = datos.Penalties.arrayValue.values;
 
             if (resultado) {
                 resultado.innerHTML = '';
@@ -305,5 +271,40 @@ function formatTwoIntegersPlusThreeDecimals(num: number) {
 
 function formatTwoIntegers(num: number): string {
     return Math.abs(num).toString().padStart(2, '0').slice(-2);
+}
+
+function createRaceResults(dcars: string[], devents: string[], dlaps: string[], dresult: string[]): RaceResult[] {
+    let rr: RaceResult[] = [];
+    return rr;
+}
+
+function createRaceLap(dcars: string[], devents: string[], dlaps: string[], dresult: string[], rr: RaceResult[]): RaceLap[] {
+    let rl: RaceLap[] = [];
+    return rl;
+}
+
+function createBestLap(dlaps: string[], dresult: string[]): BestLap[] {
+    let bl: BestLap[] = [];
+    return bl;
+}
+
+function createConsistency(rl: RaceLap[]): Consistency[] {
+    let c: Consistency[] = [];
+    return c;
+}
+
+function createBestSector(rl: RaceLap[]): BestSector[] {
+    let bs: BestSector[] = [];
+    return bs;
+}
+
+function createIncident(devents: string[], dpenalties: string[]): Incident[] {
+    let i: Incident[] = [];
+    return i;
+}
+
+function createRaceData(datos: any): RaceData {
+    let rd: RaceData = {} as RaceData;
+    return rd;
 }
 
