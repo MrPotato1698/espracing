@@ -23,11 +23,11 @@ function initializeScript() {
             const datos = await response.json();
             //console.log('Datos a usar: ', datos);
 
-            let dcars = datos.Cars.arrayValue.values;
-            let devents = datos.Events.arrayValue.values;
-            let dlaps = datos.Laps.arrayValue.values;
-            let dresult = datos.Result.arrayValue.values;
-            let dpenalties = datos.Penalties.arrayValue.values;
+            let dcars = datos.Cars?.arrayValue?.values;
+            let devents = datos.Events?.arrayValue?.values;
+            let dlaps = datos.Laps?.arrayValue?.values;
+            let dresult = datos.Result?.arrayValue?.values;
+            let dpenalties = datos.Penalties?.arrayValue?.values;
 
             if (resultado) {
                 resultado.innerHTML = '';
