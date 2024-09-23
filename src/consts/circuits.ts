@@ -224,4 +224,172 @@ export const circuits: Circuit[] = [
     filename: 'tmm_oschersleben',
     location: 'Oschersleben, Alemania',
   },
+
+  {
+    id: 33,
+    name: 'Autodromo de Buenos Aires Oscar y Juan Gálvez',
+    filename: 'bsas_h22',
+    location: 'Buenos Aires, Argentina',
+  },
+
+  {
+    id: 34,
+    name: 'Sepang International Circuit',
+    filename: 'sepang',
+    location: 'Sepang, Malasia',
+  },
+
+  {
+    id: 35,
+    name: 'Autodromo Enzo e Dino Ferrari Imola',
+    filename: 'imola',
+    location: 'Imola, Italia',
+  },
+
+  {
+    id: 36,
+    name: 'Charlotte Motor Speedway',
+    filename: 'charlotte_motor_speedway',
+    location: 'Charlotte, NC, Estados Unidos',
+  },
+
+  {
+    id: 37,
+    name: 'Circuit Zandvoort',
+    filename: 'zandvoort2020',
+    location: 'Zandvoort, Países Bajos',
+  },
+
+  {
+    id: 38,
+    name: 'Circuit Zandvoort',
+    filename: 'zandvoort2023',
+    location: 'Zandvoort, Países Bajos',
+  },
+
+  {
+    id: 39,
+    name: 'Circuito de Le Mans - Bugatti',
+    filename: 'bugatti',
+    location: 'Le Mans, Francia',
+  },
+
+  {
+    id: 40,
+    name: 'Luccaring - Circuito de Baluardi',
+    filename: 'luccaring',
+    location: 'Lucca, Italia',
+  },
+
+  {
+    id: 41,
+    name: 'Circuit de la Sarthe (Le Mans)',
+    filename: 'le_grand_circuit_1967',
+    location: 'Le Mans, Francia',
+  },
+
+  {
+    id: 42,
+    name: 'Autopolis Oita',
+    filename: 'zw_autopolis',
+    location: 'Oita, Japón',
+  },
+
+  {
+    id: 43,
+    name: 'Tokachi International Speedway',
+    filename: 'tokachi',
+    location: 'Sarabetsuruma, Japón',
+  },
+
+  {
+    id: 44,
+    name: 'Suzuka International Circuit',
+    filename: 'rt_suzuka',
+    location: 'Mie Prefecture, Japón',
+  },
+
+  {
+    id: 45,
+    name: 'Bahrain International Circuit',
+    filename: 'bahrain_international_circuit',
+    location: 'Sakhir, Baréin',
+  },
+
+  {
+    id: 46,
+    name: 'Red Bull Ring',
+    filename: 'spielberg',
+    location: 'Spielberg, Austria',
+  },
+
+  {
+    id: 47,
+    name: 'Circuit of the Americas',
+    filename: 'acu_cota_2021',
+    location: 'Austin, TX, Estados Unidos',
+  },
+
+  {
+    id: 48,
+    name: 'Autodromo Jose Carlos Pace (Interlagos)',
+    filename: 'vhe_interlagos',
+    location: 'Sao Paulo, Brasil',
+  },
+
+  {
+    id: 49,
+    name: 'Brands Hatch Circuit',
+    filename: 'ks_brands_hatch',
+    location: 'Fawkham, Reino Unido',
+  },
+
+  {
+    id: 50,
+    name: 'Donington Park',
+    filename: 'doningtonpark',
+    location: 'Castle Donington, Reino Unido',
+  },
+
+  {
+    id: 51,
+    name: 'Oulton Park',
+    filename: 'rt_oulton_park',
+    location: 'Tarporley, Reino Unido',
+  },
+
+  {
+    id: 52,
+    name: 'Shibuya RX',
+    filename: 'RX_shibuya',
+    location: 'Shibuya, Japón',
+  },
+
+  {
+    id: 53,
+    name: 'Miami RX',
+    filename: 'rmi_dirtsdn_miami',
+    location: 'Miami, FL, Estados Unidos',
+  },
+
+  {
+    id: 54,
+    name: 'Circuit Paul Armagnac Nogaro',
+    filename: 'zw_nogaro',
+    location: 'Nogaro, Francia',
+  },
+
+  {
+    id: 55,
+    name: 'Red Bull Ring',
+    filename: 'fn_redbullring',
+    location: 'Spielberg, Austria',
+  },
+
+  {
+    id: 56,
+    name: 'Autodromo Most',
+    filename: 'tmm_autodrom_most',
+    location: 'Most, República Checa',
+  },
 ]

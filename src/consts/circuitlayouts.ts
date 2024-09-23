@@ -1286,4 +1286,732 @@ export const circuitlayouts: CircuitLayout[] = [
     length: 4526,
     capacity: 36,
   },
+
+  {
+    id: 144,
+    name: 'Touring Club No.5',
+    filename: '5',
+    circuit: 33,
+    length: 2115,
+    capacity: 44,
+  },
+
+  {
+    id: 145,
+    name: 'Touring Club No.5 Alternativo',
+    filename: '5_a',
+    circuit: 33,
+    length: 2115,
+    capacity: 44,
+  },
+  {
+    id: 146,
+    name: 'Formula Argentina No.6',
+    filename: '6',
+    circuit: 33,
+    length: 4101,
+    capacity: 44,
+  },
+
+  {
+    id: 147,
+    name: 'Short Club No.7',
+    filename: '7',
+    circuit: 33,
+    length: 2607,
+    capacity: 44,
+  },
+
+  {
+    id: 148,
+    name: 'GT No.8',
+    filename: '8',
+    circuit: 33,
+    length: 3380,
+    capacity: 44,
+  },
+
+  {
+    id: 149,
+    name: 'GT No.8 Alternativo',
+    filename: '8_a',
+    circuit: 33,
+    length: 3380,
+    capacity: 44,
+  },
+
+  {
+    id: 150,
+    name: 'GT No.9',
+    filename: '9',
+    circuit: 33,
+    length: 3353,
+    capacity: 44,
+  },
+
+  {
+    id: 151,
+    name: 'GT No.9 Alternativo',
+    filename: '9_a',
+    circuit: 33,
+    length: 3353,
+    capacity: 44,
+  },
+
+  {
+    id: 152,
+    name: 'Endurance No.12',
+    filename: '12',
+    circuit: 33,
+    length: 5662,
+    capacity: 44,
+  },
+
+  {
+    id: 153,
+    name: 'IMSA No.15',
+    filename: '15',
+    circuit: 33,
+    length: 5967,
+    capacity: 44,
+  },
+
+  {
+    id: 154,
+    name: 'Drag Strip',
+    filename: 'drag',
+    circuit: 33,
+    length: 500,
+    capacity: 44,
+  },
+
+  {
+    id: 155,
+    name: 'Normal',
+    filename: '',
+    circuit: 34,
+    length: 5543,
+    capacity: 26,
+  },
+
+  {
+    id: 156,
+    name: 'Normal',
+    filename: '',
+    circuit: 35,
+    length: 4909,
+    capacity: 24,
+  },
+
+  {
+    id: 157,
+    name: 'IMSA No.15',
+    filename: 'imola_osrw',
+    circuit: 35,
+    length: 4909,
+    capacity: 32,
+  },
+
+  {
+    id: 158,
+    name: 'Drag Strip',
+    filename: 'imola_wet',
+    circuit: 35,
+    length: 4909,
+    capacity: 32,
+  },
+
+  {
+    id: 159,
+    name: 'Normal',
+    filename: 'reverse_imola',
+    circuit: 35,
+    length: 4909,
+    capacity: 24,
+  },
+
+  {
+    id: 160,
+    name: 'Oval',
+    filename: 'oval',
+    circuit: 36,
+    length: 2343,
+    capacity: 42,
+  },
+
+  {
+    id: 161,
+    name: 'Roval',
+    filename: 'roval',
+    circuit: 36,
+    length: 3590,
+    capacity: 34,
+  },
+
+  {
+    id: 162,
+    name: 'Roval (starting adjusment)',
+    filename: 'roval28',
+    circuit: 36,
+    length: 3590,
+    capacity: 28,
+  },
+
+  {
+    id: 163,
+    name: '2020',
+    filename: '2020',
+    circuit: 37,
+    length: 4259,
+    capacity: 32,
+  },
+
+  {
+    id: 164,
+    name: '2020 DRS',
+    filename: 'DRS',
+    circuit: 37,
+    length: 4259,
+    capacity: 32,
+  },
+
+  {
+    id: 165,
+    name: '2023',
+    filename: '',
+    circuit: 38,
+    length: 4259,
+    capacity: 32,
+  },
+
+  {
+    id: 166,
+    name: 'Normal',
+    filename: '',
+    circuit: 39,
+    length: 4185,
+    capacity: 56,
+  },
+
+  {
+    id: 166,
+    name: 'Normal',
+    filename: '',
+    circuit: 40,
+    length: 5450,
+    capacity: 24,
+  },
+
+  {
+    id: 166,
+    name: 'Extra Pits',
+    filename: 'luccaringextra',
+    circuit: 40,
+    length: 5450,
+    capacity: 32,
+  },
+
+  {
+    id: 167,
+    name: '1967 version',
+    filename: '',
+    circuit: 41,
+    length: 13110,
+    capacity: 36,
+  },
+
+  {
+    id: 168,
+    name: 'Full',
+    filename: 'full',
+    circuit: 42,
+    length: 4673,
+    capacity: 45,
+  },
+
+  {
+    id: 169,
+    name: 'Short',
+    filename: 'short',
+    circuit: 42,
+    length: 3022,
+    capacity: 45,
+  },
+
+  {
+    id: 170,
+    name: 'Clubman',
+    filename: 'tokachi_club',
+    circuit: 43,
+    length: 3370,
+    capacity: 40,
+  },
+
+  {
+    id: 171,
+    name: 'GP',
+    filename: 'tokachi_gp',
+    circuit: 43,
+    length: 5033,
+    capacity: 40,
+  },
+
+  {
+    id: 172,
+    name: 'Junior',
+    filename: 'tokachi_jr',
+    circuit: 43,
+    length: 1664,
+    capacity: 20,
+  },
+
+  {
+    id: 173,
+    name: 'Short',
+    filename: 'tokachi_short',
+    circuit: 43,
+    length: 995,
+    capacity: 40,
+  },
+
+  {
+    id: 174,
+    name: 'Normal',
+    filename: '',
+    circuit: 44,
+    length: 5807,
+    capacity: 36,
+  },
+
+  {
+    id: 175,
+    name: 'SuperGT 2022',
+    filename: 'suzuka_sgt_2022',
+    circuit: 44,
+    length: 5807,
+    capacity: 36,
+  },
+
+  {
+    id: 176,
+    name: 'GP',
+    filename: 'suzuka_east',
+    circuit: 44,
+    length: 2243,
+    capacity: 36,
+  },
+
+  {
+    id: 177,
+    name: 'Junior',
+    filename: 'suzuka_gp',
+    circuit: 44,
+    length: 5807,
+    capacity: 36,
+  },
+
+  {
+    id: 178,
+    name: 'Short',
+    filename: 'suzuka_west',
+    circuit: 44,
+    length: 3466,
+    capacity: 16,
+  },
+
+  {
+    id: 179,
+    name: 'Endurance Circuit',
+    filename: 'endurance',
+    circuit: 45,
+    length: 6299,
+    capacity: 36,
+  },
+
+  {
+    id: 180,
+    name: 'Grand Prix',
+    filename: 'grandprix',
+    circuit: 45,
+    length: 5411,
+    capacity: 36,
+  },
+
+  {
+    id: 181,
+    name: 'Inner Circuit',
+    filename: 'inner',
+    circuit: 45,
+    length: 2550,
+    capacity: 20,
+  },
+
+  {
+    id: 182,
+    name: 'Outer Circuit',
+    filename: 'outer',
+    circuit: 45,
+    length: 3664,
+    capacity: 36,
+  },
+
+  {
+    id: 183,
+    name: 'Padock Circuit',
+    filename: 'paddock',
+    circuit: 45,
+    length: 3705,
+    capacity: 36,
+  },
+
+  {
+    id: 184,
+    name: 'Test Oval',
+    filename: 'test',
+    circuit: 45,
+    length: 2500,
+    capacity: 36,
+  },
+
+  {
+    id: 185,
+    name: 'Full Circuit',
+    filename: 'circuit_full',
+    circuit: 46,
+    length: 4326,
+    capacity: 34,
+  },
+
+  {
+    id: 186,
+    name: 'Inner Course',
+    filename: 'circuit_inner',
+    circuit: 46,
+    length: 900,
+    capacity: 7,
+  },
+
+  {
+    id: 187,
+    name: 'South Course',
+    filename: 'circuit_south',
+    circuit: 46,
+    length: 2400,
+    capacity: 30,
+  },
+
+  {
+    id: 188,
+    name: 'Normal',
+    filename: '',
+    circuit: 47,
+    length: 5513,
+    capacity: 31,
+  },
+
+  {
+    id: 189,
+    name: 'Inner Course',
+    filename: 'layout_f1_2021',
+    circuit: 47,
+    length: 5513,
+    capacity: 31,
+  },
+
+  {
+    id: 190,
+    name: 'South Course',
+    filename: 'layout_f1_2022',
+    circuit: 47,
+    length: 5513,
+    capacity: 31,
+  },
+
+  {
+    id: 191,
+    name: 'GP',
+    filename: 'gp',
+    circuit: 48,
+    length: 4309,
+    capacity: 23,
+  },
+
+  {
+    id: 192,
+    name: 'GP',
+    filename: 'gp_46_pits',
+    circuit: 48,
+    length: 4309,
+    capacity: 46,
+  },
+
+  {
+    id: 193,
+    name: 'National',
+    filename: 'norm',
+    circuit: 48,
+    length: 4309,
+    capacity: 23,
+  },
+
+  {
+    id: 194,
+    name: 'National',
+    filename: 'norm_46_pits',
+    circuit: 48,
+    length: 4309,
+    capacity: 46,
+  },
+
+  {
+    id: 195,
+    name: 'F1 2022',
+    filename: 'layout_f1_2022',
+    circuit: 48,
+    length: 4309,
+    capacity: 46,
+  },
+
+  {
+    id: 196,
+    name: 'GP',
+    filename: 'gp',
+    circuit: 49,
+    length: 3908,
+    capacity: 24,
+  },
+
+  {
+    id: 197,
+    name: 'GP Reverse',
+    filename: 'gp_reverse',
+    circuit: 49,
+    length: 3908,
+    capacity: 24,
+  },
+
+  {
+    id: 198,
+    name: 'GP OSRW',
+    filename: 'gp_osrw',
+    circuit: 49,
+    length: 3908,
+    capacity: 32,
+  },
+
+  {
+    id: 199,
+    name: 'GP Wet',
+    filename: 'gp_wet',
+    circuit: 49,
+    length: 3908,
+    capacity: 32,
+  },
+
+  {
+    id: 200,
+    name: 'Indy',
+    filename: 'indy',
+    circuit: 49,
+    length: 1929,
+    capacity: 24,
+  },
+
+  {
+    id: 201,
+    name: 'Indy OSRW',
+    filename: 'indy_osrw',
+    circuit: 49,
+    length: 1929,
+    capacity: 32,
+  },
+
+  {
+    id: 202,
+    name: 'Indy Reverse',
+    filename: 'indy_reverse',
+    circuit: 49,
+    length: 1929,
+    capacity: 24,
+  },
+
+  {
+    id: 203,
+    name: 'Indy Wet',
+    filename: 'indy_wet',
+    circuit: 49,
+    length: 1929,
+    capacity: 32,
+  },
+
+  {
+    id: 204,
+    name: 'GP',
+    filename: 'gp',
+    circuit: 50,
+    length: 4020,
+    capacity: 24,
+  },
+
+  {
+    id: 205,
+    name: 'GP',
+    filename: 'gp_THR',
+    circuit: 50,
+    length: 4020,
+    capacity: 34,
+  },
+
+  {
+    id: 206,
+    name: 'National',
+    filename: 'national',
+    circuit: 50,
+    length: 3185,
+    capacity: 24,
+  },
+
+  {
+    id: 207,
+    name: 'National',
+    filename: 'national_THR',
+    circuit: 50,
+    length: 3185,
+    capacity: 34,
+  },
+
+  {
+    id: 208,
+    name: 'Fosters',
+    filename: 'fosters',
+    circuit: 51,
+    length: 2644,
+    capacity: 34,
+  },
+
+  {
+    id: 209,
+    name: 'International Hislops',
+    filename: 'international',
+    circuit: 51,
+    length: 4293,
+    capacity: 34,
+  },
+
+  {
+    id: 210,
+    name: 'International 2022',
+    filename: 'international22',
+    circuit: 51,
+    length: 4273,
+    capacity: 34,
+  },
+
+  {
+    id: 211,
+    name: 'International Historic (1954/1972)',
+    filename: 'internationalnochic',
+    circuit: 51,
+    length: 4259,
+    capacity: 34,
+  },
+
+  {
+    id: 212,
+    name: 'Island',
+    filename: 'island',
+    circuit: 51,
+    length: 3541,
+    capacity: 34,
+  },
+
+  {
+    id: 213,
+    name: 'Normal',
+    filename: '',
+    circuit: 52,
+    length: 4862,
+    capacity: 32,
+  },
+
+  {
+    id: 214,
+    name: 'Jumps',
+    filename: 'jumps',
+    circuit: 53,
+    length: 928,
+    capacity: 32,
+  },
+
+  {
+    id: 215,
+    name: 'Normal',
+    filename: 'normal',
+    circuit: 53,
+    length: 923,
+    capacity: 4,
+  },
+
+  {
+    id: 216,
+    name: 'Normal',
+    filename: '',
+    circuit: 54,
+    length: 3636,
+    capacity: 42,
+  },
+
+  {
+    id: 217,
+    name: 'F1 2024',
+    filename: 'austria_f1_2024',
+    circuit: 55,
+    length: 4326,
+    capacity: 50,
+  },
+
+  {
+    id: 218,
+    name: 'Chicane',
+    filename: 'layout_chicane',
+    circuit: 55,
+    length: 4348,
+    capacity: 24,
+  },
+
+  {
+    id: 219,
+    name: 'GP',
+    filename: 'layout_gp',
+    circuit: 55,
+    length: 4318,
+    capacity: 24,
+  },
+
+  {
+    id: 220,
+    name: '2023',
+    filename: 'layout_gp_2023',
+    circuit: 55,
+    length: 4318,
+    capacity: 24,
+  },
+
+  {
+    id: 221,
+    name: 'National',
+    filename: 'layout_national',
+    circuit: 55,
+    length: 2336,
+    capacity: 24,
+  },
+
+  {
+    id: 222,
+    name: 'Normal',
+    filename: '',
+    circuit: 56,
+    length: 4219,
+    capacity: 32,
+  },
 ]
