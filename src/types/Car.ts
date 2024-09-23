@@ -6,6 +6,7 @@ export type Car ={
   model: string;
   year: number;
   class: string;
+  subclass: string;
   power: number;
   torque: number;
   weight: number;
