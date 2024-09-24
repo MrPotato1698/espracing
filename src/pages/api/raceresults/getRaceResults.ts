@@ -5,7 +5,7 @@ import { getFirestore } from "firebase-admin/firestore";
 export const GET: APIRoute = async ({ request }) => {
   const url = new URL(request.url);
   const raceId = url.searchParams.get('race');
-  const collection = 'ESPRacingRaceResults';
+  const collection = 'Results';
   //console.log('API called with query: ', raceId);
 
   if (!raceId) {
@@ -44,10 +44,31 @@ export const GET: APIRoute = async ({ request }) => {
     }
 
     const datos = await response.json();
-    // console.log('Datos: ',datos);
-    // console.log('Datos: ',datos.fields);
+    let jsonData = null;
+    // console.log('Datos: ', datos);
+    // console.log('Datos Field: ', datos.fields);
+    // console.log('Datos Field StringValue: ', datos.fields.URL.stringValue);
 
-    return new Response(JSON.stringify(datos.fields), {
+    try {
+      const responseJSON = await fetch(datos.fields.URL.stringValue);
+      if (!responseJSON.ok) {
+        return new Response(JSON.stringify({ error: 'Error al obtener los datos' }), {
+          status: 500,
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+      }
+      jsonData = await responseJSON.json();
+
+      //console.log('Datos JSON: ', jsonData);
+
+    } catch (error) {
+      console.error('Error al descargar el archivo:', error);
+      alert('Hubo un error al descargar el archivo. Por favor, intenta de nuevo.');
+    }
+
+    return new Response(JSON.stringify(jsonData), {
       status: 200,
       headers: {
         'Content-Type': 'application/json'
