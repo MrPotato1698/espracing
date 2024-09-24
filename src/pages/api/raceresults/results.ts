@@ -1,7 +1,10 @@
 import { cars } from "@/consts/cars";
 import { circuits } from "@/consts/circuits";
 import { circuitlayouts } from "@/consts/circuitlayouts";
-import type { RaceResult, RaceLap, Lap, BestLap, Consistency, BestSector, Incident, RaceData } from "@/types/Results";
+import { createRaceData, formatTwoIntegersPlusThreeDecimals, formatTwoIntegers } from "@/lib/results/resultConverter";
+
+import type { RaceData, RaceResult, RaceLap, Lap, BestLap, Consistency, BestSector, Incident, RaceConfig } from "@/types/Results";
+
 /* *************************** */
 
 function initializeScript() {
@@ -271,18 +274,6 @@ if (document.readyState === 'loading') {
 // Maneja las transiciones de página de Astro
 document.addEventListener('astro:page-load', initializeScript);
 
-
-function formatTwoIntegersPlusThreeDecimals(num: number) {
-    const integerPart = Math.floor(Math.abs(num)).toString().padStart(2, '0');
-    const decimalPart = Math.abs(num % 1).toFixed(3).slice(2);
-    const sign = num < 0 ? '-' : '';
-    return `${sign}${integerPart}.${decimalPart}`;
-}
-
-function formatTwoIntegers(num: number): string {
-    return Math.abs(num).toString().padStart(2, '0').slice(-2);
-}
-
 function getColorClass(carClass: string): string {
     let result: string = "class='";
     switch (carClass) {
@@ -429,40 +420,5 @@ function getClassShortName(carClass: string): string {
             break;
     }
     return result;
-}
-
-function createRaceResults(dcars: string[], devents: string[], dlaps: string[], dresult: string[]): RaceResult[] {
-    let rr: RaceResult[] = [];
-    return rr;
-}
-
-function createRaceLap(dcars: string[], devents: string[], dlaps: string[], dresult: string[], rr: RaceResult[]): RaceLap[] {
-    let rl: RaceLap[] = [];
-    return rl;
-}
-
-function createBestLap(dlaps: string[], dresult: string[]): BestLap[] {
-    let bl: BestLap[] = [];
-    return bl;
-}
-
-function createConsistency(rl: RaceLap[]): Consistency[] {
-    let c: Consistency[] = [];
-    return c;
-}
-
-function createBestSector(rl: RaceLap[]): BestSector[] {
-    let bs: BestSector[] = [];
-    return bs;
-}
-
-function createIncident(devents: string[], dpenalties: string[]): Incident[] {
-    let i: Incident[] = [];
-    return i;
-}
-
-function createRaceData(datos: any): RaceData {
-    let rd: RaceData = {} as RaceData;
-    return rd;
 }
 
