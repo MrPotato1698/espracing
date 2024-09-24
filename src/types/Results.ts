@@ -1,3 +1,13 @@
+export interface RaceData{
+  RaceResult: RaceResult[];
+  RaceLaps: RaceLap [];
+  BestLap: BestLap [];
+  Consistency: Consistency [];
+  BestSector: BestSector [];
+  Incident: Incident [];
+  RaceConfig: RaceConfig;
+}
+
 export interface RaceResult {
   SteamID: string;
   CarId: number;
@@ -5,7 +15,7 @@ export interface RaceResult {
   DriverName: string;
   Team: string;
   CarFileName: string;
-  GridPositionClass: string;
+  //GridPositionClass: string;
   GridPosition: number;
   TotalTime: number;
   Penalties: number;
@@ -14,7 +24,7 @@ export interface RaceResult {
   AvgLap: number;
   Collisions: number;
   Ballast: number;
-  Restrictor: string;
+  Restrictor: number;
 }
 
 export interface RaceLap{
@@ -49,6 +59,7 @@ export interface Consistency{
 }
 
 export interface BestSector{
+  SectorNumber: number;
   DriverName: string;
   CarFileName: string;
   BestSector: number;
@@ -61,7 +72,7 @@ export interface Incident{
   Penalty: string;
 }
 
-export interface RaceData{
+export interface RaceConfig{
   RaceID: string;
   Date: string;
   Session: string;
