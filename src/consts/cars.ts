@@ -629,5 +629,35 @@ export const cars: Car[] = [
     torque: 800,
     weight: 1540,
     description: "El GT Black Series es una variante de alto rendimiento del Mercedes-AMG GT y se reveló oficialmente en el canal de YouTube de Mercedes-AMG el 9 de julio de 2020. El motor M178 en esta variante está sintonizado para una potencia de 537 kW (730 PS; 720 hp) a 6.700-6.900 rpm y 800 N⋅m (590 lb⋅ft) de torque a 2.000-6.000 rpm. Conocido como M178 LS2, el motor tiene una línea roja ligeramente más alta a 7200 rpm en comparación con las 7000 rpm del GT R, y utiliza un cigüeñal plano en lugar de un cigüeñal transversal, resultando en diferente orden de encendido. Además, el M178 LS2 utiliza una rueda de compresor más grande, lo que resulta en un aumento en el impulso de 19,6 psi del GT R a 24,6 psi. El GT Black Series acelera de 0 a 100 km/h (62 mph) en 3,2 segundos y tiene una velocidad máxima declarada de 325 km/h (202 mph). La suspensión es única, con una barra estabilizadora de fibra de carbono con dos ajustes para el eje delantero y una barra estabilizadora de hierro con tres ajustes para el eje trasero. Al igual que los vehículos Black Series anteriores, la inclinación se ajusta manualmente tanto para el eje delantero como para el trasero. El manejo se ha mejorado con paneles de fibra de carbono en la parte delantera y trasera, así como rotores de freno cerámicos de carbono y pastillas de freno específicas de la Serie Black. El ala tiene un flap aeroactivo activo y contribuye a una carga aerodinámica máxima total de más de 400 kg (882 lb) a 249 km/h (155 mph). Los neumáticos Michelin Pilot Cup 2 R son específicos para el automóvil y están disponibles en compuestos blandos M01A y duros M02.[30] La fibra de carbono se utiliza ampliamente en la mayor parte de la carrocería, incluido el capó, el techo, la escotilla y los bajos. El exterior gana una parrilla agrandada, basada en el Mercedes-AMG GT3, grandes salidas de aire en el capó, un divisor delantero ajustable manualmente y un alerón trasero mejorado como parte de un importante kit aerodinámico. El interior cuenta con asientos individuales de alto rendimiento AMG estándar y utiliza microfibra para el volante, las puertas y los paneles de instrumentos. El 4 de noviembre de 2020, el Mercedes-AMG GT Black Series registró un tiempo de vuelta de 6:43.616 con el piloto Maro Engel al volante en Nürburgring Nordschleife, lo que lo convierte en el tiempo de vuelta más rápido jamás registrado para un vehículo de producción legal en la pista. En el momento."
-  }
+  },
+
+  {
+    id: 43,
+    filename: 'tesla_model_s_artkato',
+    brand: 'Tesla',
+    imgbrand: '/img/brand/tesla.webp',
+    model: 'Model S',
+    year: 2020,
+    class: "GT (AWD)",
+    subclass: 'Supercar',
+    power: 682,
+    torque: 787,
+    weight: 2000,
+    description: ""
+  },
+
+  {
+    id: 44,
+    filename: 'gue_techart_gt_street_r',
+    brand: 'TECHART',
+    imgbrand: '/img/brand/porsche.webp',
+    model: 'GTstreet R',
+    year: 2021,
+    class: "GT (AWD)",
+    subclass: 'Supercar',
+    power: 800,
+    torque: 950,
+    weight: 1670,
+    description: "20 años como icono. El TECHART GTstreet R, de producción limitada a 87 unidades, es el superdeportivo exclusivo fabricado a medida basado en los 911 Turbo y 911 Turbo S de la serie 992. Desde la presentación de la primera gama GTstreet en 2001, el concepto de personalización característico de TECHART ha ganado reconocimiento mundial por su simbiosis inigualable de dos mundos: auténtica idoneidad para el uso diario y un rendimiento en pista sin concesiones. El programa GTstreet R incluye un paquete aerodinámico ligero, un sistema de escape deportivo TECHART y llantas forjadas TECHART Formula VI con discos aerodinámicos de fibra de carbono, así como mejoras de rendimiento e interior. Hasta 588 kW (800 CV) impulsan al TECHART GTstreet R hacia adelante con un impresionante par máximo de 950 Nm y una velocidad máxima de 350 km/h, estableciendo nuevos estándares en su segmento. El interior está refinado con carbono y una mezcla de Alcantara®, cuero y tejidos tradicionales, inspirados en los materiales tradicionales del automovilismo, y subraya los altos estándares de individualidad y deportividad. La fábrica TECHART no deja ningún deseo sin cumplir."
+  },
 ];
