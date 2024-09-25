@@ -23,14 +23,19 @@ function initializeScript() {
 
         try {
             const response = await fetch(`/api/raceresults/getRaceResults?race=${seleccion}`);
-            const datos = await response.json();
-            //console.log('Datos a usar: ', datos);
+            const datosRAW = await response.json();
+            //console.log('DatosRAW a usar: ', datosRAW);
 
-            let dcars = datos.Cars;
-            let devents = datos.Events;
-            let dlaps = datos.Laps;
-            let dresult = datos.Result;
-            let dpenalties = datos.Penalties;
+            const datos: RaceData = createRaceData(datosRAW);
+            console.log('Datos a usar: ', datos);
+
+            const dresult: RaceResult[] = datos.RaceResult;
+            const dlaps: RaceLap[] = datos.RaceLaps;
+            const dbestlaps: BestLap[] = datos.BestLap;
+            const dconsistency: Consistency[] = datos.Consistency;
+            const dbestsectors: BestSector[] = datos.BestSector;
+            const devents: Incident[] = datos.Incident;
+            const dconfig: RaceConfig = datos.RaceConfig;
 
             if (resultado) {
                 resultado.innerHTML = '';
@@ -45,34 +50,30 @@ function initializeScript() {
             }
 
             let pos: number = 0;
+            let postabla: number = 0;
             let vueltasLider: number = 0;
-            const sessiontime: number = datos.SessionConfig.time;
-            const sessionlaps: number = datos.SessionConfig.laps;
-            for (let item of dresult) {
-                pos = pos + 1;
+            const sessiontime: number = dconfig.RaceDurationTime;
+            const sessionlaps: number = dconfig.RaceDurationLaps;
+            for (let itemResult of dresult) {
+                postabla++;
+                pos = itemResult.Pos;
                 //console.log('Item ',pos, '. Nombre: ',item.DriverName);
-                let posicionFinal = pos.toString();
                 let gridPositionClass;
-                if ((item.GridPosition - pos) > 0) {
+                if ((itemResult.GridPosition - pos) > 0) {
                     gridPositionClass = '<svg viewBox="0 0 24 24" fill="#00f000" class="w-6 float mx-auto"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M11.375 6.22l-5 4a1 1 0 0 0 -.375 .78v6l.006 .112a1 1 0 0 0 1.619 .669l4.375 -3.501l4.375 3.5a1 1 0 0 0 1.625 -.78v-6a1 1 0 0 0 -.375 -.78l-5 -4a1 1 0 0 0 -1.25 0z" /></svg>';
-                } else if ((item.GridPosition - pos) < 0) {
+                } else if ((itemResult.GridPosition - pos) < 0) {
                     gridPositionClass = '<svg viewBox="0 0 24 24" fill="#ff0000" class="w-6 float mx-auto rotate-180"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M11.375 6.22l-5 4a1 1 0 0 0 -.375 .78v6l.006 .112a1 1 0 0 0 1.619 .669l4.375 -3.501l4.375 3.5a1 1 0 0 0 1.625 -.78v-6a1 1 0 0 0 -.375 -.78l-5 -4a1 1 0 0 0 -1.25 0z" /></svg>';
-                } else if ((item.GridPosition - pos) === 0) {
+                } else if ((itemResult.GridPosition - pos) === 0) {
                     gridPositionClass = '<svg viewBox="0 0 24 24" fill="#ffc800" class="w-6 float mx-auto rotate-90"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M11.375 6.22l-5 4a1 1 0 0 0 -.375 .78v6l.006 .112a1 1 0 0 0 1.619 .669l4.375 -3.501l4.375 3.5a1 1 0 0 0 1.625 -.78v-6a1 1 0 0 0 -.375 -.78l-5 -4a1 1 0 0 0 -1.25 0z" /></svg>';
                 }
 
                 // Obtener nombre de equipo + Ping Min-Max
-                let carID = item.CarId;
-                let equipo = "";
-                for (let item2 of dcars) {
-                    if (item2.CarId === carID) {
-                        equipo = item2.Driver.Team;
-                        break;
-                    }
-                }
+                let carID = itemResult.CarId;
+                let equipo = itemResult.Team;
+
 
                 // Obtener el nombre real del coche
-                const isCarExists = cars.find((car) => car.filename === item.CarModel);
+                const isCarExists = cars.find((car) => car.filename === itemResult.CarFileName);
                 let carName: string;
                 let carBrand: string;
                 let carClass: string;
@@ -83,7 +84,7 @@ function initializeScript() {
                     carClass = getClassShortName(isCarExists.subclass);
                     carColorClass = getColorClass(isCarExists.subclass);
                 } else {
-                    carName = item.CarModel;
+                    carName = itemResult.CarFileName;
                     carBrand = "";
                     carClass = "";
                     carColorClass = "";
@@ -91,83 +92,123 @@ function initializeScript() {
 
                 // Obtener tiempo total de carrera
                 let timeadjust;
-                if (item.Disqualified === false) {
-                    timeadjust = (item.TotalTime / 1000) + (item.PenaltyTime / 1000000000);
-                    const seconds = formatTwoIntegersPlusThreeDecimals(timeadjust % 60);
-                    const minutes = formatTwoIntegers(Math.trunc((timeadjust / 60) % 60));
-                    const hours = formatTwoIntegers(Math.trunc(timeadjust / 3600));
-                    //console.log("Pos: "+pos+" ->"+hours+":"+minutes+":"+seconds);
+                if (itemResult.Pos !== -2) {
+                    if (itemResult.TotalTime >= 0) {
+                        timeadjust = itemResult.TotalTime;
+                        const seconds = formatTwoIntegersPlusThreeDecimals(timeadjust % 60);
+                        const minutes = formatTwoIntegers(Math.trunc((timeadjust / 60) % 60));
+                        const hours = formatTwoIntegers(Math.trunc(timeadjust / 3600));
+                        //console.log("Pos: "+pos+" ->"+hours+":"+minutes+":"+seconds);
 
-                    if (Number(hours) > 0) {
-                        if (parseInt(item.PenaltyTime) !== 0) {
-                            timeadjust = hours + ":" + minutes + ":" + seconds + " <span class='rounded bg-[#da392b] text-xs px-1 py-0.5 ml-1'> + " + (item.PenaltyTime / 1000000000) + "s</span>";
+                        if (Number(hours) > 0) {
+                            if (itemResult.Penalties !== 0) {
+                                timeadjust = hours + ":" + minutes + ":" + seconds + " <span class='rounded bg-[#da392b] text-xs px-1 py-0.5 ml-1'> + " + (itemResult.Penalties) + "s</span>";
+                            } else {
+                                timeadjust = hours + ":" + minutes + ":" + seconds;
+                            }
                         } else {
-                            timeadjust = hours + ":" + minutes + ":" + seconds;
+                            if (itemResult.Penalties !== 0) {
+                                timeadjust = minutes + ":" + seconds + " <span class='rounded bg-[#da392b] text-xs px-1 py-0.5 ml-1'> + " + (itemResult.Penalties) + "s";
+                            } else {
+                                timeadjust = minutes + ":" + seconds;
+                            }
                         }
                     } else {
-                        if (parseInt(item.PenaltyTime) !== 0) {
-                            timeadjust = minutes + ":" + seconds + " <span class='rounded bg-[#da392b] text-xs px-1 py-0.5 ml-1'> + " + (item.PenaltyTime / 1000000000) + "s";
-                        } else {
-                            timeadjust = minutes + ":" + seconds;
-                        }
+                        timeadjust = "No Time";
                     }
                 } else {
                     timeadjust = "DQ";
                 }
 
                 // Obtener numero de vueltas totales / vuelta rapida / neumatico
-                let vueltastotales = 0;
-                let bestlap = 0;
-                let bestlapToString: string;
+                let vueltastotales = itemResult.Laps;
                 let tyre;
-                let mediavueltas: number = 0;
-                let mediavueltasToString: string;
                 let cuts = 0;
-                for (let item3 of dlaps) {
-                    if (item3.CarId === carID) {
-                        vueltastotales++;
-                        if (item3.Cuts < 1) {
-                            const currentLap = parseInt(item3.LapTime);
-                            mediavueltas = mediavueltas + currentLap;
-                            if (bestlap === 0 || bestlap > currentLap) {
-                                bestlap = currentLap;
-                                tyre = item3.Tyre;
+
+                // for (let itemBL of dbestlaps) {
+                //     if (itemBL.SteamID === itemResult.SteamID) {
+                //         tyre = itemBL.Tyre;
+                //     }
+                // }
+
+                for (let itemLap of dlaps) {
+                    if(itemLap.SteamID === itemResult.SteamID){
+                        for(let itemLap2 of itemLap.Laps){
+                            if(itemLap2.LapTime === itemResult.BestLap){
+                                tyre = itemLap2.Tyre;
                             }
-                        } else {
-                            cuts += 1;
                         }
                     }
                 }
+
+                for (let itemLap of dlaps) {
+                    if (itemLap.SteamID === itemResult.SteamID) {
+                        cuts += itemLap.Laps.filter((lap) => lap.Cut > 0).length;
+                    }
+                }
+
                 if (tyre === undefined || tyre === null || tyre === "") {
                     tyre = "ND";
                 }
 
+                let posicionFinal: string = "";
                 if (pos === 1) {
                     vueltasLider = vueltastotales;
+                    posicionFinal = '1';
                 } else {
-                    if (timeadjust === 'DQ') {
-                        posicionFinal = 'DQ';
-                    } else {
-                        const timerace = (item.TotalTime / 1000) + (item.PenaltyTime / 1000000000);
-                        if (vueltastotales < vueltasLider * 0.9 && ((Math.trunc((timerace / 60) % 60) + Math.trunc(timerace / 60)) < datos.SessionConfig.time)) {
-                            posicionFinal = 'DNF';
-                        }
+                    switch (itemResult.Pos) {
+                        case -1:
+                            posicionFinal = 'DNS';
+                            break;
+                        case -2:
+                            posicionFinal = 'DQ';
+                            break;
+                        case -3:
+                            posicionFinal = 'DNS';
+                            break;
+                        case -4:
+                            switch (itemResult.Team) {
+                                case "STREAMING":
+                                    posicionFinal = 'TV';
+                                    break;
+                                case "ESP Racing Staff":
+                                    posicionFinal = 'STAFF';
+                                    break;
+                                case "Safety Car":
+                                    posicionFinal = 'SC';
+                                    break;
+                                default:
+                                    posicionFinal = 'DNS';
+                                    break;
+                            }
+                            break;
+                        default:
+                            const timerace = (itemResult.TotalTime) + (itemResult.Penalties);
+                            const condicion1 = (Math.trunc((timerace / 60) % 60) + Math.trunc(timerace / 60));
+
+                            if (vueltastotales < vueltasLider * 0.9 && ((condicion1 < dconfig.RaceDurationTime) || (vueltastotales < dconfig.RaceDurationLaps * 0.9))) {
+                                posicionFinal = 'DNF';
+                            } else {
+                                posicionFinal = pos.toString();
+                            }
                     }
                 }
 
-                bestlap = (bestlap / 1000);
+                let bestlap = itemResult.BestLap;
                 let secondsbl = formatTwoIntegersPlusThreeDecimals(bestlap % 60);
                 let minutesbl = formatTwoIntegers(Math.trunc((bestlap / 60) % 60));
 
                 //console.log("Mejor vuelta Usuario ", pos, ": " + bestlap);
 
-                bestlapToString = minutesbl.toString() + ":" + secondsbl.toString();
+                let bestlapToString = minutesbl.toString() + ":" + secondsbl.toString();
                 //bestlap = minutesbl.toString + ":" + secondsbl.toString;
-                mediavueltas = mediavueltas / (vueltastotales - cuts);
-                mediavueltas = (mediavueltas / 1000);
-                // console.log("Media vueltas Usuario ", pos, ": " + mediavueltas);
+
+                let mediavueltas: number = itemResult.AvgLap;
+
                 let secondsmv = formatTwoIntegersPlusThreeDecimals(mediavueltas % 60);
                 let minutesmv = formatTwoIntegers(Math.trunc((mediavueltas / 60) % 60));
+
+                let mediavueltasToString: string;
 
                 if (mediavueltas === 0 || isNaN(mediavueltas)) {
                     mediavueltasToString = "ND";
@@ -177,48 +218,44 @@ function initializeScript() {
                 //console.log(mediavueltas+"/"+vueltastotales+"/"+cuts);
                 //console.log(item.DriverName + ": " + vueltastotales);
 
-                let collisions = 0;
-                for (let item4 of devents) {
-                    if (item4.CarId === carID) {
-                        collisions += 1;
-                    }
-                }
-                if (pos % 2 === 0) {
+                let collisions = itemResult.Collisions;
+
+                if (postabla % 2 === 0) {
                     resultado.innerHTML += `
                             <tr class="bg-[#0f0f0f] text-center">
-                                <td class = "font-medium">${posicionFinal.toString()}</td>                     <!-- Posicion -->
-                                <td>${item.DriverName}</td>         <!-- Nombre -->
+                                <td class = "font-medium">${posicionFinal}</td>                     <!-- Posicion -->
+                                <td>${itemResult.DriverName}</td>         <!-- Nombre -->
                                 <td>${equipo}</td>                  <!-- Equipo -->
                                 <td><span ${carColorClass}>${carClass}</span></td>  <!-- Clase del Coche -->
                                 <td><img class='w-4 justify-end' src='${carBrand}' alt=''></img></td>           <!-- Logo Coche -->
                                 <td>${carName}</td>           <!-- Coche -->
                                 <td>${gridPositionClass}</td>     <!-- Gan/Per (Flechas)-->
-                                <td class = "text-start">${Math.abs(item.GridPosition - pos)}</td> <!-- Gan/Per (Número)-->
+                                <td class = "text-start">${Math.abs(itemResult.GridPosition - pos)}</td> <!-- Gan/Per (Número)-->
                                 <td>${timeadjust}</td>              <!-- Tiempo Total -->
                                 <td>${vueltastotales}</td>          <!-- Nº Vueltas -->
                                 <td>${bestlapToString + " (" + tyre + ")"}</td> <!-- Vuelta Rapida  + Neumaticos-->
                                 <td>${mediavueltasToString}</td>            <!-- Media VRapida -->
                                 <td>${collisions}</td>              <!-- Colisiones -->
-                                <td>${item.BallastKG + " Kg / " + item.Restrictor + "%"}</td>  <!-- Ballast/Restrictor -->
+                                <td>${itemResult.Ballast + " Kg / " + itemResult.Restrictor + "%"}</td>  <!-- Ballast/Restrictor -->
                             </tr>
                     `;
                 } else {
                     resultado.innerHTML += `
                             <tr class="bg-[#19191c] text-center">
-                                <td class = "font-medium">${posicionFinal.toString()}</td>                     <!-- Posicion -->
-                                <td>${item.DriverName}</td>         <!-- Nombre -->
+                                <td class = "font-medium">${posicionFinal}</td>                     <!-- Posicion -->
+                                <td>${itemResult.DriverName}</td>         <!-- Nombre -->
                                 <td>${equipo}</td>                  <!-- Equipo -->
                                 <td><span ${carColorClass}>${carClass}</span></td>  <!-- Clase del Coche -->
                                 <td><img class='w-4 justify-end' src='${carBrand}' alt=''></img></td>           <!-- Logo Coche -->
                                 <td>${carName}</td>           <!-- Coche -->
                                 <td>${gridPositionClass}</td>     <!-- Gan/Per (Flechas)-->
-                                <td class = "text-start">${Math.abs(item.GridPosition - pos)}</td> <!-- Gan/Per (Número)-->
+                                <td class = "text-start">${Math.abs(itemResult.GridPosition - pos)}</td> <!-- Gan/Per (Número)-->
                                 <td>${timeadjust}</td>              <!-- Tiempo Total -->
                                 <td>${vueltastotales}</td>          <!-- Nº Vueltas -->
                                 <td>${bestlapToString + " (" + tyre + ")"}</td> <!-- Vuelta Rapida  + Neumaticos-->
                                 <td>${mediavueltasToString}</td>            <!-- Media VRapida -->
                                 <td>${collisions}</td>              <!-- Colisiones -->
-                                <td>${item.BallastKG + " Kg / " + item.Restrictor + "%"}</td>  <!-- Ballast/Restrictor -->
+                                <td>${itemResult.Ballast + " Kg / " + itemResult.Restrictor + "%"}</td>  <!-- Ballast/Restrictor -->
                             </tr>
                     `;
                 }
@@ -226,14 +263,14 @@ function initializeScript() {
 
             // Pista y datos de la carrera
 
-            const isCircuitExists = circuits.find((circuit) => circuit.filename === datos.TrackName);
+            const isCircuitExists = circuits.find((circuit) => circuit.filename === dconfig.Track);
             if (isCircuitExists) {
                 const circuitName = isCircuitExists.name;
                 const circuitLocation = isCircuitExists.location;
-                if (datos.TrackConfig === null || datos.TrackConfig === undefined || datos.TrackConfig === "") {
-                    datos.TrackConfig = "";
+                if (dconfig.TrackLayout === null || dconfig.TrackLayout === undefined || dconfig.TrackLayout === "") {
+                    dconfig.TrackLayout = "";
                 }
-                const layout = circuitlayouts.find((layout) => (layout.filename === datos.TrackConfig) && (layout.circuit === isCircuitExists.id));
+                const layout = circuitlayouts.find((layout) => (layout.filename === dconfig.TrackLayout) && (layout.circuit === isCircuitExists.id));
                 const layoutName = layout?.name;
                 const layoutLength = layout?.length;
                 const layoutCapacity = layout?.capacity;

@@ -1,8 +1,13 @@
 import type { APIRoute } from "astro";
 import { app } from "@/lib/firebase/server";
 import { getFirestore } from "firebase-admin/firestore";
+import { createRaceData } from "@/lib/results/resultConverter";
+import type { RaceData } from "@/types/Results";
+
 
 export const GET: APIRoute = async ({ request }) => {
+  let finaldata:RaceData = {} as RaceData;
+
   const url = new URL(request.url);
   const raceId = url.searchParams.get('race');
   const collection = 'Results';
