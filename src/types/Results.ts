@@ -23,6 +23,7 @@ export interface RaceResult {
   BestLap: number;
   AvgLap: number;
   Collisions: number;
+  LedLaps: number;
   Ballast: number;
   Restrictor: number;
 }
@@ -42,10 +43,13 @@ export interface Lap {
   LapTime: number;
   Sector: number[];
   Tyre: string;
+  Cut: number;
+  Timestamp: number;
 }
 
 export interface BestLap{
   DriverName: string;
+  SteamID: string;
   CarFileName: string;
   BestLap: number;
   Gap: number;
@@ -54,6 +58,7 @@ export interface BestLap{
 
 export interface Consistency{
   DriverName: string;
+  SteamID: string;
   CarFileName: string;
   Consistency: number;
 }
@@ -61,6 +66,7 @@ export interface Consistency{
 export interface BestSector{
   SectorNumber: number;
   DriverName: string;
+  SteamID: string;
   CarFileName: string;
   BestSector: number;
   Gap: number;
@@ -69,7 +75,7 @@ export interface BestSector{
 export interface Incident{
   Date: string;
   Incident: string;
-  Penalty: string;
+  AfterSession: boolean;
 }
 
 export interface RaceConfig{
