@@ -59,12 +59,15 @@ function initializeScript() {
                 pos = itemResult.Pos;
                 //console.log('Item ',pos, '. Nombre: ',item.DriverName);
                 let gridPositionClass;
-                if ((itemResult.GridPosition - pos) > 0) {
+                let gains = itemResult.GridPosition - postabla
+                let gainsAbs: number = Math.abs(gains);
+                if ((gains > 0) && (pos > -2)) {
                     gridPositionClass = '<svg viewBox="0 0 24 24" fill="#00f000" class="w-6 float mx-auto"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M11.375 6.22l-5 4a1 1 0 0 0 -.375 .78v6l.006 .112a1 1 0 0 0 1.619 .669l4.375 -3.501l4.375 3.5a1 1 0 0 0 1.625 -.78v-6a1 1 0 0 0 -.375 -.78l-5 -4a1 1 0 0 0 -1.25 0z" /></svg>';
-                } else if ((itemResult.GridPosition - pos) < 0) {
+                } else if ((gains < 0) && (pos > -2)) {
                     gridPositionClass = '<svg viewBox="0 0 24 24" fill="#ff0000" class="w-6 float mx-auto rotate-180"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M11.375 6.22l-5 4a1 1 0 0 0 -.375 .78v6l.006 .112a1 1 0 0 0 1.619 .669l4.375 -3.501l4.375 3.5a1 1 0 0 0 1.625 -.78v-6a1 1 0 0 0 -.375 -.78l-5 -4a1 1 0 0 0 -1.25 0z" /></svg>';
-                } else if ((itemResult.GridPosition - pos) === 0) {
+                } else if (gains === 0 || pos <= -2) {
                     gridPositionClass = '<svg viewBox="0 0 24 24" fill="#ffc800" class="w-6 float mx-auto rotate-90"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M11.375 6.22l-5 4a1 1 0 0 0 -.375 .78v6l.006 .112a1 1 0 0 0 1.619 .669l4.375 -3.501l4.375 3.5a1 1 0 0 0 1.625 -.78v-6a1 1 0 0 0 -.375 -.78l-5 -4a1 1 0 0 0 -1.25 0z" /></svg>';
+                    gainsAbs = 0;
                 }
 
                 // Obtener nombre de equipo + Ping Min-Max
@@ -132,9 +135,9 @@ function initializeScript() {
                 // }
 
                 for (let itemLap of dlaps) {
-                    if(itemLap.SteamID === itemResult.SteamID){
-                        for(let itemLap2 of itemLap.Laps){
-                            if(itemLap2.LapTime === itemResult.BestLap){
+                    if (itemLap.SteamID === itemResult.SteamID) {
+                        for (let itemLap2 of itemLap.Laps) {
+                            if (itemLap2.LapTime === itemResult.BestLap) {
                                 tyre = itemLap2.Tyre;
                             }
                         }
@@ -152,13 +155,14 @@ function initializeScript() {
                 }
 
                 let posicionFinal: string = "";
+
                 if (pos === 1) {
                     vueltasLider = vueltastotales;
                     posicionFinal = '1';
                 } else {
                     switch (itemResult.Pos) {
                         case -1:
-                            posicionFinal = 'DNS';
+                            posicionFinal = 'DNF';
                             break;
                         case -2:
                             posicionFinal = 'DQ';
@@ -230,7 +234,7 @@ function initializeScript() {
                                 <td><img class='w-4 justify-end' src='${carBrand}' alt=''></img></td>           <!-- Logo Coche -->
                                 <td>${carName}</td>           <!-- Coche -->
                                 <td>${gridPositionClass}</td>     <!-- Gan/Per (Flechas)-->
-                                <td class = "text-start">${Math.abs(itemResult.GridPosition - pos)}</td> <!-- Gan/Per (Número)-->
+                                <td class = "text-start">${gainsAbs}</td> <!-- Gan/Per (Número)-->
                                 <td>${timeadjust}</td>              <!-- Tiempo Total -->
                                 <td>${vueltastotales}</td>          <!-- Nº Vueltas -->
                                 <td>${bestlapToString + " (" + tyre + ")"}</td> <!-- Vuelta Rapida  + Neumaticos-->
@@ -249,7 +253,7 @@ function initializeScript() {
                                 <td><img class='w-4 justify-end' src='${carBrand}' alt=''></img></td>           <!-- Logo Coche -->
                                 <td>${carName}</td>           <!-- Coche -->
                                 <td>${gridPositionClass}</td>     <!-- Gan/Per (Flechas)-->
-                                <td class = "text-start">${Math.abs(itemResult.GridPosition - pos)}</td> <!-- Gan/Per (Número)-->
+                                <td class = "text-start">${gainsAbs}</td> <!-- Gan/Per (Número)-->
                                 <td>${timeadjust}</td>              <!-- Tiempo Total -->
                                 <td>${vueltastotales}</td>          <!-- Nº Vueltas -->
                                 <td>${bestlapToString + " (" + tyre + ")"}</td> <!-- Vuelta Rapida  + Neumaticos-->
@@ -381,6 +385,9 @@ function getColorClass(carClass: string): string {
         case "Supercar":
             result += "bg-[#ff9300] text-[#0f0f0f]";
             break;
+        case "Classic":
+            result += "bg-[#f9f9f9] text-[#0f0f0f]";
+            break;
     }
     result += " rounded text-xs font-bold px-1 py-0.5 ml-1'";
     return result;
@@ -454,6 +461,9 @@ function getClassShortName(carClass: string): string {
             break;
         case "Supercar":
             result += "SC";
+            break;
+        case "Classic":
+            result += "Classic";
             break;
     }
     return result;

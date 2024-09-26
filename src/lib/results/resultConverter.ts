@@ -38,7 +38,7 @@ function createRaceResults(dcars: CarJSON[], devents: EventJSON[], dlaps: LapJSO
         uniqueRR.Pos = -2;
       } else {
         const timerace = (uniqueRR.TotalTime) + (uniqueRR.Penalties);
-        if (uniqueRR.Laps < vueltasLider * 0.9 && ((Math.trunc((timerace / 60) % 60) + Math.trunc(timerace / 60)) < raceTime)) {
+        if (uniqueRR.Laps < vueltasLider * 0.9 || ((Math.trunc((timerace / 60) % 60) + Math.trunc(timerace / 60)) < raceTime)) {
           uniqueRR.Pos = -1;
         } else {
           uniqueRR.Pos = pos;
