@@ -660,4 +660,19 @@ export const cars: Car[] = [
     weight: 1670,
     description: "20 años como icono. El TECHART GTstreet R, de producción limitada a 87 unidades, es el superdeportivo exclusivo fabricado a medida basado en los 911 Turbo y 911 Turbo S de la serie 992. Desde la presentación de la primera gama GTstreet en 2001, el concepto de personalización característico de TECHART ha ganado reconocimiento mundial por su simbiosis inigualable de dos mundos: auténtica idoneidad para el uso diario y un rendimiento en pista sin concesiones. El programa GTstreet R incluye un paquete aerodinámico ligero, un sistema de escape deportivo TECHART y llantas forjadas TECHART Formula VI con discos aerodinámicos de fibra de carbono, así como mejoras de rendimiento e interior. Hasta 588 kW (800 CV) impulsan al TECHART GTstreet R hacia adelante con un impresionante par máximo de 950 Nm y una velocidad máxima de 350 km/h, estableciendo nuevos estándares en su segmento. El interior está refinado con carbono y una mezcla de Alcantara®, cuero y tejidos tradicionales, inspirados en los materiales tradicionales del automovilismo, y subraya los altos estándares de individualidad y deportividad. La fábrica TECHART no deja ningún deseo sin cumplir."
   },
+
+  {
+    id: 45,
+    filename: 'ks_abarth_595ss',
+    brand: 'Abarth',
+    imgbrand: '/img/brand/abarth.webp',
+    model: '595 SS',
+    year: 1964,
+    class: "Turismo (FWD)",
+    subclass: 'Classic',
+    power: 32,
+    torque: 44,
+    weight: 470,
+    description:'Carlo Abarth inició su conocida colaboración con Fiat en 1952, construyendo el Abarth 1500 Biposto con mecánica Fiat. En 1957 se presentó el Fiat "Nuova 500" y Abarth pronto realizó algunas versiones con mecánicas elaboradas. En 1963 se presentó el "595", producido hasta finales de 1971 en dos series. Abarth recibió coches incompletos de FIAT y luego montó en ellos las piezas especiales. En febrero de 1964 se presentó el 595 SS, con una velocidad máxima de 130 km/h.'
+  },
 ];
