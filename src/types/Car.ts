@@ -11,4 +11,7 @@ export type Car ={
   torque: number;
   weight: number;
   description: string;
+  tyreTimeChange:number;
+  fuelLiterTime:number;
+  maxLiter:number;
 }

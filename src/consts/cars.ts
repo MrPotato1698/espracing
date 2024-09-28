@@ -14,6 +14,9 @@ export const cars: Car[] = [
     torque: 609,
     weight: 1056,
     description: 'Audi Sport utiliza el RS 5 Coupé en el DTM desde 2013. El coche del campeonato de la temporada 2020 vuelve a arrancar con el cuatro cilindros turbo del Audi RS 5 DTM. Es el motor más eficiente y potente en la historia de Audi en el DTM. Los ingenieros obtuvieron más de 610 CV del motor de 2 litros. Audi ha demostrado de forma impresionante la superioridad de su tecnología al ganar el título en todas las categorías.',
+    tyreTimeChange:4,
+    fuelLiterTime:0.12,
+    maxLiter: 80,
   },
 
   {
@@ -29,6 +32,9 @@ export const cars: Car[] = [
     torque: 609,
     weight: 1056,
     description: 'El nuevo BMW M4 DTM es el coche DTM más potente que BMW M Motorsport haya construido jamás. Equipado con potencia turbo concentrada, está listo para continuar la historia de éxito de BMW en el DTM. Más de 600 CV, un peso del vehículo significativamente reducido, velocidades máximas de hasta 300 km/h y la función Push-to-pass, introducida para la temporada 2019, hacen que la serie de turismos más disputada sea aún más rápida y espectacular.',
+    tyreTimeChange:4,
+    fuelLiterTime:0.12,
+    maxLiter: 80,
   },
 
   {
@@ -44,6 +50,9 @@ export const cars: Car[] = [
     torque: 230,
     weight: 725,
     description: 'La quinta generación del Honda Civic debutó en Japón el 10 de septiembre de 1991. En su presentación en 1991, ganó el premio al Coche del Año en Japón por segunda vez. En Japón, así como en algunos otros lugares de exportación, el VTi se ofreció con dos motores diferentes: el B16A2/3 (DOHC VTEC de 160 CV) y el D15B (SOHC VTEC de 130 CV). El D15B comparte la misma cabeza que el Civic Si estadounidense (D16Z6), pero presenta un bloque, una manivela y unas bielas exclusivos. el automóvil compartía el desplazamiento de 1,5 L de los otros bloques D15, pero las varillas tenían la misma longitud que las del D16 (137 mm) y una mejor relación varilla-carrera (1,63) en lugar de la relación normal del D15 de 1,59. . A pesar de esto, los tamaños de manivela y cojinete no eran los mismos.',
+    tyreTimeChange:11,
+    fuelLiterTime:0.1,
+    maxLiter: 80,
   },
 
   {
@@ -59,6 +68,9 @@ export const cars: Car[] = [
     torque: 428,
     weight: 665,
     description: 'La Toyota Racing Series es una incubadora y un escaparate para la próxima generación de talentos de las carreras de Nueva Zelanda. La Serie ofrece a los conductores emergentes la oportunidad de adquirir una valiosa experiencia con chasis compuestos de fibra de carbono, aerodinámica y neumáticos lisos. Tatuus FT-60 Especificaciones técnicas Motor Toyota 8AR-FTS Motor DOHC de encendido por chispa de 4 cilindros en línea de 2,0 L (122 pulgadas cúbicas); turboalimentado, montado longitudinalmente; Motor central, disposición de tracción trasera. Transmisión SADEV SL-R 82 Caja de cambios secuencial semiautomática de 6 velocidades.',
+    tyreTimeChange:8.5,
+    fuelLiterTime:0.1,
+    maxLiter: 60,
   },
 
   {
@@ -74,6 +86,9 @@ export const cars: Car[] = [
     torque: 505,
     weight: 1030,
     description: 'El Acura ARX-06 es un prototipo de coche de carreras deportivo diseñado por Honda Performance Development y construido por Oreca. Cuenta con carrocería y aerodinámica específicas de Acura basadas en un chasis ORECA LMDh completamente nuevo que utiliza una unidad de potencia híbrida electrificada que incluye un motor de combustión interna V6 de 2.4 litros biturbo hecho a medida, igualmente nuevo, diseñado, desarrollado y fabricado por Honda Performance Development (HPD). ). Está diseñado según las regulaciones de Le Mans Daytona h y competirá en la clase GTP en el Campeonato IMSA SportsCar1. El ARX-06 debutó junto al BMW M Hybrid V8, el Cadillac V-LMDh y el Porsche 963 en la apertura de la temporada 2023 del Campeonato IMSA SportsCar en el Daytona International Speedway.',
+    tyreTimeChange:10,
+    fuelLiterTime:0.6,
+    maxLiter: 75,
   },
 
   {
@@ -89,6 +104,9 @@ export const cars: Car[] = [
     torque: 554,
     weight: 1080,
     description: 'El BMW M Hybrid V8 es un coche de carreras que puede considerarse la culminación de todas las tecnologías M hasta la fecha. Utiliza un chasis Dallara y está propulsado por un motor turbo de ocho cilindros P66/3 con propulsión eléctrica suplementaria. El motor de combustión se basa en la unidad DTM utilizada en el BMW M4 DTM en 2017 y 20181. El BMW M Hybrid V8 de aproximadamente 2200 libras obtiene toda su potencia eléctrica de la regeneración de los frenos. A partir de la temporada 2023, el nuevo coche luchará por la victoria absoluta en la nueva clase GTP de la serie IMSA, en clásicos tan prestigiosos como las 24 Horas de Daytona, las 12 Horas de Sebring y el icónico Petit Le Mans. en la carretera Atlanta. A partir de 2024, BMW M Motorsport también volverá a competir con este coche en el Campeonato Mundial de Resistencia de la FIA.',
+    tyreTimeChange:10,
+    fuelLiterTime:0.6,
+    maxLiter: 75,
   },
 
   {
@@ -104,6 +122,9 @@ export const cars: Car[] = [
     torque: 534,
     weight: 1030,
     description: 'El Cadillac V-Series.R, originalmente llamado Cadillac V-LMDh, es un prototipo de automóvil de carreras deportivo diseñado por Cadillac y construido por Dallara. Está diseñado según las regulaciones de Le Mans Daytona h y debutó en el Campeonato IMSA SportsCar en las 24 Horas de Daytona de apertura de temporada. El coche también competirá en el Campeonato Mundial de Resistencia de la FIA a partir de 2023. La cilindrada de 5,5 litros del motor es la mayor cilindrada de cualquiera de los autos GTP que debutaron en el resurgimiento de la clase GTP en las 24 Horas de Daytona de 2023.',
+    tyreTimeChange:10,
+    fuelLiterTime:0.6,
+    maxLiter: 75,
   },
 
   {
@@ -119,6 +140,9 @@ export const cars: Car[] = [
     torque: 578,
     weight: 1030,
     description: 'El Ferrari 499P es un prototipo deportivo construido por la Scuderia Ferrari para competir en el Campeonato Mundial de Resistencia de la FIA en la categoría Le Mans Hypercar. El coche fue presentado en la Ferrari Finali Mondiali, la final anual de Ferrari para su serie monomarca, Ferrari Challenge. La introducción del 499P marca 50 años desde la última vez que Ferrari presentó un prototipo deportivo respaldado por fábrica que compitió por la victoria general en las 24 Horas de Le Mans. El coche hizo su debut competitivo en la ronda inaugural de la temporada del Campeonato Mundial de Resistencia de la FIA 2023, las 1000 Millas de Sebring de 2023.',
+    tyreTimeChange:10,
+    fuelLiterTime:0.6,
+    maxLiter: 75,
   },
 
   {
@@ -134,6 +158,9 @@ export const cars: Car[] = [
     torque: 664,
     weight: 1030,
     description: 'El Peugeot 9X8 es un prototipo de carreras con tracción a las cuatro ruedas y sistema de propulsión desarrollado bajo el control de los especialistas de Peugeot Sport. El automóvil tiene un V-6 biturbo de 700 hp que impulsa las ruedas traseras y un motor eléctrico de 268 hp en el eje delantero. Las ruedas traseras están impulsadas por un motor de combustión interna (ICE) V6 biturbo de 2,6 litros y 520 kW, mientras que un motor eléctrico de alto rendimiento de 200 kW hecho a medida impulsa las ruedas delanteras. El coche pesa 2271 libras y tiene una longitud total de 196,85 pulgadas y un ancho de 78,7 pulgadas.',
+    tyreTimeChange:10,
+    fuelLiterTime:0.6,
+    maxLiter: 75,
   },
 
   {
@@ -149,6 +176,9 @@ export const cars: Car[] = [
     torque: 777,
     weight: 1040,
     description: 'El Porsche 963 es un prototipo de coche de carreras deportivo LMDh diseñado por Porsche y construido por Multimatic, para competir en las clases Hypercar y GTP (Grand Touring Protoype) en el Campeonato Mundial de Resistencia FIA y el Campeonato IMSA SportsCar, respectivamente. Tiene un motor V8 de 4,6 litros con doble turbocompresor, incluido el apoyo de un motor eléctrico. Con un peso de alrededor de 1.000 kilogramos, este coche de carreras tiene una potencia total de 500 kW (680 CV). El nombre 963 se inspira en los Porsche 956 y Porsche 962 que corrieron en la década de 1980 y que también compitieron en series de carreras americanas y europeas. El coche se presentó en el Festival de Velocidad de Goodwood de 2022, con una decoración tradicional roja, blanca y negra.',
+    tyreTimeChange:10,
+    fuelLiterTime:0.6,
+    maxLiter: 75,
   },
 
   {
@@ -164,6 +194,9 @@ export const cars: Car[] = [
     torque: 777,
     weight: 1030,
     description: 'El Toyota GR010 Hybrid es un prototipo de coche de carreras deportivo desarrollado para las reglas Le Mans Hypercar 2021 en el Campeonato Mundial de Resistencia de la FIA. Es el sucesor del Toyota TS050 Hybrid, que compitió en el WEC de 2016 a 2020, logrando 2 dobles títulos mundiales del WEC y 3 victorias consecutivas en las 24 Horas de Le Mans de 2018 a 2020. El GR010 HYBRID fue desarrollado por TOYOTA GAZOO Racing (TGR) para la serie 2021 del Campeonato Mundial de Resistencia (WEC) de la FIA de acuerdo con las regulaciones de Le Mans Hypercar (LMH), para competir en la clase cumbre de Hypercar.',
+    tyreTimeChange:10,
+    fuelLiterTime:0.6,
+    maxLiter: 75,
   },
 
   {
@@ -178,7 +211,10 @@ export const cars: Car[] = [
     power: 202,
     torque: 211,
     weight: 988,
-    description: 'Twingo Rs Under 8 Especificaciones: Motor:Clio 3 RS 203 cv<br/>-Transmisión:<br/>-Tipo: Tracción delantera con caja de cambios manual de 6 velocidades<br/><br/>Chasis:<br/>-Tipo: Chasis monocasco de acero 20CDF2 con jaula antivuelco. Carrocería de acero hatchback de 3 puertas con parachoques de plástico.<br/>-Suspensión Delantera: Puntal Macpherson con horquilla inferior, resorte helicoidal, amortiguador de gas telescópico y barra estabilizadora.<br/>-Suspensión Trasera: Brazo de arrastre con barra de torsión, amortiguador telescópico de gas y barra estabilizadora.<br/>-Sistema de Giro: Dirección asistida de correa y piñones<br/><br/>-Dimensiones:<br/>- Longitud: 3.607m <br/>Anchura: 1.688m <br/>Altura: 1.460m<br/>- Distancia entre ejes: 2.368 m <br/>front track: 1.460 m (54.4") <br/>rear track: 1.445 m (52.7") <br/>-Llantas - Gomas: 195/40/17Peso: 988 kg <br/>Tanque de Combustible: 45 L'
+    description: 'Twingo Rs Under 8 Especificaciones: Motor:Clio 3 RS 203 cv<br/>-Transmisión:<br/>-Tipo: Tracción delantera con caja de cambios manual de 6 velocidades<br/><br/>Chasis:<br/>-Tipo: Chasis monocasco de acero 20CDF2 con jaula antivuelco. Carrocería de acero hatchback de 3 puertas con parachoques de plástico.<br/>-Suspensión Delantera: Puntal Macpherson con horquilla inferior, resorte helicoidal, amortiguador de gas telescópico y barra estabilizadora.<br/>-Suspensión Trasera: Brazo de arrastre con barra de torsión, amortiguador telescópico de gas y barra estabilizadora.<br/>-Sistema de Giro: Dirección asistida de correa y piñones<br/><br/>-Dimensiones:<br/>- Longitud: 3.607m <br/>Anchura: 1.688m <br/>Altura: 1.460m<br/>- Distancia entre ejes: 2.368 m <br/>front track: 1.460 m (54.4") <br/>rear track: 1.445 m (52.7") <br/>-Llantas - Gomas: 195/40/17Peso: 988 kg <br/>Tanque de Combustible: 45 L',
+    tyreTimeChange:10,
+    fuelLiterTime:0.6,
+    maxLiter: 45,
   },
 
   {
@@ -193,7 +229,10 @@ export const cars: Car[] = [
     power: 270,
     torque: 320,
     weight: 1050,
-    description: ""
+    description: "",
+    tyreTimeChange:20,
+    fuelLiterTime:0.2,
+    maxLiter: 95,
   },
 
   {
@@ -208,7 +247,10 @@ export const cars: Car[] = [
     power: 650,
     torque: 1000,
     weight: 1450,
-    description: "Hendrick Motorsports, socio de Chevrolet desde hace mucho tiempo, líder de todos los tiempos en campeonatos de la Copa NASCAR y victorias en carreras, fue seleccionado para formar el equipo y construir el auto de carreras Garage 56 Camaro ZL1. Los pilotos de renombre Jimmie Johnson, siete veces campeón de la Copa NASCAR; Jenson Button, Campeón del Mundo de Fórmula Uno 2009; y el múltiples veces ganador de Le Mans, Mike Rockenfeller, conducirá el Garage 56 Camaro ZL1 en Le Mans. Goodyear, el neumático oficial de NASCAR y el fabricante de neumáticos para todas las variantes del Camaro de sexta generación, proporciona neumáticos Goodyear Eagle para el auto de carreras Garage 56. El equipo de Ingeniería de Competición de Deportes de Motor de Chevrolet aportó más de dos décadas de conocimiento, experiencia y éxito en Le Mans con Corvette Racing para ayudar a optimizar el auto de carreras Garage 56. Los ingenieros de Chevrolet también están muy involucrados en lo que puede ser el aspecto más memorable del Garage 56 Camaro: el rugido gutural y totalmente estadounidense producido por el R07 Small Block V-8. El R07 sirve a los equipos Chevrolet en la NASCAR Cup Series, y la variante utilizada en Le Mans fue desarrollada y probada para maximizar el rendimiento y la durabilidad para la carrera de 24 horas. Convertir el Cup Camaro ZL1 en el auto de carreras Garage 56 requirió iluminación funcional específica, nuevos tratamientos aerodinámicos y una decoración destacada. El estudio de diseño de GM Motorsport ejecutó esta visión con la ayuda de Hendrick Motorsports para llevar las proporciones características del Camaro a la pista de carreras."
+    description: "Hendrick Motorsports, socio de Chevrolet desde hace mucho tiempo, líder de todos los tiempos en campeonatos de la Copa NASCAR y victorias en carreras, fue seleccionado para formar el equipo y construir el auto de carreras Garage 56 Camaro ZL1. Los pilotos de renombre Jimmie Johnson, siete veces campeón de la Copa NASCAR; Jenson Button, Campeón del Mundo de Fórmula Uno 2009; y el múltiples veces ganador de Le Mans, Mike Rockenfeller, conducirá el Garage 56 Camaro ZL1 en Le Mans. Goodyear, el neumático oficial de NASCAR y el fabricante de neumáticos para todas las variantes del Camaro de sexta generación, proporciona neumáticos Goodyear Eagle para el auto de carreras Garage 56. El equipo de Ingeniería de Competición de Deportes de Motor de Chevrolet aportó más de dos décadas de conocimiento, experiencia y éxito en Le Mans con Corvette Racing para ayudar a optimizar el auto de carreras Garage 56. Los ingenieros de Chevrolet también están muy involucrados en lo que puede ser el aspecto más memorable del Garage 56 Camaro: el rugido gutural y totalmente estadounidense producido por el R07 Small Block V-8. El R07 sirve a los equipos Chevrolet en la NASCAR Cup Series, y la variante utilizada en Le Mans fue desarrollada y probada para maximizar el rendimiento y la durabilidad para la carrera de 24 horas. Convertir el Cup Camaro ZL1 en el auto de carreras Garage 56 requirió iluminación funcional específica, nuevos tratamientos aerodinámicos y una decoración destacada. El estudio de diseño de GM Motorsport ejecutó esta visión con la ayuda de Hendrick Motorsports para llevar las proporciones características del Camaro a la pista de carreras.",
+    tyreTimeChange:20,
+    fuelLiterTime:0.2,
+    maxLiter: 110,
   },
 
   {
@@ -223,7 +265,10 @@ export const cars: Car[] = [
     power: 650,
     torque: 1000,
     weight: 1450,
-    description: "Mustang de resistencia para Le Mans. Este Mustang tendrá muchas de las mismas cualidades de rendimiento que el Camaro y el Camry."
+    description: "Mustang de resistencia para Le Mans. Este Mustang tendrá muchas de las mismas cualidades de rendimiento que el Camaro y el Camry.",
+    tyreTimeChange:20,
+    fuelLiterTime:0.2,
+    maxLiter: 110,
   },
 
   {
@@ -238,7 +283,10 @@ export const cars: Car[] = [
     power: 650,
     torque: 1000,
     weight: 1450,
-    description: "Camry de resistencia para Le Mans. Este Camry tendrá muchas de las mismas cualidades de rendimiento que igualan tanto al Camaro original como al Mustang."
+    description: "Camry de resistencia para Le Mans. Este Camry tendrá muchas de las mismas cualidades de rendimiento que igualan tanto al Camaro original como al Mustang.",
+    tyreTimeChange:20,
+    fuelLiterTime:0.2,
+    maxLiter: 110,
   },
 
   {
@@ -253,7 +301,10 @@ export const cars: Car[] = [
     power: 447,
     torque: 603,
     weight: 1265,
-    description: ""
+    description: "",
+    tyreTimeChange:20,
+    fuelLiterTime:0.2,
+    maxLiter: 120,
   },
 
   {
@@ -268,7 +319,10 @@ export const cars: Car[] = [
     power: 477,
     torque: 554,
     weight: 1260,
-    description: "El Ferrari 296 GT3 es una versión de competición del 296 GTB, con mejoras que redefinen el rendimiento del coche en términos de preparación para la pista y exigencias estéticas. Fue presentado en el Circuito de Spa-Francorchamps antes de las 24 Horas de Spa de TotalEnergies. El 296 GT3 cuenta con un V-6 de 24 válvulas como el 296GTB de carretera, pero sin el motor eléctrico que lo acompaña, para cumplir con las regulaciones técnicas. Según Ferrari, el 296 GT3 produce un 20 por ciento más de carga aerodinámica que el 488 GT3 anterior. El motor está ubicado más adelante y más abajo, en una configuración de 120 grados con los turbos dentro de la V, para bajar el centro de gravedad y mejorar la rigidez torsional en comparación con el 488 GT3. El coche utiliza un chasis de aluminio completamente nuevo y tiene una distancia entre ejes ligeramente más larga que el coche de carretera para tener en cuenta las restricciones reglamentarias. El sistema de frenos también ha sido rediseñado para el GT3, ahora de 400 mm en el eje delantero. El Ferrari 296 GT3 representa el futuro del Cavallino Rampante en las carreras de GT, un sector que siempre ha sido testigo de la relación más estrecha con los clientes y de la mayor transferencia de tecnología y soluciones innovadoras a los coches de producción."
+    description: "El Ferrari 296 GT3 es una versión de competición del 296 GTB, con mejoras que redefinen el rendimiento del coche en términos de preparación para la pista y exigencias estéticas. Fue presentado en el Circuito de Spa-Francorchamps antes de las 24 Horas de Spa de TotalEnergies. El 296 GT3 cuenta con un V-6 de 24 válvulas como el 296GTB de carretera, pero sin el motor eléctrico que lo acompaña, para cumplir con las regulaciones técnicas. Según Ferrari, el 296 GT3 produce un 20 por ciento más de carga aerodinámica que el 488 GT3 anterior. El motor está ubicado más adelante y más abajo, en una configuración de 120 grados con los turbos dentro de la V, para bajar el centro de gravedad y mejorar la rigidez torsional en comparación con el 488 GT3. El coche utiliza un chasis de aluminio completamente nuevo y tiene una distancia entre ejes ligeramente más larga que el coche de carretera para tener en cuenta las restricciones reglamentarias. El sistema de frenos también ha sido rediseñado para el GT3, ahora de 400 mm en el eje delantero. El Ferrari 296 GT3 representa el futuro del Cavallino Rampante en las carreras de GT, un sector que siempre ha sido testigo de la relación más estrecha con los clientes y de la mayor transferencia de tecnología y soluciones innovadoras a los coches de producción.",
+    tyreTimeChange:20,
+    fuelLiterTime:0.2,
+    maxLiter: 120,
   },
 
   {
@@ -283,7 +337,10 @@ export const cars: Car[] = [
     power: 600,
     torque: 628,
     weight: 1300,
-    description: "El Ford Mustang GT3 2024 es un coche de carreras desarrollado por Ford Performance para las carreras de coches deportivos a nivel mundial. Está basado en el modelo Ford Mustang Dark Horse 2024 y se ofrece a equipos de carreras privados. El coche está propulsado por un motor V8 atmosférico de 5,4 litros basado en el Coyote desarrollado por Ford Performance y M-Sport. Este motor está listo para destrozar la pista con un rendimiento emocionante y una potencia emocionante. El Mustang GT3 cuenta con una suspensión de brazo corto-largo a medida y una caja de cambios transeje montada en la parte trasera. Los paneles de la carrocería están hechos de fibra de carbono y tiene un paquete aerodinámico único. El coche está programado para comenzar a competir a nivel mundial en 2024, con participaciones en el Campeonato Mundial de Resistencia de 2024 y las 24 Horas de Le Mans. Las primeras unidades estarán disponibles para las 24 Horas de Daytona en 2024. Ford Performance continuó su asociación con Multimatic para producir este coche de carreras de precisión. Las ventas y el servicio de este vehículo estarán a cargo de Multimatic. El coche está diseñado para ayudarte a establecer récords personales en cada vuelta."
+    description: "El Ford Mustang GT3 2024 es un coche de carreras desarrollado por Ford Performance para las carreras de coches deportivos a nivel mundial. Está basado en el modelo Ford Mustang Dark Horse 2024 y se ofrece a equipos de carreras privados. El coche está propulsado por un motor V8 atmosférico de 5,4 litros basado en el Coyote desarrollado por Ford Performance y M-Sport. Este motor está listo para destrozar la pista con un rendimiento emocionante y una potencia emocionante. El Mustang GT3 cuenta con una suspensión de brazo corto-largo a medida y una caja de cambios transeje montada en la parte trasera. Los paneles de la carrocería están hechos de fibra de carbono y tiene un paquete aerodinámico único. El coche está programado para comenzar a competir a nivel mundial en 2024, con participaciones en el Campeonato Mundial de Resistencia de 2024 y las 24 Horas de Le Mans. Las primeras unidades estarán disponibles para las 24 Horas de Daytona en 2024. Ford Performance continuó su asociación con Multimatic para producir este coche de carreras de precisión. Las ventas y el servicio de este vehículo estarán a cargo de Multimatic. El coche está diseñado para ayudarte a establecer récords personales en cada vuelta.",
+    tyreTimeChange:20,
+    fuelLiterTime:0.2,
+    maxLiter: 120,
   },
 
   {
@@ -298,7 +355,10 @@ export const cars: Car[] = [
     power: 515,
     torque: 539,
     weight: 1237,
-    description: "El Lexus RC F GT3 es un coche de carreras basado en el modelo de producción Lexus RC F. Cuenta con un motor V8 con más de 500 CV de potencia y una cilindrada de 5400 cc. El coche mide 4.846 mm de largo, 2.030 mm de ancho y 1.271 mm de alto, con un peso de 1.300 kg y una distancia entre ejes de 2.770 mm. La transmisión es una transeje secuencial de 6 velocidades con levas en el volante y el diseño de la tracción es 2WD. La carrocería utiliza carbono para reducir el peso y tiene formas aerodinámicas. El motor tiene un sistema de lubricación por cárter seco y está montado más abajo en el chasis que en el modelo de producción para aumentar el rendimiento en marcha. La parte trasera del coche está diseñada para producir una fuerte carga aerodinámica, con características como un alerón trasero y difusores. La cabina utiliza el mismo monocasco que el modelo de producción base e incluye una jaula antivuelco con fines de seguridad. El asiento está diseñado para una buena protección del conductor y los interruptores permiten realizar ajustes precisos en el rendimiento."
+    description: "El Lexus RC F GT3 es un coche de carreras basado en el modelo de producción Lexus RC F. Cuenta con un motor V8 con más de 500 CV de potencia y una cilindrada de 5400 cc. El coche mide 4.846 mm de largo, 2.030 mm de ancho y 1.271 mm de alto, con un peso de 1.300 kg y una distancia entre ejes de 2.770 mm. La transmisión es una transeje secuencial de 6 velocidades con levas en el volante y el diseño de la tracción es 2WD. La carrocería utiliza carbono para reducir el peso y tiene formas aerodinámicas. El motor tiene un sistema de lubricación por cárter seco y está montado más abajo en el chasis que en el modelo de producción para aumentar el rendimiento en marcha. La parte trasera del coche está diseñada para producir una fuerte carga aerodinámica, con características como un alerón trasero y difusores. La cabina utiliza el mismo monocasco que el modelo de producción base e incluye una jaula antivuelco con fines de seguridad. El asiento está diseñado para una buena protección del conductor y los interruptores permiten realizar ajustes precisos en el rendimiento.",
+    tyreTimeChange:20,
+    fuelLiterTime:0.2,
+    maxLiter: 120,
   },
 
   {
@@ -313,7 +373,10 @@ export const cars: Car[] = [
     power: 550,
     torque: 576,
     weight: 1160,
-    description: "El Mercedes-AMG GT3 EVO es un extraordinario vehículo de competición que se presentó en 2020 para sustituir al anterior Mercedes-AMG GT3. Cuenta con el mismo motor que su predecesor, pero con un estilo actualizado, frenos mejorados y sistemas electrónicos. Este coche es conocido por su rendimiento y fiabilidad, gracias a su motor AMG V8 de 6,3 litros y a la lubricación por cárter seco. El motor se ha colocado especialmente bajo, lo que contribuye a una conducción precisa. Los sistemas electrónicos de control de la dinámica de conducción, desde el control de tracción hasta el ABS, se han desarrollado específicamente para fines de competición. El GT3 EVO destaca en situaciones de baja velocidad, con un potente tren delantero que mantiene el coche bajo control mientras el motor proporciona un par amplio para la aceleración. A pesar de su potencia y rendimiento, la naturaleza predecible del coche lo hace adecuado para todo tipo de conductores, desde aficionados hasta profesionales. Sin embargo, cuando se configura de forma agresiva, puede convertirse en un auténtico reto, incluso para los conductores de nivel profesional."
+    description: "El Mercedes-AMG GT3 EVO es un extraordinario vehículo de competición que se presentó en 2020 para sustituir al anterior Mercedes-AMG GT3. Cuenta con el mismo motor que su predecesor, pero con un estilo actualizado, frenos mejorados y sistemas electrónicos. Este coche es conocido por su rendimiento y fiabilidad, gracias a su motor AMG V8 de 6,3 litros y a la lubricación por cárter seco. El motor se ha colocado especialmente bajo, lo que contribuye a una conducción precisa. Los sistemas electrónicos de control de la dinámica de conducción, desde el control de tracción hasta el ABS, se han desarrollado específicamente para fines de competición. El GT3 EVO destaca en situaciones de baja velocidad, con un potente tren delantero que mantiene el coche bajo control mientras el motor proporciona un par amplio para la aceleración. A pesar de su potencia y rendimiento, la naturaleza predecible del coche lo hace adecuado para todo tipo de conductores, desde aficionados hasta profesionales. Sin embargo, cuando se configura de forma agresiva, puede convertirse en un auténtico reto, incluso para los conductores de nivel profesional.",
+    tyreTimeChange:20,
+    fuelLiterTime:0.2,
+    maxLiter: 120,
   },
 
   {
@@ -328,7 +391,10 @@ export const cars: Car[] = [
     power: 603,
     torque: 627,
     weight: 930,
-    description: "Cadillac se enorgullece de regresar a la cima de las carreras de prototipos en Norteamérica después de una ausencia de 14 años”, dijo Johan de Nysschen, presidente de Cadillac. Los modelos de producción V-Performance de Cadillac, el ATS-V y el CTS-V, están transformando la sustancia de los productos de nuestra marca, ganándose un lugar entre las marcas de élite de alto rendimiento del mundo. El Cadillac DPi-V.R fortalece aún más nuestra cartera V-Performance, colocando a Cadillac en la serie más alta de carreras de autos deportivos en Norteamérica. El nuevo Cadillac DPi-V.R ha sido diseñado para contribuir al desempeño funcional del prototipo utilizando elementos extraídos de la línea actual de modelos Cadillac V-Performance, especialmente el sedán CTS-V. Por encima de todo, el DPi-V.R fue desarrollado para funcionar mediante pruebas en el túnel de viento y desarrollo de ingeniería."
+    description: "Cadillac se enorgullece de regresar a la cima de las carreras de prototipos en Norteamérica después de una ausencia de 14 años”, dijo Johan de Nysschen, presidente de Cadillac. Los modelos de producción V-Performance de Cadillac, el ATS-V y el CTS-V, están transformando la sustancia de los productos de nuestra marca, ganándose un lugar entre las marcas de élite de alto rendimiento del mundo. El Cadillac DPi-V.R fortalece aún más nuestra cartera V-Performance, colocando a Cadillac en la serie más alta de carreras de autos deportivos en Norteamérica. El nuevo Cadillac DPi-V.R ha sido diseñado para contribuir al desempeño funcional del prototipo utilizando elementos extraídos de la línea actual de modelos Cadillac V-Performance, especialmente el sedán CTS-V. Por encima de todo, el DPi-V.R fue desarrollado para funcionar mediante pruebas en el túnel de viento y desarrollo de ingeniería.",
+    tyreTimeChange:10,
+    fuelLiterTime:0.6,
+    maxLiter: 78,
   },
 
   {
@@ -343,7 +409,10 @@ export const cars: Car[] = [
     power: 515,
     torque: 520,
     weight: 1160,
-    description: ""
+    description: "",
+    tyreTimeChange:10,
+    fuelLiterTime:0.1,
+    maxLiter: 70,
   },
 
   {
@@ -358,7 +427,10 @@ export const cars: Car[] = [
     power: 600,
     torque: 700,
     weight: 1085,
-    description: ""
+    description: "",
+    tyreTimeChange:10,
+    fuelLiterTime:0.12,
+    maxLiter: 70,
   },
 
   {
@@ -373,7 +445,10 @@ export const cars: Car[] = [
     power: 600,
     torque: 700,
     weight: 1300,
-    description: ""
+    description: "",
+    tyreTimeChange:10,
+    fuelLiterTime:0.1,
+    maxLiter: 90,
   },
 
   {
@@ -388,7 +463,10 @@ export const cars: Car[] = [
     power: 930,
     torque: 388,
     weight: 530,
-    description: "El McLaren MP4-20 es un coche de carreras de Fórmula Uno construido por McLaren. Fue diseñado por Adrian Newey y Mike Coughlan para el Campeonato Mundial de Fórmula Uno de 2005. El chasis del coche tenía un nuevo diseño tras el fracaso del MP4-18 y el MP4-19. El nuevo coche presentaba una aerodinámica y una suspensión revisadas para las regulaciones de 2005, incluido un alerón delantero elevado, un difusor más pequeño y un alerón trasero más adelantado.  Se utilizó una distancia entre ejes más corta para maximizar el rendimiento de los neumáticos Michelin.  El coche presentaba distintivas alas en forma de 'cuerno' instaladas en la carrocería detrás de la entrada de aire superior en un intento de recuperar la mayor carga aerodinámica posible perdida debido a los cambios en las reglas de la FIA. El diseño de morro ancho y plano se probó inicialmente en el MP4-19 en el Gran Premio de Italia de 2004, pero no se mantuvo durante el resto de esa temporada. Se utilizó en su totalidad en 2005. Este sería el último automóvil de McLaren en presentar los colores gris y negro del patrocinador principal, West Cigarrillos, una asociación que comenzó con el MP4/12 en 1997.  El motor Mercedes era el más potente de la F1 ese año, pero sufrió problemas de fiabilidad que le costaron a Raikkonen el campeonato mundial a Fernando Alonso y a McLaren el Campeonato de Constructores a Renault a pesar de que McLaren ganó 10 carreras frente a 8 de Renault.  Raikkonen ganó siete carreras y estaba en condiciones de ganar al menos otras tres, pero la falta de fiabilidad del coche le costó el título. Montoya también sufrió problemas de confiabilidad que le costaron una posible victoria en Hungría y posibles podios en Francia y China.  El desarrollo continuo a lo largo del año convirtió al MP4/20 en el coche más rápido de la F1 desde mitad de temporada en adelante, como lo demuestra el número de poles y vueltas rápidas acumuladas tanto por Raikkonen como por Montoya. Raikkonen y McLaren finalmente terminaron segundos en sus respectivos campeonatos, mientras que Montoya terminó cuarto en la clasificación de pilotos."
+    description: "El McLaren MP4-20 es un coche de carreras de Fórmula Uno construido por McLaren. Fue diseñado por Adrian Newey y Mike Coughlan para el Campeonato Mundial de Fórmula Uno de 2005. El chasis del coche tenía un nuevo diseño tras el fracaso del MP4-18 y el MP4-19. El nuevo coche presentaba una aerodinámica y una suspensión revisadas para las regulaciones de 2005, incluido un alerón delantero elevado, un difusor más pequeño y un alerón trasero más adelantado.  Se utilizó una distancia entre ejes más corta para maximizar el rendimiento de los neumáticos Michelin.  El coche presentaba distintivas alas en forma de 'cuerno' instaladas en la carrocería detrás de la entrada de aire superior en un intento de recuperar la mayor carga aerodinámica posible perdida debido a los cambios en las reglas de la FIA. El diseño de morro ancho y plano se probó inicialmente en el MP4-19 en el Gran Premio de Italia de 2004, pero no se mantuvo durante el resto de esa temporada. Se utilizó en su totalidad en 2005. Este sería el último automóvil de McLaren en presentar los colores gris y negro del patrocinador principal, West Cigarrillos, una asociación que comenzó con el MP4/12 en 1997.  El motor Mercedes era el más potente de la F1 ese año, pero sufrió problemas de fiabilidad que le costaron a Raikkonen el campeonato mundial a Fernando Alonso y a McLaren el Campeonato de Constructores a Renault a pesar de que McLaren ganó 10 carreras frente a 8 de Renault.  Raikkonen ganó siete carreras y estaba en condiciones de ganar al menos otras tres, pero la falta de fiabilidad del coche le costó el título. Montoya también sufrió problemas de confiabilidad que le costaron una posible victoria en Hungría y posibles podios en Francia y China.  El desarrollo continuo a lo largo del año convirtió al MP4/20 en el coche más rápido de la F1 desde mitad de temporada en adelante, como lo demuestra el número de poles y vueltas rápidas acumuladas tanto por Raikkonen como por Montoya. Raikkonen y McLaren finalmente terminaron segundos en sus respectivos campeonatos, mientras que Montoya terminó cuarto en la clasificación de pilotos.",
+    tyreTimeChange:10,
+    fuelLiterTime:0.1,
+    maxLiter: 130,
   },
 
   {
@@ -403,7 +481,10 @@ export const cars: Car[] = [
     power: 920,
     torque: 394,
     weight: 530,
-    description: "El Renault R25 fue el coche de Fórmula Uno construido por Renault y conducido por Fernando Alonso y Giancarlo Fisichella para la temporada 2005. El coche ganó los campeonatos de pilotos y constructores en 2005, los primeros títulos para cualquier auto de carreras con licencia francesa desde el triunfo del Matra MS80 en 1969. Durante la temporada, el coche resultó ser más lento que el McLaren MP4-20 en numerosos puntos, con un total de victorias de 8-10. La confiabilidad y la consistencia prevalecieron al final, con Fernando Alonso y Giancarlo Fisichella llevando el auto a la última victoria y títulos para un auto de Fórmula Uno con motor V10, marcando el final de una era. Este coche también consiguió el primer título de Michelin desde su regreso a la Fórmula Uno, ganando de nuevo el título con el coche Renault 2006 en la temporada 2006, la última para el fabricante de neumáticos francés. El R25 fue el primer coche ganador del Campeonato de Constructores desde 1991 que no fue diseñado ni por Adrian Newey ni por Rory Byrne. En 19 carreras, anotó 191 puntos, 8 victorias, 15 podios y se quedó completamente fuera de los puntos sólo una vez en 18 largadas (sin contar el Gran Premio de Estados Unidos, donde ambos pilotos de Renault, al igual que todos sus compañeros corredores de neumáticos Michelin, se retiraron). antes de empezar). El R25 también fue el último coche de Fórmula Uno de Renault en utilizar una caja de cambios de 6 velocidades antes del cambio a una caja de cambios obligatoria de 7 velocidades en la temporada siguiente."
+    description: "El Renault R25 fue el coche de Fórmula Uno construido por Renault y conducido por Fernando Alonso y Giancarlo Fisichella para la temporada 2005. El coche ganó los campeonatos de pilotos y constructores en 2005, los primeros títulos para cualquier auto de carreras con licencia francesa desde el triunfo del Matra MS80 en 1969. Durante la temporada, el coche resultó ser más lento que el McLaren MP4-20 en numerosos puntos, con un total de victorias de 8-10. La confiabilidad y la consistencia prevalecieron al final, con Fernando Alonso y Giancarlo Fisichella llevando el auto a la última victoria y títulos para un auto de Fórmula Uno con motor V10, marcando el final de una era. Este coche también consiguió el primer título de Michelin desde su regreso a la Fórmula Uno, ganando de nuevo el título con el coche Renault 2006 en la temporada 2006, la última para el fabricante de neumáticos francés. El R25 fue el primer coche ganador del Campeonato de Constructores desde 1991 que no fue diseñado ni por Adrian Newey ni por Rory Byrne. En 19 carreras, anotó 191 puntos, 8 victorias, 15 podios y se quedó completamente fuera de los puntos sólo una vez en 18 largadas (sin contar el Gran Premio de Estados Unidos, donde ambos pilotos de Renault, al igual que todos sus compañeros corredores de neumáticos Michelin, se retiraron). antes de empezar). El R25 también fue el último coche de Fórmula Uno de Renault en utilizar una caja de cambios de 6 velocidades antes del cambio a una caja de cambios obligatoria de 7 velocidades en la temporada siguiente.",
+    tyreTimeChange:10,
+    fuelLiterTime:0.1,
+    maxLiter: 130,
   },
 
   {
@@ -418,7 +499,10 @@ export const cars: Car[] = [
     power: 220,
     torque: 351,
     weight: 1170,
-    description: "Hay dos motorizaciones disponibles para el nuevo Renault Clio R.S. propulsado por el motor de gasolina de 200 CV en la versión básica y de 220 CV en la versión Trophy, en ambos casos combinado con la caja de cambios EDC de doble embrague de 6 velocidades con levas en el volante. En la cima de las carreras se encuentra el chasis Trophy, asociado a llantas de 18 pulgadas, decididamente orientadas a una conducción aún más deportiva, rebajadas 20 mm delante y 10 mm detrás. El chasis Trophy, por su parte, es exclusivo de la versión de 220 CV capaz de ofrecer unas prestaciones apasionantes: 0 a 100 km/h en 6,6 segundos y una velocidad máxima de 235 km/h."
+    description: "Hay dos motorizaciones disponibles para el nuevo Renault Clio R.S. propulsado por el motor de gasolina de 200 CV en la versión básica y de 220 CV en la versión Trophy, en ambos casos combinado con la caja de cambios EDC de doble embrague de 6 velocidades con levas en el volante. En la cima de las carreras se encuentra el chasis Trophy, asociado a llantas de 18 pulgadas, decididamente orientadas a una conducción aún más deportiva, rebajadas 20 mm delante y 10 mm detrás. El chasis Trophy, por su parte, es exclusivo de la versión de 220 CV capaz de ofrecer unas prestaciones apasionantes: 0 a 100 km/h en 6,6 segundos y una velocidad máxima de 235 km/h.",
+    tyreTimeChange:8,
+    fuelLiterTime:1.2,
+    maxLiter: 45,
   },
 
   {
@@ -433,7 +517,10 @@ export const cars: Car[] = [
     power: 365,
     torque: 490,
     weight: 1424,
-    description: "La historia de éxito continúa. Con el BMW M2 CS Racing, BMW M Motorsport continúa su tradición de ofrecer vehículos de carreras para clientes cercanos a la producción. como sus dos predecesores, el BMW M235i Racing y el BMW M240i Racing, el más nuevo miembro de la gama de productos de carreras para clientes de BMW M allana el camino para ambiciosos equipos y pilotos para involucrarse en el deporte del motor. El BMW M2 CS Racing convence con un rendimiento de conducción impresionante y ofrece el rendimiento de una carrera de pedigrí coche a un precio competitivo.El BMW M2 CS (consumo combinado de combustible en l/100 km: 10,4–9,4; emisiones combinadas de CO2 en g/km: 238–214), una edición especial de BMW M GmbH, es la base perfecta para el nuevo modelo básico. En estrecha colaboración con colegas de BMW M GmbH, los ingenieros de BMW Motorsport utilizaron Muchas de las ideas del desarrollo del BMW M4 GT4 para establecer estándares totalmente nuevos en la categoría básica con el BMW M2 CS Racing. Las ayudas a la conducción específicas para deportes de motor, como ABS y DSC, garantizan que los recién llegados puedan manejar el coche con seguridad. También viene de serie un diferencial mecánico de deslizamiento limitado con precarga y refrigeración independiente, al igual que modelos especiales. Ejes de transmisión fabricados. Al igual que su homólogo de serie, el techo también está fabricado de carbono. Las principales áreas de actuación previstas son la NLS Nürburgring Endurance Series y el TC America."
+    description: "La historia de éxito continúa. Con el BMW M2 CS Racing, BMW M Motorsport continúa su tradición de ofrecer vehículos de carreras para clientes cercanos a la producción. como sus dos predecesores, el BMW M235i Racing y el BMW M240i Racing, el más nuevo miembro de la gama de productos de carreras para clientes de BMW M allana el camino para ambiciosos equipos y pilotos para involucrarse en el deporte del motor. El BMW M2 CS Racing convence con un rendimiento de conducción impresionante y ofrece el rendimiento de una carrera de pedigrí coche a un precio competitivo.El BMW M2 CS (consumo combinado de combustible en l/100 km: 10,4–9,4; emisiones combinadas de CO2 en g/km: 238–214), una edición especial de BMW M GmbH, es la base perfecta para el nuevo modelo básico. En estrecha colaboración con colegas de BMW M GmbH, los ingenieros de BMW Motorsport utilizaron Muchas de las ideas del desarrollo del BMW M4 GT4 para establecer estándares totalmente nuevos en la categoría básica con el BMW M2 CS Racing. Las ayudas a la conducción específicas para deportes de motor, como ABS y DSC, garantizan que los recién llegados puedan manejar el coche con seguridad. También viene de serie un diferencial mecánico de deslizamiento limitado con precarga y refrigeración independiente, al igual que modelos especiales. Ejes de transmisión fabricados. Al igual que su homólogo de serie, el techo también está fabricado de carbono. Las principales áreas de actuación previstas son la NLS Nürburgring Endurance Series y el TC America.",
+    tyreTimeChange:20,
+    fuelLiterTime:0.2,
+    maxLiter: 120,
   },
 
   {
@@ -448,7 +535,10 @@ export const cars: Car[] = [
     power: 350,
     torque: 420,
     weight: 1205,
-    description: "Desde la temporada 2014 en adelante, todos los coches se fabrican según las mismas normas NGTC. Introducidos por primera vez en 2011 por un período inicial de cinco años, estos reglamentos técnicos están diseñados para reducir drásticamente los costos de diseño, construcción y funcionamiento de los automóviles y motores. Ahora sólo los coches NGTC son elegibles para competir en el BTCC. TOCA amplió este reglamento por 6 años más a partir de 2016. NGTC permite a los equipos independientes competir en igualdad de condiciones contra los esfuerzos respaldados por los fabricantes manteniendo los costos bajos y al mismo tiempo recompensando la ingeniería precisa y la importante estrategia de una fracción de segundo. La base de NGTC es un énfasis en algunos componentes comunes, como turbo, válvula de descarga, intercoolers, ECU, instrumentación y tablero, sistema de administración de energía, caja de cambios secuencial de seis velocidades, tanques de combustible, diferencial, subchasis, dirección, frenos, embrague, ruedas. amortiguadores y suspensión, lo que reduce drásticamente los costos para los equipos que buscan competir en uno de los campos deportivos de motor más atractivos del mundo. En 2016 se introduce un nuevo socio técnico para los subchasis comunes, la suspensión y la nueva dirección asistida hidráulica, mientras que todos los demás socios técnicos estaban interesados ​​en continuar su asociación con el BTCC. Los equipos tienen la opción de utilizar el motor sin marca NGTC de TOCA o, ya sean privados o totalmente respaldados por el fabricante, desarrollar su propio motor según las regulaciones, siempre que sea de la misma 'familia' que el modelo de automóvil elegido. Todos son motores turboalimentados de 2 litros y 340 CV."
+    description: "Desde la temporada 2014 en adelante, todos los coches se fabrican según las mismas normas NGTC. Introducidos por primera vez en 2011 por un período inicial de cinco años, estos reglamentos técnicos están diseñados para reducir drásticamente los costos de diseño, construcción y funcionamiento de los automóviles y motores. Ahora sólo los coches NGTC son elegibles para competir en el BTCC. TOCA amplió este reglamento por 6 años más a partir de 2016. NGTC permite a los equipos independientes competir en igualdad de condiciones contra los esfuerzos respaldados por los fabricantes manteniendo los costos bajos y al mismo tiempo recompensando la ingeniería precisa y la importante estrategia de una fracción de segundo. La base de NGTC es un énfasis en algunos componentes comunes, como turbo, válvula de descarga, intercoolers, ECU, instrumentación y tablero, sistema de administración de energía, caja de cambios secuencial de seis velocidades, tanques de combustible, diferencial, subchasis, dirección, frenos, embrague, ruedas. amortiguadores y suspensión, lo que reduce drásticamente los costos para los equipos que buscan competir en uno de los campos deportivos de motor más atractivos del mundo. En 2016 se introduce un nuevo socio técnico para los subchasis comunes, la suspensión y la nueva dirección asistida hidráulica, mientras que todos los demás socios técnicos estaban interesados ​​en continuar su asociación con el BTCC. Los equipos tienen la opción de utilizar el motor sin marca NGTC de TOCA o, ya sean privados o totalmente respaldados por el fabricante, desarrollar su propio motor según las regulaciones, siempre que sea de la misma 'familia' que el modelo de automóvil elegido. Todos son motores turboalimentados de 2 litros y 340 CV.",
+    tyreTimeChange:5,
+    fuelLiterTime:1.2,
+    maxLiter: 100,
   },
 
   {
@@ -463,7 +553,10 @@ export const cars: Car[] = [
     power: 350,
     torque: 420,
     weight: 1205,
-    description: "Desde la temporada 2014 en adelante, todos los coches se fabrican según las mismas normas NGTC. Introducidos por primera vez en 2011 por un período inicial de cinco años, estos reglamentos técnicos están diseñados para reducir drásticamente los costos de diseño, construcción y funcionamiento de los automóviles y motores. Ahora sólo los coches NGTC son elegibles para competir en el BTCC. TOCA amplió este reglamento por 6 años más a partir de 2016. NGTC permite a los equipos independientes competir en igualdad de condiciones contra los esfuerzos respaldados por los fabricantes manteniendo los costos bajos y al mismo tiempo recompensando la ingeniería precisa y la importante estrategia de una fracción de segundo. La base de NGTC es un énfasis en algunos componentes comunes, como turbo, válvula de descarga, intercoolers, ECU, instrumentación y tablero, sistema de administración de energía, caja de cambios secuencial de seis velocidades, tanques de combustible, diferencial, subchasis, dirección, frenos, embrague, ruedas. amortiguadores y suspensión, lo que reduce drásticamente los costos para los equipos que buscan competir en uno de los campos deportivos de motor más atractivos del mundo. En 2016 se introduce un nuevo socio técnico para los subchasis comunes, la suspensión y la nueva dirección asistida hidráulica, mientras que todos los demás socios técnicos estaban interesados ​​en continuar su asociación con el BTCC. Los equipos tienen la opción de utilizar el motor sin marca NGTC de TOCA o, ya sean privados o totalmente respaldados por el fabricante, desarrollar su propio motor según las regulaciones, siempre que sea de la misma 'familia' que el modelo de automóvil elegido. Todos son motores turboalimentados de 2 litros y 340 CV."
+    description: "Desde la temporada 2014 en adelante, todos los coches se fabrican según las mismas normas NGTC. Introducidos por primera vez en 2011 por un período inicial de cinco años, estos reglamentos técnicos están diseñados para reducir drásticamente los costos de diseño, construcción y funcionamiento de los automóviles y motores. Ahora sólo los coches NGTC son elegibles para competir en el BTCC. TOCA amplió este reglamento por 6 años más a partir de 2016. NGTC permite a los equipos independientes competir en igualdad de condiciones contra los esfuerzos respaldados por los fabricantes manteniendo los costos bajos y al mismo tiempo recompensando la ingeniería precisa y la importante estrategia de una fracción de segundo. La base de NGTC es un énfasis en algunos componentes comunes, como turbo, válvula de descarga, intercoolers, ECU, instrumentación y tablero, sistema de administración de energía, caja de cambios secuencial de seis velocidades, tanques de combustible, diferencial, subchasis, dirección, frenos, embrague, ruedas. amortiguadores y suspensión, lo que reduce drásticamente los costos para los equipos que buscan competir en uno de los campos deportivos de motor más atractivos del mundo. En 2016 se introduce un nuevo socio técnico para los subchasis comunes, la suspensión y la nueva dirección asistida hidráulica, mientras que todos los demás socios técnicos estaban interesados ​​en continuar su asociación con el BTCC. Los equipos tienen la opción de utilizar el motor sin marca NGTC de TOCA o, ya sean privados o totalmente respaldados por el fabricante, desarrollar su propio motor según las regulaciones, siempre que sea de la misma 'familia' que el modelo de automóvil elegido. Todos son motores turboalimentados de 2 litros y 340 CV.",
+    tyreTimeChange:5,
+    fuelLiterTime:1.2,
+    maxLiter: 100,
   },
 
   {
@@ -478,7 +571,10 @@ export const cars: Car[] = [
     power: 350,
     torque: 420,
     weight: 1205,
-    description: "Desde la temporada 2014 en adelante, todos los coches se fabrican según las mismas normas NGTC. Introducidos por primera vez en 2011 por un período inicial de cinco años, estos reglamentos técnicos están diseñados para reducir drásticamente los costos de diseño, construcción y funcionamiento de los automóviles y motores. Ahora sólo los coches NGTC son elegibles para competir en el BTCC. TOCA amplió este reglamento por 6 años más a partir de 2016. NGTC permite a los equipos independientes competir en igualdad de condiciones contra los esfuerzos respaldados por los fabricantes manteniendo los costos bajos y al mismo tiempo recompensando la ingeniería precisa y la importante estrategia de una fracción de segundo. La base de NGTC es un énfasis en algunos componentes comunes, como turbo, válvula de descarga, intercoolers, ECU, instrumentación y tablero, sistema de administración de energía, caja de cambios secuencial de seis velocidades, tanques de combustible, diferencial, subchasis, dirección, frenos, embrague, ruedas. amortiguadores y suspensión, lo que reduce drásticamente los costos para los equipos que buscan competir en uno de los campos deportivos de motor más atractivos del mundo. En 2016 se introduce un nuevo socio técnico para los subchasis comunes, la suspensión y la nueva dirección asistida hidráulica, mientras que todos los demás socios técnicos estaban interesados ​​en continuar su asociación con el BTCC. Los equipos tienen la opción de utilizar el motor sin marca NGTC de TOCA o, ya sean privados o totalmente respaldados por el fabricante, desarrollar su propio motor según las regulaciones, siempre que sea de la misma 'familia' que el modelo de automóvil elegido. Todos son motores turboalimentados de 2 litros y 340 CV."
+    description: "Desde la temporada 2014 en adelante, todos los coches se fabrican según las mismas normas NGTC. Introducidos por primera vez en 2011 por un período inicial de cinco años, estos reglamentos técnicos están diseñados para reducir drásticamente los costos de diseño, construcción y funcionamiento de los automóviles y motores. Ahora sólo los coches NGTC son elegibles para competir en el BTCC. TOCA amplió este reglamento por 6 años más a partir de 2016. NGTC permite a los equipos independientes competir en igualdad de condiciones contra los esfuerzos respaldados por los fabricantes manteniendo los costos bajos y al mismo tiempo recompensando la ingeniería precisa y la importante estrategia de una fracción de segundo. La base de NGTC es un énfasis en algunos componentes comunes, como turbo, válvula de descarga, intercoolers, ECU, instrumentación y tablero, sistema de administración de energía, caja de cambios secuencial de seis velocidades, tanques de combustible, diferencial, subchasis, dirección, frenos, embrague, ruedas. amortiguadores y suspensión, lo que reduce drásticamente los costos para los equipos que buscan competir en uno de los campos deportivos de motor más atractivos del mundo. En 2016 se introduce un nuevo socio técnico para los subchasis comunes, la suspensión y la nueva dirección asistida hidráulica, mientras que todos los demás socios técnicos estaban interesados ​​en continuar su asociación con el BTCC. Los equipos tienen la opción de utilizar el motor sin marca NGTC de TOCA o, ya sean privados o totalmente respaldados por el fabricante, desarrollar su propio motor según las regulaciones, siempre que sea de la misma 'familia' que el modelo de automóvil elegido. Todos son motores turboalimentados de 2 litros y 340 CV.",
+    tyreTimeChange:5,
+    fuelLiterTime:1.2,
+    maxLiter: 100,
   },
 
   {
@@ -493,7 +589,10 @@ export const cars: Car[] = [
     power: 450,
     torque: 450,
     weight: 792,
-    description: "En la pista, el dominio de Ferrari fue tan grande como siempre tanto en el prototipo como en la clase GT, pero al otro lado del Océano Atlántico se diseñó un plan para romper el bastión de la Scuderia. Al principio, Henry Ford intentó comprar Ferrari, pero cuando las negociaciones fracasaron, Ford se propuso diseñar un automóvil que pudiera vencer a esos 'pequeños y rápidos autos rojos', como él los llamaba. Con el Lola Mk 6 como base, el Ford GT hizo su debut en las 24 Horas de Le Mans de 1964. Equipado ahora con un motor de cuatro litros, el 330 P demostró ser más rápido y fiable que el Ford GT, poco probado. Sin Ford rematando, Ferrari anotó un impresionante 1-2-3. En la clase GT, Ford consiguió su primer éxito al vencer a los GTO con el AC Cobra Daytona Coupé. No se repararon en gastos en ninguno de los lados del océano y Ferrari lanzó el nuevo P2 que se enfrentaría al GT40 de 7 litros de Ford. Después de 560 vueltas de prueba en Daytona en diciembre de 1966, el P4 estaba listo para la acción. Dos de los tres P3 estaban equipados con carrocería estilo P4 y un motor con carburador Weber. Se construyeron dos 330 P3 sin terminar con las mismas especificaciones y se denominaron 412 P. Los cuatro coches se vendieron a privados para respaldar el esfuerzo del P4 de fábrica. Lo nuevo de Ford en las 24 Horas de Le Mans de 1967 fue la versión Mk IV del GT40, con un monocasco de aluminio en forma de panal de fabricación estadounidense y el familiar V8 de 7 litros. Todas las pruebas en Daytona dieron sus frutos, ya que Ferrari dominó en casa de Ford en la carrera de 24 horas de Daytona. El podio lo llenaron los pilotos de Ferrari, lo que subrayó el dominio de la Scuderia cuando los tres coches ganadores cruzaron la línea juntos. Los dos primeros eran P4 y el tercero un P3."
+    description: "En la pista, el dominio de Ferrari fue tan grande como siempre tanto en el prototipo como en la clase GT, pero al otro lado del Océano Atlántico se diseñó un plan para romper el bastión de la Scuderia. Al principio, Henry Ford intentó comprar Ferrari, pero cuando las negociaciones fracasaron, Ford se propuso diseñar un automóvil que pudiera vencer a esos 'pequeños y rápidos autos rojos', como él los llamaba. Con el Lola Mk 6 como base, el Ford GT hizo su debut en las 24 Horas de Le Mans de 1964. Equipado ahora con un motor de cuatro litros, el 330 P demostró ser más rápido y fiable que el Ford GT, poco probado. Sin Ford rematando, Ferrari anotó un impresionante 1-2-3. En la clase GT, Ford consiguió su primer éxito al vencer a los GTO con el AC Cobra Daytona Coupé. No se repararon en gastos en ninguno de los lados del océano y Ferrari lanzó el nuevo P2 que se enfrentaría al GT40 de 7 litros de Ford. Después de 560 vueltas de prueba en Daytona en diciembre de 1966, el P4 estaba listo para la acción. Dos de los tres P3 estaban equipados con carrocería estilo P4 y un motor con carburador Weber. Se construyeron dos 330 P3 sin terminar con las mismas especificaciones y se denominaron 412 P. Los cuatro coches se vendieron a privados para respaldar el esfuerzo del P4 de fábrica. Lo nuevo de Ford en las 24 Horas de Le Mans de 1967 fue la versión Mk IV del GT40, con un monocasco de aluminio en forma de panal de fabricación estadounidense y el familiar V8 de 7 litros. Todas las pruebas en Daytona dieron sus frutos, ya que Ferrari dominó en casa de Ford en la carrera de 24 horas de Daytona. El podio lo llenaron los pilotos de Ferrari, lo que subrayó el dominio de la Scuderia cuando los tres coches ganadores cruzaron la línea juntos. Los dos primeros eran P4 y el tercero un P3.",
+    tyreTimeChange:10,
+    fuelLiterTime:0.1,
+    maxLiter: 114,
   },
 
   {
@@ -508,7 +607,10 @@ export const cars: Car[] = [
     power: 532,
     torque: 739,
     weight: 1000,
-    description: "Quizás el auto de carreras estadounidense de posguerra más importante jamás producido fue el Ford Mk IV GT40, y es nada menos que una leyenda de las carreras. Fue el desarrollo definitivo de la plataforma GT40 y llevó la lucha directamente a Ferrari, dominando un campo que incluía el Ferrari 330 PF y el Chaparral 2F, así como sus predecesores, el GT40 Mk I y Mk IIB. Como revelaría la historia, el Mk IV sólo participaría en dos carreras, en las 12 Horas de Sebring de 1967, donde Mario Andretti y Bruce McLaren pilotaron un Mk IV hasta la victoria, y en las 24 Horas de Le Mans de 1967, donde Dan Gurney y A.J. Foyt superó a todos hasta la bandera a cuadros y ganó el Índice de Rendimiento al coche más eficiente. Esa victoria es la única victoria absoluta de un chasis, motor, equipo y pilotos fabricados en Estados Unidos en la legendaria carrera de resistencia de 24 horas de Le Mans. Debido al rendimiento incomparable del Mk IV, la FIA rápidamente relegó al Mk IV a la extinción de las carreras al prohibir cualquier prototipo de automóvil que tuviera motores de más de tres litros."
+    description: "Quizás el auto de carreras estadounidense de posguerra más importante jamás producido fue el Ford Mk IV GT40, y es nada menos que una leyenda de las carreras. Fue el desarrollo definitivo de la plataforma GT40 y llevó la lucha directamente a Ferrari, dominando un campo que incluía el Ferrari 330 PF y el Chaparral 2F, así como sus predecesores, el GT40 Mk I y Mk IIB. Como revelaría la historia, el Mk IV sólo participaría en dos carreras, en las 12 Horas de Sebring de 1967, donde Mario Andretti y Bruce McLaren pilotaron un Mk IV hasta la victoria, y en las 24 Horas de Le Mans de 1967, donde Dan Gurney y A.J. Foyt superó a todos hasta la bandera a cuadros y ganó el Índice de Rendimiento al coche más eficiente. Esa victoria es la única victoria absoluta de un chasis, motor, equipo y pilotos fabricados en Estados Unidos en la legendaria carrera de resistencia de 24 horas de Le Mans. Debido al rendimiento incomparable del Mk IV, la FIA rápidamente relegó al Mk IV a la extinción de las carreras al prohibir cualquier prototipo de automóvil que tuviera motores de más de tres litros.",
+    tyreTimeChange:20,
+    fuelLiterTime:0.5,
+    maxLiter: 125,
   },
 
   {
@@ -523,7 +625,10 @@ export const cars: Car[] = [
     power: 569,
     torque: 567,
     weight: 1300,
-    description: "Construido sobre la base establecida por el 488 Challenge, el 488 Challenge EVO lleva el rendimiento y el placer de conducir al siguiente nivel con una variedad de mejoras en la aerodinámica, el manejo y los controles. El resultado es una máquina más segura, consistente y utilizable en la pista. El objetivo del paquete EVO es maximizar la sinergia entre la aerodinámica y la dinámica del vehículo, es decir, la interacción entre los neumáticos, el equilibrio de la carga aerodinámica y los controles electrónicos. Un mejor rendimiento está garantizado por una mayor carga aerodinámica y nuevos neumáticos Pirelli, mientras que la información de conducción se perfeccionó a través de un extenso simulador para equilibrar los sistemas de control. La mayor facilidad de uso en la pista se atribuye al volante, derivado del GTE y FXX-K, y a la nueva cámara orientada hacia atrás. En comparación con el 488 Challenge, el EVO ofrece un aumento de +50% en la carga aerodinámica con polarización frontal, lo que resulta en un tiempo de vuelta de -1 segundo en el circuito de Mugello. El nuevo sistema de frenos ofrece una reducción del 20% en el desgaste total y un rendimiento un 15% más consistente en los tiempos de vuelta se atribuye a los nuevos neumáticos Pirelli. Los cambios más evidentes en la plataforma son los numerosos elementos aerodinámicos nuevos. La nueva aerodinámica no sólo contribuye a una mayor carga aerodinámica y capacidad de ajuste, sino que también es muy agresiva y llamativa. El nuevo parachoques delantero y los perfiles aerodinámicos adicionales contribuyen a un equilibrio delantero de +20 % en comparación con el 488 Challenge, mientras que los bajos y el alerón rediseñados ofrecen una mayor capacidad de ajuste."
+    description: "Construido sobre la base establecida por el 488 Challenge, el 488 Challenge EVO lleva el rendimiento y el placer de conducir al siguiente nivel con una variedad de mejoras en la aerodinámica, el manejo y los controles. El resultado es una máquina más segura, consistente y utilizable en la pista. El objetivo del paquete EVO es maximizar la sinergia entre la aerodinámica y la dinámica del vehículo, es decir, la interacción entre los neumáticos, el equilibrio de la carga aerodinámica y los controles electrónicos. Un mejor rendimiento está garantizado por una mayor carga aerodinámica y nuevos neumáticos Pirelli, mientras que la información de conducción se perfeccionó a través de un extenso simulador para equilibrar los sistemas de control. La mayor facilidad de uso en la pista se atribuye al volante, derivado del GTE y FXX-K, y a la nueva cámara orientada hacia atrás. En comparación con el 488 Challenge, el EVO ofrece un aumento de +50% en la carga aerodinámica con polarización frontal, lo que resulta en un tiempo de vuelta de -1 segundo en el circuito de Mugello. El nuevo sistema de frenos ofrece una reducción del 20% en el desgaste total y un rendimiento un 15% más consistente en los tiempos de vuelta se atribuye a los nuevos neumáticos Pirelli. Los cambios más evidentes en la plataforma son los numerosos elementos aerodinámicos nuevos. La nueva aerodinámica no sólo contribuye a una mayor carga aerodinámica y capacidad de ajuste, sino que también es muy agresiva y llamativa. El nuevo parachoques delantero y los perfiles aerodinámicos adicionales contribuyen a un equilibrio delantero de +20 % en comparación con el 488 Challenge, mientras que los bajos y el alerón rediseñados ofrecen una mayor capacidad de ajuste.",
+    tyreTimeChange:20,
+    fuelLiterTime:0.2,
+    maxLiter: 120,
   },
 
   {
@@ -538,7 +643,10 @@ export const cars: Car[] = [
     power: 420,
     torque: 465,
     weight: 850,
-    description: "La empresa rusa BR Engineering presentó un nuevo prototipo deportivo de carreras BRO3, cuya presentación tuvo lugar el 18 de mayo en Moscú. El coche fue desarrollado por un equipo ruso formado 100% por especialistas técnicos rusos. El programa SMP Racing es pilotos que cuentan con una amplia y En el desarrollo también participó una experiencia exitosa no sólo en carreras de resistencia, sino también en el trabajo con los mejores ingenieros y mecánicos del mundo. El BR03 está diseñado específicamente para carreras de resistencia en Rusia. La base técnica del prototipo deportivo es mixta. La transmisión es de producción extranjera, ya que ningún equivalente en Rusia sería adecuado para esta tarea. Sin embargo, casi todos los demás componentes y juntas se fabricaron en Rusia. El automóvil está certificado por la RAF (Federación Automotriz de Rusia) para competir en competiciones nacionales en Rusia. Todos los automóviles BR03 se entregarán a los clientes con todos los documentos necesarios que les permitan participar en las carreras."
+    description: "La empresa rusa BR Engineering presentó un nuevo prototipo deportivo de carreras BRO3, cuya presentación tuvo lugar el 18 de mayo en Moscú. El coche fue desarrollado por un equipo ruso formado 100% por especialistas técnicos rusos. El programa SMP Racing es pilotos que cuentan con una amplia y En el desarrollo también participó una experiencia exitosa no sólo en carreras de resistencia, sino también en el trabajo con los mejores ingenieros y mecánicos del mundo. El BR03 está diseñado específicamente para carreras de resistencia en Rusia. La base técnica del prototipo deportivo es mixta. La transmisión es de producción extranjera, ya que ningún equivalente en Rusia sería adecuado para esta tarea. Sin embargo, casi todos los demás componentes y juntas se fabricaron en Rusia. El automóvil está certificado por la RAF (Federación Automotriz de Rusia) para competir en competiciones nacionales en Rusia. Todos los automóviles BR03 se entregarán a los clientes con todos los documentos necesarios que les permitan participar en las carreras.",
+    tyreTimeChange:7,
+    fuelLiterTime:1,
+    maxLiter: 90,
   },
 
   {
@@ -553,7 +661,10 @@ export const cars: Car[] = [
     power: 440,
     torque: 420,
     weight: 1275,
-    description: ""
+    description: "",
+    tyreTimeChange:8,
+    fuelLiterTime:1.2,
+    maxLiter: 100,
   },
 
   {
@@ -568,7 +679,10 @@ export const cars: Car[] = [
     power: 440,
     torque: 420,
     weight: 1275,
-    description: ""
+    description: "",
+    tyreTimeChange:8,
+    fuelLiterTime:1.2,
+    maxLiter: 100,
   },
 
   {
@@ -583,7 +697,10 @@ export const cars: Car[] = [
     power: 440,
     torque: 420,
     weight: 1275,
-    description: ""
+    description: "",
+    tyreTimeChange:8,
+    fuelLiterTime:1.2,
+    maxLiter: 100,
   },
 
   {
@@ -598,7 +715,10 @@ export const cars: Car[] = [
     power: 511,
     torque: 784,
     weight: 1350,
-    description: ""
+    description: "",
+    tyreTimeChange:10,
+    fuelLiterTime:0.6,
+    maxLiter: 100,
   },
 
   {
@@ -613,7 +733,10 @@ export const cars: Car[] = [
     power: 200,
     torque: 310,
     weight: 1040,
-    description: ""
+    description: "",
+    tyreTimeChange:10,
+    fuelLiterTime:0.2,
+    maxLiter: 60,
   },
 
   {
@@ -628,7 +751,10 @@ export const cars: Car[] = [
     power: 730,
     torque: 800,
     weight: 1540,
-    description: "El GT Black Series es una variante de alto rendimiento del Mercedes-AMG GT y se reveló oficialmente en el canal de YouTube de Mercedes-AMG el 9 de julio de 2020. El motor M178 en esta variante está sintonizado para una potencia de 537 kW (730 PS; 720 hp) a 6.700-6.900 rpm y 800 N⋅m (590 lb⋅ft) de torque a 2.000-6.000 rpm. Conocido como M178 LS2, el motor tiene una línea roja ligeramente más alta a 7200 rpm en comparación con las 7000 rpm del GT R, y utiliza un cigüeñal plano en lugar de un cigüeñal transversal, resultando en diferente orden de encendido. Además, el M178 LS2 utiliza una rueda de compresor más grande, lo que resulta en un aumento en el impulso de 19,6 psi del GT R a 24,6 psi. El GT Black Series acelera de 0 a 100 km/h (62 mph) en 3,2 segundos y tiene una velocidad máxima declarada de 325 km/h (202 mph). La suspensión es única, con una barra estabilizadora de fibra de carbono con dos ajustes para el eje delantero y una barra estabilizadora de hierro con tres ajustes para el eje trasero. Al igual que los vehículos Black Series anteriores, la inclinación se ajusta manualmente tanto para el eje delantero como para el trasero. El manejo se ha mejorado con paneles de fibra de carbono en la parte delantera y trasera, así como rotores de freno cerámicos de carbono y pastillas de freno específicas de la Serie Black. El ala tiene un flap aeroactivo activo y contribuye a una carga aerodinámica máxima total de más de 400 kg (882 lb) a 249 km/h (155 mph). Los neumáticos Michelin Pilot Cup 2 R son específicos para el automóvil y están disponibles en compuestos blandos M01A y duros M02.[30] La fibra de carbono se utiliza ampliamente en la mayor parte de la carrocería, incluido el capó, el techo, la escotilla y los bajos. El exterior gana una parrilla agrandada, basada en el Mercedes-AMG GT3, grandes salidas de aire en el capó, un divisor delantero ajustable manualmente y un alerón trasero mejorado como parte de un importante kit aerodinámico. El interior cuenta con asientos individuales de alto rendimiento AMG estándar y utiliza microfibra para el volante, las puertas y los paneles de instrumentos. El 4 de noviembre de 2020, el Mercedes-AMG GT Black Series registró un tiempo de vuelta de 6:43.616 con el piloto Maro Engel al volante en Nürburgring Nordschleife, lo que lo convierte en el tiempo de vuelta más rápido jamás registrado para un vehículo de producción legal en la pista. En el momento."
+    description: "El GT Black Series es una variante de alto rendimiento del Mercedes-AMG GT y se reveló oficialmente en el canal de YouTube de Mercedes-AMG el 9 de julio de 2020. El motor M178 en esta variante está sintonizado para una potencia de 537 kW (730 PS; 720 hp) a 6.700-6.900 rpm y 800 N⋅m (590 lb⋅ft) de torque a 2.000-6.000 rpm. Conocido como M178 LS2, el motor tiene una línea roja ligeramente más alta a 7200 rpm en comparación con las 7000 rpm del GT R, y utiliza un cigüeñal plano en lugar de un cigüeñal transversal, resultando en diferente orden de encendido. Además, el M178 LS2 utiliza una rueda de compresor más grande, lo que resulta en un aumento en el impulso de 19,6 psi del GT R a 24,6 psi. El GT Black Series acelera de 0 a 100 km/h (62 mph) en 3,2 segundos y tiene una velocidad máxima declarada de 325 km/h (202 mph). La suspensión es única, con una barra estabilizadora de fibra de carbono con dos ajustes para el eje delantero y una barra estabilizadora de hierro con tres ajustes para el eje trasero. Al igual que los vehículos Black Series anteriores, la inclinación se ajusta manualmente tanto para el eje delantero como para el trasero. El manejo se ha mejorado con paneles de fibra de carbono en la parte delantera y trasera, así como rotores de freno cerámicos de carbono y pastillas de freno específicas de la Serie Black. El ala tiene un flap aeroactivo activo y contribuye a una carga aerodinámica máxima total de más de 400 kg (882 lb) a 249 km/h (155 mph). Los neumáticos Michelin Pilot Cup 2 R son específicos para el automóvil y están disponibles en compuestos blandos M01A y duros M02.[30] La fibra de carbono se utiliza ampliamente en la mayor parte de la carrocería, incluido el capó, el techo, la escotilla y los bajos. El exterior gana una parrilla agrandada, basada en el Mercedes-AMG GT3, grandes salidas de aire en el capó, un divisor delantero ajustable manualmente y un alerón trasero mejorado como parte de un importante kit aerodinámico. El interior cuenta con asientos individuales de alto rendimiento AMG estándar y utiliza microfibra para el volante, las puertas y los paneles de instrumentos. El 4 de noviembre de 2020, el Mercedes-AMG GT Black Series registró un tiempo de vuelta de 6:43.616 con el piloto Maro Engel al volante en Nürburgring Nordschleife, lo que lo convierte en el tiempo de vuelta más rápido jamás registrado para un vehículo de producción legal en la pista. En el momento.",
+    tyreTimeChange:10,
+    fuelLiterTime:0.1,
+    maxLiter: 75,
   },
 
   {
@@ -643,7 +769,10 @@ export const cars: Car[] = [
     power: 682,
     torque: 787,
     weight: 2000,
-    description: ""
+    description: "",
+    tyreTimeChange:12,
+    fuelLiterTime:0.2,
+    maxLiter: 1,
   },
 
   {
@@ -658,7 +787,10 @@ export const cars: Car[] = [
     power: 800,
     torque: 950,
     weight: 1670,
-    description: "20 años como icono. El TECHART GTstreet R, de producción limitada a 87 unidades, es el superdeportivo exclusivo fabricado a medida basado en los 911 Turbo y 911 Turbo S de la serie 992. Desde la presentación de la primera gama GTstreet en 2001, el concepto de personalización característico de TECHART ha ganado reconocimiento mundial por su simbiosis inigualable de dos mundos: auténtica idoneidad para el uso diario y un rendimiento en pista sin concesiones. El programa GTstreet R incluye un paquete aerodinámico ligero, un sistema de escape deportivo TECHART y llantas forjadas TECHART Formula VI con discos aerodinámicos de fibra de carbono, así como mejoras de rendimiento e interior. Hasta 588 kW (800 CV) impulsan al TECHART GTstreet R hacia adelante con un impresionante par máximo de 950 Nm y una velocidad máxima de 350 km/h, estableciendo nuevos estándares en su segmento. El interior está refinado con carbono y una mezcla de Alcantara®, cuero y tejidos tradicionales, inspirados en los materiales tradicionales del automovilismo, y subraya los altos estándares de individualidad y deportividad. La fábrica TECHART no deja ningún deseo sin cumplir."
+    description: "20 años como icono. El TECHART GTstreet R, de producción limitada a 87 unidades, es el superdeportivo exclusivo fabricado a medida basado en los 911 Turbo y 911 Turbo S de la serie 992. Desde la presentación de la primera gama GTstreet en 2001, el concepto de personalización característico de TECHART ha ganado reconocimiento mundial por su simbiosis inigualable de dos mundos: auténtica idoneidad para el uso diario y un rendimiento en pista sin concesiones. El programa GTstreet R incluye un paquete aerodinámico ligero, un sistema de escape deportivo TECHART y llantas forjadas TECHART Formula VI con discos aerodinámicos de fibra de carbono, así como mejoras de rendimiento e interior. Hasta 588 kW (800 CV) impulsan al TECHART GTstreet R hacia adelante con un impresionante par máximo de 950 Nm y una velocidad máxima de 350 km/h, estableciendo nuevos estándares en su segmento. El interior está refinado con carbono y una mezcla de Alcantara®, cuero y tejidos tradicionales, inspirados en los materiales tradicionales del automovilismo, y subraya los altos estándares de individualidad y deportividad. La fábrica TECHART no deja ningún deseo sin cumplir.",
+    tyreTimeChange:50,
+    fuelLiterTime:0.6,
+    maxLiter: 68,
   },
 
   {
@@ -673,6 +805,9 @@ export const cars: Car[] = [
     power: 32,
     torque: 44,
     weight: 470,
-    description:'Carlo Abarth inició su conocida colaboración con Fiat en 1952, construyendo el Abarth 1500 Biposto con mecánica Fiat. En 1957 se presentó el Fiat "Nuova 500" y Abarth pronto realizó algunas versiones con mecánicas elaboradas. En 1963 se presentó el "595", producido hasta finales de 1971 en dos series. Abarth recibió coches incompletos de FIAT y luego montó en ellos las piezas especiales. En febrero de 1964 se presentó el 595 SS, con una velocidad máxima de 130 km/h.'
+    description:'Carlo Abarth inició su conocida colaboración con Fiat en 1952, construyendo el Abarth 1500 Biposto con mecánica Fiat. En 1957 se presentó el Fiat "Nuova 500" y Abarth pronto realizó algunas versiones con mecánicas elaboradas. En 1963 se presentó el "595", producido hasta finales de 1971 en dos series. Abarth recibió coches incompletos de FIAT y luego montó en ellos las piezas especiales. En febrero de 1964 se presentó el 595 SS, con una velocidad máxima de 130 km/h.',
+    tyreTimeChange:10,
+    fuelLiterTime:0.6,
+    maxLiter: 35,
   },
 ];
