@@ -16,7 +16,7 @@ const { rows: UsersData } = await turso.execute(
       <thead class="font-medium bg-[#da392b]">
         <tr>
           <th>Nº</th>
-          <th>Nombre</th>
+          <th colspan="2">Nombre</th>
           <th>Equipo</th>
           <th>Carreras</th>
           <th>Victorias</th>
@@ -33,7 +33,7 @@ const { rows: UsersData } = await turso.execute(
           UsersData.map((user, index) => (
             <tr class="bg-[#19191c]">
               <td class="font-semibold">{index + 1}</td>
-              <td><img src={String(user.image)} alt="Avatar" class="w-8 py-1 rounded-full"/></td>
+              <td><img src={String(user.image)} alt="Avatar" class="w-8 py-1 rounded-full justify-end"/></td>
               {user.number_plate === null || user.number_plate === 0 ? (
                 <td>#0 - {user.UserName}</td>
               ) : (
