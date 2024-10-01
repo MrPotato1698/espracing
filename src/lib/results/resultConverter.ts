@@ -324,30 +324,42 @@ function createConsistency(rr: RaceResult[], rl: RaceLap[]): Consistency[] {
   }
   return c;
 }
-//FIXME: Siempre escoge al mismo piloto
+
 function createBestSector(rl: RaceLap[]): BestSector[] {
   let bs: BestSector[] = [];
 
   // Numero de sectores por vuelta (en la vuelta 2 por si acaso el juego no detecta bien la primera vuelta de salida)
   const numSectors = rl[0].Laps[1].Sector.length;
+
   for (let s = 0; s < numSectors; s++) {
-    let uniqueSector: BestSector = {} as BestSector;
-    uniqueSector.SectorNumber = s + 1;
     for (let itemRL of rl) {
-      uniqueSector.BestSector = Number.MAX_VALUE;
-      for (let itemL of itemRL.Laps) {
-        if (itemL.Cut <= 0) { //Si la vuelta fue sin CUTS, es decir, vuelta limpia
-          if (itemL.Sector[s] < uniqueSector.BestSector) {
-            uniqueSector.DriverName = itemRL.DriverName;
-            uniqueSector.SteamID = itemRL.SteamID;
-            uniqueSector.CarFileName = itemL.CarFileName;
-            uniqueSector.BestSector = itemL.Sector[s];
+      if (itemRL.Laps.length > 0) {
+        let uniqueSector: BestSector = {} as BestSector;
+        uniqueSector.SectorNumber = s + 1;
+        uniqueSector.BestSector = Number.MAX_VALUE;
+        for (let itemL of itemRL.Laps) {
+          if (itemL.Cut <= 0) { //Si la vuelta fue sin CUTS, es decir, vuelta limpia
+            if (itemL.Sector[s] < uniqueSector.BestSector) {
+              uniqueSector.DriverName = itemRL.DriverName;
+              uniqueSector.SteamID = itemRL.SteamID;
+              uniqueSector.CarFileName = itemL.CarFileName;
+              uniqueSector.BestSector = itemL.Sector[s];
+            }
           }
         }
+        bs.push(uniqueSector);
       }
-      bs.push(uniqueSector);
     }
   }
+
+  bs.sort((a, b) => {
+    if(a.SectorNumber!==b.SectorNumber){
+      return a.SectorNumber - b.SectorNumber;
+    }
+    return a.BestSector - b.BestSector;
+  });
+
+  //console.table(bs);
   return bs;
 }
 
@@ -435,6 +447,21 @@ function createRaceConfig(datos: GeneralDataJSON, rr: RaceResult[], bestLap: Bes
   return rc;
 }
 
+function calculateNumLaps(rr: RaceResult[], rl: RaceLap[]): RaceResult[] {
+  let rrAdjusted: RaceResult[] = rr;
+
+  for (let itemRR of rrAdjusted) {
+    let numLaps = 0;
+    for (let itemRL of rl) {
+      if (itemRR.SteamID === itemRL.SteamID) {
+        numLaps = itemRL.Laps.length;
+      }
+    }
+    itemRR.Laps = numLaps;
+  }
+  return rrAdjusted;
+}
+
 // FUNCIONES A EXPORTAR
 
 export function createRaceData(datos: any): RaceData {
@@ -447,6 +474,11 @@ export function createRaceData(datos: any): RaceData {
 
   rd.RaceResult = createRaceResults(dcars, devents, dlaps, dresult, datos.SessionConfig.time);
   rd.RaceLaps = createRaceLap(dlaps, rd.RaceResult);
+
+  if (datos.Version < 6) {
+    rd.RaceResult = calculateNumLaps(rd.RaceResult, rd.RaceLaps);
+  }
+
   rd.BestLap = createBestLap(rd.RaceLaps);
   rd.Consistency = createConsistency(rd.RaceResult, rd.RaceLaps);
   rd.BestSector = createBestSector(rd.RaceLaps);
@@ -455,6 +487,7 @@ export function createRaceData(datos: any): RaceData {
   rd.RaceResult = getLeadLaps(rd.RaceResult, rd.RaceLaps);
 
   rd.RaceConfig = createRaceConfig(datos, rd.RaceResult, rd.BestLap[0]);
+
   return rd;
 }
 

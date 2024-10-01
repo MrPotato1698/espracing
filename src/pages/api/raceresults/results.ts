@@ -2,6 +2,7 @@ import { cars } from "@/consts/cars";
 import { circuits } from "@/consts/circuits";
 import { circuitlayouts } from "@/consts/circuitlayouts";
 import { createRaceData, formatTwoIntegersPlusThreeDecimals, formatTwoIntegers } from "@/lib/results/resultConverter";
+import ApexCharts from 'apexcharts';
 
 import type { RaceData, RaceResult, RaceLap, Lap, BestLap, Consistency, BestSector, Incident, RaceConfig } from "@/types/Results";
 
@@ -11,8 +12,10 @@ function initializeScript() {
     const loadButton = document.getElementById('loadButton');
     const opcionesTabla = document.getElementById('select-champs') as HTMLSelectElement;
 
-    const resultado = document.getElementById('resultado');
-    const resultadoPista = document.getElementById('resultado2');
+    const tablaResultados = document.getElementById('tablaResultados');
+    const datosCircuito = document.getElementById('datosCircuito');
+
+    const chartCambiosPosiciones = document.getElementById('chartCambiosPosiciones');
 
     async function loadTable() {
         const seleccion = opcionesTabla.value;
@@ -22,7 +25,9 @@ function initializeScript() {
         }
 
         try {
-            const response = await fetch(`/api/raceresults/getRaceResults?race=${seleccion}`);
+            // const response = await fetch(`/api/raceresults/getRaceResults?race=${seleccion}`);
+            const response = await fetch(`/testRace5.json`); //Pruebas para no leer constantemente de la BD
+
             const datosRAW = await response.json();
             //console.log('DatosRAW a usar: ', datosRAW);
 
@@ -37,14 +42,14 @@ function initializeScript() {
             const devents: Incident[] = datos.Incident;
             const dconfig: RaceConfig = datos.RaceConfig;
 
-            if (resultado) {
-                resultado.innerHTML = '';
+            if (tablaResultados) {
+                tablaResultados.innerHTML = '';
             } else {
                 throw new Error('Elemento con id "resultado" no encontrado.');
             }
 
-            if (resultadoPista) {
-                resultadoPista.innerHTML = '';
+            if (datosCircuito) {
+                datosCircuito.innerHTML = '';
             } else {
                 throw new Error('Elemento con id "resultado2" no encontrado.');
             }
@@ -127,12 +132,6 @@ function initializeScript() {
                 let vueltastotales = itemResult.Laps;
                 let tyre;
                 let cuts = 0;
-
-                // for (let itemBL of dbestlaps) {
-                //     if (itemBL.SteamID === itemResult.SteamID) {
-                //         tyre = itemBL.Tyre;
-                //     }
-                // }
 
                 for (let itemLap of dlaps) {
                     if (itemLap.SteamID === itemResult.SteamID) {
@@ -225,7 +224,7 @@ function initializeScript() {
                 let collisions = itemResult.Collisions;
 
                 if (postabla % 2 === 0) {
-                    resultado.innerHTML += `
+                    tablaResultados.innerHTML += `
                             <tr class="bg-[#0f0f0f] text-center">
                                 <td class = "font-medium">${posicionFinal}</td>                     <!-- Posicion -->
                                 <td>${itemResult.DriverName}</td>         <!-- Nombre -->
@@ -244,7 +243,7 @@ function initializeScript() {
                             </tr>
                     `;
                 } else {
-                    resultado.innerHTML += `
+                    tablaResultados.innerHTML += `
                             <tr class="bg-[#19191c] text-center">
                                 <td class = "font-medium">${posicionFinal}</td>                     <!-- Posicion -->
                                 <td>${itemResult.DriverName}</td>         <!-- Nombre -->
@@ -265,7 +264,7 @@ function initializeScript() {
                 }
             }
 
-            // Pista y datos de la carrera
+            // *** Pista y datos de la carrera ***
 
             const isCircuitExists = circuits.find((circuit) => circuit.filename === dconfig.Track);
             if (isCircuitExists) {
@@ -279,7 +278,7 @@ function initializeScript() {
                 const layoutLength = layout?.length;
                 const layoutCapacity = layout?.capacity;
 
-                resultadoPista.innerHTML += `
+                datosCircuito.innerHTML += `
                         <div class="text-center bg-[#19191c] rounded-lg py-5" style = "width=99%">
                         <p class = "text-3xl font-bold border-b border-[#da392b] w-fit mx-auto mb-2">Datos del circuito</p>
                             <div class = "grid grid-cols-1">
@@ -294,6 +293,169 @@ function initializeScript() {
                         <p class="text-3xl font-bold border-b border-[#da392b] w-fit mx-auto mt-4 mb-2">Resultado de carrera</p>
                     `;
             }
+
+            // *** Cambios de posiciones ***
+
+            const seriesData = dlaps
+                .filter((lapData) => lapData.Laps.length > 0)
+                .map((lapData) => ({
+                    name: lapData.DriverName,
+                    data: lapData.Laps.map((lap) => lap.Position),
+                }));
+
+            const numlaps: number[] = Array.from({ length: dlaps[0].Laps.length }, (_, i) => i + 1);
+
+            var optionsChangePositions = {
+                title: {
+                    text: 'Cambios de posiciones',
+                    align: 'center',
+                    style: {
+                        color: '#f9f9f9',
+                        fontSize: '24px',
+                        fontWeight: 'bold',
+                    },
+                },
+                series: seriesData,
+                chart: {
+                    type: 'line',
+                    zoom: {
+                        enable: false,
+                        type: 'x',
+                        autoScaleYaxis: true,
+                    },
+                    locales: [{
+                        name: 'es',
+                        options: {
+                            months: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembere', 'Diciembre'],
+                            shortMonths: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dec'],
+                            days: ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'],
+                            shortDays: ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom'],
+                            toolbar: {
+                                download: 'Descargar SVG',
+                                selection: 'Seleccionar',
+                                selectionZoom: 'Seleccionar Zoom',
+                                zoomIn: 'Zoom In',
+                                zoomOut: 'Zoom Out',
+                                pan: 'Mover',
+                                reset: 'Reiniciar Zoom',
+                            }
+                        }
+                    }],
+                    defaultLocale: 'es',
+                    toolbar: {
+                        show: false,
+                    },
+                    animation: {
+                        enabled: true,
+                        easing: 'linear',
+                        speed: 850,
+                        animateGradually: {
+                            enabled: false,
+                        },
+                    },
+                },
+                xaxis: {
+                    categories: numlaps,
+                    labels: {
+                        style: {
+                            colors: '#f9f9f9',
+                        },
+                    },
+                    title: {
+                        text: 'Vueltas',
+                        style: {
+                            color: '#f9f9f9',
+                            fontSize: '16px',
+                        },
+                    },
+                },
+
+                yaxis: {
+                    stepSize: 1,
+                    min: 1,
+                    position: 'top',
+                    reversed: true,
+                    title: {
+                        text: 'Posiciones',
+                        style: {
+                            color: '#f9f9f9',
+                            fontSize: '16px',
+                        },
+                    },
+                    labels: {
+                        style: {
+                            colors: '#f9f9f9',
+                        },
+                    },
+                },
+                stroke: {
+                    curve: 'smooth',
+                },
+                markers: {
+                    size: 1,
+                },
+                tooltip: {
+                    theme: 'dark',
+                },
+                legend: {
+                    labels: {
+                        colors: '#f9f9f9',
+                    }
+                },
+            };
+
+            var chartChangePosition = new ApexCharts(chartCambiosPosiciones, optionsChangePositions);
+            chartChangePosition.resetSeries();
+            chartChangePosition.render();
+
+            // *** Sectores ***
+            const sectors = Array.from({ length: Math.max(...dbestsectors.map(sector => sector.SectorNumber)) }, (_, i) => i + 1)
+                .map(sectorNumber => dbestsectors.filter(sector => sector.SectorNumber === sectorNumber));
+
+            sectors.forEach((sector, index) => {
+                const sectorTable = document.getElementById(`tablaS${index + 1}`);
+                if (sectorTable) {
+                    let sectorHTML = `<p>Mejor Sector ${index + 1}</p>
+                                    <table class="w-full border-collapse border border-[#f9f9f9]">
+                                    <thead class="font-medium bg-[#da392b]">
+                                        <tr class="tabletitle">
+                                        <th>Pos</th>
+                                        <th>Nombre</th>
+                                        <th>Vehiculo</th>
+                                        <th>Tiempo</th>
+                                        <th>Gap</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="font-normal">`;
+                    let pos = 0;
+                    for (let i of sector) {
+                        pos++;
+                        if (pos % 2 === 0) {
+                            sectorHTML += `
+                            <tr class="bg-[#0f0f0f] text-center">
+                                <td>${pos}</td>
+                                <td>${i.DriverName}</td>
+                                <td>${i.CarFileName}</td>
+                                <td>${i.BestSector}</td>
+                                <td>${i.Gap}</td>
+                            </tr>`;
+                        }else{
+                            sectorHTML += `
+                            <tr class="bg-[#19191c] text-center">
+                                <td>${pos}</td>
+                                <td>${i.DriverName}</td>
+                                <td>${i.CarFileName}</td>
+                                <td>${i.BestSector}</td>
+                                <td>${i.Gap}</td>
+                            </tr>`;
+                        }
+                    }
+                    sectorHTML += `</tbody></table>`;
+                    sectorTable.innerHTML = sectorHTML;
+                } else {
+                    console.warn(`Elemento con id "tablaS${index + 1}" no encontrado.`);
+                }
+            });
 
         } catch (error) {
             console.error(error);

@@ -1,5 +1,6 @@
 ---
 import { turso } from "../turso";
+import ApexCharts from "apexcharts";
 
 interface Race {
   ChampID: string;
@@ -74,7 +75,7 @@ if (RacesData.length == 0) {
       Cargar Datos
     </button>
 
-    <div id="resultado2"></div>
+    <div id="datosCircuito"></div>
     <table class="w-full border-collapse border border-[#f9f9f9]">
       <thead class="font-medium bg-[#da392b]">
         <tr class="tabletitle">
@@ -92,16 +93,30 @@ if (RacesData.length == 0) {
           <th>Lastres</th>
         </tr>
       </thead>
-      <tbody id="resultado" class="font-normal"> </tbody>
+      <tbody id="tablaResultados" class="font-normal"> </tbody>
     </table>
   </div>
+
+  <div class="tablecharts mt-4 w-11/12 mx-auto">
+    <div id="chartCambiosPosiciones" class="border-2 rounded-lg border-[#da392b]"></div>
+  </div>
+
+  <div class = "grid mt-4 mx-auto gap-2 sectorTables">
+    <div id="tablaS1"></div>
+    <div id="tablaS2"></div>
+    <div id="tablaS3"></div>
+    <div id="tablaS4"></div>
+    <div id="tablaS5"></div>
+
+  </div>
+
 </div>
 
-<script>
+<script> // Script para cargar los resultados de la carrera seleccionada
   import "@/pages/api/raceresults/results.ts";
 </script>
 
-<script>
+<script> // Script para modificar el texto del select
   const select = document.getElementById("select-champs") as HTMLSelectElement;
 
   function updateSelectText() {
@@ -157,6 +172,17 @@ if (RacesData.length == 0) {
 <style>
   .container {
     width: 99%;
+  }
+
+  .sectorTables {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+    gap: 1rem;
+    @media (min-width: 800px) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    @media (min-width: 1210px) {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
   }
 
   &::-ms-expand {
