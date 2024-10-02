@@ -1,5 +1,5 @@
 ---
-import { turso } from "../turso";
+import { turso } from "@/turso";
 import ApexCharts from "apexcharts";
 
 interface Race {
@@ -79,17 +79,17 @@ if (RacesData.length == 0) {
     <table class="w-full border-collapse border border-[#f9f9f9]">
       <thead class="font-medium bg-[#da392b]">
         <tr class="tabletitle">
+          <th colspan="2"></th>
           <th>Pos</th>
           <th>Nombre</th>
-          <th>Equipo</th>
           <th>Clase</th>
           <th colspan="2">Coche</th>
-          <th colspan="2">Gain/Lost</th>
+          <th>Equipo</th>
+          <th>Vueltas</th>
           <th>Tiempo Total</th>
-          <th>Nº Vueltas</th>
           <th>Vuelta Rápida</th>
-          <th>Media Vueltas</th>
-          <th>Golpes</th>
+          <th>Gap to 1st</th>
+          <th>Intervalo</th>
           <th>Lastres</th>
         </tr>
       </thead>

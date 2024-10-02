@@ -1,10 +1,13 @@
+import { turso } from "@/turso";
 import { cars } from "@/consts/cars";
 import { circuits } from "@/consts/circuits";
 import { circuitlayouts } from "@/consts/circuitlayouts";
+import { points } from "@/consts/pointsystem";
 import { createRaceData, formatTwoIntegersPlusThreeDecimals, formatTwoIntegers } from "@/lib/results/resultConverter";
 import ApexCharts from 'apexcharts';
 
 import type { RaceData, RaceResult, RaceLap, Lap, BestLap, Consistency, BestSector, Incident, RaceConfig } from "@/types/Results";
+import type { Points } from "@/types/Points";
 
 /* *************************** */
 
@@ -25,8 +28,8 @@ function initializeScript() {
         }
 
         try {
-            // const response = await fetch(`/api/raceresults/getRaceResults?race=${seleccion}`);
-            const response = await fetch(`/testRace5.json`); //Pruebas para no leer constantemente de la BD
+            //const response = await fetch(`/api/raceresults/getRaceResults?race=${seleccion}`);
+            const response = await fetch(`/testRace7.json`); //Pruebas para no leer constantemente de la BD
 
             const datosRAW = await response.json();
             //console.log('DatosRAW a usar: ', datosRAW);
@@ -41,6 +44,25 @@ function initializeScript() {
             const dbestsectors: BestSector[] = datos.BestSector;
             const devents: Incident[] = datos.Incident;
             const dconfig: RaceConfig = datos.RaceConfig;
+
+            const pointsystem = await turso.execute({
+                sql: "SELECT pointsystem FROM Race WHERE filename = ?",
+                args: [seleccion],
+            });
+
+            console.log('Puntos a usar: ', pointsystem);
+
+            let pointsystemName: string | undefined = undefined;
+            let pointArray: Points | undefined = undefined;
+            if (pointsystem.rows.length === 0) {
+                pointsystemName = pointsystem.rows[0].pointsystem?.toString();
+                pointArray = points.find((point) => point.Name === pointsystemName);
+                console.log('Puntos a usar: ', pointArray);
+            }
+            else {
+                pointsystemName = "NoPoints";
+            }
+
 
             if (tablaResultados) {
                 tablaResultados.innerHTML = '';
@@ -59,6 +81,10 @@ function initializeScript() {
             let vueltasLider: number = 0;
             const sessiontime: number = dconfig.RaceDurationTime;
             const sessionlaps: number = dconfig.RaceDurationLaps;
+
+            // *** Mejor vuelta de carrera ***
+            const bestlapDriverID = dbestlaps[0].SteamID;
+
             for (let itemResult of dresult) {
                 postabla++;
                 pos = itemResult.Pos;
@@ -129,7 +155,16 @@ function initializeScript() {
                 }
 
                 // Obtener numero de vueltas totales / vuelta rapida / neumatico
-                let vueltastotales = itemResult.Laps;
+                let vueltastotales = 0;
+                if (itemResult.Laps === undefined || itemResult.Laps === null || itemResult.Laps === 0) {
+                    for (let itemLap of dlaps) {
+                        if (itemLap.SteamID === itemResult.SteamID) {
+                            vueltastotales = itemLap.Laps.length;
+                        }
+                    }
+                } else {
+                    vueltastotales = itemResult.Laps;
+                }
                 let tyre;
                 let cuts = 0;
 
@@ -206,59 +241,107 @@ function initializeScript() {
                 let bestlapToString = minutesbl.toString() + ":" + secondsbl.toString();
                 //bestlap = minutesbl.toString + ":" + secondsbl.toString;
 
-                let mediavueltas: number = itemResult.AvgLap;
 
-                let secondsmv = formatTwoIntegersPlusThreeDecimals(mediavueltas % 60);
-                let minutesmv = formatTwoIntegers(Math.trunc((mediavueltas / 60) % 60));
+                // *** Intervalo de tiempo con el lider ***
+                let gap: string = "";
+                if (pos < -2) {
+                    gap = "";
+                } else if (postabla > 1 && vueltasLider === vueltastotales) {
+                    const gapTime = (itemResult.TotalTime - dresult[0].TotalTime);
+                    let secondsgap = formatTwoIntegersPlusThreeDecimals(gapTime % 60);
+                    let minutesgap = formatTwoIntegers(Math.trunc((gapTime / 60) % 60));
 
-                let mediavueltasToString: string;
-
-                if (mediavueltas === 0 || isNaN(mediavueltas)) {
-                    mediavueltasToString = "ND";
-                } else {
-                    mediavueltasToString = minutesmv + ":" + secondsmv;
+                    if (minutesgap === "00") {
+                        gap = "+ " + secondsgap;
+                    } else {
+                        gap = "+ " + minutesgap + ":" + secondsgap;
+                    }
+                } else if (postabla > 1 && vueltasLider !== vueltastotales) {
+                    gap = "+ " + (vueltasLider - vueltastotales) + "L";
+                } else if (postabla === 1) {
+                    gap = "";
                 }
-                //console.log(mediavueltas+"/"+vueltastotales+"/"+cuts);
-                //console.log(item.DriverName + ": " + vueltastotales);
 
-                let collisions = itemResult.Collisions;
+                // *** Intervalo con el anterior piloto ***
+                let interval: string = "";
+                let vueltasPrevio: number = 0;
+                if (postabla > 1) {
+                    for (let itemLap of dlaps) {
+                        if (itemLap.SteamID === dresult[postabla - 2].SteamID) {
+                            vueltasPrevio = itemLap.Laps.length;
+                        }
+                    }
+                    if (pos < -2) {
+                        interval = "";
+                    } else if (postabla > 1 && vueltasPrevio === vueltastotales) {
+                        const intervalTime = itemResult.TotalTime - dresult[postabla - 2].TotalTime;
+                        let secondsInterval = formatTwoIntegersPlusThreeDecimals(intervalTime % 60);
+                        let minutesInterval = formatTwoIntegers(Math.trunc((intervalTime / 60) % 60));
+
+                        if (minutesInterval === "00") {
+                            interval = "+ " + secondsInterval;
+                        } else {
+                            interval = "+ " + minutesInterval + ":" + secondsInterval;
+                        }
+                    } else if (postabla > 1 && vueltasLider !== vueltastotales) {
+                        interval = "+ " + (vueltasLider - vueltastotales) + "L";
+                    }
+                } else {
+                    console.log("Piloto Actual: ", itemResult.DriverName + ". Vueltas Totales: ", vueltastotales, "Tiempo: ", itemResult.TotalTime);
+                    interval = "";
+                }
+
+                // *** Añadir puntuaciones a la tabla ***
+                let puntos: number = 0;
+                let puntosString: string = "";
+                if(pointsystemName !== "NoPoints"){
+                    if(pos>0){
+                        puntos = pointArray?.Puntuation[pos-1] || 0;
+                        if(bestlapDriverID === itemResult.SteamID){
+                            puntos += pointArray?.FastestLap || 0;
+                        }
+                        puntosString = puntos.toString();
+                    }
+                }
+
+
 
                 if (postabla % 2 === 0) {
                     tablaResultados.innerHTML += `
-                            <tr class="bg-[#0f0f0f] text-center">
-                                <td class = "font-medium">${posicionFinal}</td>                     <!-- Posicion -->
-                                <td>${itemResult.DriverName}</td>         <!-- Nombre -->
-                                <td>${equipo}</td>                  <!-- Equipo -->
-                                <td><span ${carColorClass}>${carClass}</span></td>  <!-- Clase del Coche -->
-                                <td><img class='w-4 justify-end' src='${carBrand}' alt=''></img></td>           <!-- Logo Coche -->
-                                <td>${carName}</td>           <!-- Coche -->
-                                <td>${gridPositionClass}</td>     <!-- Gan/Per (Flechas)-->
-                                <td class = "text-start">${gainsAbs}</td> <!-- Gan/Per (Número)-->
-                                <td>${timeadjust}</td>              <!-- Tiempo Total -->
-                                <td>${vueltastotales}</td>          <!-- Nº Vueltas -->
-                                <td>${bestlapToString + " (" + tyre + ")"}</td> <!-- Vuelta Rapida  + Neumaticos-->
-                                <td>${mediavueltasToString}</td>            <!-- Media VRapida -->
-                                <td>${collisions}</td>              <!-- Colisiones -->
-                                <td>${itemResult.Ballast + " Kg / " + itemResult.Restrictor + "%"}</td>  <!-- Ballast/Restrictor -->
+                            <tr class="bg-[#0f0f0f]">
+                                <td class = "text-center">${gridPositionClass}</td>                                               <!-- Gan/Per (Flechas)-->
+                                <td class = "text-center">${gainsAbs}</td>                                                        <!-- Gan/Per (Número)-->
+                                <td class = "font-medium text-center">${posicionFinal}</td>                                       <!-- Posicion -->
+                                <td class = "text-start">${itemResult.DriverName}</td>                                            <!-- Nombre -->
+                                <td class = "text-center"><span ${carColorClass}>${carClass}</span></td>                          <!-- Clase del Coche -->
+                                <td class = "text-center"><img class='w-4 justify-end' src='${carBrand}' alt=''></img></td>       <!-- Logo Coche -->
+                                <td class = "text-start">${carName}</td>                                                          <!-- Coche -->
+                                <td class = "text-start">${equipo}</td>                                                           <!-- Equipo -->
+                                <td class = "text-center">${vueltastotales}</td>                                                  <!-- Nº Vueltas -->
+                                <td class = "text-center">${timeadjust}</td>                                                      <!-- Tiempo Total -->
+                                <td class = "text-center">${bestlapToString + " (" + tyre + ")"}</td>                             <!-- Vuelta Rapida  + Neumaticos-->
+                                <td class = "text-center">${gap}</td>                                                             <!-- Gap con primero -->
+                                <td class = "text-center">${interval}</td>                                                        <!-- Intervalo -->
+                                <td class = "text-center">${puntosString}</td>     <!-- Ballast/Restrictor -->
                             </tr>
                     `;
                 } else {
                     tablaResultados.innerHTML += `
-                            <tr class="bg-[#19191c] text-center">
-                                <td class = "font-medium">${posicionFinal}</td>                     <!-- Posicion -->
-                                <td>${itemResult.DriverName}</td>         <!-- Nombre -->
-                                <td>${equipo}</td>                  <!-- Equipo -->
-                                <td><span ${carColorClass}>${carClass}</span></td>  <!-- Clase del Coche -->
-                                <td><img class='w-4 justify-end' src='${carBrand}' alt=''></img></td>           <!-- Logo Coche -->
-                                <td>${carName}</td>           <!-- Coche -->
-                                <td>${gridPositionClass}</td>     <!-- Gan/Per (Flechas)-->
-                                <td class = "text-start">${gainsAbs}</td> <!-- Gan/Per (Número)-->
-                                <td>${timeadjust}</td>              <!-- Tiempo Total -->
-                                <td>${vueltastotales}</td>          <!-- Nº Vueltas -->
-                                <td>${bestlapToString + " (" + tyre + ")"}</td> <!-- Vuelta Rapida  + Neumaticos-->
-                                <td>${mediavueltasToString}</td>            <!-- Media VRapida -->
-                                <td>${collisions}</td>              <!-- Colisiones -->
-                                <td>${itemResult.Ballast + " Kg / " + itemResult.Restrictor + "%"}</td>  <!-- Ballast/Restrictor -->
+                            <tr class="bg-[#19191c]">
+                                <td class = "text-center">${gridPositionClass}</td>                                               <!-- Gan/Per (Flechas)-->
+                                <td class = "text-center">${gainsAbs}</td>                                                        <!-- Gan/Per (Número)-->
+                                <td class = "font-medium text-center">${posicionFinal}</td>                                       <!-- Posicion -->
+                                <td class = "text-start">${itemResult.DriverName}</td>                                            <!-- Nombre -->
+                                <td class = "text-center"><span ${carColorClass}>${carClass}</span></td>                          <!-- Clase del Coche -->
+                                <td class = "text-center"><img class='w-4 justify-end' src='${carBrand}' alt=''></img></td>       <!-- Logo Coche -->
+                                <td class = "text-start">${carName}</td>                                                          <!-- Coche -->
+                                <td class = "text-start">${equipo}</td>                                                           <!-- Equipo -->
+                                <td class = "text-center">${vueltastotales}</td>                                                  <!-- Nº Vueltas -->
+                                <td class = "text-center">${timeadjust}</td>                                                      <!-- Tiempo Total -->
+                                <td class = "text-center">${bestlapToString + " (" + tyre + ")"}</td>                             <!-- Vuelta Rapida  + Neumaticos-->
+                                <td class = "text-center">${gap}</td>                                                             <!-- Gap con primero -->
+                                <td class = "text-center">${interval}</td>                                                        <!-- Intervalo -->
+                                <td class = "text-center">${puntosString}</td>     <!-- Ballast/Restrictor -->
                             </tr>
                     `;
                 }
@@ -415,13 +498,13 @@ function initializeScript() {
             sectors.forEach((sector, index) => {
                 const sectorTable = document.getElementById(`tablaS${index + 1}`);
                 if (sectorTable) {
-                    let sectorHTML = `<p>Mejor Sector ${index + 1}</p>
+                    let sectorHTML = `<p class="text-3xl font-bold border-b border-[#da392b] w-fit mx-auto mt-4 mb-2">Mejor Sector ${index + 1}</p>
                                     <table class="w-full border-collapse border border-[#f9f9f9]">
                                     <thead class="font-medium bg-[#da392b]">
                                         <tr class="tabletitle">
                                         <th>Pos</th>
                                         <th>Nombre</th>
-                                        <th>Vehiculo</th>
+                                        <th colspan="3">Vehiculo</th>
                                         <th>Tiempo</th>
                                         <th>Gap</th>
                                         </tr>
@@ -430,23 +513,55 @@ function initializeScript() {
                     let pos = 0;
                     for (let i of sector) {
                         pos++;
+                        let gap: string = "";
+
+                        if (pos === 1) {
+                            gap = "0.000";
+                        } else {
+                            gap = "+" + formatTwoIntegersPlusThreeDecimals((i.BestSector - sector[0].BestSector) / 1000);
+                        }
+
+                        const sectorTimeString: string = formatTwoIntegersPlusThreeDecimals(i.BestSector / 1000);
+
+                        // Obtener el nombre real del coche
+                        const isCarExists = cars.find((car) => car.filename === i.CarFileName);
+                        let carName: string;
+                        let carBrand: string;
+                        let carClass: string;
+                        let carColorClass: string;
+                        if (isCarExists) {
+                            carName = isCarExists.brand + " " + isCarExists.model;
+                            carBrand = isCarExists.imgbrand;
+                            carClass = getClassShortName(isCarExists.subclass);
+                            carColorClass = getColorClass(isCarExists.subclass);
+                        } else {
+                            carName = i.CarFileName;
+                            carBrand = "";
+                            carClass = "";
+                            carColorClass = "";
+                        }
+
                         if (pos % 2 === 0) {
                             sectorHTML += `
                             <tr class="bg-[#0f0f0f] text-center">
                                 <td>${pos}</td>
                                 <td>${i.DriverName}</td>
-                                <td>${i.CarFileName}</td>
-                                <td>${i.BestSector}</td>
-                                <td>${i.Gap}</td>
+                                <td><span ${carColorClass}>${carClass}</span></td>
+                                <td><img class='w-4 justify-end' src='${carBrand}' alt=''></img></td>
+                                <td>${carName}</td>
+                                <td>${sectorTimeString}</td>
+                                <td>${gap}</td>
                             </tr>`;
-                        }else{
+                        } else {
                             sectorHTML += `
                             <tr class="bg-[#19191c] text-center">
                                 <td>${pos}</td>
                                 <td>${i.DriverName}</td>
-                                <td>${i.CarFileName}</td>
-                                <td>${i.BestSector}</td>
-                                <td>${i.Gap}</td>
+                                <td><span ${carColorClass}>${carClass}</span></td>
+                                <td><img class='w-4 justify-end' src='${carBrand}' alt=''></img></td>
+                                <td>${carName}</td>
+                                <td>${sectorTimeString}</td>
+                                <td>${gap}</td>
                             </tr>`;
                         }
                     }
