@@ -69,7 +69,6 @@ export interface BestSector{
   SteamID: string;
   CarFileName: string;
   BestSector: number;
-  Gap: number;
 }
 
 export interface Incident{
