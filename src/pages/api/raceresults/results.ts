@@ -1,10 +1,10 @@
-import { turso } from "@/turso";
+import ApexCharts from 'apexcharts';
+
 import { cars } from "@/consts/cars";
 import { circuits } from "@/consts/circuits";
 import { circuitlayouts } from "@/consts/circuitlayouts";
 import { points } from "@/consts/pointsystem";
 import { createRaceData, formatTwoIntegersPlusThreeDecimals, formatTwoIntegers } from "@/lib/results/resultConverter";
-import ApexCharts from 'apexcharts';
 
 import type { RaceData, RaceResult, RaceLap, Lap, BestLap, Consistency, BestSector, Incident, RaceConfig } from "@/types/Results";
 import type { Points } from "@/types/Points";
@@ -21,7 +21,21 @@ function initializeScript() {
     const chartCambiosPosiciones = document.getElementById('chartCambiosPosiciones');
 
     async function loadTable() {
-        const seleccion = opcionesTabla.value;
+
+        const arraySeleccion = opcionesTabla.value.split("@");
+
+        const seleccion = arraySeleccion[0];
+
+        let pointsystemName: string | undefined = undefined;
+        let pointArray: Points | undefined = undefined;
+        if (arraySeleccion[1] === null || arraySeleccion[1] === undefined || arraySeleccion[1] === "") {
+            pointsystemName = "NoPoints";
+        }
+        else {
+            pointsystemName = arraySeleccion[1];
+            pointArray = points.find((point) => point.Name === arraySeleccion[1]);
+        }
+
         if (!seleccion) {
             alert('Por favor, selecciona una opción');
             return;
@@ -44,25 +58,6 @@ function initializeScript() {
             const dbestsectors: BestSector[] = datos.BestSector;
             const devents: Incident[] = datos.Incident;
             const dconfig: RaceConfig = datos.RaceConfig;
-
-            const pointsystem = await turso.execute({
-                sql: "SELECT pointsystem FROM Race WHERE filename = ?",
-                args: [seleccion],
-            });
-
-            console.log('Puntos a usar: ', pointsystem);
-
-            let pointsystemName: string | undefined = undefined;
-            let pointArray: Points | undefined = undefined;
-            if (pointsystem.rows.length === 0) {
-                pointsystemName = pointsystem.rows[0].pointsystem?.toString();
-                pointArray = points.find((point) => point.Name === pointsystemName);
-                console.log('Puntos a usar: ', pointArray);
-            }
-            else {
-                pointsystemName = "NoPoints";
-            }
-
 
             if (tablaResultados) {
                 tablaResultados.innerHTML = '';
@@ -287,21 +282,27 @@ function initializeScript() {
                         interval = "+ " + (vueltasLider - vueltastotales) + "L";
                     }
                 } else {
-                    console.log("Piloto Actual: ", itemResult.DriverName + ". Vueltas Totales: ", vueltastotales, "Tiempo: ", itemResult.TotalTime);
                     interval = "";
                 }
 
                 // *** Añadir puntuaciones a la tabla ***
                 let puntos: number = 0;
                 let puntosString: string = "";
-                if(pointsystemName !== "NoPoints"){
-                    if(pos>0){
-                        puntos = pointArray?.Puntuation[pos-1] || 0;
-                        if(bestlapDriverID === itemResult.SteamID){
+                if (pointsystemName !== "NoPoints") {
+                    if (pos > 0) {
+                        puntos = pointArray?.Puntuation[pos - 1] || 0;
+                        if (bestlapDriverID === itemResult.SteamID) {
                             puntos += pointArray?.FastestLap || 0;
                         }
-                        puntosString = puntos.toString();
+                        puntosString = '+ '+ puntos.toString();
                     }
+                } else {
+                    puntosString = "";
+                }
+
+                let flapClass = "";
+                if (bestlapDriverID === itemResult.SteamID) {
+                    flapClass = ' bg-[#c100ff] text-white font-bold rounded-full';
                 }
 
 
@@ -319,10 +320,10 @@ function initializeScript() {
                                 <td class = "text-start">${equipo}</td>                                                           <!-- Equipo -->
                                 <td class = "text-center">${vueltastotales}</td>                                                  <!-- Nº Vueltas -->
                                 <td class = "text-center">${timeadjust}</td>                                                      <!-- Tiempo Total -->
-                                <td class = "text-center">${bestlapToString + " (" + tyre + ")"}</td>                             <!-- Vuelta Rapida  + Neumaticos-->
+                                <td class = "text-center ${flapClass} ">${bestlapToString + " (" + tyre + ")"}</td>                             <!-- Vuelta Rapida  + Neumaticos-->
                                 <td class = "text-center">${gap}</td>                                                             <!-- Gap con primero -->
                                 <td class = "text-center">${interval}</td>                                                        <!-- Intervalo -->
-                                <td class = "text-center">${puntosString}</td>     <!-- Ballast/Restrictor -->
+                                <td class = "text-center">${puntosString}</td>                                                    <!-- Ballast/Restrictor -->
                             </tr>
                     `;
                 } else {
@@ -338,10 +339,10 @@ function initializeScript() {
                                 <td class = "text-start">${equipo}</td>                                                           <!-- Equipo -->
                                 <td class = "text-center">${vueltastotales}</td>                                                  <!-- Nº Vueltas -->
                                 <td class = "text-center">${timeadjust}</td>                                                      <!-- Tiempo Total -->
-                                <td class = "text-center">${bestlapToString + " (" + tyre + ")"}</td>                             <!-- Vuelta Rapida  + Neumaticos-->
+                                <td class = "text-center ${flapClass} ">${bestlapToString + " (" + tyre + ")"}</td>                             <!-- Vuelta Rapida  + Neumaticos-->
                                 <td class = "text-center">${gap}</td>                                                             <!-- Gap con primero -->
                                 <td class = "text-center">${interval}</td>                                                        <!-- Intervalo -->
-                                <td class = "text-center">${puntosString}</td>     <!-- Ballast/Restrictor -->
+                                <td class = "text-center">${puntosString}</td>                                                    <!-- Ballast/Restrictor -->
                             </tr>
                     `;
                 }

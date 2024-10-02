@@ -7,6 +7,7 @@ interface Race {
   ChampName: string;
   RaceName: string;
   filename: string;
+  pointsystem: string;
 }
 
 interface Championship {
@@ -15,7 +16,7 @@ interface Championship {
 }
 
 const resultSet = await turso.execute(
-  "SELECT DISTINCT R.name AS RaceName, R.filename, C.name AS ChampName, C.id AS ChampID FROM Championship AS C INNER JOIN Race AS R ON C.id = R.championship"
+  "SELECT DISTINCT R.name AS RaceName, R.filename, R.pointsystem, C.name AS ChampName, C.id AS ChampID FROM Championship AS C INNER JOIN Race AS R ON C.id = R.championship"
 );
 const RacesData: Race[] = resultSet.rows as unknown as Race[];
 
@@ -53,7 +54,7 @@ if (RacesData.length == 0) {
       <optgroup label={champData.name} class="font-semibold py-2">
         {champData.races.map((race) => (
           <option
-            value={race.filename?.toString()}
+            value={race.filename?.toString()+"@"+race.pointsystem?.toString()}
             class="text-[#f7f7f7]"
             data-champ={champData.name}
           >
