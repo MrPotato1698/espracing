@@ -86,14 +86,18 @@ function initializeScript() {
                 //console.log('Item ',pos, '. Nombre: ',item.DriverName);
                 let gridPositionClass;
                 let gains = itemResult.GridPosition - postabla
-                let gainsAbs: number = Math.abs(gains);
+                let gainsAbs: string = Math.abs(gains).toString();
                 if ((gains > 0) && (pos > -2)) {
                     gridPositionClass = '<svg viewBox="0 0 24 24" fill="#00f000" class="w-6 float mx-auto"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M11.375 6.22l-5 4a1 1 0 0 0 -.375 .78v6l.006 .112a1 1 0 0 0 1.619 .669l4.375 -3.501l4.375 3.5a1 1 0 0 0 1.625 -.78v-6a1 1 0 0 0 -.375 -.78l-5 -4a1 1 0 0 0 -1.25 0z" /></svg>';
                 } else if ((gains < 0) && (pos > -2)) {
                     gridPositionClass = '<svg viewBox="0 0 24 24" fill="#ff0000" class="w-6 float mx-auto rotate-180"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M11.375 6.22l-5 4a1 1 0 0 0 -.375 .78v6l.006 .112a1 1 0 0 0 1.619 .669l4.375 -3.501l4.375 3.5a1 1 0 0 0 1.625 -.78v-6a1 1 0 0 0 -.375 -.78l-5 -4a1 1 0 0 0 -1.25 0z" /></svg>';
                 } else if (gains === 0 || pos <= -2) {
                     gridPositionClass = '<svg viewBox="0 0 24 24" fill="#ffc800" class="w-6 float mx-auto rotate-90"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M11.375 6.22l-5 4a1 1 0 0 0 -.375 .78v6l.006 .112a1 1 0 0 0 1.619 .669l4.375 -3.501l4.375 3.5a1 1 0 0 0 1.625 -.78v-6a1 1 0 0 0 -.375 -.78l-5 -4a1 1 0 0 0 -1.25 0z" /></svg>';
-                    gainsAbs = 0;
+                    gainsAbs = "0";
+                }
+                if (pos <= -3) {
+                    gridPositionClass = "";
+                    gainsAbs = "";
                 }
 
                 // Obtener nombre de equipo + Ping Min-Max
@@ -123,7 +127,7 @@ function initializeScript() {
                 let timeadjust;
                 if (itemResult.Pos !== -2) {
                     if (itemResult.TotalTime >= 0) {
-                        timeadjust = itemResult.TotalTime;
+                        timeadjust = itemResult.TotalTime + itemResult.Penalties;
                         const seconds = formatTwoIntegersPlusThreeDecimals(timeadjust % 60);
                         const minutes = formatTwoIntegers(Math.trunc((timeadjust / 60) % 60));
                         const hours = formatTwoIntegers(Math.trunc(timeadjust / 3600));
@@ -167,7 +171,7 @@ function initializeScript() {
                     if (itemLap.SteamID === itemResult.SteamID) {
                         for (let itemLap2 of itemLap.Laps) {
                             if (itemLap2.LapTime === itemResult.BestLap) {
-                                tyre = itemLap2.Tyre;
+                                tyre = "(" + itemLap2.Tyre + ")";
                             }
                         }
                     }
@@ -180,7 +184,7 @@ function initializeScript() {
                 }
 
                 if (tyre === undefined || tyre === null || tyre === "") {
-                    tyre = "ND";
+                    tyre = "(ND)";
                 }
 
                 let posicionFinal: string = "";
@@ -233,7 +237,12 @@ function initializeScript() {
 
                 //console.log("Mejor vuelta Usuario ", pos, ": " + bestlap);
 
-                let bestlapToString = minutesbl.toString() + ":" + secondsbl.toString();
+                let bestlapToString = "";
+                if (pos >= -1) {
+                    bestlapToString = minutesbl.toString() + ":" + secondsbl.toString();
+                } else {
+                    tyre = "";
+                }
                 //bestlap = minutesbl.toString + ":" + secondsbl.toString;
 
 
@@ -242,7 +251,7 @@ function initializeScript() {
                 if (pos < -2) {
                     gap = "";
                 } else if (postabla > 1 && vueltasLider === vueltastotales) {
-                    const gapTime = (itemResult.TotalTime - dresult[0].TotalTime);
+                    const gapTime = ((itemResult.TotalTime + itemResult.Penalties) - (dresult[0].TotalTime + dresult[0].Penalties));
                     let secondsgap = formatTwoIntegersPlusThreeDecimals(gapTime % 60);
                     let minutesgap = formatTwoIntegers(Math.trunc((gapTime / 60) % 60));
 
@@ -269,7 +278,7 @@ function initializeScript() {
                     if (pos < -2) {
                         interval = "";
                     } else if (postabla > 1 && vueltasPrevio === vueltastotales) {
-                        const intervalTime = itemResult.TotalTime - dresult[postabla - 2].TotalTime;
+                        const intervalTime = (itemResult.TotalTime + itemResult.Penalties) - (dresult[postabla - 2].TotalTime + dresult[postabla - 2].Penalties);
                         let secondsInterval = formatTwoIntegersPlusThreeDecimals(intervalTime % 60);
                         let minutesInterval = formatTwoIntegers(Math.trunc((intervalTime / 60) % 60));
 
@@ -294,7 +303,9 @@ function initializeScript() {
                         if (bestlapDriverID === itemResult.SteamID) {
                             puntos += pointArray?.FastestLap || 0;
                         }
-                        puntosString = '+ '+ puntos.toString();
+                        puntosString = '+ ' + puntos.toString();
+                    } else if (pos === -1) {
+                        puntosString = "+ 0";
                     }
                 } else {
                     puntosString = "";
@@ -302,7 +313,11 @@ function initializeScript() {
 
                 let flapClass = "";
                 if (bestlapDriverID === itemResult.SteamID) {
-                    flapClass = ' bg-[#c100ff] text-white font-bold rounded-full';
+                    if (pos >= -1) {
+                        flapClass = ' bg-[#c100ff] text-white font-bold rounded-full';
+                    } else {
+                        flapClass = '';
+                    }
                 }
 
 
@@ -320,9 +335,9 @@ function initializeScript() {
                                 <td class = "text-start">${equipo}</td>                                                           <!-- Equipo -->
                                 <td class = "text-center">${vueltastotales}</td>                                                  <!-- Nº Vueltas -->
                                 <td class = "text-center">${timeadjust}</td>                                                      <!-- Tiempo Total -->
-                                <td class = "text-center ${flapClass} ">${bestlapToString + " (" + tyre + ")"}</td>                             <!-- Vuelta Rapida  + Neumaticos-->
                                 <td class = "text-center">${gap}</td>                                                             <!-- Gap con primero -->
                                 <td class = "text-center">${interval}</td>                                                        <!-- Intervalo -->
+                                <td class = "text-center ${flapClass} ">${bestlapToString + " " + tyre}</td>               <!-- Vuelta Rapida  + Neumaticos-->
                                 <td class = "text-center">${puntosString}</td>                                                    <!-- Ballast/Restrictor -->
                             </tr>
                     `;
@@ -339,9 +354,9 @@ function initializeScript() {
                                 <td class = "text-start">${equipo}</td>                                                           <!-- Equipo -->
                                 <td class = "text-center">${vueltastotales}</td>                                                  <!-- Nº Vueltas -->
                                 <td class = "text-center">${timeadjust}</td>                                                      <!-- Tiempo Total -->
-                                <td class = "text-center ${flapClass} ">${bestlapToString + " (" + tyre + ")"}</td>                             <!-- Vuelta Rapida  + Neumaticos-->
                                 <td class = "text-center">${gap}</td>                                                             <!-- Gap con primero -->
                                 <td class = "text-center">${interval}</td>                                                        <!-- Intervalo -->
+                                <td class = "text-center ${flapClass} ">${bestlapToString + " " + tyre}</td>               <!-- Vuelta Rapida  + Neumaticos-->
                                 <td class = "text-center">${puntosString}</td>                                                    <!-- Ballast/Restrictor -->
                             </tr>
                     `;
@@ -399,7 +414,9 @@ function initializeScript() {
                         fontWeight: 'bold',
                     },
                 },
+
                 series: seriesData,
+
                 chart: {
                     type: 'line',
                     zoom: {
@@ -438,6 +455,7 @@ function initializeScript() {
                         },
                     },
                 },
+
                 xaxis: {
                     categories: numlaps,
                     labels: {
@@ -472,15 +490,19 @@ function initializeScript() {
                         },
                     },
                 },
+
                 stroke: {
                     curve: 'smooth',
                 },
+
                 markers: {
                     size: 1,
                 },
+
                 tooltip: {
                     theme: 'dark',
                 },
+
                 legend: {
                     labels: {
                         colors: '#f9f9f9',
@@ -489,7 +511,7 @@ function initializeScript() {
             };
 
             var chartChangePosition = new ApexCharts(chartCambiosPosiciones, optionsChangePositions);
-            chartChangePosition.resetSeries();
+            //chartChangePosition.resetSeries();
             chartChangePosition.render();
 
             // *** Sectores ***

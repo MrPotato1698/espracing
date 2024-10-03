@@ -51,7 +51,7 @@ if (RacesData.length == 0) {
 >
   {
     Object.entries(racesByChampionship).map(([champId, champData]) => (
-      <optgroup label={champData.name} class="font-semibold py-2">
+      <optgroup label={champData.name} class="py-2 font-semibold">
         {champData.races.map((race) => (
           <option
             value={race.filename?.toString()+"@"+race.pointsystem?.toString()}
@@ -88,21 +88,21 @@ if (RacesData.length == 0) {
           <th>Equipo</th>
           <th>Vueltas</th>
           <th>Tiempo Total</th>
-          <th>Vuelta Rápida</th>
           <th>Gap to 1st</th>
           <th>Intervalo</th>
-          <th>Lastres</th>
+          <th>Vuelta Rápida</th>
+          <th>Ptos</th>
         </tr>
       </thead>
       <tbody id="tablaResultados" class="font-normal"> </tbody>
     </table>
   </div>
 
-  <div class="tablecharts mt-4 w-11/12 mx-auto">
+  <div class="w-11/12 mx-auto mt-4 tablecharts">
     <div id="chartCambiosPosiciones" class="border-2 rounded-lg border-[#da392b]"></div>
   </div>
 
-  <div class = "grid mt-4 mx-auto gap-2 sectorTables">
+  <div class = "grid gap-2 mx-auto mt-4 sectorTables">
     <div id="tablaS1"></div>
     <div id="tablaS2"></div>
     <div id="tablaS3"></div>
