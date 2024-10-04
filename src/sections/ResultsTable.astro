@@ -54,7 +54,9 @@ if (RacesData.length == 0) {
       <optgroup label={champData.name} class="py-2 font-semibold">
         {champData.races.map((race) => (
           <option
-            value={race.filename?.toString()+"@"+race.pointsystem?.toString()}
+            value={
+              race.filename?.toString() + "@" + race.pointsystem?.toString()
+            }
             class="text-[#f7f7f7]"
             data-champ={champData.name}
           >
@@ -99,25 +101,31 @@ if (RacesData.length == 0) {
   </div>
 
   <div class="w-11/12 mx-auto mt-4 tablecharts">
-    <div id="chartCambiosPosiciones" class="border-2 rounded-lg border-[#da392b]"></div>
+    <div
+      id="chartCambiosPosiciones"
+      class="border-2 rounded-lg border-[#da392b]"
+    >
+    </div>
   </div>
 
-  <div class = "grid gap-2 mx-auto mt-4 sectorTables">
+  <div class="grid gap-2 mx-auto mt-4 sectorTables">
     <div id="tablaS1"></div>
     <div id="tablaS2"></div>
     <div id="tablaS3"></div>
     <div id="tablaS4"></div>
     <div id="tablaS5"></div>
-
   </div>
 
+  <div id="tableIndividualLaps"></div>
 </div>
 
-<script> // Script para cargar los resultados de la carrera seleccionada
+<script>
+  // Script para cargar los resultados de la carrera seleccionada
   import "@/pages/api/raceresults/results.ts";
 </script>
 
-<script> // Script para modificar el texto del select
+<script>
+  // Script para modificar el texto del select
   const select = document.getElementById("select-champs") as HTMLSelectElement;
 
   function updateSelectText() {
