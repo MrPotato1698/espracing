@@ -143,10 +143,12 @@ function createRaceLap(dlaps: LapJSON[], rr: RaceResult[]): RaceLap[] {
 
 function createLap(dlaps: LapJSON[], rr: RaceResult): Lap[] {
   let l: Lap[] = [];
+  let numLaps = 0;
   for (let lapItem of dlaps) {
     if (rr.SteamID === lapItem.DriverGuid) {
+      numLaps++;
       let uniqueL: Lap = {} as Lap;
-      uniqueL.LapNumber = lapItem.Sectors.length;
+      uniqueL.LapNumber = numLaps;
       uniqueL.Position = -1;
       uniqueL.CarFileName = lapItem.CarModel;
       uniqueL.LapTime = lapItem.LapTime / 1000;
