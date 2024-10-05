@@ -810,4 +810,22 @@ export const cars: Car[] = [
     fuelLiterTime:0.6,
     maxLiter: 35,
   },
+
+  {
+    id: 46,
+    filename: 'btcc_audi_rs3',
+    brand: 'Audi',
+    imgbrand: '/img/brand/audi.webp',
+    model: 'Audi RS3 BTCC 2019',
+    year: 2019,
+    class: "Turismo (FWD)",
+    subclass: 'BTCC',
+    power: 350,
+    torque: 420,
+    weight: 1250,
+    description: "Desde la temporada 2014 en adelante, todos los coches se fabrican según las mismas normas NGTC. Introducidos por primera vez en 2011 por un período inicial de cinco años, estos reglamentos técnicos están diseñados para reducir drásticamente los costos de diseño, construcción y funcionamiento de los automóviles y motores. Ahora sólo los coches NGTC son elegibles para competir en el BTCC. TOCA amplió este reglamento por 6 años más a partir de 2016. NGTC permite a los equipos independientes competir en igualdad de condiciones contra los esfuerzos respaldados por los fabricantes manteniendo los costos bajos y al mismo tiempo recompensando la ingeniería precisa y la importante estrategia de una fracción de segundo. La base de NGTC es un énfasis en algunos componentes comunes, como turbo, válvula de descarga, intercoolers, ECU, instrumentación y tablero, sistema de administración de energía, caja de cambios secuencial de seis velocidades, tanques de combustible, diferencial, subchasis, dirección, frenos, embrague, ruedas. amortiguadores y suspensión, lo que reduce drásticamente los costos para los equipos que buscan competir en uno de los campos deportivos de motor más atractivos del mundo. En 2016 se introduce un nuevo socio técnico para los subchasis comunes, la suspensión y la nueva dirección asistida hidráulica, mientras que todos los demás socios técnicos estaban interesados ​​en continuar su asociación con el BTCC. Los equipos tienen la opción de utilizar el motor sin marca NGTC de TOCA o, ya sean privados o totalmente respaldados por el fabricante, desarrollar su propio motor según las regulaciones, siempre que sea de la misma 'familia' que el modelo de automóvil elegido. Todos son motores turboalimentados de 2 litros y 340 CV.",
+    tyreTimeChange:5,
+    fuelLiterTime:1.2,
+    maxLiter: 100,
+  },
 ];
