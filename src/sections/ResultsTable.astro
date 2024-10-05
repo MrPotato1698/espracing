@@ -15,9 +15,28 @@ interface Championship {
   races: Race[];
 }
 
-const resultSet = await turso.execute(
-  "SELECT DISTINCT R.name AS RaceName, R.filename, R.pointsystem, C.name AS ChampName, C.id AS ChampID FROM Championship AS C INNER JOIN Race AS R ON C.id = R.championship"
-);
+interface Props {
+  actualchamp: string;
+}
+
+const { actualchamp } = Astro.props;
+
+let resultSet;
+
+if (actualchamp==="true") {
+  const lastchamp = await turso.execute(
+    "SELECT MAX(championship) AS lastchamp FROM Race"
+  );
+
+  resultSet = await turso.execute(
+    `SELECT DISTINCT R.name AS RaceName, R.filename, R.pointsystem, C.name AS ChampName, C.id AS ChampID FROM Championship AS C INNER JOIN Race AS R ON C.id = R.championship WHERE C.id = ${lastchamp.rows[0].lastchamp}`
+  );
+} else {
+  resultSet = await turso.execute(
+    "SELECT DISTINCT R.name AS RaceName, R.filename, R.pointsystem, C.name AS ChampName, C.id AS ChampID FROM Championship AS C INNER JOIN Race AS R ON C.id = R.championship"
+  );
+}
+
 const RacesData: Race[] = resultSet.rows as unknown as Race[];
 
 let racesByChampionship: { [key: string]: Championship } = {};
@@ -103,6 +122,14 @@ if (RacesData.length == 0) {
   <div class="w-11/12 mx-auto mt-4 tablecharts">
     <div
       id="chartCambiosPosiciones"
+      class="border-2 rounded-lg border-[#da392b]"
+    >
+    </div>
+  </div>
+
+  <div class="w-11/12 mx-auto mt-4 tablecharts">
+    <div
+      id="chartGaps"
       class="border-2 rounded-lg border-[#da392b]"
     >
     </div>
