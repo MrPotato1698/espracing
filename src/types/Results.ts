@@ -34,6 +34,7 @@ export interface RaceLap{
   Laps: Lap [];
   Average: number[];
   Best: number[];
+  Optimal: number[];
 }
 
 export interface Lap {
