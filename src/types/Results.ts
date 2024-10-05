@@ -46,6 +46,7 @@ export interface Lap {
   Tyre: string;
   Cut: number;
   Timestamp: number;
+  GaptoFirst: number;
 }
 
 export interface BestLap{
