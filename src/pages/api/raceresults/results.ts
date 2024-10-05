@@ -19,6 +19,7 @@ function initializeScript() {
     const datosCircuito = document.getElementById('datosCircuito');
 
     const chartCambiosPosiciones = document.getElementById('chartCambiosPosiciones');
+    const chartGaps = document.getElementById('chartGaps');
 
     const tablaIndividuales = document.getElementById('tableIndividualLaps');
 
@@ -44,8 +45,8 @@ function initializeScript() {
         }
 
         try {
-            //const response = await fetch(`/api/raceresults/getRaceResults?race=${seleccion}`);
-            const response = await fetch(`/testRace7.json`); //Pruebas para no leer constantemente de la BD
+            const response = await fetch(`/api/raceresults/getRaceResults?race=${seleccion}`);
+            //const response = await fetch(`/testRace7.json`); //Pruebas para no leer constantemente de la BD
 
             const datosRAW = await response.json();
             //console.log('DatosRAW a usar: ', datosRAW);
@@ -162,6 +163,10 @@ function initializeScript() {
                     timeadjust = "DQ";
                 }
 
+                if (itemResult.Pos <= -3) {
+                    timeadjust = "";
+                }
+
                 // Obtener numero de vueltas totales / vuelta rapida / neumatico
                 let vueltastotales = 0;
                 if (itemResult.Laps === undefined || itemResult.Laps === null || itemResult.Laps === 0) {
@@ -173,6 +178,7 @@ function initializeScript() {
                 } else {
                     vueltastotales = itemResult.Laps;
                 }
+
                 let tyre;
                 let cuts = 0;
 
@@ -204,7 +210,11 @@ function initializeScript() {
                 } else {
                     switch (itemResult.Pos) {
                         case -1:
-                            posicionFinal = 'DNF';
+                            if (itemResult.Team === "ESP Racing Staff") {
+                                posicionFinal = 'STAFF';
+                            } else {
+                                posicionFinal = 'DNF';
+                            }
                             break;
                         case -2:
                             posicionFinal = 'DQ';
@@ -238,6 +248,9 @@ function initializeScript() {
                                 posicionFinal = pos.toString();
                             }
                     }
+                    if (itemResult.Pos === -4 && itemResult.DriverName === "STREAMING") {
+                        posicionFinal = 'TV';
+                    }
                 }
 
                 let bestlap = itemResult.BestLap;
@@ -262,7 +275,7 @@ function initializeScript() {
 
                 // *** Intervalo de tiempo con el lider ***
                 let gap: string = "";
-                if (pos < -2) {
+                if (pos <= -2) {
                     gap = "";
                 } else if (postabla > 1 && vueltasLider === vueltastotales) {
                     const gapTime = ((itemResult.TotalTime + itemResult.Penalties) - (dresult[0].TotalTime + dresult[0].Penalties));
@@ -289,7 +302,7 @@ function initializeScript() {
                             vueltasPrevio = itemLap.Laps.length;
                         }
                     }
-                    if (pos < -2) {
+                    if (pos <= -2) {
                         interval = "";
                     } else if (postabla > 1 && vueltasPrevio === vueltastotales) {
                         const intervalTime = (itemResult.TotalTime + itemResult.Penalties) - (dresult[postabla - 2].TotalTime + dresult[postabla - 2].Penalties);
@@ -328,50 +341,55 @@ function initializeScript() {
                 let flapClass = "";
                 if (bestlapDriverID === itemResult.SteamID) {
                     if (pos >= -1) {
-                        flapClass = ' bg-[#c100ff] text-white font-bold rounded-full';
+                        flapClass = ' bg-[#c100ff] text-white font-bold rounded-full w-content px-5';
                     } else {
                         flapClass = '';
                     }
                 }
 
-
+                let vueltasTotalesString: string = "";
+                if (pos > -2) {
+                    vueltasTotalesString = vueltastotales.toString();
+                } else {
+                    vueltasTotalesString = "";
+                }
 
                 if (postabla % 2 === 0) {
                     tablaResultados.innerHTML += `
                             <tr class="bg-[#0f0f0f]">
-                                <td class = "text-center">${gridPositionClass}</td>                                               <!-- Gan/Per (Flechas)-->
-                                <td class = "text-center">${gainsAbs}</td>                                                        <!-- Gan/Per (Número)-->
-                                <td class = "font-medium text-center">${posicionFinal}</td>                                       <!-- Posicion -->
-                                <td class = "text-start">${itemResult.DriverName}</td>                                            <!-- Nombre -->
-                                <td class = "text-center"><span ${carColorClass}>${carClass}</span></td>                          <!-- Clase del Coche -->
-                                <td class = "text-center"><img class='w-4 justify-end' src='${carBrand}' alt=''></img></td>       <!-- Logo Coche -->
-                                <td class = "text-start">${carName}</td>                                                          <!-- Coche -->
-                                <td class = "text-start">${equipo}</td>                                                           <!-- Equipo -->
-                                <td class = "text-center">${vueltastotales}</td>                                                  <!-- Nº Vueltas -->
-                                <td class = "text-center">${timeadjust}</td>                                                      <!-- Tiempo Total -->
-                                <td class = "text-center">${gap}</td>                                                             <!-- Gap con primero -->
-                                <td class = "text-center">${interval}</td>                                                        <!-- Intervalo -->
-                                <td class = "text-center ${flapClass} ">${bestlapToString + " " + tyre}</td>               <!-- Vuelta Rapida  + Neumaticos-->
-                                <td class = "text-center">${puntosString}</td>                                                    <!-- Ballast/Restrictor -->
+                                <td class = "text-center">${gridPositionClass}</td>                                                 <!-- Gan/Per (Flechas)-->
+                                <td class = "text-center">${gainsAbs}</td>                                                          <!-- Gan/Per (Número)-->
+                                <td class = "font-medium text-center">${posicionFinal}</td>                                         <!-- Posicion -->
+                                <td class = "text-start">${itemResult.DriverName}</td>                                              <!-- Nombre -->
+                                <td class = "text-center"><span ${carColorClass}>${carClass}</span></td>                            <!-- Clase del Coche -->
+                                <td class = "text-center"><img class='w-4 justify-end' src='${carBrand}' alt=''></img></td>         <!-- Logo Coche -->
+                                <td class = "text-start">${carName}</td>                                                            <!-- Coche -->
+                                <td class = "text-start">${equipo}</td>                                                             <!-- Equipo -->
+                                <td class = "text-center">${vueltasTotalesString}</td>                                              <!-- Nº Vueltas -->
+                                <td class = "text-center">${timeadjust}</td>                                                        <!-- Tiempo Total -->
+                                <td class = "text-center">${gap}</td>                                                               <!-- Gap con primero -->
+                                <td class = "text-center">${interval}</td>                                                          <!-- Intervalo -->
+                                <td class = "text-center"><span class = "${flapClass}">${bestlapToString + " " + tyre}</span></td>  <!-- Vuelta Rapida  + Neumaticos-->
+                                <td class = "text-center">${puntosString}</td>                                                      <!-- Ballast/Restrictor -->
                             </tr>
                     `;
                 } else {
                     tablaResultados.innerHTML += `
                             <tr class="bg-[#19191c]">
-                                <td class = "text-center">${gridPositionClass}</td>                                               <!-- Gan/Per (Flechas)-->
-                                <td class = "text-center">${gainsAbs}</td>                                                        <!-- Gan/Per (Número)-->
-                                <td class = "font-medium text-center">${posicionFinal}</td>                                       <!-- Posicion -->
-                                <td class = "text-start">${itemResult.DriverName}</td>                                            <!-- Nombre -->
-                                <td class = "text-center"><span ${carColorClass}>${carClass}</span></td>                          <!-- Clase del Coche -->
-                                <td class = "text-center"><img class='w-4 justify-end' src='${carBrand}' alt=''></img></td>       <!-- Logo Coche -->
-                                <td class = "text-start">${carName}</td>                                                          <!-- Coche -->
-                                <td class = "text-start">${equipo}</td>                                                           <!-- Equipo -->
-                                <td class = "text-center">${vueltastotales}</td>                                                  <!-- Nº Vueltas -->
-                                <td class = "text-center">${timeadjust}</td>                                                      <!-- Tiempo Total -->
-                                <td class = "text-center">${gap}</td>                                                             <!-- Gap con primero -->
-                                <td class = "text-center">${interval}</td>                                                        <!-- Intervalo -->
-                                <td class = "text-center ${flapClass} ">${bestlapToString + " " + tyre}</td>               <!-- Vuelta Rapida  + Neumaticos-->
-                                <td class = "text-center">${puntosString}</td>                                                    <!-- Ballast/Restrictor -->
+                                <td class = "text-center">${gridPositionClass}</td>                                                 <!-- Gan/Per (Flechas)-->
+                                <td class = "text-center">${gainsAbs}</td>                                                          <!-- Gan/Per (Número)-->
+                                <td class = "font-medium text-center">${posicionFinal}</td>                                         <!-- Posicion -->
+                                <td class = "text-start">${itemResult.DriverName}</td>                                              <!-- Nombre -->
+                                <td class = "text-center"><span ${carColorClass}>${carClass}</span></td>                            <!-- Clase del Coche -->
+                                <td class = "text-center"><img class='w-4 justify-end' src='${carBrand}' alt=''></img></td>         <!-- Logo Coche -->
+                                <td class = "text-start">${carName}</td>                                                            <!-- Coche -->
+                                <td class = "text-start">${equipo}</td>                                                             <!-- Equipo -->
+                                <td class = "text-center">${vueltasTotalesString}</td>                                              <!-- Nº Vueltas -->
+                                <td class = "text-center">${timeadjust}</td>                                                        <!-- Tiempo Total -->
+                                <td class = "text-center">${gap}</td>                                                               <!-- Gap con primero -->
+                                <td class = "text-center">${interval}</td>                                                          <!-- Intervalo -->
+                                <td class = "text-center"><span class = "${flapClass} ">${bestlapToString + " " + tyre}</span></td> <!-- Vuelta Rapida  + Neumaticos-->
+                                <td class = "text-center">${puntosString}</td>                                                      <!-- Ballast/Restrictor -->
                             </tr>
                     `;
                 }
@@ -408,8 +426,7 @@ function initializeScript() {
             }
 
             // *** Cambios de posiciones ***
-
-            const seriesData = dlaps
+            const seriesDataPositions = dlaps
                 .filter((lapData) => lapData.Laps.length > 0)
                 .map((lapData) => ({
                     name: lapData.DriverName,
@@ -429,7 +446,7 @@ function initializeScript() {
                     },
                 },
 
-                series: seriesData,
+                series: seriesDataPositions,
 
                 chart: {
                     type: 'line',
@@ -458,7 +475,16 @@ function initializeScript() {
                     }],
                     defaultLocale: 'es',
                     toolbar: {
-                        show: false,
+                        show: true,
+                        tools: {
+                            download: false,
+                            selection: false,
+                            zoom: true,
+                            zoomin: true,
+                            zoomout: true,
+                            pan: true,
+                            reset: true,
+                        },
                     },
                     animation: {
                         enabled: true,
@@ -525,14 +551,144 @@ function initializeScript() {
             };
 
             var chartChangePosition = new ApexCharts(chartCambiosPosiciones, optionsChangePositions);
-            //chartChangePosition.resetSeries();
+            chartChangePosition.resetSeries();
             chartChangePosition.render();
 
+            // *** Gaps durante las vueltas ***
+            const seriesDataGaps = dlaps.filter((lapData) => lapData.Laps.length > 0)
+                .map((lapData) => ({
+                    name: lapData.DriverName,
+                    data: lapData.Laps.map((lap) => lap.GaptoFirst),
+                }));
+
+            var optionsGaps = {
+                title: {
+                    text: 'Distancia al líder',
+                    align: 'center',
+                    style: {
+                        color: '#f9f9f9',
+                        fontSize: '24px',
+                        fontWeight: 'bold',
+                    },
+                },
+
+                series: seriesDataGaps,
+
+                chart: {
+                    type: 'line',
+                    zoom: {
+                        enable: false,
+                        type: 'x',
+                        autoScaleYaxis: true,
+                    },
+                    locales: [{
+                        name: 'es',
+                        options: {
+                            months: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembere', 'Diciembre'],
+                            shortMonths: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dec'],
+                            days: ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'],
+                            shortDays: ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom'],
+                            toolbar: {
+                                download: 'Descargar SVG',
+                                selection: 'Seleccionar',
+                                selectionZoom: 'Seleccionar Zoom',
+                                zoomIn: 'Zoom In',
+                                zoomOut: 'Zoom Out',
+                                pan: 'Mover',
+                                reset: 'Reiniciar Zoom',
+                            }
+                        }
+                    }],
+                    defaultLocale: 'es',
+                    toolbar: {
+                        show: true,
+                        tools: {
+                            download: false,
+                            selection: false,
+                            zoom: true,
+                            zoomin: true,
+                            zoomout: true,
+                            pan: true,
+                            reset: true,
+                        },
+                    },
+                    animation: {
+                        enabled: true,
+                        easing: 'linear',
+                        speed: 850,
+                        animateGradually: {
+                            enabled: false,
+                        },
+                    },
+                },
+
+                xaxis: {
+                    categories: numlaps,
+                    labels: {
+                        style: {
+                            colors: '#f9f9f9',
+                        },
+                    },
+                    title: {
+                        text: 'Vueltas',
+                        style: {
+                            color: '#f9f9f9',
+                            fontSize: '16px',
+                        },
+                    },
+                },
+
+                yaxis: {
+                    stepSize: 8,
+                    min: 0,
+                    position: 'top',
+                    reversed: true,
+                    title: {
+                        text: 'Distancia al líder (segundos)',
+                        style: {
+                            color: '#f9f9f9',
+                            fontSize: '16px',
+                        },
+                    },
+                    labels: {
+                        style: {
+                            colors: '#f9f9f9',
+                        },
+                    },
+                },
+
+                stroke: {
+                    curve: 'smooth',
+                },
+
+                markers: {
+                    size: 1,
+                },
+
+                tooltip: {
+                    theme: 'dark',
+                },
+
+                legend: {
+                    labels: {
+                        colors: '#f9f9f9',
+                    }
+                },
+                grid: {
+                    borderColor:'#5a5a5a',
+                },
+            };
+
+            var chartGapsProgression = new ApexCharts(chartGaps, optionsGaps);
+            chartGapsProgression.resetSeries();
+            chartGapsProgression.render();
+
+
             // *** Sectores ***
-            const sectors = Array.from({ length: Math.max(...dbestsectors.map(sector => sector.SectorNumber)) }, (_, i) => i + 1)
+            const sectorsList = Array.from({ length: Math.max(...dbestsectors.map(sector => sector.SectorNumber)) }, (_, i) => i + 1)
                 .map(sectorNumber => dbestsectors.filter(sector => sector.SectorNumber === sectorNumber));
 
-            sectors.forEach((sector, index) => {
+            sectorsList.forEach((sector, index) => {
                 const sectorTable = document.getElementById(`tablaS${index + 1}`);
                 if (sectorTable) {
                     let sectorHTML = `<p class="text-3xl font-bold border-b border-[#da392b] w-fit mx-auto mt-4 mb-2">Mejor Sector ${index + 1}</p>
@@ -620,6 +776,7 @@ function initializeScript() {
                 const bestLap = itemRL.Best;
                 const optimalLap: number[] = itemRL.Optimal;
                 const average = itemRL.Average;
+                const consistency = dconsistency.find((consistency) => consistency.SteamID === driverID)?.Consistency;
 
                 let pos = dresult.find((driver) => driver.SteamID === driverID)?.Pos;
                 if (pos === undefined) {
@@ -730,6 +887,15 @@ function initializeScript() {
                     bestlapToString = "Vuelta Rápida: No Time";
                 }
 
+                let consistencyString: string = "";
+                if (consistency !== undefined) {
+                    const diffConsistency = (consistency - 100).toFixed(2);
+                    consistencyString = ` | Consistencia: ${consistency}% ( ${diffConsistency} )`;
+                }
+                if (consistency === -1) {
+                    consistencyString = "";
+                }
+
 
                 if (pos >= -3) {
                     tablaIndividualesHTML += `<div class = "mt-8">
@@ -743,7 +909,7 @@ function initializeScript() {
                             </div>
                             <div class = "grid grid-cols-3 text-lg mt-2">
                                 <p>${bestlapToString}</p>
-                                <p>${avglapToString}</p>
+                                <p>${avglapToString} ${consistencyString} </p>
                                 <p>${optimallapToString} </p>
                             </div>
                             <div class = "grid grid-cols-3 text-lg mt-2">
@@ -768,18 +934,25 @@ function initializeScript() {
                             </thead>
                             <tbody class="font-normal">`;
 
+                        let bestGlobalSectors: number[] = [sectorsList[0][0].BestSector, sectorsList[1][0].BestSector, sectorsList[2][0].BestSector];
+
                         for (let itemL of laps) {
                             let bestlap = itemL.LapTime;
                             let BestLapClass: string = "";
+                            let CutClass: string = "";
 
                             if (bestlap === BestLapGeneral && !BestLapFound) { // Mejor vuelta de carrera
                                 BestLapFound = true;
-                                BestLapClass = `"bg-[#c100ff] text-white font-bold rounded-full"`;
+                                BestLapClass = `"bg-[#c100ff] text-white font-bold rounded-full w-content px-5"`;
                             }
 
                             if (bestlap === BestLap && !BestLapFound) { // Mejor vuelta personal
                                 BestLapFound = true;
-                                BestLapClass = `"bg-[#00ee07] text-black font-bold rounded-full"`;
+                                BestLapClass = `"bg-[#00ee07] text-black font-bold rounded-full w-content px-5"`;
+                            }
+
+                            if(itemL.Cut > 0){
+                                CutClass = BestLapClass = `"bg-[#da392b] text-black font-semibold rounded-full w-content px-5"`;
                             }
 
                             let secondsbl = formatTwoIntegersPlusThreeDecimals(bestlap % 60);
@@ -792,6 +965,21 @@ function initializeScript() {
 
                             let sectorTimeString: string[] = [];
                             const sectorTimeLength = itemL.Sector.length;
+                            let sectorIndex: number = 0;
+                            let sectorClass: string[] = [];
+                            let bestSectorsDriverID = sectorsList.map(sector => sector.find(s => s.SteamID === driverID)?.BestSector);
+                            bestSectorsDriverID.forEach((sector, index) => {
+                                if (sector === itemL.Sector[index]) {
+                                    if (sector === bestGlobalSectors[index]) {
+                                        sectorClass[index] = `"bg-[#c100ff] text-white font-bold rounded-full w-content px-5"`;
+                                    } else {
+                                        sectorClass[index] = `"bg-[#00ee07] text-black font-bold rounded-full w-content px-5"`;
+                                    }
+                                } else {
+                                    sectorClass[index] = `""`;
+                                }
+                            });
+
                             for (let s of itemL.Sector) {
                                 s = s / 1000;
                                 if (s >= 60) {
@@ -801,6 +989,7 @@ function initializeScript() {
                                 } else {
                                     sectorTimeString.push(formatTwoIntegersPlusThreeDecimals(s));
                                 }
+                                sectorIndex++;
                             }
                             if (sectorTimeLength < 3) {
                                 sectorTimeString.push("");
@@ -814,14 +1003,14 @@ function initializeScript() {
                                     <tr class="bg-[#19191c] text-center">`;
                             }
                             tablaIndividualesHTML +=
-                                `<td>${itemL.LapNumber.toString()}</td>                         <!-- Nº Vuelta -->
-                                        <td class =${BestLapClass}>${bestlapToString}</td>  <!-- Lap Time -->
-                                        <td>${sectorTimeString[0]}</td>                     <!-- Sector 1 -->
-                                        <td>${sectorTimeString[1]}</td>                     <!-- Sector 2 -->
-                                        <td>${sectorTimeString[2]}</td>                     <!-- Sector 3 -->
-                                        <td>${itemL.Tyre}</td>                              <!-- Tyre -->
-                                        <td>${itemL.Position.toString()}</td>               <!-- Posición en carrera -->
-                                        <td>${itemL.Cut.toString()}</td>                    <!-- Cut -->
+                                `<td>${itemL.LapNumber.toString()}</td>                             <!-- Nº Vuelta -->
+                                        <td><span class =${BestLapClass}>${bestlapToString}</span></td>          <!-- Lap Time -->
+                                        <td><span class =${sectorClass[0]}>${sectorTimeString[0]}</span></td>    <!-- Sector 1 -->
+                                        <td><span class =${sectorClass[1]}>${sectorTimeString[1]}</span></td>    <!-- Sector 2 -->
+                                        <td><span class =${sectorClass[2]}>${sectorTimeString[2]}</span></td>    <!-- Sector 3 -->
+                                        <td>${itemL.Tyre}</td>                                      <!-- Tyre -->
+                                        <td>${itemL.Position.toString()}</td>                       <!-- Posición en carrera -->
+                                        <td><span class =${CutClass}>${itemL.Cut.toString()}</span></td>                            <!-- Cut -->
                                     </tr> `;
                         }
                         tablaIndividualesHTML += ` </tbody></table></div> `;

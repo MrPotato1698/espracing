@@ -20,7 +20,6 @@ function createRaceResults(dcars: CarJSON[], devents: EventJSON[], dlaps: LapJSO
     uniqueRR.DriverName = itemR.DriverName;
     uniqueRR.Team = dcars[itemR.CarId].Driver.Team;
     uniqueRR.CarFileName = itemR.CarModel;
-    uniqueRR.GridPosition = itemR.GridPosition;
     uniqueRR.TotalTime = (itemR.TotalTime / 1000);
     uniqueRR.Penalties = (itemR.PenaltyTime / 1000000000);
     uniqueRR.Laps = itemR.NumLaps;
@@ -28,6 +27,13 @@ function createRaceResults(dcars: CarJSON[], devents: EventJSON[], dlaps: LapJSO
     uniqueRR.LedLaps = 0;
     uniqueRR.Ballast = itemR.BallastKG;
     uniqueRR.Restrictor = itemR.Restrictor;
+
+    // Obtener posición de salida
+    if (itemR.GridPosition !== 0) {
+      uniqueRR.GridPosition = itemR.GridPosition;
+    } else {
+      uniqueRR.GridPosition = -1;
+    }
 
     // Obtener posición final (uniqueRR.Pos)
     if (pos === 1) {
@@ -90,7 +96,7 @@ function createRaceResults(dcars: CarJSON[], devents: EventJSON[], dlaps: LapJSO
         uniqueRR.Restrictor = itemdC.Restrictor;
 
         //Diferenciar entre personal del staff y pilotos no presentados
-        if (itemdC.Driver.Team === "ESP Racing Staff" || itemdC.Driver.Team === "Safety Car" || itemdC.Driver.Team === "STREAMING") {
+        if (itemdC.Driver.Team === "ESP Racing Staff" || itemdC.Driver.Team === "Safety Car" || itemdC.Driver.Team === "STREAMING" || itemdC.Driver.Name === "STREAMING") {
           uniqueRR.Pos = -4;
           uniqueRR.GridPosition = -4;
 
@@ -193,12 +199,8 @@ function getBestLapTime(rl: Lap[]): number[] {
   for (let lap of rl) {
     if (lap.LapTime < bestLapTime) {
       bestLapTime = lap.LapTime;
+      bestSectorTimes = lap.Sector;
     }
-    lap.Sector.forEach((sectorTime, index) => {
-      if (sectorTime < bestSectorTimes[index]) {
-        bestSectorTimes[index] = sectorTime;
-      }
-    });
   }
   BestTimes.push(bestLapTime, ...bestSectorTimes);
 
@@ -216,15 +218,19 @@ function getBestTheoricalTime(rl: Lap[]): number[] {
       bestLapTime = lap.LapTime;
     }
     lap.Sector.forEach((sectorTime, index) => {
-      if (sectorTime < bestSectorTimes[index]) {
+      if (sectorTime < bestSectorTimes[index] && lap.Cut <= 0) {
         bestSectorTimes[index] = sectorTime;
       }
     });
   }
 
   bestTheoricalTime.push(bestLapTime, ...bestSectorTimes);
-  bestTheoricalTime[0] = (bestTheoricalTime[1] + bestTheoricalTime[2] + bestTheoricalTime[3])/1000;
-
+  switch (bestTheoricalTime.length) {
+    case 2: bestTheoricalTime[0] = (bestTheoricalTime[1]) / 1000; break;
+    case 3: bestTheoricalTime[0] = (bestTheoricalTime[1] + bestTheoricalTime[2]) / 1000; break;
+    case 4: bestTheoricalTime[0] = (bestTheoricalTime[1] + bestTheoricalTime[2] + bestTheoricalTime[3]) / 1000; break;
+    case 5: bestTheoricalTime[0] = (bestTheoricalTime[1] + bestTheoricalTime[2] + bestTheoricalTime[3] + bestTheoricalTime[4]) / 1000; break;
+  }
   return bestTheoricalTime;
 }
 
@@ -319,7 +325,11 @@ function createConsistency(rr: RaceResult[], rl: RaceLap[]): Consistency[] {
       let k = 0;
       while (!driverFound && k < rr.length) {
         if (rr[k].SteamID === driver.SteamID) {
-          bestLap = rr[k].BestLap;
+          if (rr[k].BestLap === 999999.999) {
+            bestLap = driver.Laps[1].LapTime;
+          } else {
+            bestLap = rr[k].BestLap;
+          }
           uniqueC.DriverName = rr[k].DriverName;
           uniqueC.SteamID = rr[k].SteamID;
           uniqueC.CarFileName = rr[k].CarFileName;
@@ -342,7 +352,7 @@ function createConsistency(rr: RaceResult[], rl: RaceLap[]): Consistency[] {
       const averageTime = totalTimes / otherLapTimes.length;
       const consistency = parseFloat((averageTime - bestLap).toFixed(2));
 
-      uniqueC.Consistency = consistency;
+      uniqueC.Consistency = 100 - consistency;
     }
     c.push(uniqueC);
     c.sort((a, b) => b.Consistency - a.Consistency);
@@ -489,6 +499,58 @@ function calculateNumLaps(rr: RaceResult[], rl: RaceLap[]): RaceResult[] {
   return rrAdjusted;
 }
 
+function calculateGridPosition(rr: RaceResult[], rl: RaceLap[]): RaceResult[] {
+  let rrAdjusted: RaceResult[] = rr;
+  for (let itemRR of rrAdjusted) {
+    let gridPosition = 0;
+    for (let itemRL of rl) {
+      if (itemRR.SteamID === itemRL.SteamID) {
+        if (itemRL.Laps.length > 0) {
+          gridPosition = itemRL.Laps[0].Position;
+        }
+      }
+    }
+    itemRR.GridPosition = gridPosition;
+  }
+
+  return rrAdjusted;
+}
+
+function getGapToFirst(rr: RaceResult[], rl: RaceLap[]): RaceLap[] {
+  let gapToFirst: RaceLap[] = rl;
+  const numberOfLaps = gapToFirst[0].Laps.length;
+
+  for (let lapIndex = 0; lapIndex < numberOfLaps; lapIndex++) {
+    let firstLapTime: number | null = null;
+
+    // Encontrar el tiempo por vuelta del coche en primera posición para la vuelta actual
+    for (let driverLap of gapToFirst) {
+      if (driverLap.Laps[lapIndex] && driverLap.Laps[lapIndex].Position === 1) {
+        firstLapTime = driverLap.Laps[lapIndex].LapTime;
+        break;
+      }
+    }
+
+    if (firstLapTime !== null) {
+      // Calcular la diferencia para cada piloto con respecto al coche en primera posición
+      for (let driverLap of gapToFirst) {
+        if (driverLap.Laps[lapIndex]) {
+          if (lapIndex > 0) {
+            const lastLapGap = driverLap.Laps[lapIndex - 1].GaptoFirst;
+            driverLap.Laps[lapIndex].GaptoFirst = parseFloat(((driverLap.Laps[lapIndex].LapTime - firstLapTime) + lastLapGap).toFixed(3)); // Convertir a segundos
+            if(driverLap.Laps[lapIndex].GaptoFirst <= 0 || driverLap.Laps[lapIndex].Position === 1){
+              driverLap.Laps[lapIndex].GaptoFirst = 0;
+            }
+          } else {
+            driverLap.Laps[lapIndex].GaptoFirst = parseFloat((driverLap.Laps[lapIndex].LapTime - firstLapTime).toFixed(3)); // Convertir a segundos
+          }
+        }
+      }
+    }
+  }
+  return gapToFirst;
+}
+
 // FUNCIONES A EXPORTAR
 
 export function createRaceData(datos: any): RaceData {
@@ -514,6 +576,12 @@ export function createRaceData(datos: any): RaceData {
   rd.RaceResult = getLeadLaps(rd.RaceResult, rd.RaceLaps);
 
   rd.RaceConfig = createRaceConfig(datos, rd.RaceResult, rd.BestLap[0]);
+
+  if (rd.RaceResult[0].GridPosition === -1) {
+    rd.RaceResult = calculateGridPosition(rd.RaceResult, rd.RaceLaps);
+  }
+
+  rd.RaceLaps = getGapToFirst(rd.RaceResult, rd.RaceLaps);
 
   return rd;
 }
