@@ -130,7 +130,8 @@ function createRaceLap(dlaps: LapJSON[], rr: RaceResult[]): RaceLap[] {
       uniqueRL.SteamID = driver.SteamID;
       uniqueRL.Laps = createLap(dlaps, driver);
       uniqueRL.Average = getAvgLapTimes(uniqueRL.Laps);
-      uniqueRL.Best = getBestTheoricalTime(uniqueRL.Laps);
+      uniqueRL.Best = getBestLapTime(uniqueRL.Laps);
+      uniqueRL.Optimal = getBestTheoricalTime(uniqueRL.Laps);
     }
     rl.push(uniqueRL);
   }
@@ -183,6 +184,27 @@ function getAvgLapTimes(rl: Lap[]): number[] {
   return avgTimes;
 }
 
+function getBestLapTime(rl: Lap[]): number[] {
+  let BestTimes: number[] = [];
+
+  let bestLapTime = Number.MAX_VALUE;
+  let bestSectorTimes: number[] = rl[0].Sector.map(() => Number.MAX_VALUE);
+
+  for (let lap of rl) {
+    if (lap.LapTime < bestLapTime) {
+      bestLapTime = lap.LapTime;
+    }
+    lap.Sector.forEach((sectorTime, index) => {
+      if (sectorTime < bestSectorTimes[index]) {
+        bestSectorTimes[index] = sectorTime;
+      }
+    });
+  }
+  BestTimes.push(bestLapTime, ...bestSectorTimes);
+
+  return BestTimes;
+}
+
 function getBestTheoricalTime(rl: Lap[]): number[] {
   let bestTheoricalTime: number[] = [];
 
@@ -201,6 +223,7 @@ function getBestTheoricalTime(rl: Lap[]): number[] {
   }
 
   bestTheoricalTime.push(bestLapTime, ...bestSectorTimes);
+  bestTheoricalTime[0] = (bestTheoricalTime[1] + bestTheoricalTime[2] + bestTheoricalTime[3])/1000;
 
   return bestTheoricalTime;
 }
@@ -349,13 +372,15 @@ function createBestSector(rl: RaceLap[]): BestSector[] {
             }
           }
         }
-        bs.push(uniqueSector);
+        if (uniqueSector.DriverName !== undefined) {
+          bs.push(uniqueSector);
+        }
       }
     }
   }
 
   bs.sort((a, b) => {
-    if(a.SectorNumber!==b.SectorNumber){
+    if (a.SectorNumber !== b.SectorNumber) {
       return a.SectorNumber - b.SectorNumber;
     }
     return a.BestSector - b.BestSector;
