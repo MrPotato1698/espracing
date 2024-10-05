@@ -252,6 +252,11 @@ function initializeScript() {
                 } else {
                     tyre = "";
                 }
+
+                if (itemResult.BestLap >= 999999.999) {
+                    bestlapToString = "No Time";
+                    tyre = "";
+                }
                 //bestlap = minutesbl.toString + ":" + secondsbl.toString;
 
 
@@ -296,8 +301,8 @@ function initializeScript() {
                         } else {
                             interval = "+ " + minutesInterval + ":" + secondsInterval;
                         }
-                    } else if (postabla > 1 && vueltasLider !== vueltastotales) {
-                        interval = "+ " + (vueltasLider - vueltastotales) + "L";
+                    } else if (postabla > 1 && vueltasPrevio !== vueltastotales) {
+                        interval = "+ " + (vueltasPrevio - vueltastotales) + "L";
                     }
                 } else {
                     interval = "";
@@ -604,17 +609,16 @@ function initializeScript() {
                 }
             });
 
-            //FIXME: Revisar la tabla de vueltas
             // *** Tabla de vueltas de carrera por piloto ***
-            /*
-            tablaIndividuales.innerHTML += `<p class="text-3xl font-bold border-b border-[#da392b] w-fit mx-auto mt-4 mb-2">Vuelta a vuelta de pilotos</p> `;
+            let tablaIndividualesHTML: string = `<p class="text-3xl font-bold border-b border-[#da392b] w-fit mx-auto mt-4 mb-2">Vuelta a vuelta de pilotos</p> `;
             const BestLapGeneral = dbestlaps[0].BestLap;
             for (let itemRL of dlaps) {
                 const driverName = itemRL.DriverName;
                 const driverID = itemRL.SteamID;
                 const laps = itemRL.Laps;
                 const totalLaps = laps.length;
-                const optimal = itemRL.Best;
+                const bestLap = itemRL.Best;
+                const optimalLap: number[] = itemRL.Optimal;
                 const average = itemRL.Average;
 
                 let pos = dresult.find((driver) => driver.SteamID === driverID)?.Pos;
@@ -643,33 +647,92 @@ function initializeScript() {
                     carColorClass = "";
                 }
 
-                let secondsoptimal = formatTwoIntegersPlusThreeDecimals(optimal[0] % 60);
-                let minutesoptimal = formatTwoIntegers(Math.trunc((optimal[0] / 60) % 60));
-                let optimallapToString = "";
-                if (pos >= -1) {
-                    optimallapToString = minutesoptimal.toString() + ":" + secondsoptimal.toString();
-                }
-
+                const AvgSectors: number[] = average.slice(1);
                 let secondsavg = formatTwoIntegersPlusThreeDecimals(average[0] % 60);
                 let minutesavg = formatTwoIntegers(Math.trunc((average[0] / 60) % 60));
-                let avglapToString = "";
-                if (pos >= -1) {
-                    avglapToString = minutesavg.toString() + ":" + secondsavg.toString();
+                let avglapToString: string = "";
+                let avgSectorString: string = "";
+                if (pos >= -2) {
+                    avglapToString = `Vuelta Media: ` + minutesavg.toString() + `:` + secondsavg.toString();
+                    avgSectorString += `(`;
+                    AvgSectors.map((sector, index) => {
+                        sector = sector / 1000;
+                        if (sector > 60) {
+                            const seconds = formatTwoIntegersPlusThreeDecimals(sector % 60);
+                            const minutes = formatTwoIntegers(Math.trunc((sector / 60) % 60));
+                            avgSectorString += `S${index + 1}: ${minutes}:${seconds} `;
+                        } else {
+                            avgSectorString += `S${index + 1}: ${formatTwoIntegersPlusThreeDecimals(sector)} `;
+                        }
+                        if (index < AvgSectors.length - 1) {
+                            avgSectorString += " | ";
+                        }
+                    });
+                    avgSectorString += `)`;
+
+                }
+                let optimallapToString: string = "";
+                let optimalSectorsString: string = "";
+                if (optimalLap !== undefined) {
+                    const OptimalSectors: number[] = optimalLap.slice(1);
+                    let secondsoptimal = formatTwoIntegersPlusThreeDecimals(optimalLap[0] % 60);
+                    let minutesoptimal = formatTwoIntegers(Math.trunc((optimalLap[0] / 60) % 60));
+                    if (pos >= -2) {
+                        optimallapToString = `Vuelta Optima: ` + minutesoptimal.toString() + `:` + secondsoptimal.toString();
+                        optimalSectorsString += `(`;
+                        OptimalSectors.map((sector, index) => {
+                            sector = sector / 1000;
+                            if (sector > 60) {
+                                const seconds = formatTwoIntegersPlusThreeDecimals(sector % 60);
+                                const minutes = formatTwoIntegers(Math.trunc((sector / 60) % 60));
+                                optimalSectorsString += `S${index + 1}: ${minutes}:${seconds} `;
+                            } else {
+                                optimalSectorsString += `S${index + 1}: ${formatTwoIntegersPlusThreeDecimals(sector)} `;
+                            }
+                            if (index < OptimalSectors.length - 1) {
+                                optimalSectorsString += " | ";
+                            }
+                        });
+                        optimalSectorsString += `)`;
+                    }
                 }
 
-                let bestlapToString = "";
+                const BestSectors: number[] = bestLap.slice(1);
+                let bestSectorsString: string = "";
+                let bestlapToString = ``;
                 if (BestLap !== undefined) {
-                    let secondsbest = formatTwoIntegersPlusThreeDecimals(BestLap % 60);
-                    let minutesbest = formatTwoIntegers(Math.trunc((BestLap / 60) % 60));
-                    if (pos >= -1) {
-                        bestlapToString = minutesbest.toString() + ":" + secondsbest.toString();
+                    if (BestLap >= 999999.999) {
+                        bestlapToString = "Vuelta Rápida: No Time";
+                    } else {
+                        let secondsbest = formatTwoIntegersPlusThreeDecimals(BestLap % 60);
+                        let minutesbest = formatTwoIntegers(Math.trunc((BestLap / 60) % 60));
+                        if (pos >= -2) {
+                            bestlapToString = `Vuelta Rápida: ` + minutesbest.toString() + `:` + secondsbest.toString();
+
+                            bestSectorsString += `(`;
+                            BestSectors.map((sector, index) => {
+                                sector = sector / 1000;
+                                if (sector > 60) {
+                                    const seconds = formatTwoIntegersPlusThreeDecimals(sector % 60);
+                                    const minutes = formatTwoIntegers(Math.trunc((sector / 60) % 60));
+                                    bestSectorsString += `S${index + 1}: ${minutes}:${seconds} `;
+                                } else {
+                                    bestSectorsString += `S${index + 1}: ${formatTwoIntegersPlusThreeDecimals(sector)} `;
+                                }
+                                if (index < BestSectors.length - 1) {
+                                    bestSectorsString += " | ";
+                                }
+                            });
+                            bestSectorsString += `)`;
+                        }
                     }
                 } else {
-                    bestlapToString = "No Time";
+                    bestlapToString = "Vuelta Rápida: No Time";
                 }
 
+
                 if (pos >= -3) {
-                    tablaIndividuales.innerHTML += `<div class = "mt-8">
+                    tablaIndividualesHTML += `<div class = "mt-8">
                         <div class="text-center bg-[#19191c] rounded-lg py-5">
                             <p class = "text-3xl font-bold border-b border-[#da392b] w-fit mx-auto mb-2">${driverName}</p>
                             <div class = "grid grid-cols-1">
@@ -679,14 +742,19 @@ function initializeScript() {
                                 </div>
                             </div>
                             <div class = "grid grid-cols-3 text-lg mt-2">
-                                <p>Vuelta Rápida: ${bestlapToString}</p>
-                                <p>Vuelta Media: ${avglapToString}</p>
-                                <p>Vuelta Optima: ${optimallapToString} </p>
+                                <p>${bestlapToString}</p>
+                                <p>${avglapToString}</p>
+                                <p>${optimallapToString} </p>
+                            </div>
+                            <div class = "grid grid-cols-3 text-lg mt-2">
+                                <p>${bestSectorsString}</p>
+                                <p>${avgSectorString}</p>
+                                <p>${optimalSectorsString} </p>
                             </div>
                         </div>
                     `;
                     if (pos >= -2) {
-                        tablaIndividuales.innerHTML += `
+                        tablaIndividualesHTML += `
                             <table class="w-full border-collapse border border-[#f9f9f9]">
                             <thead class="font-medium bg-[#da392b]">
                                 <tr class="tabletitle">
@@ -706,12 +774,12 @@ function initializeScript() {
 
                             if (bestlap === BestLapGeneral && !BestLapFound) { // Mejor vuelta de carrera
                                 BestLapFound = true;
-                                BestLapClass = " bg-[#c100ff] text-white font-bold rounded-full ";
+                                BestLapClass = `"bg-[#c100ff] text-white font-bold rounded-full"`;
                             }
 
                             if (bestlap === BestLap && !BestLapFound) { // Mejor vuelta personal
                                 BestLapFound = true;
-                                BestLapClass = " bg-[#00ee07] text-white font-bold rounded-full ";
+                                BestLapClass = `"bg-[#00ee07] text-black font-bold rounded-full"`;
                             }
 
                             let secondsbl = formatTwoIntegersPlusThreeDecimals(bestlap % 60);
@@ -723,45 +791,47 @@ function initializeScript() {
                             }
 
                             let sectorTimeString: string[] = [];
-                            if (itemL.Sector.length < 3) {
-                                sectorTimeString = [formatTwoIntegersPlusThreeDecimals(itemL.Sector[0] / 1000), formatTwoIntegersPlusThreeDecimals(itemL.Sector[1] / 1000), ""];
-                            } else {
-                                sectorTimeString = [formatTwoIntegersPlusThreeDecimals(itemL.Sector[0] / 1000), formatTwoIntegersPlusThreeDecimals(itemL.Sector[1] / 1000).toString(), formatTwoIntegersPlusThreeDecimals(itemL.Sector[2] / 1000).toString()];
+                            const sectorTimeLength = itemL.Sector.length;
+                            for (let s of itemL.Sector) {
+                                s = s / 1000;
+                                if (s >= 60) {
+                                    let seconds = formatTwoIntegersPlusThreeDecimals(s % 60);
+                                    let minutes = formatTwoIntegers(Math.trunc((s / 60) % 60));
+                                    sectorTimeString.push(minutes + ":" + seconds);
+                                } else {
+                                    sectorTimeString.push(formatTwoIntegersPlusThreeDecimals(s));
+                                }
+                            }
+                            if (sectorTimeLength < 3) {
+                                sectorTimeString.push("");
                             }
 
-                            if (pos % 2 === 0) {
-                                tablaIndividuales.innerHTML += `
-                                    <tr class="bg-[#0f0f0f] text-center">
-                                        <td>${itemL.LapNumber.toString()}</td>                                 <!-- Nº Vuelta -->
-                                        <td class =${BestLapClass}>${bestlapToString}</td>        <!-- Lap Time -->
-                                        <td>${sectorTimeString[0]}</td>                             <!-- Sector 1 -->
-                                        <td>${sectorTimeString[1]}</td>                             <!-- Sector 2 -->
-                                        <td>${sectorTimeString[2]}</td>                             <!-- Sector 3 -->
-                                        <td>${itemL.Tyre}</td>                                      <!-- Tyre -->
-                                        <td>${itemL.Position.toString()}</td>                                  <!-- Posición en carrera -->
-                                        <td>${itemL.Cut.toString()}</td>                                       <!-- Cut -->
-                                    </tr> `;
+                            if (itemL.LapNumber % 2 === 0) {
+                                tablaIndividualesHTML += `
+                                    <tr class="bg-[#0f0f0f] text-center">`;
                             } else {
-                                tablaIndividuales.innerHTML += `
-                                    <tr class="bg-[#19191c] text-center">
-                                        <td>${itemL.LapNumber.toString()}</td>                                 <!-- Nº Vuelta -->
-                                        <td class =${BestLapClass}>${bestlapToString}</td>         <!-- Lap Time -->
-                                        <td>${sectorTimeString[0]}</td>                             <!-- Sector 1 -->
-                                        <td>${sectorTimeString[1]}</td>                             <!-- Sector 2 -->
-                                        <td>${sectorTimeString[2]}</td>                             <!-- Sector 3 -->
-                                        <td>${itemL.Tyre}</td>                                      <!-- Tyre -->
-                                        <td>${itemL.Position.toString()}</td>                                  <!-- Posición en carrera -->
-                                        <td>${itemL.Cut.toString()}</td>                                       <!-- Cut -->
-                                    </tr> `;
+                                tablaIndividualesHTML += `
+                                    <tr class="bg-[#19191c] text-center">`;
                             }
+                            tablaIndividualesHTML +=
+                                `<td>${itemL.LapNumber.toString()}</td>                         <!-- Nº Vuelta -->
+                                        <td class =${BestLapClass}>${bestlapToString}</td>  <!-- Lap Time -->
+                                        <td>${sectorTimeString[0]}</td>                     <!-- Sector 1 -->
+                                        <td>${sectorTimeString[1]}</td>                     <!-- Sector 2 -->
+                                        <td>${sectorTimeString[2]}</td>                     <!-- Sector 3 -->
+                                        <td>${itemL.Tyre}</td>                              <!-- Tyre -->
+                                        <td>${itemL.Position.toString()}</td>               <!-- Posición en carrera -->
+                                        <td>${itemL.Cut.toString()}</td>                    <!-- Cut -->
+                                    </tr> `;
                         }
-                        tablaIndividuales.innerHTML += ` </tbody></table></div> `;
+                        tablaIndividualesHTML += ` </tbody></table></div> `;
                     } else {
-                        tablaIndividuales.innerHTML += `<p class="w-fit mx-auto font-medium text-xl">Piloto sin vueltas</p>`;
+                        tablaIndividualesHTML += `<p class="w-fit mx-auto font-medium text-xl">Piloto sin vueltas: No empezó la prueba / no completó ninguna vuelta</p></div>`;
                     }
                 }
             }
-            */
+            tablaIndividuales.innerHTML = tablaIndividualesHTML;
+
 
         } catch (error) {
             console.error(error);
