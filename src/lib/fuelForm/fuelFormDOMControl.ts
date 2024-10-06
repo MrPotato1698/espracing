@@ -1,42 +1,170 @@
+import type { Car } from "@/types/Car";
+import { cars } from "@/consts/cars";
+
 export function initializeFuelFormControls() {
-  const switchElement = document.getElementById("switch-2");
-  const timeContainer = document.getElementById("timeContainer");
+  const switchElement = document.getElementById("switch-2")as HTMLInputElement | null;
+  const timeContainer = document.getElementById("timeContainer")
   const lapsContainer = document.getElementById("lapsContainer");
-  const carSelect = document.getElementById("carname");
+  const carSelect = document.getElementById("carname")as HTMLInputElement | null;
   const otherCarFuelTank = document.getElementById("otherCarFuelTank");
+  const formulario = document.getElementById('fuelForm') as HTMLFormElement | null;
+  const resultadoDiv = document.getElementById('resultadoCalculo');
 
   function toggleInputs() {
-    if (timeContainer === null || lapsContainer === null) {
-      return;
-    }
-    if (switchElement && (switchElement as HTMLInputElement).checked) {
-      timeContainer.style.display = "none";
-      lapsContainer.style.display = "block";
-    } else {
-      timeContainer.style.display = "block";
-      lapsContainer.style.display = "none";
+    if (timeContainer && lapsContainer && switchElement) {
+      timeContainer.style.display = switchElement.checked ? "none" : "block";
+      lapsContainer.style.display = switchElement.checked ? "block" : "none";
     }
   }
+
   function toggleFuelTankInput() {
-    if (otherCarFuelTank === null) {
+    if (otherCarFuelTank && carSelect) {
+      otherCarFuelTank.style.display = carSelect.value === "othercar" ? "block" : "none";
+    }
+  }
+
+  function handleSubmit(event: Event) {
+    event.preventDefault(); // Prevenir el envío del formulario
+
+    // Obtener los datos del formulario
+    if (!formulario) {
+      console.error("Formulario no encontrado");
       return;
     }
-    if (carSelect && (carSelect as HTMLSelectElement).value === "othercar") {
-      otherCarFuelTank.style.display = "block";
-    } else {
-      otherCarFuelTank.style.display = "none";
+
+    const formData = new FormData(formulario);
+    const CarFileName = formData.get('carname') as string;
+    let fuelTank;
+
+    if (CarFileName === 'othercar') {
+      const fuelTankInput = formData.get('fuelTankCapacity');
+      if (!fuelTankInput) {
+        alert('Por favor, ingrese la capacidad del tanque de combustible');
+        return;
+      }
+      fuelTank = parseFloat(fuelTankInput as string);
+    }else{
+      const selectedCar = cars.find((car: Car) => car.filename === CarFileName);
+      fuelTank = selectedCar ? selectedCar.maxLiter : 0;
     }
+
+    const fuelConsumption = parseFloat(formData.get('fuelConsumption') as string);
+    const isLapsBased = switchElement?.checked;
+
+    let distance: number;
+    if (isLapsBased) {
+      distance = parseInt(formData.get('racedurationLaps') as string);
+    } else {
+      const hours = parseInt(formData.get('racedurationTimeHours') as string);
+      const minutes = parseInt(formData.get('racedurationTimeMinutes') as string);
+      distance = hours* 3600 + minutes*60;
+    }
+
+    const laptimeMinutes = parseInt(formData.get('laptimeMinutes') as string);
+    const laptimeSeconds = parseInt(formData.get('laptimeSeconds') as string);
+    const laptime = laptimeMinutes* 60 + laptimeSeconds;
+
+    // Tratar los datos
+    let VueltasTotales: number;
+    if (!isLapsBased) {
+      VueltasTotales = Math.ceil(distance / laptime);
+    } else {
+      VueltasTotales = distance;
+    }
+
+    //Tanque de combustible del coche, tiempo en repostar y tiempo en cambiar gomas
+    const selectedCar = cars.find((car: Car) => car.filename === CarFileName);
+    const carFuelTimeperLiter = selectedCar ? selectedCar.fuelLiterTime : 0;
+    const carTiresTime = selectedCar ? selectedCar.tyreTimeChange : 0;
+
+    //Calcular vueltas con un solo deposito
+    const maxLapsperTank = fuelTank / fuelConsumption;
+
+    //Número de stints que habrá que hacer y litros a usar durante la carrera
+    const stints = VueltasTotales / maxLapsperTank;
+    const totalFuel = fuelTank * stints;
+    const minimumStints = Math.ceil(VueltasTotales / maxLapsperTank);
+    const completeStints = Math.floor(VueltasTotales / maxLapsperTank);
+
+    console.log('Minimum stints:', minimumStints);
+    console.log('Complete stints:', completeStints);
+
+    let stintLaps: number[] = [];
+    let stintFuel: number[] = [];
+
+    if (minimumStints >= completeStints && minimumStints > 1) {
+      for (let i = 0; i < completeStints; i++) {
+          const laps = Math.floor(maxLapsperTank);
+          stintLaps.push(laps);
+          const fuel = i === 0 ? fuelTank : (laps * fuelConsumption) - (fuelTank - stintFuel[i - 1]);
+          stintFuel.push(fuel);
+      }
+      // Ultimo Stint
+      const lastStintLaps = VueltasTotales - (completeStints) * Math.floor(maxLapsperTank);
+      const lastStintFuel = (lastStintLaps * fuelConsumption) - (100 - stintFuel[stintFuel.length - 1]);
+      stintLaps.push(lastStintLaps);
+      stintFuel.push(lastStintFuel);
+    }else if (minimumStints === 1) {
+      stintLaps.push(VueltasTotales);
+      stintFuel.push(VueltasTotales * fuelConsumption);
+    }
+
+    // Calcular tiempo total de repostaje
+    const totalFuelperStint = stintFuel.map(fuel => fuel * carFuelTimeperLiter);
+
+
+    // Mostrar el resultado con AJAX
+    if (resultadoDiv) {
+      let resultHTML = `
+      <h2 class="font-bold">Resultado</h2>
+      <p class="font-semibold">Para completar la carrera necesitas:</p>
+      <ul>
+        <li>${stints.toFixed(2)} stints (${Math.floor(stints)} nº de paradas).</li>
+        <li>${totalFuel.toFixed(2)} litros de combustible para completar la carrera.</li>
+        <li>${fuelTank} litros de tanque de combustible.</li>
+      </ul>`;
+      if (stints > 1) {
+        resultHTML += `
+        <p class = "mt-2 font-semibold">Detalle de los diferentes stints:</p>
+        <ul>
+          ${stintLaps.map((item, index) => {
+          return `<li>Stint ${index + 1}: ${item} vueltas, ${stintFuel[index].toFixed(2)} litros para realizar el stint,
+          ${totalFuelperStint[index].toFixed(2)} segundos solo la parada (sin contar paso por boxes).
+          - ${carFuelTimeperLiter} segundos por cada litro repostado.</li>`;
+        }).join('')}
+        </ul>
+        `;
+      } else {
+        resultHTML += `
+        <p class = "mt-2 font-semibold">Detalle del stint de carrera:</p>
+        <ul>
+          <li>Unico stint: ${stintLaps[0]} vueltas, ${stintFuel[0].toFixed(2)} litros.
+          No es necesario parar, pero recuerda que cada litro añadido en la parada son ${carFuelTimeperLiter} segundos sin contar paso por boxes.</li>
+        </ul>
+        `;
+      }
+      if (carTiresTime > 0) {
+        resultHTML += `
+        <p class = "mt-4">*Si se quiere realizar un cambio de gomas, recuerde que en este coche son ${carTiresTime} segundos,
+        mire los diferentes stints y si el tiempo de parada es superior al cambio de goma, recuerde que tiene un
+        cambio de gomas "gratis" en lo que perdida de tiempo se refiere.</p>
+      `;
+      }
+      resultadoDiv.innerHTML = resultHTML;
+      resultadoDiv.style.display = "block";
+    }
+
   }
 
   // Configurar el estado inicial
   toggleInputs();
   toggleFuelTankInput();
+  if (resultadoDiv) {
+    resultadoDiv.style.display = "none"; //Doble check para ocultar el div
+  }
 
   // Agregar el event listener para el cambio del switch
-  if (switchElement) {
-    switchElement.addEventListener("change", toggleInputs);
-  }
-  if (carSelect) {
-    carSelect.addEventListener("change", toggleFuelTankInput);
-  }
+  switchElement?.addEventListener("change", toggleInputs);
+  carSelect?.addEventListener("change", toggleFuelTankInput);
+  formulario?.addEventListener('submit', handleSubmit);
 };
