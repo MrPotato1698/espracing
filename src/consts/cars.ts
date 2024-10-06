@@ -816,7 +816,7 @@ export const cars: Car[] = [
     filename: 'btcc_audi_rs3',
     brand: 'Audi',
     imgbrand: '/img/brand/audi.webp',
-    model: 'Audi RS3 BTCC 2019',
+    model: 'RS3 BTCC 2019',
     year: 2019,
     class: "Turismo (FWD)",
     subclass: 'BTCC',
