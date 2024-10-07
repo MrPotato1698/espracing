@@ -12,7 +12,7 @@ import type { Points } from "@/types/Points";
 /* *************************** */
 
 function initializeScript() {
-    const loadButton = document.getElementById('loadButton');
+    const loadButton = document.getElementById('loadButtonRace');
     const opcionesTabla = document.getElementById('select-champs') as HTMLSelectElement;
 
     const tablaResultados = document.getElementById('tablaResultados');
@@ -45,6 +45,7 @@ function initializeScript() {
         }
 
         try {
+            console.log('Cargando datos de la carrera: ' + seleccion);
             const response = await fetch(`/api/raceresults/getRaceResults?race=${seleccion}`);
             //const response = await fetch(`/testRace7.json`); //Pruebas para no leer constantemente de la BD
 
@@ -1039,5 +1040,15 @@ if (document.readyState === 'loading') {
     initializeScript();
 }
 
+function cleanupEventListeners() {
+    const loadButton = document.getElementById('loadButtonRace');
+    if (loadButton) {
+      loadButton.removeEventListener('click', loadData);
+    }
+  }
+
 // Maneja las transiciones de página de Astro
 document.addEventListener('astro:page-load', initializeScript);
+
+// Limpiar event listeners antes de descargar la página
+document.addEventListener('astro:page-unload', cleanupEventListeners);

@@ -1,6 +1,5 @@
 ---
 import { turso } from "@/turso";
-import ApexCharts from "apexcharts";
 
 interface Race {
   ChampID: string;
@@ -91,7 +90,7 @@ if (RacesData.length == 0) {
 <div class="container mx-auto">
   <div class="section">
     <button
-      id="loadButton"
+      id="loadButtonRace"
       class="no-underline bg-[#19191c] rounded-xl my-4 font-medium text-white text-lg py-4 px-8 block mx-auto hover:text-[#0f0f0f] hover:bg-[#da392b]"
     >
       Cargar Datos
@@ -148,7 +147,7 @@ if (RacesData.length == 0) {
 
 <script>
   // Script para cargar los resultados de la carrera seleccionada
-  import "@/pages/api/raceresults/results.ts";
+  import "@/pages/api/raceresults/raceresults.ts";
 </script>
 
 <script>
