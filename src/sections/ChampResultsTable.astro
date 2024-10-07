@@ -1,0 +1,84 @@
+---
+import type { Championship } from "@/lib/tursotypes";
+import { turso } from "@/turso";
+
+interface Props {
+  actualchamp: string;
+}
+
+const { actualchamp } = Astro.props;
+
+let resultSet;
+
+if (actualchamp === "true") {
+  const lastchamp = await turso.execute(
+    "SELECT MAX(championship) AS lastchamp FROM Race"
+  );
+
+  resultSet = await turso.execute(
+    `SELECT DISTINCT id, name FROM Championship AS C WHERE C.id = ${lastchamp.rows[0].lastchamp}`
+  );
+} else {
+  resultSet = await turso.execute(
+    "SELECT DISTINCT id, name, year, season FROM Championship AS C WHERE C.isChampionship = 1"
+  );
+}
+
+const ChampionshipData: Championship[] = resultSet.rows as unknown as Championship[];
+
+const groupedChampionships = ChampionshipData.reduce((acc, champ) =>{
+if (!acc[champ.season]) {
+    acc[champ.season] = [];
+  }
+  acc[champ.season].push(champ);
+  return acc;
+}, {} as Record<string, Championship[]>);
+---
+
+<p class="py-4 text-4xl font-bold text-center">
+  Selecciona el campeonato a revisar
+</p>
+<select
+  id="select-champs"
+  class="block m-auto w-4/5 px-4 py-3 text-lg font-medium rounded-xl pe-9 focus:border-[#da392b] disabled:opacity-50 disabled:pointer-events-none bg-[#19191c] border-neutral-700 text-[#f9f9f9] placeholder-neutral-500"
+>
+{Object.entries(groupedChampionships).map(([season, championships]) => (
+  <optgroup label={`Temporada ${season}`} class="text-[#f7f7f7] font-semibold">
+    {championships.map((champ) => (
+      <option value={champ.id.toString()} class="text-[#f7f7f7]">
+        {champ.name}
+      </option>
+    ))}
+  </optgroup>
+))}
+</select>
+
+<!-- Tabla de resultados -->
+<div class="container mx-auto">
+  <div class="section">
+    <button
+      id="loadButton"
+      class="no-underline bg-[#19191c] rounded-xl my-4 font-medium text-white text-lg py-4 px-8 block mx-auto hover:text-[#0f0f0f] hover:bg-[#da392b]"
+    >
+      Cargar Datos
+    </button>
+  </div>
+
+  <div id="resultsIndyChampsTable"></div>
+  <div id="chartProgressiónIndyChamp"></div>
+  <div id="resultsTeamsChampsTable"></div>
+  <div id="chartProgressiónTeamsChamp"></div>
+  <div id="resultTableOtherPrizes"></div>
+
+</div>
+
+<script>
+  // Script para cargar los resultados de los campeonatos
+  import "@/pages/api/champresults/results.ts";
+</script>
+
+<style>
+  .container {
+    width: 99%;
+  }
+</style>
