@@ -11,9 +11,27 @@ import type { RaceData, RaceResult, RaceLap, Lap, BestLap, Consistency, BestSect
 import type { Points } from "@/types/Points";
 
 /* *************************** */
+interface DriverDataChamp{
+  name: string;
+  guid: string;
+  car: string;
+  team: string;
+  points: number;
+}
+
+interface TeamDataChamp{
+  name: string;
+  guidDriver1: string;
+  guidDriver2: string;
+  points: number;
+}
+
+
+
+/* *************************** */
 
 function initializeScript() {
-  const loadButton = document.getElementById('loadButton');
+  const loadButton = document.getElementById('loadButtonChamp');
 
   const opcionesChamps = document.getElementById('select-champs') as HTMLSelectElement;
 
@@ -26,7 +44,6 @@ function initializeScript() {
   async function loadData() {
     const seleccion = opcionesChamps.value;
     try {
-      console.log('Cargando datos del campeonato: ' + seleccion);
       const response = await fetch(`/api/champresults/getChampResults?champ=${seleccion}`);
 
       if (!response.ok) {
@@ -34,9 +51,17 @@ function initializeScript() {
         return;
       }
 
-      const data = await response.json();
+      let dataRAW = await response.text();
+      //console.log('Datos crudos de la API: ' + dataRAW);
 
-      console.log('Data recibida de API: ' + data);
+      dataRAW = dataRAW.replace('{"raceData":', '');
+      dataRAW = dataRAW.slice(0, -1);
+
+      const arrayRaceData = JSON.parse(dataRAW) as RaceData[];
+
+      //console.log('Data recibida de API: ' + arrayRaceData[0].BestLap[0].CarFileName);
+
+      const numRaces = arrayRaceData.length;
 
 
     } catch (error) {
@@ -59,5 +84,15 @@ if (document.readyState === 'loading') {
   initializeScript();
 }
 
+function cleanupEventListeners() {
+  const loadButton = document.getElementById('loadButtonChamp');
+  if (loadButton) {
+    loadButton.removeEventListener('click', loadData);
+  }
+}
+
 // Maneja las transiciones de página de Astro
 document.addEventListener('astro:page-load', initializeScript);
+
+// Limpiar event listeners antes de descargar la página
+document.addEventListener('astro:page-unload', cleanupEventListeners);

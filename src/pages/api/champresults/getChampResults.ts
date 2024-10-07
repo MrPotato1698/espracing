@@ -1,12 +1,13 @@
 import type { APIRoute } from 'astro';
 import { turso } from '@/turso';
-import type { RaceData } from '@/types/Results';
+
 import { createRaceData } from '@/lib/results/resultConverter';
+
+import type { RaceData } from '@/types/Results';
 
 /* *************************** */
 
-export const all: APIRoute = async ({ request }) => {
-  console.log('API getChampResults llamada');
+export const GET: APIRoute = async ({ request }) => {
   const url = new URL(request.url);
   const championshipId = url.searchParams.get('champ');
 
@@ -25,16 +26,28 @@ export const all: APIRoute = async ({ request }) => {
     const races = racesResult.rows;
 
     // Obtener resultados de carreras desde Firestore
-    let raceData:RaceData[] = [];
-    races.map(async (race) => {
-      const response = await fetch(`/api/raceresults/getRaceResults?race=${race.filename}`);
-      const datosRAW = await response.json();
-      const datos: RaceData = createRaceData(datosRAW);
-      raceData.push(datos);
-    });
-    console.log('raceData en API: '+raceData);
+    async function fetchRaceResults() {
+      try {
+        const promises = races.map(async (race) => {
+          // Construye una URL absoluta
+          const apiUrl = new URL(`/api/raceresults/getRaceResults?race=${race.filename}`, url.origin);
+          const response = await fetch(apiUrl);
+          if (!response.ok) {
+            console.error('Error al obtener los datos de la carrera: ', response.status, response.statusText);
+            return;
+          }
+          const datosRAW = await response.json();
+          return createRaceData(datosRAW);
+        });
+        return await Promise.all(promises);
+      } catch (error) {
+        console.error('Error obteniendo resultados de la carrera: ', error);
+      }
+    }
 
-    return new Response(JSON.stringify({raceData}), {
+    const raceData = await fetchRaceResults();
+
+    return new Response(JSON.stringify({ raceData }), {
       status: 200,
       headers: {
         'Content-Type': 'application/json'
