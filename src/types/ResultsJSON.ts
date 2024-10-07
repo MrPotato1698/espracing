@@ -4,7 +4,7 @@ export interface GeneralDataJSON {
   Events:         EventJSON[];
   Laps:           LapJSON[];
   Result:         ResultJSON[];
-  Penalties:      null;
+  Penalties:      PenaltiesJSON[];
   TrackConfig:    string;
   TrackName:      string;
   Type:           string;
