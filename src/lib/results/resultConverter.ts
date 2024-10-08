@@ -197,7 +197,7 @@ function getBestLapTime(rl: Lap[]): number[] {
   let bestSectorTimes: number[] = rl[0].Sector.map(() => Number.MAX_VALUE);
 
   for (let lap of rl) {
-    if (lap.LapTime < bestLapTime) {
+    if ((lap.LapTime < bestLapTime) && (lap.Cut <= 0)) {
       bestLapTime = lap.LapTime;
       bestSectorTimes = lap.Sector;
     }
