@@ -696,11 +696,11 @@ function initializeScript() {
                                     <table class="w-full border-collapse border border-[#f9f9f9]">
                                     <thead class="font-medium bg-[#da392b]">
                                         <tr class="tabletitle">
-                                        <th>Pos</th>
-                                        <th>Nombre</th>
-                                        <th colspan="3">Vehiculo</th>
-                                        <th>Tiempo</th>
-                                        <th>Gap</th>
+                                            <th>Pos</th>
+                                            <th>Nombre</th>
+                                            <th colspan="3">Vehiculo</th>
+                                            <th>Tiempo</th>
+                                            <th>Gap</th>
                                         </tr>
                                     </thead>
                                     <tbody class="font-normal">`;
@@ -1040,15 +1040,15 @@ if (document.readyState === 'loading') {
     initializeScript();
 }
 
-function cleanupEventListeners() {
-    const loadButton = document.getElementById('loadButtonRace');
-    if (loadButton) {
-      loadButton.removeEventListener('click', loadData);
-    }
-  }
+// function cleanupEventListeners() {
+//     const loadButton = document.getElementById('loadButtonRace');
+//     if (loadButton) {
+//       loadButton.removeEventListener('click', loadData);
+//     }
+//   }
 
 // Maneja las transiciones de página de Astro
 document.addEventListener('astro:page-load', initializeScript);
 
 // Limpiar event listeners antes de descargar la página
-document.addEventListener('astro:page-unload', cleanupEventListeners);
+//document.addEventListener('astro:page-unload', cleanupEventListeners);
