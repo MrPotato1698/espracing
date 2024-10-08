@@ -241,13 +241,15 @@ function initializeScript() {
                             break;
                         default:
                             const timerace = (itemResult.TotalTime) + (itemResult.Penalties);
-                            const condicion1 = (Math.trunc((timerace / 60) % 60) + Math.trunc(timerace / 60));
+                            const condicion1 = (Math.trunc((timerace / 3600) % 60) + Math.trunc(timerace / 60));
 
                             if (vueltastotales < vueltasLider * 0.9 && ((condicion1 < dconfig.RaceDurationTime) || (vueltastotales < dconfig.RaceDurationLaps * 0.9))) {
                                 posicionFinal = 'DNF';
+                                pos = -1;
                             } else {
                                 posicionFinal = pos.toString();
                             }
+                            break;
                     }
                     if (itemResult.Pos === -4 && itemResult.DriverName === "STREAMING") {
                         posicionFinal = 'TV';
@@ -448,6 +450,7 @@ function initializeScript() {
                 },
 
                 series: seriesDataPositions,
+                colors: ['#2E93fA', '#66DA26', '#E91E63', '#FF9800', '#fff700', '#00ffd4', '#0036ff', '#e91ec4', '#9e57ff', '#ff0000', '#00ffbd', '#546E7A'],
 
                 chart: {
                     type: 'line',
@@ -574,6 +577,7 @@ function initializeScript() {
                 },
 
                 series: seriesDataGaps,
+                colors: ['#2E93fA', '#66DA26', '#546E7A', '#E91E63', '#FF9800', '#fff700', '#00ffd4', '#0036ff', '#e91ec4', '#9e57ff', '#ff0000', '#00ffbd'],
 
                 chart: {
                     type: 'line',
