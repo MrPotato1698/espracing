@@ -22,7 +22,8 @@ export const GET: APIRoute = async ({ request }) => {
 
   try {
     // Obtener carreras del campeonato desde Turso
-    const racesResult = await turso.execute(`SELECT filename FROM Race WHERE championship = ${championshipId}`,);
+    const champName = championshipId.split('@')[0];
+    const racesResult = await turso.execute(`SELECT filename FROM Race WHERE championship = ${champName}`,);
     const races = racesResult.rows;
 
     // Obtener resultados de carreras desde Firestore

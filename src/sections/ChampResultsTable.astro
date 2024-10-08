@@ -8,6 +8,26 @@ interface Props {
 
 const { actualchamp } = Astro.props;
 
+interface Race {
+  ChampID: number;
+  ChampName: string;
+  ChampSeason: string;
+  RaceOrder: number;
+  RacePoints: string;
+}
+
+type RaceDetail = {
+  RaceOrder: number;
+  RacePoints: string;
+};
+
+interface GroupedChamp {
+  ChampID: string;
+  ChampName: string;
+  ChampSeason: string;
+  RaceDetails: RaceDetail[];
+}
+
 let resultSet;
 
 if (actualchamp === "true") {
@@ -16,23 +36,67 @@ if (actualchamp === "true") {
   );
 
   resultSet = await turso.execute(
-    `SELECT DISTINCT id, name FROM Championship AS C WHERE C.id = ${lastchamp.rows[0].lastchamp}`
+    `SELECT DISTINCT C.id AS ChampID, C.name AS ChampName, C.season AS ChampSeason, R.pointsystem AS RacePoints FROM Championship AS C INNER JOIN Race AS R ON C.id = R.championship WHERE C.id = ${lastchamp.rows[0].lastchamp}`
   );
 } else {
   resultSet = await turso.execute(
-    "SELECT DISTINCT id, name, year, season FROM Championship AS C WHERE C.isChampionship = 1"
+    "SELECT DISTINCT C.id AS ChampID, C.name AS ChampName, C.season AS ChampSeason, R.pointsystem AS RacePoints FROM Championship AS C INNER JOIN Race AS R ON C.id = R.championship WHERE C.isChampionship = 1"
   );
 }
+const ChampionshipData: Championship[] =
+  resultSet.rows as unknown as Championship[];
 
-const ChampionshipData: Championship[] = resultSet.rows as unknown as Championship[];
+const groupedChampionships = ChampionshipData.reduce(
+  (acc, champ) => {
+    if (!acc[champ.season]) {
+      acc[champ.season] = [];
+    }
+    acc[champ.season].push(champ);
+    return acc;
+  },
+  {} as Record<string, Championship[]>
+);
 
-const groupedChampionships = ChampionshipData.reduce((acc, champ) =>{
-if (!acc[champ.season]) {
-    acc[champ.season] = [];
+const ChampData: Race[] = resultSet.rows as unknown as Race[];
+
+function groupByChamp(resultSet: Race[]): GroupedChamp[] {
+  // Creamos un objeto auxiliar para agrupar los campeonatos
+  const grouped: {
+    [key: number]: GroupedChamp & { RacePointsList: string[] };
+  } = {};
+
+  resultSet.forEach((race) => {
+    if (!grouped[race.ChampID]) {
+      grouped[race.ChampID] = {
+        ChampID: race.ChampID.toString(),
+        ChampName: race.ChampName,
+        ChampSeason: race.ChampSeason,
+        RacePointsList: [],
+        RaceDetails: [],
+      };
+    }
+
+    // Añadimos los puntos de cada carrera a la lista del campeonato
+    grouped[race.ChampID].RaceDetails.push({
+      RaceOrder: race.RaceOrder,
+      RacePoints: race.RacePoints,
+    });
+  });
+
+  // Transformamos el objeto en un array
+  return Object.values(grouped);
+}
+
+const finalResult: GroupedChamp[] = groupByChamp(ChampData);
+
+let dataChamp: GroupedChamp[] = [];
+for (let i = 0; i < finalResult.length; i++) {
+  dataChamp.push(finalResult[i]);
+  for (let j = 0; j < finalResult[i].RaceDetails.length; j++) {
+    dataChamp[i].ChampID +=
+      "@" + finalResult[i].RaceDetails[j].RacePoints.toString();
   }
-  acc[champ.season].push(champ);
-  return acc;
-}, {} as Record<string, Championship[]>);
+}
 ---
 
 <p class="py-4 text-4xl font-bold text-center">
@@ -42,15 +106,18 @@ if (!acc[champ.season]) {
   id="select-champs"
   class="block m-auto w-4/5 px-4 py-3 text-lg font-medium rounded-xl pe-9 focus:border-[#da392b] disabled:opacity-50 disabled:pointer-events-none bg-[#19191c] border-neutral-700 text-[#f9f9f9] placeholder-neutral-500"
 >
-{Object.entries(groupedChampionships).map(([season, championships]) => (
-  <optgroup label={`Temporada ${season}`} class="text-[#f7f7f7] font-semibold">
-    {championships.map((champ) => (
-      <option value={champ.id.toString()} class="text-[#f7f7f7]">
-        {champ.name}
-      </option>
-    ))}
-  </optgroup>
-))}
+  {
+    dataChamp.map((champ) => (
+      <optgroup
+        label={`Temporada ${champ.ChampSeason}`}
+        class="text-[#f7f7f7] font-semibold"
+      >
+        <option value={champ.ChampID} class="text-[#f7f7f7]">
+          {champ.ChampName}
+        </option>
+      </optgroup>
+    ))
+  }
 </select>
 
 <!-- Tabla de resultados -->
@@ -69,7 +136,6 @@ if (!acc[champ.season]) {
   <div id="resultsTeamsChampsTable"></div>
   <div id="chartProgressiónTeamsChamp"></div>
   <div id="resultTableOtherPrizes"></div>
-
 </div>
 
 <script>
