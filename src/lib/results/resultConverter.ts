@@ -538,7 +538,7 @@ function getGapToFirst(rr: RaceResult[], rl: RaceLap[]): RaceLap[] {
           if (lapIndex > 0) {
             const lastLapGap = driverLap.Laps[lapIndex - 1].GaptoFirst;
             driverLap.Laps[lapIndex].GaptoFirst = parseFloat(((driverLap.Laps[lapIndex].LapTime - firstLapTime) + lastLapGap).toFixed(3)); // Convertir a segundos
-            if(driverLap.Laps[lapIndex].GaptoFirst <= 0 || driverLap.Laps[lapIndex].Position === 1){
+            if (driverLap.Laps[lapIndex].GaptoFirst <= 0 || driverLap.Laps[lapIndex].Position === 1) {
               driverLap.Laps[lapIndex].GaptoFirst = 0;
             }
           } else {
@@ -583,6 +583,15 @@ export function createRaceData(datos: any): RaceData {
 
   rd.RaceLaps = getGapToFirst(rd.RaceResult, rd.RaceLaps);
 
+  rd.RaceResult.map((itemRD) => {
+    if (itemRD.Laps === 0) {
+      itemRD.Laps = rd.RaceLaps
+      .filter((item1) => item1.SteamID === itemRD.SteamID)
+      .map((item2) => item2.Laps.length)
+      .reduce((acc, laps) => acc + laps, 0);
+    }
+  });
+
   return rd;
 }
 
@@ -600,76 +609,76 @@ export function formatTwoIntegers(num: number): string {
 export function getColorClass(carClass: string): string {
   let result: string = "class='";
   switch (carClass) {
-      case "GT3":
-          result += "bg-[#00df1b] text-[#f9f9f9]";
-          break;
-      case "GT4":
-          result += "bg-[#ff8f00] text-[#f9f9f9]";
-          break;
-      case "DTM":
-          result += "bg-[#02315b] text-[#e0ff80]";
-          break;
-      case "JTC Div.III":
-          result += "text-[#ff0000] bg-[#f9f9f9]";
-          result
-          break;
-      case "Formula 4":
-          result += "bg-[#c5c5c5] text-[#0f0f0f]";
-          break;
-      case "LMDh":
-          result += "bg-[#ff0000] text-[#f9f9f9]";
-          break;
-      case "LMH":
-          result += "bg-[#ff0000] text-[#f9f9f9]";
-          break;
-      case "Twingo Cup":
-          result += "bg-[#ffe000] text-[#0f0f0f]";
-          break;
-      case "A110 Cup":
-          result += "bg-[#006fba] text-[#f9f9f9]";
-          break;
-      case "Nascar Le Mans":
-          result += "bg-[#0f0f0f] text-[#f9f9f9]";
-          break;
-      case "DPi":
-          result += "bg-[#0f0f0f] text-[#f9f9f9]";
-          break;
-      case "F1":
-          result += "bg-[#ff0000] text-[#f9f9f9]";
-          break;
-      case "F2":
-          result += "bg-[#0055ff] text-[#f9f9f9]";
-          break;
-      case "Clio Cup":
-          result += "bg-[#ffe000] text-[#0f0f0f]";
-          break;
-      case "M2 CS Cup":
-          result += "bg-[#0055ff] text-[#f9f9f9]";
-          break;
-      case "BTCC":
-          result += "bg-[#0f00ff] text-[#f9f9f9]";
-          break;
-      case "Prototype >5000":
-          result += "bg-[#f9f9f9] text-[#0f0f0f]";
-          break;
-      case "GT2":
-          result += "bg-[#f9f9f9] text-[#ff0000]";
-          break;
-      case "Light Prototype":
-          result += "bg-[#00fbff] text-[#0f0f0f]";
-          break;
-      case "TNC3":
-          result += "bg-[#f9f9f9] text-[#0f0f0f]";
-          break;
-      case "Trophy Truck":
-          result += "bg-[#0f0f0f] text-[#f9f9f9]";
-          break;
-      case "Supercar":
-          result += "bg-[#ff9300] text-[#0f0f0f]";
-          break;
-      case "Classic":
-          result += "bg-[#f9f9f9] text-[#0f0f0f]";
-          break;
+    case "GT3":
+      result += "bg-[#00df1b] text-[#f9f9f9]";
+      break;
+    case "GT4":
+      result += "bg-[#ff8f00] text-[#f9f9f9]";
+      break;
+    case "DTM":
+      result += "bg-[#02315b] text-[#e0ff80]";
+      break;
+    case "JTC Div.III":
+      result += "text-[#ff0000] bg-[#f9f9f9]";
+      result
+      break;
+    case "Formula 4":
+      result += "bg-[#c5c5c5] text-[#0f0f0f]";
+      break;
+    case "LMDh":
+      result += "bg-[#ff0000] text-[#f9f9f9]";
+      break;
+    case "LMH":
+      result += "bg-[#ff0000] text-[#f9f9f9]";
+      break;
+    case "Twingo Cup":
+      result += "bg-[#ffe000] text-[#0f0f0f]";
+      break;
+    case "A110 Cup":
+      result += "bg-[#006fba] text-[#f9f9f9]";
+      break;
+    case "Nascar Le Mans":
+      result += "bg-[#0f0f0f] text-[#f9f9f9]";
+      break;
+    case "DPi":
+      result += "bg-[#0f0f0f] text-[#f9f9f9]";
+      break;
+    case "F1":
+      result += "bg-[#ff0000] text-[#f9f9f9]";
+      break;
+    case "F2":
+      result += "bg-[#0055ff] text-[#f9f9f9]";
+      break;
+    case "Clio Cup":
+      result += "bg-[#ffe000] text-[#0f0f0f]";
+      break;
+    case "M2 CS Cup":
+      result += "bg-[#0055ff] text-[#f9f9f9]";
+      break;
+    case "BTCC":
+      result += "bg-[#0f00ff] text-[#f9f9f9]";
+      break;
+    case "Prototype >5000":
+      result += "bg-[#f9f9f9] text-[#0f0f0f]";
+      break;
+    case "GT2":
+      result += "bg-[#f9f9f9] text-[#ff0000]";
+      break;
+    case "Light Prototype":
+      result += "bg-[#00fbff] text-[#0f0f0f]";
+      break;
+    case "TNC3":
+      result += "bg-[#f9f9f9] text-[#0f0f0f]";
+      break;
+    case "Trophy Truck":
+      result += "bg-[#0f0f0f] text-[#f9f9f9]";
+      break;
+    case "Supercar":
+      result += "bg-[#ff9300] text-[#0f0f0f]";
+      break;
+    case "Classic":
+      result += "bg-[#f9f9f9] text-[#0f0f0f]";
+      break;
   }
   result += " rounded text-xs font-bold px-1 py-0.5 ml-1'";
   return result;
@@ -678,75 +687,75 @@ export function getColorClass(carClass: string): string {
 export function getClassShortName(carClass: string): string {
   let result: string = "";
   switch (carClass) {
-      case "GT3":
-          result += "GT3";
-          break;
-      case "GT4":
-          result += "GT4";
-          break;
-      case "DTM":
-          result += "DTM";
-          break;
-      case "JTC Div.III":
-          result += "JTC Div.3";
-          break;
-      case "Formula 4":
-          result += "F4";
-          break;
-      case "LMDh":
-          result += "LMDh";
-          break;
-      case "LMH":
-          result += "LMH";
-          break;
-      case "Twingo Cup":
-          result += "CUP";
-          break;
-      case "A110 Cup":
-          result += "CUP";
-          break;
-      case "Nascar Le Mans":
-          result += "Nascar";
-          break;
-      case "DPi":
-          result += "DPi";
-          break;
-      case "F1":
-          result += "F1";
-          break;
-      case "F2":
-          result += "F2";
-          break;
-      case "Clio Cup":
-          result += "CUP";
-          break;
-      case "M2 CS Cup":
-          result += "CUP";
-          break;
-      case "BTCC":
-          result += "BTCC";
-          break;
-      case "Prototype >5000":
-          result += ">5.0L";
-          break;
-      case "GT2":
-          result += "GT2";
-          break;
-      case "Light Prototype":
-          result += "Proto";
-          break;
-      case "TNC3":
-          result += "TNC3";
-          break;
-      case "Trophy Truck":
-          result += "TT";
-          break;
-      case "Supercar":
-          result += "SC";
-          break;
-      case "Classic":
-          result += "Classic";
-          break;
+    case "GT3":
+      result += "GT3";
+      break;
+    case "GT4":
+      result += "GT4";
+      break;
+    case "DTM":
+      result += "DTM";
+      break;
+    case "JTC Div.III":
+      result += "JTC Div.3";
+      break;
+    case "Formula 4":
+      result += "F4";
+      break;
+    case "LMDh":
+      result += "LMDh";
+      break;
+    case "LMH":
+      result += "LMH";
+      break;
+    case "Twingo Cup":
+      result += "CUP";
+      break;
+    case "A110 Cup":
+      result += "CUP";
+      break;
+    case "Nascar Le Mans":
+      result += "Nascar";
+      break;
+    case "DPi":
+      result += "DPi";
+      break;
+    case "F1":
+      result += "F1";
+      break;
+    case "F2":
+      result += "F2";
+      break;
+    case "Clio Cup":
+      result += "CUP";
+      break;
+    case "M2 CS Cup":
+      result += "CUP";
+      break;
+    case "BTCC":
+      result += "BTCC";
+      break;
+    case "Prototype >5000":
+      result += ">5.0L";
+      break;
+    case "GT2":
+      result += "GT2";
+      break;
+    case "Light Prototype":
+      result += "Proto";
+      break;
+    case "TNC3":
+      result += "TNC3";
+      break;
+    case "Trophy Truck":
+      result += "TT";
+      break;
+    case "Supercar":
+      result += "SC";
+      break;
+    case "Classic":
+      result += "Classic";
+      break;
   }
   return result;
 }
