@@ -106,7 +106,7 @@ function initializeScript() {
         };
       });
 
-      const DriversChamp: DriverDataChamp[] = getDriverDataChamp(RacesChamp);
+      const DriversChamp: DriverDataChamp[] = getDriverDataChamp(RacesChamp, arrayRaceData);
       const DriversPointsPerRace: DriverPointsPerRace[] = getDriverPointsPerRace(RacesChamp, DriversChamp);
       const TeamsChamp: TeamDataChamp[] = getTeamsDataChamp(DriversChamp);
 
@@ -184,7 +184,7 @@ function initializeScript() {
 
           // Obtener numero de vueltas totales / vuelta rapida / neumatico
           let vueltastotales = raceData.results.find((driver) => driver.SteamID === DriverGUID)?.Laps;
-          if(vueltastotales === undefined){
+          if (vueltastotales === undefined) {
             vueltastotales = 0;
           }
 
@@ -466,7 +466,7 @@ function initializeScript() {
           <td class = "text-start font-normal">${TeamName}</td>
           <td class = "text-center font-medium">${totalPoints}</td>`;
 
-        
+
         for (let raceData of RacesChamp) {
           const pointArray = points.find((point) => point.Name === raceData.pointSystem);
 
@@ -488,6 +488,7 @@ function initializeScript() {
           let vueltastotalesDriver2 = 0;
 
           if (driverPosition1) {
+            vueltastotalesDriver1 = driverPosition1.Laps;
             if (driverPosition1.Pos === 1) {
               vueltasLiderTeam = vueltastotalesDriver1;
               posicionFinalDriver1 = '1º';
@@ -550,6 +551,7 @@ function initializeScript() {
           }
 
           if (driverPosition2) {
+            vueltastotalesDriver2 = driverPosition2.Laps;
             if (driverPosition2.Pos === 1) {
               vueltasLiderTeam = vueltastotalesDriver2;
               posicionFinalDriver2 = '1º';
@@ -610,7 +612,8 @@ function initializeScript() {
               }
             }
           }
-          if (driver1Points > driver2Points) {
+
+          if (driver1Points > driver2Points || posicionFinalDriver1 === 'DNF') {
             tablaTeamChampsHTML += `
               <td class = "text-center">
                 <span ${fastestLapDriver1Class}>${driver1Points}</span> + <span ${fastestLapDriver2Class}>${driver2Points}</span> ( ${posicionFinalDriver1} / ${posicionFinalDriver2} )
@@ -637,8 +640,119 @@ function initializeScript() {
           const fastestLapDriver1 = pointArray && raceData.driverFastestLapGuid === team.guidDriver1 ? pointArray.FastestLap : 0;
           const fastestLapDriver2 = pointArray && raceData.driverFastestLapGuid === team.guidDriver2 ? pointArray.FastestLap : 0;
 
-          const driver1Points = driver1Data && pointArray ? pointArray.Puntuation[driver1Data.Pos - 1] + fastestLapDriver1 : 0;
-          const driver2Points = driver2Data && pointArray ? pointArray.Puntuation[driver2Data.Pos - 1] + fastestLapDriver2 : 0;
+          let driver1Points = 0;
+          let driver2Points = 0;
+
+          let posDriver1 = driver1Data?.Pos || 0;
+          let posDriver2 = driver2Data?.Pos || 0;
+
+          let vueltasLiderTeam = 0;
+          let vueltastotalesDriver1 = driver1Data?.Laps || 0;
+          let vueltastotalesDriver2 = driver2Data?.Laps || 0;
+
+          if (posDriver1 === 1) {
+            vueltasLiderTeam = vueltastotalesDriver1;
+          } else {
+            switch (posDriver1) {
+              case -1:
+                if (driver1Data?.Team === "ESP Racing Staff") {
+                  posDriver1 = -4;
+                } else {
+                  posDriver1 = -1;
+                }
+                break;
+              case -2:
+                posDriver1 = -2;
+                break;
+              case -3:
+                posDriver1 = -3;
+                break;
+              case -4:
+                switch (driver1Data?.Team) {
+                  case "STREAMING":
+                    posDriver1 = -4;
+                    break;
+                  case "ESP Racing Staff":
+                    posDriver1 = -4;
+                    break;
+                  case "Safety Car":
+                    posDriver1 = -4;
+                    break;
+                  default:
+                    posDriver1 = -3;
+                    break;
+                }
+                break;
+              default:
+                const timerace = (driver1Data?.TotalTime || 0) + (driver1Data?.Penalties || 0);
+                const condicion1 = (Math.trunc((timerace / 3600) % 60) + Math.trunc(timerace / 60));
+                const dconfig = arrayRaceData[raceData.raceNumber - 1].RaceConfig;
+
+                if (vueltastotalesDriver1 < vueltasLider * 0.9 && ((condicion1 < dconfig.RaceDurationTime) || (vueltasLiderTeam < dconfig.RaceDurationLaps * 0.9))) {
+                  posDriver1 = -1;
+                }
+                break;
+            }
+            if (driver1Data?.Pos === -4 && driver1Data?.DriverName === "STREAMING") {
+              posDriver1 = -4;
+            }
+          }
+
+          if (posDriver2 === 1) {
+            vueltasLiderTeam = vueltastotalesDriver2;
+
+          } else {
+            switch (posDriver2) {
+              case -1:
+                if (driver2Data?.Team === "ESP Racing Staff") {
+                  posDriver2 = -4;
+                } else {
+                  posDriver2 = -1;
+                }
+                break;
+              case -2:
+                posDriver2 = -2;
+                break;
+              case -3:
+                posDriver2 = -3;
+                break;
+              case -4:
+                switch (driver2Data?.Team) {
+                  case "STREAMING":
+                    posDriver2 = -4;
+                    break;
+                  case "ESP Racing Staff":
+                    posDriver2 = -4;
+                    break;
+                  case "Safety Car":
+                    posDriver2 = -4;
+                    break;
+                  default:
+                    posDriver2 = -3;
+                    break;
+                }
+                break;
+              default:
+                const timerace = (driver2Data?.TotalTime || 0) + (driver2Data?.Penalties || 0);
+                const condicion2 = (Math.trunc((timerace / 3600) % 60) + Math.trunc(timerace / 60));
+                const dconfig = arrayRaceData[raceData.raceNumber - 1].RaceConfig;
+
+                if (vueltastotalesDriver2 < vueltasLider * 0.9 && ((condicion2 < dconfig.RaceDurationTime) || (vueltasLiderTeam < dconfig.RaceDurationLaps * 0.9))) {
+                  posDriver2 = -1;
+                }
+                break;
+            }
+            if (driver2Data?.Pos === -4 && driver2Data?.DriverName === "STREAMING") {
+              posDriver2 = -4;
+            }
+          }
+
+          if (driver1Data && posDriver1 > 0) {
+            driver1Points = pointArray ? pointArray.Puntuation[posDriver1 - 1] + fastestLapDriver1 : 0;
+          }
+          if (driver2Data && posDriver2 > 0) {
+            driver2Points = driver2Data && pointArray ? pointArray.Puntuation[posDriver2 - 1] + fastestLapDriver2 : 0;
+          }
 
           return driver1Points + driver2Points;
         });
@@ -657,6 +771,8 @@ function initializeScript() {
           data: cumulativePoints,
         };
       });
+
+      console.log(seriesDataTeamChamp);
 
       let stepChartTeam: number = 20;
       let MaxStepChartTeam: number = 0;
@@ -835,17 +951,70 @@ document.addEventListener('astro:page-load', initializeScript);
 // document.addEventListener('astro:page-unload', cleanupEventListeners);
 
 
-// Obtener los datos globales de los pilotos FIXME: Arreglar que los DNF no cuenten los puntos
-function getDriverDataChamp(result: RaceDataChamp[]): DriverDataChamp[] {
+// Obtener los datos globales de los pilotos
+function getDriverDataChamp(result: RaceDataChamp[], rd: RaceData[]): DriverDataChamp[] {
   let respuesta: DriverDataChamp[] = [];
   result.map((raceData) => {
     const pointArray = points.find((point) => point.Name === raceData.pointSystem);
     if (pointArray !== undefined) {
+      let vueltasLider: number = 0;
       for (let item of raceData.results) {
+        let vueltasTotales = item.Laps;
+        let pos = item.Pos;
         const driverIndex = respuesta.findIndex((driver) => driver.guid === item.SteamID);
 
+
+        if (pos === 1) {
+          vueltasLider = vueltasTotales;
+
+        } else {
+          switch (pos) {
+            case -1:
+              if (item.Team === "ESP Racing Staff") {
+                pos = -4;
+              } else {
+                pos = -1;
+              }
+              break;
+            case -2:
+              pos = -2;
+              break;
+            case -3:
+              pos = -3;
+              break;
+            case -4:
+              switch (item.Team) {
+                case "STREAMING":
+                  pos = -4;
+                  break;
+                case "ESP Racing Staff":
+                  pos = -4;
+                  break;
+                case "Safety Car":
+                  pos = -4;
+                  break;
+                default:
+                  pos = -3;
+                  break;
+              }
+              break;
+            default:
+              const timerace = (item.TotalTime) + (item.Penalties);
+              const condicion1 = (Math.trunc((timerace / 3600) % 60) + Math.trunc(timerace / 60));
+              const dconfig = rd[raceData.raceNumber - 1].RaceConfig;
+
+              if (vueltasTotales < vueltasLider * 0.9 && ((condicion1 < dconfig.RaceDurationTime) || (vueltasTotales < dconfig.RaceDurationLaps * 0.9))) {
+                pos = -1;
+              }
+              break;
+          }
+          if (item.Pos === -4 && item.DriverName === "STREAMING") {
+            pos = -4;
+          }
+        }
         if (driverIndex === -1) {
-          if (item.Pos > 0) {
+          if (pos > 0) {
+
             if (item.SteamID === raceData.driverFastestLapGuid) {
               respuesta.push({
                 name: item.DriverName,
@@ -865,7 +1034,7 @@ function getDriverDataChamp(result: RaceDataChamp[]): DriverDataChamp[] {
               });
             }
 
-          } else if (item.Pos !== -4) {
+          } else if (pos !== -4) {
             respuesta.push({
               name: item.DriverName,
               guid: item.SteamID,
@@ -876,11 +1045,11 @@ function getDriverDataChamp(result: RaceDataChamp[]): DriverDataChamp[] {
           }
 
         } else {
-          if (item.Pos > 0) {
+          if (pos > 0) {
             if (item.SteamID === raceData.driverFastestLapGuid) {
               respuesta[driverIndex].totalsPoints += pointArray.FastestLap;
             }
-            respuesta[driverIndex].totalsPoints += pointArray.Puntuation[item.Pos - 1];
+            respuesta[driverIndex].totalsPoints += pointArray.Puntuation[pos - 1];
           }
         }
       }

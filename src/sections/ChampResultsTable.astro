@@ -99,9 +99,16 @@ for (let i = 0; i < finalResult.length; i++) {
 }
 ---
 
-<p class="py-4 text-4xl font-bold text-center">
-  Selecciona el campeonato a revisar
-</p>
+{actualchamp === "true" ? (
+  <p class="py-4 text-4xl font-bold text-center">
+    Carga los datos del progreso actual de los campeonatos
+  </p>
+) : (
+  <p class="py-4 text-4xl font-bold text-center">
+    Selecciona el campeonato pasado a revisar
+  </p>
+)}
+
 <select
   id="select-champs"
   class="block m-auto w-4/5 px-4 py-3 text-lg font-medium rounded-xl pe-9 focus:border-[#da392b] disabled:opacity-50 disabled:pointer-events-none bg-[#19191c] border-neutral-700 text-[#f9f9f9] placeholder-neutral-500"

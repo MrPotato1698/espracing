@@ -59,10 +59,16 @@ if (RacesData.length == 0) {
   );
 }
 ---
+{actualchamp === "true" ? (
+  <p class="py-4 text-4xl font-bold text-center">
+    Selecciona la carrera a revisar
+  </p>
+) : (
+  <p class="py-4 text-4xl font-bold text-center">
+    Selecciona el campeonato y carrera pasada a revisar
+  </p>
+)}
 
-<p class="py-4 text-2xl font-bold text-center">
-  Selecciona la carrera a revisar
-</p>
 <select
   id="select-champs"
   class="block m-auto w-4/5 px-4 py-3 text-lg font-medium rounded-xl pe-9 focus:border-[#da392b] disabled:opacity-50 disabled:pointer-events-none bg-[#19191c] border-neutral-700 text-[#f9f9f9] placeholder-neutral-500"
