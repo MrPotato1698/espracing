@@ -2,6 +2,7 @@
 import Layout from "@/layouts/ProfileLayout.astro";
 import ButtonProfiles from "@/components/ButtonProfiles.astro";
 import { supabase } from "@/lib/supabase";
+import type { QueryResult, QueryData, QueryError } from "@supabase/supabase-js";
 import { type Database } from "@/types/supabase";
 import { turso } from "@/turso";
 
@@ -60,11 +61,10 @@ const { rows: userData } = await turso.execute({
 
 //Integración unica con Supabase (Para evitar usar Turso)
 
-// let { data: circuit, error } = await supabase
-//   .from('circuit')
-//   .select('name')
 
-// console.log("Circuitos: "+circuit);
+let { data: circuit, error } = await supabase.from('circuit').select('name');
+
+console.log("Circuito Final: " + circuit);
 
 // const { data: userData, error: errorUserData } = await supabase
 //   .from('profiles')
