@@ -35,6 +35,11 @@ if (errorAuth) {
 const id = dataAuth?.user?.id || "";
 const rol = dataAuth?.user?.role;
 
+if (rol !== "low_administration" && rol !== "supabase_admin"){
+  return redirect("/profile");
+}
+
+
 // Get user data
 const {rows: userData} = await turso.execute({
   sql: 'SELECT * FROM User WHERE id = ?',
@@ -66,86 +71,86 @@ const {rows: userData} = await turso.execute({
       >
     <input type="hidden" name="id" value={id}>
 
-  {
-  rol === "low_administration" || rol === "supabase_admin" ? (
-    <label class="mt-5 text-lg font-semibold" for="races">Carreras:</label>
-    <input
-      type="text"
-      name="races"
-      value= {userData[0].races.toString()}
-      class = "bg-[#19191c] text-[#f9f9f9] text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
-      >
+    {
+    rol === "low_administration" || rol === "supabase_admin" ? (
+      <label class="mt-5 text-lg font-semibold" for="races">Carreras:</label>
+      <input
+        type="text"
+        name="races"
+        value= {userData[0].races.toString()}
+        class = "bg-[#19191c] text-[#f9f9f9] text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
+        >
 
-    <label class="mt-5 text-lg font-semibold" for="wins">Victorias:</label>
-    <input
-      type="text"
-      name="wins"
-      value= {userData[0].wins.toString()}
-      class = "bg-[#19191c] text-[#f9f9f9] text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
-      >
+      <label class="mt-5 text-lg font-semibold" for="wins">Victorias:</label>
+      <input
+        type="text"
+        name="wins"
+        value= {userData[0].wins.toString()}
+        class = "bg-[#19191c] text-[#f9f9f9] text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
+        >
 
-    <label class="mt-5 text-lg font-semibold" for="poles">Pole Positions:</label>
-    <input
-      type="text"
-      name="poles"
-      value= {userData[0].poles.toString()}
-      class = "bg-[#19191c] text-[#f9f9f9] text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
-      >
+      <label class="mt-5 text-lg font-semibold" for="poles">Pole Positions:</label>
+      <input
+        type="text"
+        name="poles"
+        value= {userData[0].poles.toString()}
+        class = "bg-[#19191c] text-[#f9f9f9] text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
+        >
 
-    <label class="mt-5 text-lg font-semibold" for="podiums">Podios:</label>
-    <input
-      type="text"
-      name="podiums"
-      value= {userData[0].podiums.toString()}
-      class = "bg-[#19191c] text-[#f9f9f9] text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
-      >
+      <label class="mt-5 text-lg font-semibold" for="podiums">Podios:</label>
+      <input
+        type="text"
+        name="podiums"
+        value= {userData[0].podiums.toString()}
+        class = "bg-[#19191c] text-[#f9f9f9] text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
+        >
 
-    <label class="mt-5 text-lg font-semibold" for="top5">Top5:</label>
-    <input
-      type="text"
-      name="top5"
-      value= {userData[0].top5.toString()}
-      class = "bg-[#19191c] text-[#f9f9f9] text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
-      >
+      <label class="mt-5 text-lg font-semibold" for="top5">Top5:</label>
+      <input
+        type="text"
+        name="top5"
+        value= {userData[0].top5.toString()}
+        class = "bg-[#19191c] text-[#f9f9f9] text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
+        >
 
-    <label class="mt-5 text-lg font-semibold" for="top10">Top10:</label>
-    <input
-      type="text"
-      name="top10"
-      value= {userData[0].top10.toString()}
-      class = "bg-[#19191c] text-[#f9f9f9] text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
-      >
+      <label class="mt-5 text-lg font-semibold" for="top10">Top10:</label>
+      <input
+        type="text"
+        name="top10"
+        value= {userData[0].top10.toString()}
+        class = "bg-[#19191c] text-[#f9f9f9] text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
+        >
 
-    <label class="mt-5 text-lg font-semibold" for="flaps">Vueltas Rápidas:</label>
-    <input
-      type="text"
-      name="flaps"
-      value= {userData[0].flaps.toString()}
-      class = "bg-[#19191c] text-[#f9f9f9] text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
-      >
+      <label class="mt-5 text-lg font-semibold" for="flaps">Vueltas Rápidas:</label>
+      <input
+        type="text"
+        name="flaps"
+        value= {userData[0].flaps.toString()}
+        class = "bg-[#19191c] text-[#f9f9f9] text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
+        >
 
-    <label class="mt-5 text-lg font-semibold" for="dnf">DNF:</label>
-    <input
-      type="text"
-      name="dnf"
-      value= {userData[0].dnf.toString()}
-      class = "bg-[#19191c] text-[#f9f9f9] text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
-      >
-    ):null
-  }
-  <div>
-    <button
-      type="submit"
-      class="py-1.5 px-3 w-fit mr-2 bg-[#0f0f0f] text-white border-[#29dd38] border-2 rounded-md my-4 font-medium text-lg hover:bg-[#29dd38] hover:text-[#0f0f0f]">
-      Aceptar
-    </button>
+      <label class="mt-5 text-lg font-semibold" for="dnf">DNF:</label>
+      <input
+        type="text"
+        name="dnf"
+        value= {userData[0].dnf.toString()}
+        class = "bg-[#19191c] text-[#f9f9f9] text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
+        >
+      ):null
+    }
+    <div>
+      <button
+        type="submit"
+        class="py-1.5 px-3 w-fit mr-2 bg-[#0f0f0f] text-white border-[#29dd38] border-2 rounded-md my-4 font-medium text-lg hover:bg-[#29dd38] hover:text-[#0f0f0f]">
+        Aceptar
+      </button>
 
-    <button
-      onclick="window, location.href = '/myprofile'"
-      class="py-1.5 px-3 w-fit bg-[#0f0f0f] text-white border-[#da392b] border-2 rounded-md my-4 font-medium text-lg hover:bg-[#da392b] hover:text-[#0f0f0f]">
-      Cancelar
-    </button>
-  </div>
+      <button
+        onclick="window, location.href = '/myprofile'"
+        class="py-1.5 px-3 w-fit bg-[#0f0f0f] text-white border-[#da392b] border-2 rounded-md my-4 font-medium text-lg hover:bg-[#da392b] hover:text-[#0f0f0f]">
+        Cancelar
+      </button>
+    </div>
 
   </form>
 </Layout>

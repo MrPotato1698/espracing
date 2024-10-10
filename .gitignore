@@ -40,3 +40,5 @@ local-images/*
 src/middleware.tsall
 .vercel
 .prettierignore
+
+keyFirestore.json

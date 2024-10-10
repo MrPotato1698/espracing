@@ -13,6 +13,5 @@ export const POST: APIRoute = async ({ request }) => {
     args: [id],
   });
 
-
   return new Response("Mensaje eliminado con exito", { status: 200 });
 };

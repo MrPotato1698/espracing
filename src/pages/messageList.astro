@@ -144,7 +144,7 @@ const { rows: MessageListData } = await turso.execute({
           });
 
           if (response.ok) {
-            // Update UI
+            // Actualiza UI
             button.setAttribute('data-readed', newReaded);
             const icon = button.querySelector('svg');
             if (newReaded === '1') {
@@ -187,7 +187,7 @@ const { rows: MessageListData } = await turso.execute({
             });
 
             if (response.ok) {
-              // Remove the row from the table
+              // Elimina la fila de la tabla
               const closestTr = button.closest('tr');
               if (closestTr) {
                 closestTr.remove();

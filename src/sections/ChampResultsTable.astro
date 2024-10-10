@@ -1,0 +1,157 @@
+---
+import type { Championship } from "@/lib/tursotypes";
+import { turso } from "@/turso";
+
+interface Props {
+  actualchamp: string;
+}
+
+const { actualchamp } = Astro.props;
+
+interface Race {
+  ChampID: number;
+  ChampName: string;
+  ChampSeason: string;
+  RaceOrder: number;
+  RacePoints: string;
+}
+
+type RaceDetail = {
+  RaceOrder: number;
+  RacePoints: string;
+};
+
+interface GroupedChamp {
+  ChampID: string;
+  ChampName: string;
+  ChampSeason: string;
+  RaceDetails: RaceDetail[];
+}
+
+let resultSet;
+
+if (actualchamp === "true") {
+  const lastchamp = await turso.execute(
+    "SELECT MAX(championship) AS lastchamp FROM Race"
+  );
+
+  resultSet = await turso.execute(
+    `SELECT DISTINCT C.id AS ChampID, C.name AS ChampName, C.season AS ChampSeason, R.pointsystem AS RacePoints FROM Championship AS C INNER JOIN Race AS R ON C.id = R.championship WHERE C.id = ${lastchamp.rows[0].lastchamp}`
+  );
+} else {
+  resultSet = await turso.execute(
+    "SELECT DISTINCT C.id AS ChampID, C.name AS ChampName, C.season AS ChampSeason, R.pointsystem AS RacePoints FROM Championship AS C INNER JOIN Race AS R ON C.id = R.championship WHERE C.isChampionship = 1"
+  );
+}
+const ChampionshipData: Championship[] =
+  resultSet.rows as unknown as Championship[];
+
+const groupedChampionships = ChampionshipData.reduce(
+  (acc, champ) => {
+    if (!acc[champ.season]) {
+      acc[champ.season] = [];
+    }
+    acc[champ.season].push(champ);
+    return acc;
+  },
+  {} as Record<string, Championship[]>
+);
+
+const ChampData: Race[] = resultSet.rows as unknown as Race[];
+
+function groupByChamp(resultSet: Race[]): GroupedChamp[] {
+  // Creamos un objeto auxiliar para agrupar los campeonatos
+  const grouped: {
+    [key: number]: GroupedChamp & { RacePointsList: string[] };
+  } = {};
+
+  resultSet.forEach((race) => {
+    if (!grouped[race.ChampID]) {
+      grouped[race.ChampID] = {
+        ChampID: race.ChampID.toString(),
+        ChampName: race.ChampName,
+        ChampSeason: race.ChampSeason,
+        RacePointsList: [],
+        RaceDetails: [],
+      };
+    }
+
+    // Añadimos los puntos de cada carrera a la lista del campeonato
+    grouped[race.ChampID].RaceDetails.push({
+      RaceOrder: race.RaceOrder,
+      RacePoints: race.RacePoints,
+    });
+  });
+
+  // Transformamos el objeto en un array
+  return Object.values(grouped);
+}
+
+const finalResult: GroupedChamp[] = groupByChamp(ChampData);
+
+let dataChamp: GroupedChamp[] = [];
+for (let i = 0; i < finalResult.length; i++) {
+  dataChamp.push(finalResult[i]);
+  for (let j = 0; j < finalResult[i].RaceDetails.length; j++) {
+    dataChamp[i].ChampID +=
+      "@" + finalResult[i].RaceDetails[j].RacePoints.toString();
+  }
+}
+---
+
+{actualchamp === "true" ? (
+  <p class="py-4 text-4xl font-bold text-center">
+    Carga los datos del progreso actual de los campeonatos
+  </p>
+) : (
+  <p class="py-4 text-4xl font-bold text-center">
+    Selecciona el campeonato pasado a revisar
+  </p>
+)}
+
+<select
+  id="select-champs"
+  class="block m-auto w-4/5 px-4 py-3 text-lg font-medium rounded-xl pe-9 focus:border-[#da392b] disabled:opacity-50 disabled:pointer-events-none bg-[#19191c] border-neutral-700 text-[#f9f9f9] placeholder-neutral-500"
+>
+  {
+    dataChamp.map((champ) => (
+      <optgroup
+        label={`Temporada ${champ.ChampSeason}`}
+        class="text-[#f7f7f7] font-semibold"
+      >
+        <option value={champ.ChampID} class="text-[#f7f7f7]">
+          {champ.ChampName}
+        </option>
+      </optgroup>
+    ))
+  }
+</select>
+
+<!-- Tabla de resultados -->
+<div class="container mx-auto">
+  <div class="section">
+    <button
+      id="loadButtonChamp"
+      class="no-underline bg-[#19191c] rounded-xl my-4 font-medium text-white text-lg py-4 px-8 block mx-auto hover:text-[#0f0f0f] hover:bg-[#da392b]"
+    >
+      Cargar Datos
+    </button>
+  </div>
+
+  <div id="resultsIndyChampsTable"></div>
+  <div class="w-11/12 mx-auto mt-4 tablecharts"><div id="chartProgressiónIndyChamp" class = "border-2 border-[#da392b]"></div></div>
+  <div id="resultsTeamsChampsTable"></div>
+  <div class="w-11/12 mx-auto mt-4 tablecharts"><div id="chartProgressiónTeamsChamp" class = "border-2 border-[#da392b]"></div></div>
+  <div id="resultTableOtherPrizes"></div>
+</div>
+
+<script>
+  // Script para cargar los resultados de los campeonatos
+  import "@/pages/api/champresults/champresults.ts";
+</script>
+
+<style>
+  .container {
+    width: 99%;
+  }
+</style>

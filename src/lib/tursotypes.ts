@@ -16,6 +16,9 @@ export interface Championship {
   id: number;
   name: string;
   key_search: string;
+  year: number;
+  season: number;
+  ischampionship: number;
 }
 
 export interface Circuit {

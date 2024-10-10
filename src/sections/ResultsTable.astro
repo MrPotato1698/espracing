@@ -1,25 +1,93 @@
 ---
-import { turso } from "../turso";
+import { turso } from "@/turso";
 
-const { rows: RacesData } = await turso.execute(
-  "SELECT DISTINCT R.name AS RaceName, R.filename, C.name AS ChampName FROM Championship AS C INNER JOIN Race AS R ON C.id = R.championship"
-);
+interface Race {
+  ChampID: string;
+  ChampName: string;
+  RaceName: string;
+  filename: string;
+  pointsystem: string;
+}
 
-// console.log("Tamaño de RaceData: "+ RacesData.length)
+interface Championship {
+  name: string;
+  races: Race[];
+}
+
+interface Props {
+  actualchamp: string;
+}
+
+const { actualchamp } = Astro.props;
+
+let resultSet;
+
+if (actualchamp==="true") {
+  const lastchamp = await turso.execute(
+    "SELECT MAX(championship) AS lastchamp FROM Race"
+  );
+
+  resultSet = await turso.execute(
+    `SELECT DISTINCT R.name AS RaceName, R.filename, R.pointsystem, C.name AS ChampName, C.id AS ChampID FROM Championship AS C INNER JOIN Race AS R ON C.id = R.championship WHERE C.id = ${lastchamp.rows[0].lastchamp}`
+  );
+} else {
+  resultSet = await turso.execute(
+    "SELECT DISTINCT R.name AS RaceName, R.filename, R.pointsystem, C.name AS ChampName, C.id AS ChampID FROM Championship AS C INNER JOIN Race AS R ON C.id = R.championship"
+  );
+}
+
+const RacesData: Race[] = resultSet.rows as unknown as Race[];
+
+let racesByChampionship: { [key: string]: Championship } = {};
+
+if (RacesData.length == 0) {
+  console.log("No hay datos");
+} else {
+  // Agrupamos las carreras por campeonato
+  racesByChampionship = RacesData.reduce(
+    (acc: { [key: string]: Championship }, race: Race) => {
+      if (!acc[String(race.ChampID)]) {
+        acc[String(race.ChampID)] = {
+          name: String(race.ChampName) ?? "Unknown Championship",
+          races: [],
+        };
+      }
+      acc[String(race.ChampID)].races.push(race);
+      return acc;
+    },
+    {} as { [key: string]: Championship }
+  );
+}
 ---
+{actualchamp === "true" ? (
+  <p class="py-4 text-4xl font-bold text-center">
+    Selecciona la carrera a revisar
+  </p>
+) : (
+  <p class="py-4 text-4xl font-bold text-center">
+    Selecciona el campeonato y carrera pasada a revisar
+  </p>
+)}
 
-<p class="py-4 text-2xl font-bold text-center">
-  Selecciona la carrera a revisar
-</p>
 <select
   id="select-champs"
-  class="block m-auto w-4/5 px-4 py-3 text-lg font-medium rounded-xl pe-9 focus:border-[#da392b] disabled:opacity-50 disabled:pointer-events-none bg-[#19191c] border-neutral-700 text-white placeholder-neutral-500"
+  class="block m-auto w-4/5 px-4 py-3 text-lg font-medium rounded-xl pe-9 focus:border-[#da392b] disabled:opacity-50 disabled:pointer-events-none bg-[#19191c] border-neutral-700 text-[#f9f9f9] placeholder-neutral-500"
 >
   {
-    RacesData.map((race) => (
-      <option value={race.filename?.toString()}>
-        {race.ChampName + " - " + race.RaceName}
-      </option>
+    Object.entries(racesByChampionship).map(([champId, champData]) => (
+      <optgroup label={champData.name} class="py-2 font-semibold">
+        {champData.races.map((race) => (
+          <option
+            value={
+              race.filename?.toString() + "@" + race.pointsystem?.toString()
+            }
+            class="text-[#f7f7f7]"
+            data-champ={champData.name}
+          >
+            {race.RaceName}
+          </option>
+        ))}
+      </optgroup>
     ))
   }
 </select>
@@ -28,49 +96,144 @@ const { rows: RacesData } = await turso.execute(
 <div class="container mx-auto">
   <div class="section">
     <button
-      class="cargarselector no-underline bg-[#19191c] rounded-xl my-4 font-medium text-white text-lg py-4 px-8 block mx-auto"
-      id="btnCargarTabla"
+      id="loadButtonRace"
+      class="no-underline bg-[#19191c] rounded-xl my-4 font-medium text-white text-lg py-4 px-8 block mx-auto hover:text-[#0f0f0f] hover:bg-[#da392b]"
     >
       Cargar Datos
     </button>
 
-    <div id="resultado2"></div>
-
+    <div id="datosCircuito"></div>
     <table class="w-full border-collapse border border-[#f9f9f9]">
       <thead class="font-medium bg-[#da392b]">
         <tr class="tabletitle">
+          <th colspan="2"></th>
           <th>Pos</th>
           <th>Nombre</th>
+          <th>Clase</th>
+          <th colspan="2">Coche</th>
           <th>Equipo</th>
-          <th colspan="2" =>Coche</th>
-          <th colspan="2">Gain/Lost</th>
+          <th>Vueltas</th>
           <th>Tiempo Total</th>
-          <th>Nº Vueltas</th>
+          <th>Gap to 1st</th>
+          <th>Intervalo</th>
           <th>Vuelta Rápida</th>
-          <th>Media Vueltas</th>
-          <th>Golpes</th>
-          <th>Lastres</th>
+          <th>Ptos</th>
         </tr>
       </thead>
-      <tbody id="resultado" class="font-normal"> </tbody>
+      <tbody id="tablaResultados" class="font-normal"> </tbody>
     </table>
-
   </div>
+
+  <div class="w-11/12 mx-auto mt-4 tablecharts">
+    <div
+      id="chartCambiosPosiciones"
+      class="border-2 rounded-lg border-[#da392b]"
+    >
+    </div>
+  </div>
+
+  <div class="w-11/12 mx-auto mt-4 tablecharts">
+    <div
+      id="chartGaps"
+      class="border-2 rounded-lg border-[#da392b]"
+    >
+    </div>
+  </div>
+
+  <div class="grid gap-2 mx-auto mt-4 sectorTables">
+    <div id="tablaS1"></div>
+    <div id="tablaS2"></div>
+    <div id="tablaS3"></div>
+    <div id="tablaS4"></div>
+    <div id="tablaS5"></div>
+  </div>
+
+  <div id="tableIndividualLaps"></div>
 </div>
+
+<script>
+  // Script para cargar los resultados de la carrera seleccionada
+  import "@/pages/api/raceresults/raceresults.ts";
+</script>
+
+<script>
+  // Script para modificar el texto del select
+  const select = document.getElementById("select-champs") as HTMLSelectElement;
+
+  function updateSelectText() {
+    const selectedOption = select.options[select.selectedIndex];
+    if (selectedOption) {
+      const champName = selectedOption.dataset.champ;
+      const raceName =
+        selectedOption.dataset.originalText || selectedOption.textContent;
+
+      // Restaurar todos los textos originales
+      Array.from(select.options).forEach((opt) => {
+        opt.textContent = opt.dataset.originalText || opt.textContent;
+      });
+
+      // Actualizar solo la opción seleccionada
+      if (raceName && !raceName.includes(champName ?? "")) {
+        selectedOption.textContent = `${champName} - ${raceName}`;
+      }
+    }
+  }
+
+  // Guardar los textos originales
+  Array.from(select.options).forEach((opt) => {
+    opt.dataset.originalText = opt.textContent ?? "";
+  });
+
+  select.addEventListener("change", updateSelectText);
+  select.addEventListener("focus", () => {
+    Array.from(select.options).forEach((opt) => {
+      opt.textContent = opt.dataset.originalText || opt.textContent;
+    });
+  });
+  select.addEventListener("blur", updateSelectText);
+
+  // Inicializar el texto del select
+  updateSelectText();
+
+  // Observar cambios en el valor del select (para manejar cambios programáticos)
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      if (
+        mutation.type === "attributes" &&
+        mutation.attributeName === "value"
+      ) {
+        updateSelectText();
+      }
+    });
+  });
+
+  observer.observe(select, { attributes: true });
+</script>
 
 <style>
   .container {
     width: 99%;
   }
 
+  .sectorTables {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+    gap: 1rem;
+    @media (min-width: 800px) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    @media (min-width: 1210px) {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
   &::-ms-expand {
     display: none;
-}
+  }
 
-/* Remove focus outline */
-&:focus {
+  /* Remove focus outline */
+  &:focus {
     outline: none;
-}
+  }
   td {
     text-align: center;
   }
@@ -87,5 +250,3 @@ const { rows: RacesData } = await turso.execute(
     background-color: "#19191c";
   }
 </style>
-
-<script src="../pages/api/raceresults/results.ts"></script>
