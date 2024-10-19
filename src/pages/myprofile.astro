@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabase";
 import type { QueryResult, QueryData, QueryError } from "@supabase/supabase-js";
 import { type Database } from "@/types/supabase";
 import { turso } from "@/turso";
+import { db } from "@/db/drizzle-ormConecction";
 
 const { cookies, redirect } = Astro;
 
@@ -61,8 +62,7 @@ const { rows: userData } = await turso.execute({
 
 //Integración unica con Supabase (Para evitar usar Turso)
 
-
-let { data: circuit, error } = await supabase.from('circuit').select('name');
+const circuit = await db.select("name").from("circuit");
 
 console.log("Circuito Final: " + circuit);
 
