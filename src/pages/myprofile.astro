@@ -5,7 +5,10 @@ import { supabase } from "@/lib/supabase";
 import type { QueryResult, QueryData, QueryError } from "@supabase/supabase-js";
 import { type Database } from "@/types/supabase";
 import { turso } from "@/turso";
+import { circuitlayouts } from "@/consts/circuitlayouts";
+
 import { db } from "@/db/drizzle-ormConecction";
+import { circuit } from "@/db/schema/circuit";
 
 const { cookies, redirect } = Astro;
 
@@ -62,9 +65,14 @@ const { rows: userData } = await turso.execute({
 
 //Integración unica con Supabase (Para evitar usar Turso)
 
-const circuit = await db.select("name").from("circuit");
+const { data: circuitData, error: circuitError } = await supabase.from("team").select('*');
 
-console.log("Circuito Final: " + circuit);
+if (circuitError) {
+  console.error("Error fetching circuit data:", circuitError);
+} else if (circuitData && circuitData.length > 0) {
+  console.log("Circuito Final: " + circuitData[0].name);
+}
+
 
 // const { data: userData, error: errorUserData } = await supabase
 //   .from('profiles')
