@@ -1,9 +1,9 @@
 import * as t from "drizzle-orm/pg-core"
 
 export const circuit = t.pgTable('circuit', {
-  id: t.bigint({ mode: 'number' }).primaryKey(),
-  name: t.text(),
-  filename: t.text().unique(),
-  location: t.text().default("Earth"),
-  shortname: t.text()
+  id: t.bigint("id", { mode: 'number' }).primaryKey(),
+  name: t.text("name"),
+  filename: t.text("filename").unique(),
+  location: t.text("location").default("Earth"),
+  shortname: t.text("shortname")
 })

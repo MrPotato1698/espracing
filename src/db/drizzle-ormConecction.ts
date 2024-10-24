@@ -1,6 +1,7 @@
-import { drizzle } from 'drizzle-orm/postgres-js'
-import postgres from 'postgres'
+import { drizzle } from 'drizzle-orm/node-postgres';
 
-
-const client = postgres(process.env.DATABASE_URL || 'default_database_url');
-export const db = drizzle({ client });
+export const db = drizzle({
+  connection: {
+    connectionString:process.env.DATABASE_URL
+  }
+});
