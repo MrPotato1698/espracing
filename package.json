@@ -26,9 +26,10 @@
     "crypto-browserify": "^3.3.0",
     "csv-parse": "5.5.6",
     "dotenv": "16.4.5",
-    "drizzle-orm": "^0.35.2",
+    "drizzle-orm": "^0.35.3",
     "firebase": "10.14.1",
     "firebase-admin": "12.6.0",
+    "pg": "^8.13.0",
     "postgres": "^3.4.4",
     "promisify": "0.0.3",
     "tailwindcss": "3.4.14",
@@ -37,6 +38,7 @@
   "devDependencies": {
     "@tailwindcss/aspect-ratio": "0.4.2",
     "@types/node": "22.7.7",
+    "@types/pg": "^8.11.10",
     "drizzle-kit": "^0.26.2",
     "supabase": "1.204.3"
   },
