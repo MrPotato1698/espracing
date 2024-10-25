@@ -1,7 +1,5 @@
 import type { APIRoute } from "astro";
 import { supabase } from "@/db/supabase";
-import { turso } from "@/turso";
-
 
 export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const formData = await request.formData();

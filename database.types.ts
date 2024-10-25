@@ -46,7 +46,7 @@ export type Database = {
           maxLiter: number | null
           model: string | null
           power: number | null
-          subclass: string | null
+          subclass: number | null
           torque: number | null
           tyreTimeChange: number | null
           weight: number | null
@@ -63,7 +63,7 @@ export type Database = {
           maxLiter?: number | null
           model?: string | null
           power?: number | null
-          subclass?: string | null
+          subclass?: number | null
           torque?: number | null
           tyreTimeChange?: number | null
           weight?: number | null
@@ -80,11 +80,40 @@ export type Database = {
           maxLiter?: number | null
           model?: string | null
           power?: number | null
-          subclass?: string | null
+          subclass?: number | null
           torque?: number | null
           tyreTimeChange?: number | null
           weight?: number | null
           year?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "car_subclass_fkey"
+            columns: ["subclass"]
+            isOneToOne: false
+            referencedRelation: "carsubclass"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      carsubclass: {
+        Row: {
+          class_design: string | null
+          id: number
+          name: string | null
+          short_name: string | null
+        }
+        Insert: {
+          class_design?: string | null
+          id?: number
+          name?: string | null
+          short_name?: string | null
+        }
+        Update: {
+          class_design?: string | null
+          id?: number
+          name?: string | null
+          short_name?: string | null
         }
         Relationships: []
       }
@@ -283,7 +312,6 @@ export type Database = {
           team: number | null
           top10: number | null
           top5: number | null
-          updated_at: string | null
           wins: number | null
         }
         Insert: {
@@ -303,7 +331,6 @@ export type Database = {
           team?: number | null
           top10?: number | null
           top5?: number | null
-          updated_at?: string | null
           wins?: number | null
         }
         Update: {
@@ -323,7 +350,6 @@ export type Database = {
           team?: number | null
           top10?: number | null
           top5?: number | null
-          updated_at?: string | null
           wins?: number | null
         }
         Relationships: [
@@ -370,7 +396,7 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "Race_championship_fkey"
+            foreignKeyName: "race_championship_fkey"
             columns: ["championship"]
             isOneToOne: false
             referencedRelation: "championship"
