@@ -1,9 +1,14 @@
 ---
-import { turso } from "@/turso";
+import { supabase } from "@/db/supabase";
 
-const { rows: AdminsData } = await turso.execute(
-  "SELECT name, email FROM User WHERE role = 1 OR role = 2"
-);
+const {data: AdminsData, error: AdminsError} = await supabase
+  .from("profiles")
+  .select("full_name, email")
+  .eq("roleesp", 1);
+
+if (AdminsError || AdminsData === null) {
+  console.error(AdminsError);
+}
 ---
 
 <div class="box-border p-5 m-auto bg-white rounded-md max-w-screen-2xl">
@@ -60,8 +65,8 @@ const { rows: AdminsData } = await turso.execute(
       name="contactwho"
     >
       {
-        AdminsData.map((admin) => (
-          <option value={admin.email?.toString()}>{admin.name}</option>
+        AdminsData?.map((admin) => (
+          <option value={admin.email?.toString()}>{admin.full_name}</option>
         ))
       }
     </select>

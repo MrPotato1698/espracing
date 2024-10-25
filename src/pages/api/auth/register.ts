@@ -1,6 +1,5 @@
 import type { APIRoute } from "astro";
 import { supabase } from "@/db/supabase";
-import { turso } from "@/turso";
 
 export const POST: APIRoute = async ({ request, redirect }) => {
   const formData = await request.formData();
@@ -21,22 +20,23 @@ export const POST: APIRoute = async ({ request, redirect }) => {
     return new Response("Steam ID obligatorio", { status: 400 });
   }
 
-  const { error } = await supabase.auth.signUp({
+  const { error: signUpError } = await supabase.auth.signUp({
     email,
     password,
+    options: {
+      data: {
+        full_name: name,
+        email: email,
+        avatar: 'img/user/default.webp',
+        steam_id: steamId,
+        roleesp: 4
+      }
+    }
   });
 
-  if (error) {
-    return new Response(error.message, { status: 500 });
+  if (signUpError) {
+    return new Response(signUpError.message, { status: 500 });
+  } else {
+    return redirect("/");
   }
-
-  const transaction = await turso.transaction("write");
-  await transaction.execute({
-    sql: `INSERT INTO User (email, name, steam_id, role) VALUES (?, ?, ?, ?)`,
-    args: [email, name, steamId, 4],
-  });
-
-  await transaction.commit();
-
-  return redirect("/");
 };

@@ -1,8 +1,6 @@
 ---
 import Chevron from "@/icons/Chevron.astro";
-
-import { supabase } from "../db/supabase";
-import { turso } from "@/turso";
+import { supabase } from "@/db/supabase";
 
 const { cookies, redirect } = Astro;
 
@@ -29,13 +27,23 @@ if (error) {
   return redirect("/login");
 }
 
-const rol = data?.user?.role;
 const email = data?.user?.email || "";
 
-const emailSearchQuery = await turso.execute({
-  sql: "SELECT COUNT (*) AS NoReaded FROM Message WHERE name_receiver = ? AND readed = 0",
-  args: [email],
-});
+const {data:emailSearchQuery} = await supabase
+  .from("message")
+  .select('*', {count: 'exact', head:true })
+  .eq("name_receiver", email)
+  .eq("readed", 0);
+
+const {data: rolUser} = await supabase
+  .from("profiles")
+  .select("roleesp")
+  .eq("email", email)
+  .single();
+
+if(rolUser === null) {
+  return redirect("/");
+}
 ---
 
 <!-- Nombre Inicial + Redes -->
@@ -137,7 +145,7 @@ const emailSearchQuery = await turso.execute({
 
       {
         //Si es admin, verá estas opciones de Zona Admin
-        rol === "low_administration" || rol === "supabase_admin" ? (
+        rolUser.roleesp === 1 ? (
           <li>
             <button
               type="button"
@@ -332,9 +340,9 @@ const emailSearchQuery = await turso.execute({
               </svg>
               <span class="flex-1 ml-3 whitespace-nowrap">Mensajes</span>
               {
-                (emailSearchQuery?.rows[0]?.NoReaded ?? 0 > 0) ? (
+                (emailSearchQuery ?? 0 > 0) ? (
                   <span class="inline-flex items-center justify-center w-5 h-5 text-xs font-semibold rounded-full bg-[#da392b] text-white">
-                    {emailSearchQuery?.rows[0]?.NoReaded}
+                    {emailSearchQuery}
                   </span>
                 ) : null
               }

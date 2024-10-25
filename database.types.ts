@@ -7,6 +7,31 @@ export type Json =
   | Json[]
 
 export type Database = {
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          operationName?: string
+          query?: string
+          variables?: Json
+          extensions?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
       car: {
@@ -15,11 +40,15 @@ export type Database = {
           class: string | null
           description: string | null
           filename: string | null
+          fuelLiterTime: number | null
           id: number
           imgbrand: string | null
+          maxLiter: number | null
           model: string | null
           power: number | null
+          subclass: string | null
           torque: number | null
+          tyreTimeChange: number | null
           weight: number | null
           year: number | null
         }
@@ -28,11 +57,15 @@ export type Database = {
           class?: string | null
           description?: string | null
           filename?: string | null
+          fuelLiterTime?: number | null
           id: number
           imgbrand?: string | null
+          maxLiter?: number | null
           model?: string | null
           power?: number | null
+          subclass?: string | null
           torque?: number | null
+          tyreTimeChange?: number | null
           weight?: number | null
           year?: number | null
         }
@@ -41,11 +74,15 @@ export type Database = {
           class?: string | null
           description?: string | null
           filename?: string | null
+          fuelLiterTime?: number | null
           id?: number
           imgbrand?: string | null
+          maxLiter?: number | null
           model?: string | null
           power?: number | null
+          subclass?: string | null
           torque?: number | null
+          tyreTimeChange?: number | null
           weight?: number | null
           year?: number | null
         }
@@ -54,18 +91,27 @@ export type Database = {
       championship: {
         Row: {
           id: number
+          ischampionship: boolean | null
           key_search: string | null
           name: string | null
+          season: string | null
+          year: number
         }
         Insert: {
           id: number
+          ischampionship?: boolean | null
           key_search?: string | null
           name?: string | null
+          season?: string | null
+          year?: number
         }
         Update: {
           id?: number
+          ischampionship?: boolean | null
           key_search?: string | null
           name?: string | null
+          season?: string | null
+          year?: number
         }
         Relationships: []
       }
@@ -75,18 +121,21 @@ export type Database = {
           id: number
           location: string | null
           name: string | null
+          shortname: string | null
         }
         Insert: {
           filename?: string | null
           id: number
           location?: string | null
           name?: string | null
+          shortname?: string | null
         }
         Update: {
           filename?: string | null
           id?: number
           location?: string | null
           name?: string | null
+          shortname?: string | null
         }
         Relationships: []
       }
@@ -129,53 +178,90 @@ export type Database = {
         Row: {
           id: string
           position: string | null
+          profile: string | null
           race: string | null
-          user: string | null
           valid_laps: string | null
         }
         Insert: {
           id: string
           position?: string | null
+          profile?: string | null
           race?: string | null
-          user?: string | null
           valid_laps?: string | null
         }
         Update: {
           id?: string
           position?: string | null
+          profile?: string | null
           race?: string | null
-          user?: string | null
           valid_laps?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "inscription_profile_fkey"
+            columns: ["profile"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       message: {
         Row: {
           description: string | null
           discord: string | null
-          id: string
+          id: number
           name_emissor: string
-          name_receiver: string | null
+          name_receiver: string
           readed: boolean | null
           region: string | null
         }
         Insert: {
           description?: string | null
           discord?: string | null
-          id: string
+          id: number
           name_emissor: string
-          name_receiver?: string | null
+          name_receiver?: string
           readed?: boolean | null
           region?: string | null
         }
         Update: {
           description?: string | null
           discord?: string | null
-          id?: string
+          id?: number
           name_emissor?: string
-          name_receiver?: string | null
+          name_receiver?: string
           readed?: boolean | null
           region?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_name_receiver_fkey"
+            columns: ["name_receiver"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pointsystem: {
+        Row: {
+          fastestlap: number | null
+          id: number
+          name: string
+          points: Json
+        }
+        Insert: {
+          fastestlap?: number | null
+          id?: number
+          name: string
+          points: Json
+        }
+        Update: {
+          fastestlap?: number | null
+          id?: number
+          name?: string
+          points?: Json
         }
         Relationships: []
       }
@@ -188,10 +274,11 @@ export type Database = {
           full_name: string | null
           id: string
           is_team_manager: boolean | null
+          number_plate: number | null
           podiums: number | null
           poles: number | null
           races: number | null
-          roleesp: string | null
+          roleesp: number | null
           steam_id: string | null
           team: number | null
           top10: number | null
@@ -207,10 +294,11 @@ export type Database = {
           full_name?: string | null
           id: string
           is_team_manager?: boolean | null
+          number_plate?: number | null
           podiums?: number | null
           poles?: number | null
           races?: number | null
-          roleesp?: string | null
+          roleesp?: number | null
           steam_id?: string | null
           team?: number | null
           top10?: number | null
@@ -226,10 +314,11 @@ export type Database = {
           full_name?: string | null
           id?: string
           is_team_manager?: boolean | null
+          number_plate?: number | null
           podiums?: number | null
           poles?: number | null
           races?: number | null
-          roleesp?: string | null
+          roleesp?: number | null
           steam_id?: string | null
           team?: number | null
           top10?: number | null
@@ -239,10 +328,17 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "profiles_id_fkey"
-            columns: ["id"]
-            isOneToOne: true
-            referencedRelation: "users"
+            foreignKeyName: "profiles_roleesp_fkey"
+            columns: ["roleesp"]
+            isOneToOne: false
+            referencedRelation: "role"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_team_fkey"
+            columns: ["team"]
+            isOneToOne: false
+            referencedRelation: "team"
             referencedColumns: ["id"]
           },
         ]
@@ -253,18 +349,24 @@ export type Database = {
           filename: string
           id: number
           name: string | null
+          orderinchamp: number
+          pointsystem: number | null
         }
         Insert: {
           championship?: number | null
           filename: string
           id: number
           name?: string | null
+          orderinchamp?: number
+          pointsystem?: number | null
         }
         Update: {
           championship?: number | null
           filename?: string
           id?: number
           name?: string | null
+          orderinchamp?: number
+          pointsystem?: number | null
         }
         Relationships: [
           {
@@ -274,7 +376,29 @@ export type Database = {
             referencedRelation: "championship"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "race_pointsystem_fkey"
+            columns: ["pointsystem"]
+            isOneToOne: false
+            referencedRelation: "pointsystem"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      role: {
+        Row: {
+          id: number
+          name: string | null
+        }
+        Insert: {
+          id?: number
+          name?: string | null
+        }
+        Update: {
+          id?: number
+          name?: string | null
+        }
+        Relationships: []
       }
       team: {
         Row: {
@@ -393,4 +517,19 @@ export type Enums<
   ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
     ? PublicSchema["Enums"][PublicEnumNameOrOptions]
+    : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof PublicSchema["CompositeTypes"]
+    | { schema: keyof Database },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof PublicSchema["CompositeTypes"]
+    ? PublicSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never

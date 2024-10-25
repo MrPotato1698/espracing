@@ -1,7 +1,6 @@
 ---
 import Layout from "@/layouts/ProfileLayout.astro";
 import { supabase } from "@/db/supabase";
-import { turso } from '@/turso';
 
 const { cookies, redirect } = Astro;
 
@@ -31,39 +30,22 @@ if (errorAuth) {
 }
 
 const id = dataAuth?.user?.id || "";
-const email = dataAuth?.user?.email || "";
 
-// Asign ID to user in Turso if it doesn't exist
-const emailSearchQuery = await turso.execute({
-  sql: 'SELECT id FROM User WHERE email = ?',
-  args: [email],
-});
+const {data: TeamData} = await supabase
+  .from("team")
+  .select("name, description, image, id, profiles!inner(id)")
+  .eq("profiles.id", id)
+  .single();
 
-const idSearch = emailSearchQuery.rows[0].email;
-
-if(idSearch === undefined || idSearch === null) {
-  const transaction = await turso.transaction("write");
-  await transaction.execute({
-    sql: 'UPDATE User SET id = ? WHERE email = ?',
-    args: [id, email],
-  });
-  await transaction.commit();
+if(TeamData !== null && TeamData !== undefined) {
+  return redirect("/myteam");
 }
 
-// Get team data
-const { rows: TeamData } = await turso.execute({
-  sql: 'SELECT T.name, T.id, T.description, T.image FROM User AS U RIGHT JOIN Team AS T WHERE U.id = ? AND U.team = T.id',
-  args: [id],
-});
+const {data: TeamsData} = await supabase
+  .from("team")
+  .select("name, description, image, id, profiles(count)")
+  .eq("id", id);
 
-if(TeamData.length > 0) {
-  return redirect("/joinateam");
-}
-
-// Get every teams data
-const { rows: TeamsData } = await turso.execute(
-  "SELECT T.name, COUNT (U.team) AS TeamMembers, T.description, T.image, T.id FROM User AS U RIGHT JOIN Team AS T ON T.id = U.team GROUP BY T.name"
-);
 ---
 
 <Layout title = "ESP Racing: Unirse a un equipo">
@@ -82,12 +64,12 @@ const { rows: TeamsData } = await turso.execute(
       </thead>
       <tbody>
         {
-          TeamsData.map((team, index) =>
+          TeamsData?.map((team, index) =>
             <tr class="bg-[#0f0f0f]">
               <td class = "font-semibold">{index + 1}</td>
               <td><img src={String(team.image)} alt="Avatar" class="w-8 py-1"/></td>
               <td>{team.name}</td>
-              <td>{team.TeamMembers}</td>
+              <td>{team.profiles}</td>
               <td>{team.description}</td>
             </tr>
           )
@@ -110,7 +92,7 @@ const { rows: TeamsData } = await turso.execute(
     class="block m-auto w-4/5 px-4 py-3 mt-2 text-lg font-medium rounded-xl pe-9 focus:border-[#da392b] disabled:opacity-50 disabled:pointer-events-none bg-[#19191c] border-neutral-700 text-white placeholder-neutral-500"
     >
       {
-        TeamsData.map((team) => (
+        TeamsData?.map((team) => (
           <option value={team.id?.toString()}>{team.name}</option>
         ))
       }

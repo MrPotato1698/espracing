@@ -1,9 +1,6 @@
 ---
 import Layout from "@/layouts/ProfileLayout.astro";
-import ButtonProfiles from "@/components/ButtonProfiles.astro";
 import { supabase } from "@/db/supabase";
-import { type Database } from "@/types/supabase";
-import { turso } from "@/turso";
 
 const { cookies, redirect } = Astro;
 
@@ -39,12 +36,11 @@ if (rol !== "low_administration" && rol !== "supabase_admin" && rol !== "team_ma
   return redirect("/profile");
 }
 
-// Get user data
-const { rows: TeamData } = await turso.execute({
-  sql: "SELECT T.name, T.id, T.description, T.image FROM User AS U RIGHT JOIN Team AS T WHERE U.id = ? AND U.team = T.id",
-  args: [id],
-});
-
+const {data: TeamData} = await supabase
+  .from("team")
+  .select("name, description, image, id, profiles!inner(id)")
+  .eq("profiles.id", id)
+  .single();
 ---
 
 <Layout title="ESP Racing: Modificar Equipo">
@@ -66,10 +62,10 @@ const { rows: TeamData } = await turso.execute({
       id = "description"
       name = "description"
       class = "bg-[#19191c] text-[#f9f9f9] text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px max-h-96 min-h-28 resize-y"
-    >{TeamData[0].description}
+    >{TeamData?.description}
     </textarea>
 
-    <input type="hidden" name="team_id" value={TeamData[0].id?.toString()}>
+    <input type="hidden" name="team_id" value={TeamData?.id?.toString()}>
 
     <div>
       <button

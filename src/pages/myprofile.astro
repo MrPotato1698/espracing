@@ -1,14 +1,8 @@
 ---
 import Layout from "@/layouts/ProfileLayout.astro";
-import ButtonProfiles from "@/components/ButtonProfiles.astro";
 import { supabase } from "@/db/supabase";
-import type { QueryResult, QueryData, QueryError } from "@supabase/supabase-js";
-import { type Database } from "@/types/supabase";
-import { turso } from "@/turso";
-import { circuitlayouts } from "@/consts/circuitlayouts";
 
-import { db } from "@/db/drizzle-ormConecction";
-import { circuit } from "@/db/schema/circuit";
+// ****************************************************************************
 
 const { cookies, redirect } = Astro;
 
@@ -38,71 +32,29 @@ if (errorAuth) {
 }
 
 const id = dataAuth?.user?.id || "";
-const email = dataAuth?.user?.email || "";
 
-// Asign ID to user in Turso if it doesn't exist
-const emailSearchQuery = await turso.execute({
-  sql: "SELECT id FROM User WHERE email = ?",
-  args: [email],
-});
+const { data: userData, error: errorUserData } = await supabase
+  .from('profiles')
+  .select('id, email, full_name, steam_id, avatar, races, poles, wins, podiums, top5, top10, flaps, dnf, team')
+  .eq('id', id)
+  .single();
 
-const idSearch = emailSearchQuery.rows[0].email;
-
-if (idSearch === undefined || idSearch === null) {
-  const transaction = await turso.transaction("write");
-  await transaction.execute({
-    sql: "UPDATE User SET id = ? WHERE email = ?",
-    args: [id, email],
-  });
-  await transaction.commit();
+if(errorUserData || userData === null) {
+  return redirect("/index");
 }
 
-// Get user data
-const { rows: userData } = await turso.execute({
-  sql: "SELECT * FROM User WHERE id = ?",
-  args: [id],
-});
-
-//Integración unica con Supabase (Para evitar usar Turso)
-
-const { data: circuitData, error: circuitError } = await supabase.from("team").select('*');
-
-if (circuitError) {
-  console.error("Error fetching circuit data:", circuitError);
-  console.log("Datos de Usuario: " + dataAuth.user?.role);
-} else if (circuitData && circuitData.length > 0) {
-  console.log("Circuito Final: " + circuitData[0].name);
-  console.log("Datos de Usuario: " + dataAuth.user?.role);
+const teamID = userData?.team;
+let TeamData: { name: string } = { name: "" };
+if (teamID) {
+  const { data, error: errorTeamData } = await supabase
+    .from('team')
+    .select('name')
+    .eq('id', teamID)
+    .single();
+  if (!errorTeamData) {
+    TeamData = data;
+  }
 }
-
-
-// const { data: userData, error: errorUserData } = await supabase
-//   .from('profiles')
-//   .select('id, email, full_name, steam_id, avatar, races, poles, wins, podiums, top5, top10, flaps, dnf')
-//   .eq('id', id)
-//   .single();
-
-// console.log("UserData: "+userData);
-
-// if(errorUserData || userData === null) {
-//   return redirect("/faq");
-// }
-
-// console.log ("User ID:", id);
-// console.log ("User Data:", userData);
-// console.log ("Circuit Data:", circuit);
-
-// const teamID = userData?.team;
-
-// const { data: TeamData, error: errorTeamData } = await supabase
-//   .from('profiles')
-//   .select('team!inner(name)')
-//   .eq('id', teamID);
-
-const { rows: TeamData } = await turso.execute({
-  sql: "SELECT T.name FROM User AS U INNER JOIN Team AS T WHERE U.id = ? AND U.team = T.id",
-  args: [id],
-});
 ---
 
 <Layout title="ESP Racing: Mi Perfil">
@@ -111,7 +63,7 @@ const { rows: TeamData } = await turso.execute({
   </h2>
 
   <img
-    src={String(userData[0].image)}
+    src={String(userData.avatar)}
     alt="Avatar"
     class="w-20 mt-5 rounded-full"
   />
@@ -120,20 +72,20 @@ const { rows: TeamData } = await turso.execute({
       <h3 class="text-4xl font-semibold border-b-2 border-[#da392b] w-3/4">
         Nombre
       </h3>
-      <p class="pl-2 text-2xl font-medium">{userData[0].name}</p>
+      <p class="pl-2 text-2xl font-medium">{userData.full_name}</p>
     </div>
 
     <div class="blockdata">
       <h3 class="text-4xl font-semibold border-b-2 border-[#da392b] w-3/4">
         Steam ID
       </h3>
-      <p class="pl-2 text-2xl font-medium">{userData[0].steam_id}</p>
+      <p class="pl-2 text-2xl font-medium">{userData.steam_id}</p>
     </div>
 
     {
-      TeamData[0]?.name === null ||
-      TeamData[0]?.name === undefined ||
-      TeamData[0]?.name === "" ? (
+      TeamData?.name === null ||
+      TeamData?.name === undefined ||
+      TeamData?.name === "" ? (
         <div class="blockdata">
           <h3 class="text-4xl font-semibold border-b-2 border-[#da392b] w-3/4">
             Equipo
@@ -145,7 +97,7 @@ const { rows: TeamData } = await turso.execute({
           <h3 class="text-4xl font-semibold border-b-2 border-[#da392b] w-3/4">
             Equipo
           </h3>
-          <p class="pl-2 text-2xl font-medium">{TeamData[0].name}</p>
+          <p class="pl-2 text-2xl font-medium">{TeamData.name}</p>
         </div>
       )
     }
@@ -159,49 +111,49 @@ const { rows: TeamData } = await turso.execute({
       <h3 class="text-4xl font-semibold border-b-2 border-[#da392b] w-3/4">
         Carreras
       </h3>
-      <p class="pl-2 text-2xl font-medium">{userData[0].races}</p>
+      <p class="pl-2 text-2xl font-medium">{userData.races}</p>
     </div>
 
     <div class="blockdata">
       <h3 class="text-4xl font-semibold border-b-2 border-[#da392b] w-3/4">
         Victorias
       </h3>
-      <p class="pl-2 text-2xl font-medium">{userData[0].wins}</p>
+      <p class="pl-2 text-2xl font-medium">{userData.wins}</p>
     </div>
 
     <div class="blockdata">
       <h3 class="text-4xl font-semibold border-b-2 border-[#da392b] w-3/4">
         Podios
       </h3>
-      <p class="pl-2 text-2xl font-medium">{userData[0].podiums}</p>
+      <p class="pl-2 text-2xl font-medium">{userData.podiums}</p>
     </div>
 
     <div class="blockdata">
       <h3 class="text-4xl font-semibold border-b-2 border-[#da392b] w-3/4">
         Top 5
       </h3>
-      <p class="pl-2 text-2xl font-medium">{userData[0].top5}</p>
+      <p class="pl-2 text-2xl font-medium">{userData.top5}</p>
     </div>
 
     <div class="blockdata">
       <h3 class="text-4xl font-semibold border-b-2 border-[#da392b] w-3/4">
         Top 10
       </h3>
-      <p class="pl-2 text-2xl font-medium">{userData[0].top10}</p>
+      <p class="pl-2 text-2xl font-medium">{userData.top10}</p>
     </div>
 
     <div class="blockdata">
       <h3 class="text-4xl font-semibold border-b-2 border-[#da392b] w-3/4">
         Vueltas Rápidas
       </h3>
-      <p class="pl-2 text-2xl font-medium">{userData[0].flaps}</p>
+      <p class="pl-2 text-2xl font-medium">{userData.flaps}</p>
     </div>
 
     <div class="blockdata">
       <h3 class="text-4xl font-semibold border-b-2 border-[#da392b] w-3/4">
         DNF
       </h3>
-      <p class="pl-2 text-2xl font-medium">{userData[0].dnf}</p>
+      <p class="pl-2 text-2xl font-medium">{userData.dnf}</p>
     </div>
   </div>
 
