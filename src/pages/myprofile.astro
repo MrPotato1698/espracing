@@ -69,8 +69,10 @@ const { data: circuitData, error: circuitError } = await supabase.from("team").s
 
 if (circuitError) {
   console.error("Error fetching circuit data:", circuitError);
+  console.log("Datos de Usuario: " + dataAuth.user?.role);
 } else if (circuitData && circuitData.length > 0) {
   console.log("Circuito Final: " + circuitData[0].name);
+  console.log("Datos de Usuario: " + dataAuth.user?.role);
 }
 
 
