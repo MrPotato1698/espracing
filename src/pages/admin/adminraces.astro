@@ -1,0 +1,134 @@
+---
+import Layout from "@/layouts/ProfileLayout.astro";
+import { supabase } from "@/db/supabase";
+import Trash from "@/icons/Trash.astro";
+import Edit from "@/icons/Edit.astro";
+
+const { cookies, redirect } = Astro;
+
+const accessToken = cookies.get("sb-access-token");
+const refreshToken = cookies.get("sb-refresh-token");
+
+if (!accessToken || !refreshToken) {
+  return redirect("/login");
+}
+
+// Set the session with the cookies
+const { data: dataAuth, error: errorAuth } = await supabase.auth.setSession({
+  refresh_token: refreshToken.value,
+  access_token: accessToken.value,
+});
+
+// If there is an error, delete the cookies and redirect to login
+if (errorAuth) {
+  cookies.delete("sb-access-token", {
+    path: "/",
+  });
+  cookies.delete("sb-refresh-token", {
+    path: "/",
+  });
+
+  return redirect("/login");
+}
+
+const id = dataAuth?.user?.id || "";
+
+const { data: userData } = await supabase
+  .from("profiles")
+  .select("roleesp")
+  .eq("id", id)
+  .single();
+
+if (userData?.roleesp !== 1) {
+  return redirect("/index");
+}
+
+const {data: raceData } = await supabase
+  .from('race')
+  .select('id, name, championship!inner(name), pointsystem!inner(name)');
+---
+
+<Layout title="ESP Racing: Administrar Carreras">
+  <h2 class="text-5xl font-extrabold border-b-2 border-[#da392b] w-full">
+    Administración de Carreras
+  </h2>
+
+  <div class="py-4 mx-auto text-center" style="width: 99%">
+    <p2 class="text-5xl font-bold border-b border-[#da392b] w-fit mx-auto"
+      >Lista de Carreras del Sistema</p2
+    >
+    <table class="mt-6 w-full border-collapse border border-[#f9f9f9]">
+      <thead class="font-medium bg-[#da392b]">
+        <tr>
+          <th>Nº</th>
+          <th>Nombre</th>
+          <th>Campeonato</th>
+          <th>Sistema de Puntuación</th>
+          <th>Editar</th>
+          <th>Eliminar</th>
+        </tr>
+      </thead>
+      <tbody>
+        {
+          raceData?.map((race, index) => (
+            <tr class="bg-[#19191c]">
+              <td class="font-semibold">{index + 1}</td>
+              <td>{race.name}</td>
+              <td>{race.championship.name}</td>
+              <td>{race.pointsystem.name}</td>
+              <td>
+                <a href={`/admin/race/${race.id}`}>
+                  <Edit moreClass="w-6 text-center mx-auto" />
+                </a>
+              </td>
+              <td>
+                <button class="align-middle delete-race" data-id={race.id}>
+                  <Trash moreClass="w-6 text-center mx-auto" />
+                </button>
+              </td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </div>
+</Layout>
+
+<script is:inline data-astro-rerun>
+  document.addEventListener('astro:page-load', () => {
+    const deleteRaceButtons = document.querySelectorAll('.delete-race');
+
+    deleteRaceButtons.forEach(button => {
+      button.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const id = button.getAttribute('data-id');
+
+        if (confirm('¿Estás seguro de que quieres eliminar esta carrera?')) {
+          try {
+            const response = await fetch('/api/admin/race/deleterace.ts', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ id }),
+            });
+
+            if (response.ok) {
+              // Elimina la fila de la tabla
+              const closestTr = button.closest('tr');
+              if (closestTr) {
+                closestTr.remove();
+              }
+              window.location.reload();
+            } else {
+              console.error('Error eliminando carrera');
+            }
+          } catch (error) {
+            console.error('Error:', error);
+          }
+        }
+      });
+    });
+  });
+
+</script>
