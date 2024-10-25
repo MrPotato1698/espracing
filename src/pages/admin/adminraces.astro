@@ -43,9 +43,20 @@ if (userData?.roleesp !== 1) {
   return redirect("/index");
 }
 
-const {data: raceData } = await supabase
-  .from('race')
-  .select('id, name, championship!inner(name), pointsystem!inner(name)');
+const { data: raceData } = await supabase
+  .from("race")
+  .select("id, name, championship!inner(name), pointsystem!inner(name)")
+  .order("championship", { ascending: true });
+
+const { data: champsData } = await supabase
+  .from("championship")
+  .select("id, name")
+  .order("id", { ascending: true });
+
+const { data: pointsystemData } = await supabase
+  .from("pointsystem")
+  .select("id, name")
+  .order("id", { ascending: true });
 ---
 
 <Layout title="ESP Racing: Administrar Carreras">
@@ -54,9 +65,9 @@ const {data: raceData } = await supabase
   </h2>
 
   <div class="py-4 mx-auto text-center" style="width: 99%">
-    <p2 class="text-5xl font-bold border-b border-[#da392b] w-fit mx-auto"
-      >Lista de Carreras del Sistema</p2
-    >
+    <p class="text-5xl font-bold border-b border-[#da392b] w-fit mx-auto">
+      Lista de Carreras del Sistema
+    </p>
     <table class="mt-6 w-full border-collapse border border-[#f9f9f9]">
       <thead class="font-medium bg-[#da392b]">
         <tr>
@@ -92,43 +103,141 @@ const {data: raceData } = await supabase
       </tbody>
     </table>
   </div>
+
+  <div class="py-4 mx-auto text-center" style="width: 99%">
+    <p class="text-5xl font-bold border-b border-[#da392b] w-fit mx-auto">
+      Añadir Carrera Nueva
+    </p>
+
+    <div
+      class="box-border p-5 m-auto bg-[#0f0f0f] rounded-md max-w-screen-2xl border border-[#da392b]"
+    >
+      <form id="uploadForm" data-astro-reload>
+        <label class="text-[#f9f9f9] text-lg font-medium" for="racename">
+          Nombre de la carrera
+        </label>
+        <input
+          class="w-full p-3 border border-solid border-[#f7f7f7] rounded-md mt-2 mb-4 resize-y text-white bg-[#19191c] hover:border-[#da392b]"
+          type="text"
+          id="racename"
+          name="racename"
+          placeholder="Carrera X en cualquier sitio..."
+        />
+
+        <label class="text-[#f9f9f9] text-lg font-medium" for="champID">
+          Campeonato a la que pertenece la carrera
+        </label>
+        <select
+          class="w-full p-3 border border-solid border-[#f7f7f7] rounded-md mt-2 mb-4 resize-y text-white bg-[#19191c] hover:border-[#da392b]"
+          id="champID"
+          name="champID"
+        >
+          {
+            champsData?.map((champ) => (
+              <option value={champ.id?.toString()}>{champ.name}</option>
+            ))
+          }
+        </select>
+
+        <label class="text-[#f9f9f9] text-lg font-medium" for="numrace">
+          Orden al que pertenece en el campeonato
+        </label>
+        <input
+          class="w-full p-3 border border-solid border-[#f7f7f7] rounded-md mt-2 mb-4 resize-y text-white bg-[#19191c] hover:border-[#da392b]"
+          type="number"
+          id="numrace"
+          name="numrace"
+          step="1"
+          min="1"
+          placeholder="1"
+        />
+
+        <label class="text-[#f9f9f9] text-lg font-medium" for="pointsystem">
+          Sistema de Puntuación de la carrera
+        </label>
+        <select
+          class="w-full p-3 border border-solid border-[#f7f7f7] rounded-md mt-2 mb-4 resize-y text-white bg-[#19191c] hover:border-[#da392b]"
+          id="pointsystem"
+          name="pointsystem"
+        >
+          {
+            pointsystemData?.map((ps) => (
+              <option value={ps.id?.toString()}>{ps.name}</option>
+            ))
+          }
+          <option value="0">Evento / Sin Puntuación</option>
+        </select>
+
+        <div class="mb-4">
+          <label
+            for="fileInput"
+            class="block text-[#f9f9f9] text-sm font-bold mb-2"
+          >
+            Arrastra y suelta tu archivo JSON o haz clic para seleccionar
+          </label>
+          <div
+            id="dropZone"
+            class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-[#da392b] transition duration-300"
+          >
+            <input type="file" id="fileInput" accept=".json" class="hidden" />
+            <p class="text-[#f7f7f7] opacity-70">
+              Arrastra tu archivo aquí o haz clic para seleccionar
+            </p>
+          </div>
+        </div>
+        <div id="fileInfo" class="mb-4 hidden">
+          <p class="text-sm text-[#f9f9f9]">
+            Archivo seleccionado: <span id="fileName"></span>
+          </p>
+        </div>
+
+        <input
+          class="bg-[#da392b] text-white font-bold py-3 px-5 border-solid border-[#da392b] border-2 rounded-md hover:bg-[#19191c] hover:text-[#f9f9f9] mt-4"
+          type="submit"
+          value="Enviar"
+        />
+      </form>
+    </div>
+  </div>
 </Layout>
 
 <script is:inline data-astro-rerun>
-  document.addEventListener('astro:page-load', () => {
-    const deleteRaceButtons = document.querySelectorAll('.delete-race');
+  import { initRaceManagement, initDeleteRaceButtons } from '@/api/admin/race/newrace';
+  document.addEventListener("astro:page-load", () => {
+    const deleteRaceButtons = document.querySelectorAll(".delete-race");
+    initRaceManagement();
+    initDeleteRaceButtons();
 
-    deleteRaceButtons.forEach(button => {
-      button.addEventListener('click', async (e) => {
+    deleteRaceButtons.forEach((button) => {
+      button.addEventListener("click", async (e) => {
         e.preventDefault();
-        const id = button.getAttribute('data-id');
+        const id = button.getAttribute("data-id");
 
-        if (confirm('¿Estás seguro de que quieres eliminar esta carrera?')) {
+        if (confirm("¿Estás seguro de que quieres eliminar esta carrera?")) {
           try {
-            const response = await fetch('/api/admin/race/deleterace.ts', {
-              method: 'POST',
+            const response = await fetch("/api/admin/race/deleterace.ts", {
+              method: "POST",
               headers: {
-                'Content-Type': 'application/json',
+                "Content-Type": "application/json",
               },
               body: JSON.stringify({ id }),
             });
 
             if (response.ok) {
               // Elimina la fila de la tabla
-              const closestTr = button.closest('tr');
+              const closestTr = button.closest("tr");
               if (closestTr) {
                 closestTr.remove();
               }
               window.location.reload();
             } else {
-              console.error('Error eliminando carrera');
+              console.error("Error eliminando carrera");
             }
           } catch (error) {
-            console.error('Error:', error);
+            console.error("Error:", error);
           }
         }
       });
     });
   });
-
 </script>
