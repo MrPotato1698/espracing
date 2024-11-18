@@ -12,6 +12,10 @@ export function initRaceManagement() {
       const season = formData.get('season') as string;
       const champORevent = formData.get('champORevent')  === 'on';
 
+      const seasonPart1 = '20' + season.slice(0, 2);
+      const seasonPart2 = '20' + season.slice(2, 4);
+      const formattedSeason = `${seasonPart1}/${seasonPart2}`;
+
       const { data: getLastChamp } = await supabase
         .from('championship')
         .select('id')
@@ -26,9 +30,9 @@ export function initRaceManagement() {
         .insert({
           id: lastChampID,
           name: champname,
-          key_search: Number(keysearchAPI),
+          key_search: keysearchAPI,
           year: Number(year),
-          season: Number(season),
+          season: formattedSeason,
           ischampionship: champORevent,
         });
 
@@ -56,7 +60,7 @@ export function initDeleteRaceButtons() {
 
       if (confirm("¿Estás seguro de que quieres eliminar este campeonato?")) {
         try {
-          const response = await fetch("/api/admin/race/deleterace", {
+          const response = await fetch("/api/admin/championship/deletechamp", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
