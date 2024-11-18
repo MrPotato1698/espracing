@@ -39,14 +39,14 @@ export type Database = {
           brand: string | null
           class: string | null
           description: string | null
-          filename: string | null
+          filename: string
           fuelLiterTime: number | null
           id: number
           imgbrand: string | null
           maxLiter: number | null
           model: string | null
           power: number | null
-          subclass: number | null
+          subclass: number
           torque: number | null
           tyreTimeChange: number | null
           weight: number | null
@@ -56,14 +56,14 @@ export type Database = {
           brand?: string | null
           class?: string | null
           description?: string | null
-          filename?: string | null
+          filename: string
           fuelLiterTime?: number | null
           id: number
           imgbrand?: string | null
           maxLiter?: number | null
           model?: string | null
           power?: number | null
-          subclass?: number | null
+          subclass?: number
           torque?: number | null
           tyreTimeChange?: number | null
           weight?: number | null
@@ -73,14 +73,14 @@ export type Database = {
           brand?: string | null
           class?: string | null
           description?: string | null
-          filename?: string | null
+          filename?: string
           fuelLiterTime?: number | null
           id?: number
           imgbrand?: string | null
           maxLiter?: number | null
           model?: string | null
           power?: number | null
-          subclass?: number | null
+          subclass?: number
           torque?: number | null
           tyreTimeChange?: number | null
           weight?: number | null
@@ -146,21 +146,21 @@ export type Database = {
       }
       circuit: {
         Row: {
-          filename: string | null
+          filename: string
           id: number
           location: string | null
           name: string | null
           shortname: string | null
         }
         Insert: {
-          filename?: string | null
+          filename: string
           id: number
           location?: string | null
           name?: string | null
           shortname?: string | null
         }
         Update: {
-          filename?: string | null
+          filename?: string
           id?: number
           location?: string | null
           name?: string | null
@@ -172,7 +172,7 @@ export type Database = {
         Row: {
           capacity: number | null
           circuit: number
-          filename: string | null
+          filename: string
           id: number
           length: number | null
           name: string | null
@@ -180,7 +180,7 @@ export type Database = {
         Insert: {
           capacity?: number | null
           circuit: number
-          filename?: string | null
+          filename: string
           id: number
           length?: number | null
           name?: string | null
@@ -188,7 +188,7 @@ export type Database = {
         Update: {
           capacity?: number | null
           circuit?: number
-          filename?: string | null
+          filename?: string
           id?: number
           length?: number | null
           name?: string | null
@@ -205,21 +205,21 @@ export type Database = {
       }
       inscription: {
         Row: {
-          id: string
+          id: number
           position: string | null
           profile: string | null
           race: string | null
           valid_laps: string | null
         }
         Insert: {
-          id: string
+          id: number
           position?: string | null
           profile?: string | null
           race?: string | null
           valid_laps?: string | null
         }
         Update: {
-          id?: string
+          id?: number
           position?: string | null
           profile?: string | null
           race?: string | null
@@ -238,7 +238,7 @@ export type Database = {
       message: {
         Row: {
           description: string | null
-          discord: string | null
+          discord: string
           id: number
           name_emissor: string
           name_receiver: string
@@ -247,7 +247,7 @@ export type Database = {
         }
         Insert: {
           description?: string | null
-          discord?: string | null
+          discord: string
           id: number
           name_emissor: string
           name_receiver?: string
@@ -256,7 +256,7 @@ export type Database = {
         }
         Update: {
           description?: string | null
-          discord?: string | null
+          discord?: string
           id?: number
           name_emissor?: string
           name_receiver?: string
@@ -275,30 +275,30 @@ export type Database = {
       }
       pointsystem: {
         Row: {
-          fastestlap: number | null
+          fastestlap: number
           id: number
           name: string
-          points: Json
+          points: string
         }
         Insert: {
-          fastestlap?: number | null
+          fastestlap?: number
           id?: number
           name: string
-          points: Json
+          points?: string
         }
         Update: {
-          fastestlap?: number | null
+          fastestlap?: number
           id?: number
           name?: string
-          points?: Json
+          points?: string
         }
         Relationships: []
       }
       profiles: {
         Row: {
-          avatar: string | null
+          avatar: string
           dnf: number | null
-          email: string | null
+          email: string
           flaps: number | null
           full_name: string | null
           id: string
@@ -308,16 +308,16 @@ export type Database = {
           poles: number | null
           races: number | null
           roleesp: number | null
-          steam_id: string | null
+          steam_id: string
           team: number | null
           top10: number | null
           top5: number | null
           wins: number | null
         }
         Insert: {
-          avatar?: string | null
+          avatar?: string
           dnf?: number | null
-          email?: string | null
+          email: string
           flaps?: number | null
           full_name?: string | null
           id: string
@@ -327,16 +327,16 @@ export type Database = {
           poles?: number | null
           races?: number | null
           roleesp?: number | null
-          steam_id?: string | null
+          steam_id: string
           team?: number | null
           top10?: number | null
           top5?: number | null
           wins?: number | null
         }
         Update: {
-          avatar?: string | null
+          avatar?: string
           dnf?: number | null
-          email?: string | null
+          email?: string
           flaps?: number | null
           full_name?: string | null
           id?: string
@@ -346,7 +346,7 @@ export type Database = {
           poles?: number | null
           races?: number | null
           roleesp?: number | null
-          steam_id?: string | null
+          steam_id?: string
           team?: number | null
           top10?: number | null
           top5?: number | null
@@ -371,28 +371,31 @@ export type Database = {
       }
       race: {
         Row: {
-          championship: number | null
+          championship: number
           filename: string
           id: number
           name: string | null
           orderinchamp: number
-          pointsystem: number | null
+          pointsystem: number
+          race_data: Json | null
         }
         Insert: {
-          championship?: number | null
+          championship?: number
           filename: string
           id: number
           name?: string | null
           orderinchamp?: number
-          pointsystem?: number | null
+          pointsystem?: number
+          race_data?: Json | null
         }
         Update: {
-          championship?: number | null
+          championship?: number
           filename?: string
           id?: number
           name?: string | null
           orderinchamp?: number
-          pointsystem?: number | null
+          pointsystem?: number
+          race_data?: Json | null
         }
         Relationships: [
           {
