@@ -1,0 +1,205 @@
+---
+import Layout from "@/layouts/ProfileLayout.astro";
+import { supabase } from "@/db/supabase";
+import Trash from "@/icons/Trash.astro";
+import Edit from "@/icons/Edit.astro";
+
+const { cookies, redirect } = Astro;
+
+const accessToken = cookies.get("sb-access-token");
+const refreshToken = cookies.get("sb-refresh-token");
+
+if (!accessToken || !refreshToken) {
+  return redirect("/login");
+}
+
+// Set the session with the cookies
+const { data: dataAuth, error: errorAuth } = await supabase.auth.setSession({
+  refresh_token: refreshToken.value,
+  access_token: accessToken.value,
+});
+
+// If there is an error, delete the cookies and redirect to login
+if (errorAuth) {
+  cookies.delete("sb-access-token", {
+    path: "/",
+  });
+  cookies.delete("sb-refresh-token", {
+    path: "/",
+  });
+
+  return redirect("/login");
+}
+
+const id = dataAuth?.user?.id || "";
+
+const { data: userData } = await supabase
+  .from("profiles")
+  .select("roleesp")
+  .eq("id", id)
+  .single();
+
+if (userData?.roleesp !== 1) {
+  return redirect("/index");
+}
+
+const { data: champsData } = await supabase
+  .from("championship")
+  .select(`id, name, race:race(id)`);
+---
+
+<Layout title="ESP Racing: Administrar Campeonatos">
+  <h2 class="text-5xl font-extrabold border-b-2 border-[#da392b] w-full">
+    Administración de Campeonatos
+  </h2>
+
+  <div class="py-4 mx-auto text-center" style="width: 99%">
+    <p class="text-5xl font-bold border-b border-[#da392b] w-fit mx-auto">
+      Lista de Campeonatos del Sistema
+    </p>
+    <table class="mt-6 w-full border-collapse border border-[#f9f9f9]">
+      <thead class="font-medium bg-[#da392b]">
+        <tr>
+          <th>Nº</th>
+          <th>Nombre</th>
+          <th>Nº Carreras</th>
+          <th>Editar</th>
+          <th>Eliminar</th>
+        </tr>
+      </thead>
+      <tbody>
+        {
+          champsData?.map((champ, index) => (
+            <tr class="bg-[#19191c]">
+              <td class="font-semibold">{index + 1}</td>
+              <td>{champ.name}</td>
+              <td>{champ.race.length}</td>
+              <td>
+                <a href={`/admin/race/${champ.id}`}>
+                  <Edit moreClass="w-6 text-center mx-auto" />
+                </a>
+              </td>
+              <td>
+                <button class="align-middle delete-champ" data-id={champ.id}>
+                  <Trash moreClass="w-6 text-center mx-auto" />
+                </button>
+              </td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <div class="py-4 mx-auto text-center" style="width: 99%">
+    <p class="text-5xl font-bold border-b border-[#da392b] w-fit mx-auto">
+      Añadir Campeonato Nuevo
+    </p>
+
+    <div
+      class="box-border p-5 m-auto bg-[#0f0f0f] rounded-md max-w-screen-2xl border border-[#da392b]"
+    >
+      <form id="uploadForm" data-astro-reload>
+        <label class="text-[#f9f9f9] text-lg font-medium" for="champname">
+          Nombre del campeonato
+        </label>
+        <input
+          class="w-full p-3 border border-solid border-[#f7f7f7] rounded-md mt-2 mb-4 resize-y text-white bg-[#19191c] hover:border-[#da392b]"
+          type="text"
+          id="champname"
+          name="champname"
+          placeholder="Campeonato X en cualquier sitio..."
+        />
+
+        <label class="text-[#f9f9f9] text-lg font-medium" for="keySearchAPI">
+          Keysearch del campeonato (sentencia para buscar el campeonato en la
+          API del servidor)
+        </label>
+        <input
+          class="w-full p-3 border border-solid border-[#f7f7f7] rounded-md mt-2 mb-4 resize-y text-white bg-[#19191c] hover:border-[#da392b]"
+          type="text"
+          id="keySearchAPI"
+          name="keySearchAPI"
+          placeholder="+car_filename_1 +car_filename_2 +RACE"
+        />
+
+        <label class="text-[#f9f9f9] text-lg font-medium" for="yearChamp">
+          Año de inicio del campeonato
+        </label>
+        <input
+          class="w-full p-3 border border-solid border-[#f7f7f7] rounded-md mt-2 mb-4 resize-y text-white bg-[#19191c] hover:border-[#da392b]"
+          type="number"
+          id="yearChamp"
+          name="yearChamp"
+          step="1"
+          min="2000"
+          placeholder="2020"
+        />
+
+        <label class="text-[#f9f9f9] text-lg font-medium" for="season">
+          Temporada a la que pertenece
+        </label>
+        <select
+          class="w-full p-3 border border-solid border-[#f7f7f7] rounded-md mt-2 mb-4 resize-y text-white bg-[#19191c] hover:border-[#da392b]"
+          id="season"
+          name="season"
+        >
+          <option value="2021">2020/2021</option>
+          <option value="2122">2021/2022</option>
+          <option value="2223">2022/2023</option>
+          <option value="2324">2023/2024</option>
+          <option value="2425">2024/2025</option>
+          <option value="2526">2025/2026</option>
+          <option value="2627">2026/2027</option>
+          <option value="0">Sin Temporada / Otra</option>
+        </select>
+
+        <div class="mb-4">
+          <label class="text-[#f9f9f9] text-lg font-medium" for="champORevent">
+            ¿Es un evento suelto o un campeonato completo?
+          </label>
+          <div class="flex items-center gap-2 mt-2">
+            <label class="relative inline-flex cursor-pointer">
+              <input id="champORevent" name="champORevent" type="checkbox" class="sr-only peer" />
+              <div class="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-[#da392b] dark:peer-focus:ring-[#da392b] dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-[#da392b]"></div>
+            </label>
+            <span id="eventTypeText" class="text-[#f9f9f9] text-sm font-medium">
+              Evento suelto
+            </span>
+          </div>
+        </div>
+
+        <input
+          class="bg-[#da392b] text-white font-bold py-3 px-5 border-solid border-[#da392b] border-2 rounded-md hover:bg-[#19191c] hover:text-[#f9f9f9] mt-4"
+          type="submit"
+          value="Enviar"
+        />
+      </form>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  import {
+    initRaceManagement,
+    initDeleteRaceButtons,
+  } from "@/lib/admin/champs/champManagment";
+
+  document.addEventListener("astro:page-load", () => {
+    initRaceManagement();
+    initDeleteRaceButtons();
+
+    const isEventSwitch = document.getElementById('champORevent') as HTMLInputElement;
+    const eventTypeText = document.getElementById('eventTypeText');
+
+    if (isEventSwitch && eventTypeText) {
+      isEventSwitch.addEventListener('change', () => {
+        if (isEventSwitch.checked) {
+          eventTypeText.textContent = 'Campeonato completo';
+        } else {
+          eventTypeText.textContent = 'Evento suelto';
+        }
+      });
+    }
+  });
+</script>
