@@ -168,7 +168,7 @@ const { data: pointsystemData } = await supabase
           <option value="0">Evento / Sin Puntuación</option>
         </select>
 
-        <div class="mb-4">
+        <!-- <div class="mb-4">
           <label
             for="fileInput"
             class="block text-[#f9f9f9] text-sm font-bold mb-2"
@@ -189,6 +189,24 @@ const { data: pointsystemData } = await supabase
           <p class="text-sm text-[#f9f9f9]">
             Archivo seleccionado: <span id="fileName"></span>
           </p>
+        </div> -->
+
+        <div class="mb-4">
+          <label for="fileInput" class="block text-[#f9f9f9] text-sm font-bold mb-2">
+            Selecciona el archivo JSON de la carrera
+          </label>
+          <input
+            type="file"
+            id="fileInput"
+            name="fileInput"
+            accept=".json"
+            class="block w-full text-sm text-[#f9f9f9] file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#da392b] file:text-white hover:file:bg-[#b32d22]"
+          />
+        </div>
+        <div id="fileInfo" class="mb-4 hidden">
+          <p class="text-sm text-[#f9f9f9]">
+            Archivo seleccionado: <span id="fileName"></span>
+          </p>
         </div>
 
         <input
@@ -201,43 +219,11 @@ const { data: pointsystemData } = await supabase
   </div>
 </Layout>
 
-<script is:inline data-astro-rerun>
-  import { initRaceManagement, initDeleteRaceButtons } from '@/api/admin/race/newrace';
+<script>
+  import { initRaceManagement, initDeleteRaceButtons } from '@/lib/admin/races/raceManagment';
+
   document.addEventListener("astro:page-load", () => {
-    const deleteRaceButtons = document.querySelectorAll(".delete-race");
     initRaceManagement();
     initDeleteRaceButtons();
-
-    deleteRaceButtons.forEach((button) => {
-      button.addEventListener("click", async (e) => {
-        e.preventDefault();
-        const id = button.getAttribute("data-id");
-
-        if (confirm("¿Estás seguro de que quieres eliminar esta carrera?")) {
-          try {
-            const response = await fetch("/api/admin/race/deleterace.ts", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ id }),
-            });
-
-            if (response.ok) {
-              // Elimina la fila de la tabla
-              const closestTr = button.closest("tr");
-              if (closestTr) {
-                closestTr.remove();
-              }
-              window.location.reload();
-            } else {
-              console.error("Error eliminando carrera");
-            }
-          } catch (error) {
-            console.error("Error:", error);
-          }
-        }
-      });
-    });
   });
 </script>
