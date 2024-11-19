@@ -27,18 +27,25 @@ if (error) {
   return redirect("/login");
 }
 
-const email = data?.user?.email || "";
+const idAuth = data?.user?.id || "";
 
-const {data:emailSearchQuery} = await supabase
+const {data:messageSearchQuery} = await supabase
   .from("message")
-  .select('*', {count: 'exact', head:true })
-  .eq("name_receiver", email)
-  .eq("readed", 0);
+  .select('*', {count: 'exact', head:false })
+  .eq("name_receiver", idAuth)
+  .eq("readed", false);
+
+const {data: teamApplicationSearchQuery} = await supabase
+  .from("teamsapplication")
+  .select('*', {count: 'exact', head:false })
+  .eq("team_manager", idAuth);
+
+const messageCount = (messageSearchQuery?.length ?? 0) + (teamApplicationSearchQuery?.length ?? 0);
 
 const {data: rolUser} = await supabase
   .from("profiles")
   .select("roleesp")
-  .eq("email", email)
+  .eq("id", idAuth)
   .single();
 
 if(rolUser === null) {
@@ -340,9 +347,9 @@ if(rolUser === null) {
               </svg>
               <span class="flex-1 ml-3 whitespace-nowrap">Mensajes</span>
               {
-                (emailSearchQuery ?? 0 > 0) ? (
+                (messageCount ?? 0 > 0) ? (
                   <span class="inline-flex items-center justify-center w-5 h-5 text-xs font-semibold rounded-full bg-[#da392b] text-white">
-                    {emailSearchQuery}
+                    {messageCount}
                   </span>
                 ) : null
               }
