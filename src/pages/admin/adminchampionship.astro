@@ -53,8 +53,6 @@ const { data: eventsData } = await supabase
   .from("championship")
   .select(`id, name, season, race:race(id)`)
   .eq("ischampionship", false);
-
-console.log(champsData);
 ---
 
 <Layout title="ESP Racing: Administrar Campeonatos">
@@ -233,12 +231,12 @@ console.log(champsData);
 <script>
   import {
     initRaceManagement,
-    initDeleteRaceButtons,
+    initDeleteChampButtons,
   } from "@/lib/admin/champs/champManagment";
 
   document.addEventListener("astro:page-load", () => {
     initRaceManagement();
-    initDeleteRaceButtons();
+    initDeleteChampButtons();
 
     const isEventSwitch = document.getElementById('champORevent') as HTMLInputElement;
     const eventTypeText = document.getElementById('eventTypeText');

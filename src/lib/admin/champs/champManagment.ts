@@ -7,10 +7,10 @@ export function initRaceManagement() {
     try {
       const formData = new FormData(form);
       const champname = formData.get('champname') as string;
-      const keysearchAPI = formData.get('keySearchAPI') as string;
+      let keysearchAPI = formData.get('keySearchAPI') as string | null;
       const year = formData.get('yearChamp') as string;
       const season = formData.get('season') as string;
-      const champORevent = formData.get('champORevent')  === 'on';
+      const champORevent = formData.get('champORevent') === 'on';
 
       const seasonPart1 = '20' + season.slice(0, 2);
       const seasonPart2 = '20' + season.slice(2, 4);
@@ -25,6 +25,8 @@ export function initRaceManagement() {
 
       const lastChampID = getLastChamp ? (getLastChamp.id + 1) : 1;
 
+      if(keysearchAPI === '') {keysearchAPI=null}
+
       const { data: insertData, error: insertError } = await supabase
         .from('championship')
         .insert({
@@ -37,8 +39,8 @@ export function initRaceManagement() {
         });
 
       if (insertError) throw insertError;
+      champORevent ? alert("Campeonato creado con éxito") : alert("Evento creado con éxito");
 
-      alert("Campeonato creado con éxito");
       form.reset();
       window.location.reload();
     } catch (error) {
@@ -50,10 +52,10 @@ export function initRaceManagement() {
   });
 }
 
-export function initDeleteRaceButtons() {
-  const deleteRaceButtons = document.querySelectorAll(".delete-champ");
+export function initDeleteChampButtons() {
+  const deleteChampButtons = document.querySelectorAll(".delete-champ");
 
-  deleteRaceButtons.forEach((button) => {
+  deleteChampButtons.forEach((button) => {
     button.addEventListener("click", async (e) => {
       e.preventDefault();
       const id = button.getAttribute("data-id");

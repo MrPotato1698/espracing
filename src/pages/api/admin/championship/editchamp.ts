@@ -23,10 +23,12 @@ export const POST: APIRoute = async ({ request }) => {
   try {
     let updateData: any = {};
     if (champ_name) updateData.name = champ_name;
-    if (keySearchAPI) updateData.key_search = Number(keySearchAPI);
+    if (keySearchAPI) updateData.key_search = keySearchAPI;
     if (yearChamp) updateData.year = Number(yearChamp);
-    if (season) updateData.season = Number(formattedSeason);
+    if (season) updateData.season = formattedSeason;
     if(champORevent) updateData.ischampionship = champORevent;
+
+    console.log(updateData);
 
     if (Object.keys(updateData).length > 0) {
       const { error: updateError } = await supabase
