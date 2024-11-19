@@ -450,6 +450,49 @@ export type Database = {
         }
         Relationships: []
       }
+      teamsapplication: {
+        Row: {
+          id: number
+          team_manager: string
+          team_requesting: number
+          user_application: string
+        }
+        Insert: {
+          id?: number
+          team_manager?: string
+          team_requesting: number
+          user_application?: string
+        }
+        Update: {
+          id?: number
+          team_manager?: string
+          team_requesting?: number
+          user_application?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teamsapplication_team_manager_fkey"
+            columns: ["team_manager"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "teamsapplication_team_requesting_fkey"
+            columns: ["team_requesting"]
+            isOneToOne: false
+            referencedRelation: "team"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "teamsapplication_user_application_fkey"
+            columns: ["user_application"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
