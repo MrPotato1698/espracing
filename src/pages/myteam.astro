@@ -169,7 +169,7 @@ const {data: TeamUsersData} = await supabase
               // Actualizar UI
               window.location.reload();
             } else {
-              console.error('Error saliendo de equipo');
+              console.error('Error saliendo de equipo: ', response);
             }
           } catch (error) {
             console.error('Error:', error);

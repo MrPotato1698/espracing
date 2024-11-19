@@ -6,10 +6,7 @@ export const POST: APIRoute = async ({ request, redirect }) => {
   const form = await request.formData();
 
   const team_id = form.get('select_team')?.toString();
-  const user_id = form.get("user_id")?.toString();
-
-  console.log('Team id: ' + team_id);
-  console.log('User id: ' + user_id);
+  const user_id = form.get("user_id");
 
   if (!team_id || !user_id) {
     return new Response("Error en la asignación de equipo, hay algún campo nulo.", { status: 400 });
@@ -35,7 +32,7 @@ try{
     .from('teamsapplication')
     .insert({
       id: Number(lastRaceID),
-      user_application: user_id,
+      user_application: String(user_id),
       team_manager: teamManager?.id,
       team_requesting: Number(team_id),
     });

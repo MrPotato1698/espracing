@@ -8,12 +8,14 @@ export const POST: APIRoute = async ({ request }) => {
     return new Response("Id is required", { status: 400 });
   }
 
-  const {data: updateData} = await supabase
+  const {data: updateData, error: errorUpdateData} = await supabase
     .from('profiles')
     .update({team: null})
     .eq('id', id);
 
-    console.log('updateData / ID: ',updateData,'/',id);
+    if(errorUpdateData) {
+      return new Response("Error al actualizar el piloto", { status: 500 });
+    }
 
   return new Response("Piloto fuera de equipo con exito", { status: 200 });
 };
