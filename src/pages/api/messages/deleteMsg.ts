@@ -1,6 +1,5 @@
 import type { APIRoute } from "astro";
-import { turso } from "@/turso";
-
+import {supabase} from "@/db/supabase";
 
 export const POST: APIRoute = async ({ request }) => {
 
@@ -8,10 +7,11 @@ export const POST: APIRoute = async ({ request }) => {
   if(!id) {
     return new Response("Id is required", { status: 400 });
   }
-  await turso.execute({
-    sql: "DELETE FROM Message WHERE id = ?",
-    args: [id],
-  });
+
+  const {data: deleteData} = await supabase
+    .from('message')
+    .delete()
+    .eq('id', id);
 
   return new Response("Mensaje eliminado con exito", { status: 200 });
 };

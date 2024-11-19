@@ -1,6 +1,5 @@
 import type { APIRoute } from "astro";
-import { turso } from "@/turso";
-
+import { supabase } from "@/db/supabase";
 
 export const POST: APIRoute = async ({ request, redirect }) => {
 
@@ -9,16 +8,18 @@ export const POST: APIRoute = async ({ request, redirect }) => {
   if (id === null || id === undefined) {
     return new Response("Id is required", { status: 400 });
   }
-  let { rows: ReadedData } = await turso.execute({
-    sql: "SELECT readed FROM Message WHERE id = ?",
-    args: [id],
-  });
 
-  if (ReadedData[0].readed === 0) {
-    await turso.execute({
-      sql: "UPDATE Message SET readed = 1 WHERE id = ?",
-      args: [id],
-    });
+  const {data: ReadedData} = await supabase
+  .from('message')
+  .select('readed')
+  .eq('id', id)
+  .single();
+
+  if(ReadedData?.readed === false){
+    const {data: updateData} = await supabase
+      .from('message')
+      .update({readed: true})
+      .eq('id', id);
   }
 
   return redirect("/messageList");
