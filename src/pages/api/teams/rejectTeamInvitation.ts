@@ -1,0 +1,28 @@
+import type { APIRoute } from "astro";
+import {supabase} from "@/db/supabase";
+
+export const POST: APIRoute = async ({ request }) => {
+
+  const { action, id } = await request.json();
+  if(!id) {
+    return new Response("Id is required", { status: 400 });
+  }
+
+  const {data: ReadedData} = await supabase
+    .from('teamsapplication')
+    .select('user_application, team_requesting')
+    .eq('id', id)
+    .single();
+
+    if (ReadedData?.user_application) {
+      const {data: deleteData} = await supabase
+        .from('teamsapplication')
+        .delete()
+        .eq('id', id);
+    } else {
+      return new Response("ID de usuario no encontrado", { status: 400 });
+    }
+
+
+  return new Response("Petición rechazada con éxito", { status: 200 });
+};

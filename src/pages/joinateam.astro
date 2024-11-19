@@ -29,23 +29,29 @@ if (errorAuth) {
   return redirect("/login");
 }
 
-const id = dataAuth?.user?.id || "";
+const idAuth = dataAuth?.user?.id || "";
 
 const {data: TeamData} = await supabase
   .from("team")
   .select("name, description, image, id, profiles!inner(id)")
-  .eq("profiles.id", id)
+  .eq("profiles.id", idAuth)
   .single();
 
 if(TeamData !== null && TeamData !== undefined) {
   return redirect("/myteam");
 }
 
+const {data: TeamRequestData} = await supabase
+  .from("teamsapplication")
+  .select("team!inner(name)")
+  .eq("user_application", idAuth)
+  .single();
+
+const RequestData: Boolean = TeamRequestData !== null ? true : false;
+
 const {data: TeamsData} = await supabase
   .from("team")
-  .select("name, description, image, id, profiles(count)")
-  .eq("id", id);
-
+  .select("name, description, image, id, profiles(count)");
 ---
 
 <Layout title = "ESP Racing: Unirse a un equipo">
@@ -69,7 +75,7 @@ const {data: TeamsData} = await supabase
               <td class = "font-semibold">{index + 1}</td>
               <td><img src={String(team.image)} alt="Avatar" class="w-8 py-1"/></td>
               <td>{team.name}</td>
-              <td>{team.profiles}</td>
+              <td>{team.profiles[0].count}</td>
               <td>{team.description}</td>
             </tr>
           )
@@ -77,33 +83,46 @@ const {data: TeamsData} = await supabase
       </tbody>
     </table>
   </div>
+  {
+  RequestData ?
+  (
+    <p class="text-4xl font-bold border-b border-[#da392b] w-fit mx-auto mb-2">
+      Selecciona un equipo al que quiera unirse
+    </p>
+    <p class = "text-xl font-medium w-fit mx-auto mt-10">
+      Esperando que se acepte la solicitud para el ingreso en el equipo {TeamRequestData?.team.name} ...
+    </p>
 
-  <p class="text-5xl font-bold border-b border-[#da392b] w-fit mx-auto">
-  Selecciona un equipo
-  </p>
+  ):(
 
-  <form action = "/api/teams/getInsideTeam"
-    method = "post"
-    class = "grid grid-flow-col"
-  >
-    <select
-    id="select-team"
-    name="select_team"
-    class="block m-auto w-4/5 px-4 py-3 mt-2 text-lg font-medium rounded-xl pe-9 focus:border-[#da392b] disabled:opacity-50 disabled:pointer-events-none bg-[#19191c] border-neutral-700 text-white placeholder-neutral-500"
+    <p class="text-4xl font-bold border-b border-[#da392b] w-fit mx-auto mb-2">
+    Selecciona un equipo al que quiera unirse
+    </p>
+
+    <form action = "/api/teams/getInsideTeam"
+      method = "post"
+      class = "grid grid-flow-col"
     >
-      {
-        TeamsData?.map((team) => (
-          <option value={team.id?.toString()}>{team.name}</option>
-        ))
-      }
-    </select>
-    <input type="hidden" name="user_id" value={id}>
-    <button
-      class="cargarselector no-underline bg-[#19191c] rounded-xl my-4 font-medium text-white text-lg py-4 px-8 block mx-auto mt-2"
-      id="btnCargarTabla"
-      type="submit"
-    >
-      Cargar Datos
-    </button>
-  </form>
+      <select
+      id="select-team"
+      name="select_team"
+      class="block m-auto w-4/5 px-4 py-3 mt-2 text-lg font-medium rounded-xl pe-9 focus:border-[#da392b] disabled:opacity-50 disabled:pointer-events-none bg-[#19191c] border-neutral-700 text-white placeholder-neutral-500"
+      >
+        {
+          TeamsData?.map((team) => (
+            <option value={team.id?.toString()}>{team.name}</option>
+          ))
+        }
+      </select>
+      <input type="hidden" name="user_id" value={idAuth}>
+      <button
+        class="cargarselector no-underline bg-[#19191c] rounded-xl my-4 font-medium text-white text-lg py-4 px-8 block mx-auto mt-2"
+        id="btnCargarTabla"
+        type="submit"
+      >
+        Enviar solicitud
+      </button>
+    </form>
+    )}
+
 </Layout>

@@ -1,6 +1,5 @@
 import type { APIRoute } from "astro";
-import { turso } from "@/turso";
-
+import { supabase } from "@/db/supabase";
 
 export const POST: APIRoute = async ({ request }) => {
 
@@ -9,10 +8,12 @@ export const POST: APIRoute = async ({ request }) => {
     return new Response("Id is required", { status: 400 });
   }
 
-  await turso.execute({
-    sql: "UPDATE User SET Team = NULL, is_team_manager = 0 WHERE id = ?",
-    args: [id],
-  });
+  const {data: updateData} = await supabase
+    .from('profiles')
+    .update({team: null})
+    .eq('id', id);
+
+    console.log('updateData / ID: ',updateData,'/',id);
 
   return new Response("Piloto fuera de equipo con exito", { status: 200 });
 };
