@@ -36,51 +36,45 @@ export type Database = {
     Tables: {
       car: {
         Row: {
-          brand: string | null
-          class: string | null
+          brand: number | null
+          class: number
           description: string | null
           filename: string
           fuelLiterTime: number | null
           id: number
-          imgbrand: string | null
           maxLiter: number | null
           model: string | null
           power: number | null
-          subclass: number
           torque: number | null
           tyreTimeChange: number | null
           weight: number | null
           year: number | null
         }
         Insert: {
-          brand?: string | null
-          class?: string | null
+          brand?: number | null
+          class?: number
           description?: string | null
           filename: string
           fuelLiterTime?: number | null
           id: number
-          imgbrand?: string | null
           maxLiter?: number | null
           model?: string | null
           power?: number | null
-          subclass?: number
           torque?: number | null
           tyreTimeChange?: number | null
           weight?: number | null
           year?: number | null
         }
         Update: {
-          brand?: string | null
-          class?: string | null
+          brand?: number | null
+          class?: number
           description?: string | null
           filename?: string
           fuelLiterTime?: number | null
           id?: number
-          imgbrand?: string | null
           maxLiter?: number | null
           model?: string | null
           power?: number | null
-          subclass?: number
           torque?: number | null
           tyreTimeChange?: number | null
           weight?: number | null
@@ -88,15 +82,46 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "car_subclass_fkey"
-            columns: ["subclass"]
+            foreignKeyName: "car_brand_fkey"
+            columns: ["brand"]
             isOneToOne: false
-            referencedRelation: "carsubclass"
+            referencedRelation: "carbrand"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "car_class_fkey"
+            columns: ["class"]
+            isOneToOne: false
+            referencedRelation: "carclass"
             referencedColumns: ["id"]
           },
         ]
       }
-      carsubclass: {
+      carbrand: {
+        Row: {
+          foundation: number | null
+          id: number
+          imgbrand: string | null
+          location: string | null
+          name: string | null
+        }
+        Insert: {
+          foundation?: number | null
+          id?: number
+          imgbrand?: string | null
+          location?: string | null
+          name?: string | null
+        }
+        Update: {
+          foundation?: number | null
+          id?: number
+          imgbrand?: string | null
+          location?: string | null
+          name?: string | null
+        }
+        Relationships: []
+      }
+      carclass: {
         Row: {
           class_design: string | null
           id: number
