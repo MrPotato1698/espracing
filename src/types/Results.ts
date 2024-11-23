@@ -92,4 +92,18 @@ export interface RaceConfig{
   RaceDurationTime: number;
   RaceDurationLaps: number;
   DisableP2P: boolean;
+  NumberofSplit: number;
+}
+
+export interface RaceDriversResume{
+  DriverName: string;
+  SteamID: string;
+  Position: number;
+  BestLap: Boolean;
+}
+
+export interface RaceCarResume{
+  CarFileName: string;
+  CarClassID: number;
+  numberOfCars: number;
 }
