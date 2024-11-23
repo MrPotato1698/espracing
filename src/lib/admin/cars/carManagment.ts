@@ -6,48 +6,132 @@ export function initCarManagement() {
   form.addEventListener("submit", async (e) => {
     try {
       const formData = new FormData(form);
-      const champname = formData.get('champname') as string;
-      let keysearchAPI = formData.get('keySearchAPI') as string | null;
-      const year = formData.get('yearChamp') as string;
-      const season = formData.get('season') as string;
-      const champORevent = formData.get('champORevent') === 'on';
+      const carfilename = formData.get('filenameCarName') as string;
 
-      const seasonPart1 = '20' + season.slice(0, 2);
-      const seasonPart2 = '20' + season.slice(2, 4);
-      const formattedSeason = `${seasonPart1}/${seasonPart2}`;
+      const carBrandSelect = formData.get("carbrand") as string;
 
-      const { data: getLastChamp } = await supabase
-        .from('championship')
+      const newBrandCar = formData.get("newBrandCar") as string;
+      const newImgBrandCar = formData.get("newImgBrandCar") as string;
+      const newCountryCar = formData.get("newCountryCar") as string;
+      const newFoundationCar = formData.get("newFoundationCar") as string;
+
+      const modelCar = formData.get("modelCar") as string;
+      const yearCar = formData.get("yearCar") as string;
+
+      const carClassSelect = formData.get("carClasses") as string;
+
+      const newClassName = formData.get("newClassName") as string;
+      const newClassShortName = formData.get("newClassShortName") as string;
+      const newClassDesign = formData.get("newClassDesign") as string;
+
+      const powerCar = formData.get("powerCar") as string;
+      const torqueCar = formData.get("torqueCar") as string;
+      const weightCar = formData.get("weightCar") as string;
+      const tyreTimeChange = formData.get("tyreTimeChange") as string;
+      const fuelLiterTime = formData.get("fuelLiterTime") as string;
+      const maxFuel = formData.get("maxFuel") as string;
+      const descriptionCar = formData.get("descriptionCar") as string;
+
+      const { data: getLastCar } = await supabase
+        .from('car')
         .select('id')
         .order('id', { ascending: false })
         .limit(1)
         .single();
 
-      const lastChampID = getLastChamp ? (getLastChamp.id + 1) : 1;
+      const lastCarID = getLastCar ? (getLastCar.id + 1) : 1;
+      let lastBrandID = 0;
+      let lastClassID = 0;
 
-      if(keysearchAPI === '') {keysearchAPI=null}
+      if (carBrandSelect === 'new') {
+        try {
+          const { data: getLastCarBrand } = await supabase
+            .from('carbrand')
+            .select('id')
+            .order('id', { ascending: false })
+            .limit(1)
+            .single();
+
+          lastBrandID = getLastCarBrand ? (getLastCarBrand.id + 1) : 1;
+
+          const { data: insertBrandData, error: insertBrandError } = await supabase
+            .from('carbrand')
+            .insert({
+              id: lastBrandID,
+              name: newBrandCar,
+              imgbrand: newImgBrandCar,
+              location: newCountryCar,
+              foundation: Number(newFoundationCar),
+            });
+            if (insertBrandError) throw insertBrandError;
+
+        } catch (error) {
+          console.error("Error al crear la marca del coche:", error);
+          alert("Hubo un error al crear la marca del coche. Por favor, inténtalo de nuevo.");
+        }
+      } else {
+        lastBrandID = Number(carBrandSelect);
+      }
+
+      if(carClassSelect === 'new') {
+        try{
+          const { data: getLastClass } = await supabase
+            .from('carclass')
+            .select('id')
+            .order('id', { ascending: false })
+            .limit(1)
+            .single();
+
+            lastClassID = getLastClass ? (getLastClass.id + 1) : 1;
+
+            const { data: insertBrandData, error: insertClassError } = await supabase
+            .from('carclass')
+            .insert({
+              id: lastClassID,
+              name: newClassName,
+              short_name: newClassShortName,
+              class_design: newClassDesign,
+            });
+
+            if (insertClassError) throw insertClassError;
+
+        }catch(error){
+          console.error("Error al crear la clase del coche:", error);
+          alert("Hubo un error al crear la clase del coche. Por favor, inténtalo de nuevo.");
+        }
+      } else{
+        lastClassID = Number(carClassSelect);
+      }
+
+      console.log('BrandID'+lastBrandID);
+      console.log('ClassID'+lastClassID);
 
       const { data: insertData, error: insertError } = await supabase
-        .from('championship')
+        .from('car')
         .insert({
-          id: lastChampID,
-          name: champname,
-          key_search: keysearchAPI,
-          year: Number(year),
-          season: formattedSeason,
-          ischampionship: champORevent,
+          id: lastCarID,
+          filename: carfilename,
+          brand: lastBrandID,
+          model: modelCar,
+          year: Number(yearCar),
+          class: lastClassID,
+          power: Number(powerCar),
+          torque: Number(torqueCar),
+          weight: Number(weightCar),
+          description: descriptionCar,
+          tyreTimeChange: Number(tyreTimeChange),
+          fuelLiterTime: Number(fuelLiterTime),
+          maxLiter: Number(maxFuel),
         });
 
       if (insertError) throw insertError;
-      champORevent ? alert("Campeonato creado con éxito") : alert("Evento creado con éxito");
+      alert("Coche creado con éxito");
 
       form.reset();
       window.location.reload();
     } catch (error) {
-      console.error("Error al crear el campeonato:", error);
-      alert(
-        "Hubo un error al crear el campeonato. Por favor, inténtalo de nuevo."
-      );
+      console.error("Error al crear el coche:", error);
+      alert("Hubo un error al crear el coche. Por favor, inténtalo de nuevo.");
     }
   });
 }
