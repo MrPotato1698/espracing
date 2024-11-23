@@ -1,10 +1,20 @@
 ---
 import Layout from "@/layouts/NormalLayout.astro";
-import { turso } from "@/turso";
+import {supabase} from "@/db/supabase";
 
-const { rows: TeamsData } = await turso.execute(
-  "SELECT T.name, COUNT (U.team) AS TeamMembers, T.description, T.image FROM User AS U RIGHT JOIN Team AS T ON T.id = U.team GROUP BY T.name"
-);
+const {data: TeamsData, error} = await supabase
+  .from("team")
+  .select("*");
+
+  let numberOFDrivers: number[] = [];
+
+for (const team of TeamsData || []) {
+  const { data: teamMembers } = await supabase
+    .from("profiles")
+    .select('*', { count: 'exact', head: false })
+    .eq("team", team.id);
+  numberOFDrivers.push(teamMembers?.length || 0);
+}
 ---
 
 <Layout title="ESP Racing: Equipos">
@@ -23,12 +33,12 @@ const { rows: TeamsData } = await turso.execute(
       </thead>
       <tbody>
         {
-          TeamsData.map((team, index) =>
+          TeamsData?.map((team, index) =>
             <tr class="bg-[#0f0f0f]">
               <td class = "font-semibold">{index + 1}</td>
               <td><img src={String(team.image)} alt="Avatar" class="w-8 py-1"/></td>
               <td>{team.name}</td>
-              <td>{team.TeamMembers}</td>
+              <td>{numberOFDrivers[index]}</td>
               <td>{team.description}</td>
             </tr>
           )
