@@ -1,0 +1,329 @@
+---
+import Layout from "@/layouts/ProfileLayout.astro";
+import { supabase } from "@/db/supabase";
+import Trash from "@/icons/Trash.astro";
+import Edit from "@/icons/Edit.astro";
+
+const { cookies, redirect } = Astro;
+
+const accessToken = cookies.get("sb-access-token");
+const refreshToken = cookies.get("sb-refresh-token");
+
+if (!accessToken || !refreshToken) {
+  return redirect("/login");
+}
+
+// Set the session with the cookies
+const { data: dataAuth, error: errorAuth } = await supabase.auth.setSession({
+  refresh_token: refreshToken.value,
+  access_token: accessToken.value,
+});
+
+// If there is an error, delete the cookies and redirect to login
+if (errorAuth) {
+  cookies.delete("sb-access-token", {
+    path: "/",
+  });
+  cookies.delete("sb-refresh-token", {
+    path: "/",
+  });
+
+  return redirect("/login");
+}
+
+const id = dataAuth?.user?.id || "";
+
+const { data: userData } = await supabase
+  .from("profiles")
+  .select("roleesp")
+  .eq("id", id)
+  .single();
+
+if (userData?.roleesp !== 1) {
+  return redirect("/index");
+}
+
+const { data: carsData } = await supabase
+  .from("car")
+  .select("id, carbrand!inner(name), model, year, carclass!inner(name)")
+  .order("id", { ascending: true });
+
+const {data: carBrandsData} = await supabase
+  .from('carbrand')
+  .select('id, name')
+  .order('name', {ascending: true});
+
+const {data: carClassesData} = await supabase
+  .from('carclass')
+  .select('id, name')
+  .order('name', {ascending: true});
+
+---
+
+<Layout title="ESP Racing:  Administrar Carreras">
+  <h2 class="text-5xl font-extrabold border-b-2 border-[#da392b] w-full">
+    Administración de Coches del Sistema
+  </h2>
+
+  <div class="py-4 mx-auto text-center" style="width: 99%">
+    <p class="text-5xl font-bold border-b border-[#da392b] w-fit mx-auto">
+      Lista de Coches del Sistema
+    </p>
+    <table class="mt-6 w-full border-collapse border border-[#f9f9f9]">
+      <thead class="font-medium bg-[#da392b]">
+        <tr>
+          <th>Nº</th>
+          <th>Nombre</th>
+          <th>Año</th>
+          <th>Clase</th>
+          <th>Editar</th>
+          <th>Eliminar</th>
+        </tr>
+      </thead>
+      <tbody>
+        {
+          carsData?.map((car, index) => (
+            <tr>
+              <td class="font-semibold">{index + 1}</td>
+              <td>{car.carbrand.name} {car.model}</td>
+              <td>{car.year}</td>
+              <td>{car.carclass.name}</td>
+              <td>
+                <a href={`/admin/cars/${car.id}`}>
+                  <Edit moreClass="w-6 text-center mx-auto" />
+                </a>
+              </td>
+              <td>
+                <button class="align-middle delete-car" data-id={car.id}>
+                  <Trash moreClass="w-6 text-center mx-auto" />
+                </button>
+              </td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <div class="py-4 mx-auto text-center" style="width: 99%">
+    <p class="text-5xl font-bold border-b border-[#da392b] w-fit mx-auto">
+      Añadir nuevo Coche
+    </p>
+
+    <div
+      class="box-border p-5 m-auto bg-[#0f0f0f] rounded-md max-w-screen-2xl border border-[#da392b]"
+    >
+      <form id="uploadForm" data-astro-reload>
+
+        <label class="text-[#f9f9f9] text-lg font-medium" for="filenameCarName">
+          Nombre de la carpeta del coche
+        </label>
+        <input
+          class="w-full p-3 border border-solid border-[#f7f7f7] rounded-md mt-2 mb-4 resize-y text-white bg-[#19191c] hover:border-[#da392b]"
+          type="text"
+          id="filenameCarName"
+          name="filenameCarName"
+          placeholder="ks_generic_car"
+        />
+
+        <label class="text-[#f9f9f9] text-lg font-medium" for="carbrand">
+          Marca del coche
+        </label>
+        <select
+          class="w-full p-3 border border-solid border-[#f7f7f7] rounded-md mt-2 mb-4 resize-y text-white bg-[#19191c] hover:border-[#da392b]"
+          id="carbrand"
+          name="carbrand"
+        >
+          {
+            carBrandsData?.map((carBrand) => (
+              <option value={carBrand.id}>{carBrand.name}</option>
+            ))
+          }
+        </select>
+
+        <label class="text-[#f9f9f9] text-lg font-medium" for="champname">
+          Modelo del coche
+        </label>
+        <input
+          class="w-full p-3 border border-solid border-[#f7f7f7] rounded-md mt-2 mb-4 resize-y text-white bg-[#19191c] hover:border-[#da392b]"
+          type="text"
+          id="champname"
+          name="champname"
+          placeholder="Model X V8"
+        />
+
+        <label class="text-[#f9f9f9] text-lg font-medium" for="yearCar">
+          Año del coche
+        </label>
+        <input
+          class="w-full p-3 border border-solid border-[#f7f7f7] rounded-md mt-2 mb-4 resize-y text-white bg-[#19191c] hover:border-[#da392b]"
+          type="number"
+          id="yearCar"
+          name="yearCar"
+          step="1"
+          min="0"
+          placeholder="1998"
+        />
+
+        <label class="text-[#f9f9f9] text-lg font-medium" for="carClasses">
+          Clase del coche
+        </label>
+        <select
+          class="w-full p-3 border border-solid border-[#f7f7f7] rounded-md mt-2 mb-4 resize-y text-white bg-[#19191c] hover:border-[#da392b]"
+          id="carClasses"
+          name="carClasses"
+        >
+          {
+            carClassesData?.map((carClass) => (
+              <option value={carClass.id}>{carClass.name}</option>
+            ))
+          }
+        </select>
+
+        <label class="text-[#f9f9f9] text-lg font-medium" for="powerCar">
+          Potencia del coche (en CV)
+        </label>
+        <input
+          class="w-full p-3 border border-solid border-[#f7f7f7] rounded-md mt-2 mb-4 resize-y text-white bg-[#19191c] hover:border-[#da392b]"
+          type="number"
+          id="powerCar"
+          name="powerCar"
+          step="1"
+          min="1"
+          placeholder="215"
+        />
+
+        <label class="text-[#f9f9f9] text-lg font-medium" for="torqueCar">
+          Par del coche (en N/m)
+        </label>
+        <input
+          class="w-full p-3 border border-solid border-[#f7f7f7] rounded-md mt-2 mb-4 resize-y text-white bg-[#19191c] hover:border-[#da392b]"
+          type="number"
+          id="torqueCar"
+          name="torqueCar"
+          step="1"
+          min="1"
+          placeholder="150"
+        />
+
+        <label class="text-[#f9f9f9] text-lg font-medium" for="weightCar">
+          Peso del coche (en Kg)
+        </label>
+        <input
+          class="w-full p-3 border border-solid border-[#f7f7f7] rounded-md mt-2 mb-4 resize-y text-white bg-[#19191c] hover:border-[#da392b]"
+          type="number"
+          id="weightCar"
+          name="weightCar"
+          step="1"
+          min="1"
+          placeholder="1250"
+        />
+
+        <label class="text-[#f9f9f9] text-lg font-medium" for="tyreTimeChange">
+          Tiempo de cambio de gomas (si se conoce, en segundos)
+        </label>
+        <input
+          class="w-full p-3 border border-solid border-[#f7f7f7] rounded-md mt-2 mb-4 resize-y text-white bg-[#19191c] hover:border-[#da392b]"
+          type="number"
+          id="tyreTimeChange"
+          name="tyreTimeChange"
+          step="0.01"
+          min="1"
+          placeholder="0.20"
+        />
+
+        <label class="text-[#f9f9f9] text-lg font-medium" for="fuelLiterTime">
+          Tiempo de carga de combustible (si se conoce, en segundos por cada litro de combustible)
+        </label>
+        <input
+          class="w-full p-3 border border-solid border-[#f7f7f7] rounded-md mt-2 mb-4 resize-y text-white bg-[#19191c] hover:border-[#da392b]"
+          type="number"
+          id="fuelLiterTime"
+          name="fuelLiterTime"
+          step="0.01"
+          min="1"
+          placeholder="1.15"
+        />
+
+        <label class="text-[#f9f9f9] text-lg font-medium" for="maxFuel">
+          Combustible máximo (si se conoce, en litros)
+        </label>
+        <input
+          class="w-full p-3 border border-solid border-[#f7f7f7] rounded-md mt-2 mb-4 resize-y text-white bg-[#19191c] hover:border-[#da392b]"
+          type="number"
+          id="maxFuel"
+          name="maxFuel"
+          step="0.1"
+          min="1"
+          placeholder="100"
+        />
+
+        <label class="text-[#f9f9f9] text-lg font-medium" for="weightCar">
+          Descripción breve del coche
+        </label>
+        <textarea
+          class="w-full p-3 border border-solid border-[#f7f7f7] rounded-md mt-2 mb-4 resize-y text-white bg-[#19191c] hover:border-[#da392b] max-h-96 min-h-28 resize-y"
+          id="weightCar"
+          name="weightCar"
+          placeholder="Cualquier descripción adicional del coche"
+        ></textarea>
+
+        <div class="mb-4">
+          <label class="text-[#f9f9f9] text-lg font-medium" for="champORevent">
+            ¿Es un evento suelto o un campeonato completo?
+          </label>
+          <div class="flex items-center gap-2 mt-2">
+            <label class="relative inline-flex cursor-pointer">
+              <input id="champORevent" name="champORevent" type="checkbox" class="sr-only peer" />
+              <div class="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-[#da392b] dark:peer-focus:ring-[#da392b] dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-[#da392b]"></div>
+            </label>
+            <span id="eventTypeText" class="text-[#f9f9f9] text-sm font-medium">
+              Evento suelto
+            </span>
+          </div>
+        </div>
+
+        <input
+          class="bg-[#da392b] text-white font-bold py-3 px-5 border-solid border-[#da392b] border-2 rounded-md hover:bg-[#19191c] hover:text-[#f9f9f9] mt-4"
+          type="submit"
+          value="Enviar"
+        />
+      </form>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  tbody tr:nth-child(odd) {
+    background-color: #0f0f0f;
+  }
+
+  tbody tr:nth-child(even) {
+    background-color: #19191c;
+  }
+</style>
+
+<script>
+  import {
+    initCarManagement,
+    initDeleteCarButtons,
+  } from "@/lib/admin/cars/carManagment";
+
+  document.addEventListener("astro:page-load", () => {
+    initCarManagement();
+    initDeleteCarButtons();
+
+    const isEventSwitch = document.getElementById('champORevent') as HTMLInputElement;
+    const eventTypeText = document.getElementById('eventTypeText');
+
+    if (isEventSwitch && eventTypeText) {
+      isEventSwitch.addEventListener('change', () => {
+        if (isEventSwitch.checked) {
+          eventTypeText.textContent = 'Campeonato completo';
+        } else {
+          eventTypeText.textContent = 'Evento suelto';
+        }
+      });
+    }
+  });
+</script>
