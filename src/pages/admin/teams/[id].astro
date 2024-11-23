@@ -1,0 +1,145 @@
+---
+import Layout from "@/layouts/ProfileLayout.astro";
+import { supabase } from "@/db/supabase";
+
+const { id } = Astro.params;
+const { cookies, redirect } = Astro;
+
+if (!id) {
+  return redirect("/admin/adminraces");
+}
+
+const accessToken = cookies.get("sb-access-token");
+const refreshToken = cookies.get("sb-refresh-token");
+
+if (!accessToken || !refreshToken) {
+  return redirect("/login");
+}
+
+// Set the session with the cookies
+const { data: dataAuth, error: errorAuth } = await supabase.auth.setSession({
+  refresh_token: refreshToken.value,
+  access_token: accessToken.value,
+});
+
+// If there is an error, delete the cookies and redirect to login
+if (errorAuth) {
+  cookies.delete("sb-access-token", {
+    path: "/",
+  });
+  cookies.delete("sb-refresh-token", {
+    path: "/",
+  });
+
+  return redirect("/login");
+}
+
+const idAuth = dataAuth?.user?.id || "";
+
+const { data: roleData } = await supabase
+  .from("profiles")
+  .select("roleesp")
+  .eq("id", idAuth)
+  .single();
+
+if (roleData?.roleesp !== 1) {
+  return redirect("/index");
+}
+
+const { data: teamData } = await supabase
+  .from("team")
+  .select("*")
+  .eq("id", id)
+  .single();
+---
+
+<Layout title="ESP Racing: Modificación datos de campeonato">
+  <h2 class="text-5xl font-bold border-b border-[#da392b] w-fit mx-auto">
+    Modificar Datos de Equipo
+  </h2>
+  <form id="editTeamForm" class="flex flex-col mt-5">
+    <label class="mt-5 text-lg font-semibold" for="name">
+      Nombre de Campeonato:
+    </label>
+    <input
+      type="text"
+      name="name"
+      value={teamData?.name}
+      class="bg-[#19191c] text-[#f9f9f9] text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
+    />
+
+    <label class="mt-5 text-lg font-semibold" for="imageTeam">
+      Imagen de equipo
+    </label>
+    <input
+      type="text"
+      id="imageTeam"
+      name="imageTeam"
+      value={teamData?.image}
+      class="bg-[#19191c] text-[#f9f9f9] text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
+    />
+
+    <label class="mt-5 text-lg font-semibold" for="descriptionTeam">
+      Descripción del equipo
+    </label>
+    <textarea
+      id="descriptionTeam"
+      name="descriptionTeam"
+      placeholder={teamData?.description}
+      class="bg-[#19191c] text-[#f9f9f9] text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px max-h-96 min-h-28 resize-y"
+    ></textarea>
+
+    <input type="hidden" name="champ_id" value={id} />
+
+    <div>
+      <button
+        type="submit"
+        class="py-1.5 px-3 w-fit mr-2 bg-[#0f0f0f] text-white border-[#29dd38] border-2 rounded-md my-4 font-medium text-lg hover:bg-[#29dd38] hover:text-[#0f0f0f]"
+      >
+        Aceptar
+      </button>
+
+      <button
+        onclick="window, location.href = '/admin/adminteams'"
+        class="py-1.5 px-3 w-fit bg-[#0f0f0f] text-white border-[#da392b] border-2 rounded-md my-4 font-medium text-lg hover:bg-[#da392b] hover:text-[#0f0f0f]"
+      >
+        Cancelar
+      </button>
+    </div>
+  </form>
+</Layout>
+
+<script>
+  const form = document.getElementById("editTeamForm") as HTMLFormElement;
+
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const formData = new FormData(form);
+
+    try {
+      const response = await fetch("/api/admin/team/editteam", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Error en la respuesta del servidor");
+      }
+
+      const result = await response.json();
+
+      if (result.success) {
+        alert("Equipo actualizada con éxito");
+        window.location.href = "/admin/adminteams";
+      } else {
+        throw new Error(result.error || "Error desconocido");
+      }
+    } catch (error) {
+      console.error("Error al actualizar el equipo:", error);
+      alert(
+        "Hubo un error al actualizar el equipo. Por favor, inténtalo de nuevo."
+      );
+    }
+  });
+</script>
