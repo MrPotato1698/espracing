@@ -195,24 +195,16 @@ function initializeScript() {
             } else {
               switch (driverPosition.Pos) {
                 case -1:
-                  if (teamName === "ESP Racing Staff") {
-                    posicionFinal = 'STAFF';
-                    driverPoints = 0;
-                  } else {
-                    posicionFinal = 'DNF';
-                    driverPoints = 0;
-                  }
-                  break;
+                  posicionFinal = 'DNF';
+                  driverPoints = 0; break;
                 case -2:
                   posicionFinal = 'DQ';
-                  driverPoints = 0;
-                  break;
+                  driverPoints = 0; break;
                 case -3:
                   posicionFinal = 'DNS';
-                  driverPoints = 0;
-                  break;
+                  driverPoints = 0; break;
                 case -4:
-                  switch (teamName) {
+                  switch (driverPosition.Team) {
                     case "STREAMING":
                       posicionFinal = 'TV';
                       driverPoints = 0;
@@ -232,20 +224,11 @@ function initializeScript() {
                   }
                   break;
                 default:
-                  const timerace = (driverPosition.TotalTime) + (driverPosition.Penalties);
-                  const condicion1 = (Math.trunc((timerace / 3600) % 60) + Math.trunc(timerace / 60));
-                  const rConfig = arrayRaceData[raceData.raceNumber - 1].RaceConfig;
-
-                  if (vueltastotales < vueltasLider * 0.9 && ((condicion1 < rConfig.RaceDurationTime) || ((vueltastotales ?? 0) < rConfig.RaceDurationLaps * 0.9))) {
-                    posicionFinal = 'DNF';
-                    driverPoints = 0;
-                  } else {
-                    posicionFinal = "(" + driverPosition.Pos.toString() + 'º)';
-                  }
-                  break;
+                  posicionFinal = "("+driverPosition.Pos.toString()+"º)";
               }
               if (driverPosition.Pos === -4 && raceData.name === "STREAMING") {
                 posicionFinal = 'TV';
+                driverPoints = 0;
               }
             }
           }
@@ -495,24 +478,16 @@ function initializeScript() {
             } else {
               switch (driverPosition1.Pos) {
                 case -1:
-                  if (TeamName === "ESP Racing Staff") {
-                    posicionFinalDriver1 = 'STAFF';
-                    driver1Points = 0;
-                  } else {
-                    posicionFinalDriver1 = 'DNF';
-                    driver1Points = 0;
-                  }
-                  break;
+                  posicionFinalDriver1 = 'DNF';
+                  driver1Points = 0; break;
                 case -2:
                   posicionFinalDriver1 = 'DQ';
-                  driver1Points = 0;
-                  break;
+                  driver1Points = 0; break;
                 case -3:
                   posicionFinalDriver1 = 'DNS';
-                  driver1Points = 0;
-                  break;
+                  driver1Points = 0; break;
                 case -4:
-                  switch (TeamName) {
+                  switch (driverPosition1.Team) {
                     case "STREAMING":
                       posicionFinalDriver1 = 'TV';
                       driver1Points = 0;
@@ -532,17 +507,7 @@ function initializeScript() {
                   }
                   break;
                 default:
-                  const timerace = (driverPosition1.TotalTime) + (driverPosition1.Penalties);
-                  const condicion1 = (Math.trunc((timerace / 3600) % 60) + Math.trunc(timerace / 60));
-                  const rConfig = arrayRaceData[raceData.raceNumber - 1].RaceConfig;
-
-                  if (vueltastotalesDriver1 < vueltasLiderTeam * 0.9 && ((condicion1 < rConfig.RaceDurationTime) || (vueltastotalesDriver1 < rConfig.RaceDurationLaps * 0.9))) {
-                    posicionFinalDriver1 = 'DNF';
-                    driver1Points = 0;
-                  } else {
-                    posicionFinalDriver1 = driverPosition1.Pos.toString() + 'º';
-                  }
-                  break;
+                  posicionFinalDriver1 = driverPosition1.Pos.toString() + 'º';
               }
               if (driverPosition1.Pos === -4 && raceData.name === "STREAMING") {
                 posicionFinalDriver1 = 'TV';
@@ -558,24 +523,16 @@ function initializeScript() {
             } else {
               switch (driverPosition2.Pos) {
                 case -1:
-                  if (TeamName === "ESP Racing Staff") {
-                    posicionFinalDriver2 = 'STAFF';
-                    driver2Points = 0;
-                  } else {
-                    posicionFinalDriver2 = 'DNF';
-                    driver2Points = 0;
-                  }
-                  break;
+                  posicionFinalDriver2 = 'DNF';
+                  driver2Points = 0; break;
                 case -2:
                   posicionFinalDriver2 = 'DQ';
-                  driver2Points = 0;
-                  break;
+                  driver2Points = 0; break;
                 case -3:
                   posicionFinalDriver2 = 'DNS';
-                  driver2Points = 0;
-                  break;
+                  driver2Points = 0; break;
                 case -4:
-                  switch (TeamName) {
+                  switch (driverPosition2.Team) {
                     case "STREAMING":
                       posicionFinalDriver2 = 'TV';
                       driver2Points = 0;
@@ -595,17 +552,7 @@ function initializeScript() {
                   }
                   break;
                 default:
-                  const timerace = (driverPosition2.TotalTime) + (driverPosition2.Penalties);
-                  const condicion2 = (Math.trunc((timerace / 3600) % 60) + Math.trunc(timerace / 60));
-                  const rConfig = arrayRaceData[raceData.raceNumber - 1].RaceConfig;
-
-                  if (vueltastotalesDriver1 < vueltasLiderTeam * 0.9 && ((condicion2 < rConfig.RaceDurationTime) || (vueltastotalesDriver2 < rConfig.RaceDurationLaps * 0.9))) {
-                    posicionFinalDriver2 = 'DNF';
-                    driver2Points = 0;
-                  } else {
-                    posicionFinalDriver2 = driverPosition2.Pos.toString() + 'º';
-                  }
-                  break;
+                  posicionFinalDriver2 = driverPosition2.Pos.toString() + 'º';
               }
               if (driverPosition2.Pos === -4 && raceData.name === "STREAMING") {
                 posicionFinalDriver2 = 'TV';
@@ -652,100 +599,103 @@ function initializeScript() {
 
           if (posDriver1 === 1) {
             vueltasLiderTeam = vueltastotalesDriver1;
-          } else {
-            switch (posDriver1) {
-              case -1:
-                if (driver1Data?.Team === "ESP Racing Staff") {
-                  posDriver1 = -4;
-                } else {
-                  posDriver1 = -1;
-                }
-                break;
-              case -2:
-                posDriver1 = -2;
-                break;
-              case -3:
-                posDriver1 = -3;
-                break;
-              case -4:
-                switch (driver1Data?.Team) {
-                  case "STREAMING":
-                    posDriver1 = -4;
-                    break;
-                  case "ESP Racing Staff":
-                    posDriver1 = -4;
-                    break;
-                  case "Safety Car":
-                    posDriver1 = -4;
-                    break;
-                  default:
-                    posDriver1 = -3;
-                    break;
-                }
-                break;
-              default:
-                const timerace = (driver1Data?.TotalTime || 0) + (driver1Data?.Penalties || 0);
-                const condicion1 = (Math.trunc((timerace / 3600) % 60) + Math.trunc(timerace / 60));
-                const dconfig = arrayRaceData[raceData.raceNumber - 1].RaceConfig;
+          } 
+          // else {
+          //   switch (posDriver1) {
+          //     case -1:
+          //       if (driver1Data?.Team === "ESP Racing Staff") {
+          //         posDriver1 = -4;
+          //       } else {
+          //         posDriver1 = -1;
+          //       }
+          //       break;
+          //     case -2:
+          //       posDriver1 = -2;
+          //       break;
+          //     case -3:
+          //       posDriver1 = -3;
+          //       break;
+          //     case -4:
+          //       switch (driver1Data?.Team) {
+          //         case "STREAMING":
+          //           posDriver1 = -4;
+          //           break;
+          //         case "ESP Racing Staff":
+          //           posDriver1 = -4;
+          //           break;
+          //         case "Safety Car":
+          //           posDriver1 = -4;
+          //           break;
+          //         default:
+          //           posDriver1 = -3;
+          //           break;
+          //       }
+          //       break;
+          //     default:
+          //       const timerace = (driver1Data?.TotalTime || 0) + (driver1Data?.Penalties || 0);
+          //       const condicion1 = (Math.trunc((timerace / 3600) % 60) + Math.trunc(timerace / 60));
+          //       const dconfig = arrayRaceData[raceData.raceNumber - 1].RaceConfig;
 
-                if (vueltastotalesDriver1 < vueltasLider * 0.9 && ((condicion1 < dconfig.RaceDurationTime) || (vueltasLiderTeam < dconfig.RaceDurationLaps * 0.9))) {
-                  posDriver1 = -1;
-                }
-                break;
-            }
-            if (driver1Data?.Pos === -4 && driver1Data?.DriverName === "STREAMING") {
-              posDriver1 = -4;
-            }
-          }
+          //       if (vueltastotalesDriver1 < vueltasLider * 0.9 && ((condicion1 < dconfig.RaceDurationTime) || (vueltasLiderTeam < dconfig.RaceDurationLaps * 0.9))) {
+          //         posDriver1 = -1;
+          //       }
+          //       break;
+          //   }
+
+          //   if (driver1Data?.Pos === -4 && driver1Data?.DriverName === "STREAMING") {
+          //     posDriver1 = -4;
+          //   }
+          // }
 
           if (posDriver2 === 1) {
             vueltasLiderTeam = vueltastotalesDriver2;
 
-          } else {
-            switch (posDriver2) {
-              case -1:
-                if (driver2Data?.Team === "ESP Racing Staff") {
-                  posDriver2 = -4;
-                } else {
-                  posDriver2 = -1;
-                }
-                break;
-              case -2:
-                posDriver2 = -2;
-                break;
-              case -3:
-                posDriver2 = -3;
-                break;
-              case -4:
-                switch (driver2Data?.Team) {
-                  case "STREAMING":
-                    posDriver2 = -4;
-                    break;
-                  case "ESP Racing Staff":
-                    posDriver2 = -4;
-                    break;
-                  case "Safety Car":
-                    posDriver2 = -4;
-                    break;
-                  default:
-                    posDriver2 = -3;
-                    break;
-                }
-                break;
-              default:
-                const timerace = (driver2Data?.TotalTime || 0) + (driver2Data?.Penalties || 0);
-                const condicion2 = (Math.trunc((timerace / 3600) % 60) + Math.trunc(timerace / 60));
-                const dconfig = arrayRaceData[raceData.raceNumber - 1].RaceConfig;
-
-                if (vueltastotalesDriver2 < vueltasLider * 0.9 && ((condicion2 < dconfig.RaceDurationTime) || (vueltasLiderTeam < dconfig.RaceDurationLaps * 0.9))) {
-                  posDriver2 = -1;
-                }
-                break;
-            }
-            if (driver2Data?.Pos === -4 && driver2Data?.DriverName === "STREAMING") {
-              posDriver2 = -4;
-            }
           }
+          // else {
+          //   switch (posDriver2) {
+          //     case -1:
+          //       if (driver2Data?.Team === "ESP Racing Staff") {
+          //         posDriver2 = -4;
+          //       } else {
+          //         posDriver2 = -1;
+          //       }
+          //       break;
+          //     case -2:
+          //       posDriver2 = -2;
+          //       break;
+          //     case -3:
+          //       posDriver2 = -3;
+          //       break;
+          //     case -4:
+          //       switch (driver2Data?.Team) {
+          //         case "STREAMING":
+          //           posDriver2 = -4;
+          //           break;
+          //         case "ESP Racing Staff":
+          //           posDriver2 = -4;
+          //           break;
+          //         case "Safety Car":
+          //           posDriver2 = -4;
+          //           break;
+          //         default:
+          //           posDriver2 = -3;
+          //           break;
+          //       }
+          //       break;
+          //     default:
+          //       const timerace = (driver2Data?.TotalTime || 0) + (driver2Data?.Penalties || 0);
+          //       const condicion2 = (Math.trunc((timerace / 3600) % 60) + Math.trunc(timerace / 60));
+          //       const dconfig = arrayRaceData[raceData.raceNumber - 1].RaceConfig;
+
+          //       if (vueltastotalesDriver2 < vueltasLider * 0.9 && ((condicion2 < dconfig.RaceDurationTime) || (vueltasLiderTeam < dconfig.RaceDurationLaps * 0.9))) {
+          //         posDriver2 = -1;
+          //       }
+          //       break;
+          //   }
+          //   if (driver2Data?.Pos === -4 && driver2Data?.DriverName === "STREAMING") {
+          //     posDriver2 = -4;
+          //   }
+          // }
 
           if (driver1Data && posDriver1 > 0) {
             driver1Points = pointArray ? pointArray.Puntuation[posDriver1 - 1] + fastestLapDriver1 : 0;
@@ -772,7 +722,7 @@ function initializeScript() {
         };
       });
 
-      console.log(seriesDataTeamChamp);
+      //console.log(seriesDataTeamChamp);
 
       let stepChartTeam: number = 20;
       let MaxStepChartTeam: number = 0;
@@ -799,7 +749,7 @@ function initializeScript() {
 
       var optionsTeamChamp = {
         title: {
-          text: 'Progresión de Puntos en el Campeonato Individual',
+          text: 'Progresión de Puntos en el Campeonato por Equipos',
           align: 'center',
           style: {
             color: '#f9f9f9',
@@ -967,51 +917,52 @@ function getDriverDataChamp(result: RaceDataChamp[], rd: RaceData[]): DriverData
         if (pos === 1) {
           vueltasLider = vueltasTotales;
 
-        } else {
-          switch (pos) {
-            case -1:
-              if (item.Team === "ESP Racing Staff") {
-                pos = -4;
-              } else {
-                pos = -1;
-              }
-              break;
-            case -2:
-              pos = -2;
-              break;
-            case -3:
-              pos = -3;
-              break;
-            case -4:
-              switch (item.Team) {
-                case "STREAMING":
-                  pos = -4;
-                  break;
-                case "ESP Racing Staff":
-                  pos = -4;
-                  break;
-                case "Safety Car":
-                  pos = -4;
-                  break;
-                default:
-                  pos = -3;
-                  break;
-              }
-              break;
-            default:
-              const timerace = (item.TotalTime) + (item.Penalties);
-              const condicion1 = (Math.trunc((timerace / 3600) % 60) + Math.trunc(timerace / 60));
-              const dconfig = rd[raceData.raceNumber - 1].RaceConfig;
+        } 
+        // else {
+        //   switch (pos) {
+        //     case -1:
+        //       if (item.Team === "ESP Racing Staff") {
+        //         pos = -4;
+        //       } else {
+        //         pos = -1;
+        //       }
+        //       break;
+        //     case -2:
+        //       pos = -2;
+        //       break;
+        //     case -3:
+        //       pos = -3;
+        //       break;
+        //     case -4:
+        //       switch (item.Team) {
+        //         case "STREAMING":
+        //           pos = -4;
+        //           break;
+        //         case "ESP Racing Staff":
+        //           pos = -4;
+        //           break;
+        //         case "Safety Car":
+        //           pos = -4;
+        //           break;
+        //         default:
+        //           pos = -3;
+        //           break;
+        //       }
+        //       break;
+        //     default:
+        //       const timerace = (item.TotalTime) + (item.Penalties);
+        //       const condicion1 = (Math.trunc((timerace / 3600) % 60) + Math.trunc(timerace / 60));
+        //       const dconfig = rd[raceData.raceNumber - 1].RaceConfig;
 
-              if (vueltasTotales < vueltasLider * 0.9 && ((condicion1 < dconfig.RaceDurationTime) || (vueltasTotales < dconfig.RaceDurationLaps * 0.9))) {
-                pos = -1;
-              }
-              break;
-          }
-          if (item.Pos === -4 && item.DriverName === "STREAMING") {
-            pos = -4;
-          }
-        }
+        //       if (vueltasTotales < vueltasLider * 0.9 && ((condicion1 < dconfig.RaceDurationTime) || (vueltasTotales < dconfig.RaceDurationLaps * 0.9))) {
+        //         pos = -1;
+        //       }
+        //       break;
+        //   }
+        //   if (item.Pos === -4 && item.DriverName === "STREAMING") {
+        //     pos = -4;
+        //   }
+        // }
         if (driverIndex === -1) {
           if (pos > 0) {
 

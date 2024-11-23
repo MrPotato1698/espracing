@@ -210,19 +210,9 @@ function initializeScript() {
                     posicionFinal = '1';
                 } else {
                     switch (itemResult.Pos) {
-                        case -1:
-                            if (itemResult.Team === "ESP Racing Staff") {
-                                posicionFinal = 'STAFF';
-                            } else {
-                                posicionFinal = 'DNF';
-                            }
-                            break;
-                        case -2:
-                            posicionFinal = 'DQ';
-                            break;
-                        case -3:
-                            posicionFinal = 'DNS';
-                            break;
+                        case -1: posicionFinal = 'DNF'; break;
+                        case -2: posicionFinal = 'DQ'; break;
+                        case -3: posicionFinal = 'DNS'; break;
                         case -4:
                             switch (itemResult.Team) {
                                 case "STREAMING":
@@ -240,16 +230,7 @@ function initializeScript() {
                             }
                             break;
                         default:
-                            const timerace = (itemResult.TotalTime) + (itemResult.Penalties);
-                            const condicion1 = (Math.trunc((timerace / 3600) % 60) + Math.trunc(timerace / 60));
-
-                            if (vueltastotales < vueltasLider * 0.9 && ((condicion1 < dconfig.RaceDurationTime) || (vueltastotales < dconfig.RaceDurationLaps * 0.9))) {
-                                posicionFinal = 'DNF';
-                                pos = -1;
-                            } else {
-                                posicionFinal = pos.toString();
-                            }
-                            break;
+                            posicionFinal = pos.toString();
                     }
                     if (itemResult.Pos === -4 && itemResult.DriverName === "STREAMING") {
                         posicionFinal = 'TV';
@@ -431,12 +412,16 @@ function initializeScript() {
             // *** Cambios de posiciones ***
             const seriesDataPositions = dlaps
                 .filter((lapData) => lapData.Laps.length > 0)
-                .map((lapData) => ({
-                    name: lapData.DriverName,
-                    data: lapData.Laps.map((lap) => lap.Position),
-                }));
+                .map((lapData) => {
+                    const driverResult = dresult.find(result => result.SteamID === lapData.SteamID);
+                    const gridPosition = driverResult ? driverResult.GridPosition : 0;
+                    return {
+                        name: lapData.DriverName,
+                        data: [gridPosition, ...lapData.Laps.map((lap) => lap.Position)],
+                    };
+                });
 
-            const numlaps: number[] = Array.from({ length: dlaps[0].Laps.length }, (_, i) => i + 1);
+            const numlaps: number[] = Array.from({ length: dlaps[0].Laps.length + 1 }, (_, i) => i);
 
             var optionsChangePositions = {
                 title: {
@@ -680,7 +665,7 @@ function initializeScript() {
                     }
                 },
                 grid: {
-                    borderColor:'#5a5a5a',
+                    borderColor: '#5a5a5a',
                 },
             };
 
@@ -956,7 +941,7 @@ function initializeScript() {
                                 BestLapClass = `"bg-[#00ee07] text-black font-bold rounded-full w-content px-5"`;
                             }
 
-                            if(itemL.Cut > 0){
+                            if (itemL.Cut > 0) {
                                 CutClass = BestLapClass = `"bg-[#da392b] text-black font-semibold rounded-full w-content px-5"`;
                             }
 
@@ -1028,7 +1013,7 @@ function initializeScript() {
 
 
         } catch (error) {
-            console.error('Error al cargar los resultados de carrera: '+error);
+            console.error('Error al cargar los resultados de carrera: ' + error);
         }
     }
     if (loadButton) {

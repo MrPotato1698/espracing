@@ -8,7 +8,14 @@ interface DriverLapData {
 
 function createRaceResults(dcars: CarJSON[], devents: EventJSON[], dlaps: LapJSON[], dresult: ResultJSON[], raceTime: number): RaceResult[] {
   let rr: RaceResult[] = [];
-  let pos: number = 0; // Posición en la carrera: -1 = no clasificado, -2 = descalificado, -3 = no presentado, -4 = SC o Staff ESP, 0 = no clasificado, 1 = primero, 2 = segundo, etc.
+  let pos: number = 0; // Posición en la carrera:
+  //-1 = no clasificado
+  //-2 = descalificado
+  //-3 = no presentado
+  //-4 = SC o Staff ESP
+  //0 = no clasificado
+  //1 = primero
+  //2 = segundo, etc.
   let vueltasLider = 0;
 
   for (let itemR of dresult) {
@@ -44,10 +51,13 @@ function createRaceResults(dcars: CarJSON[], devents: EventJSON[], dlaps: LapJSO
         uniqueRR.Pos = -2;
       } else {
         const timerace = (uniqueRR.TotalTime) + (uniqueRR.Penalties);
-        if (uniqueRR.Laps < vueltasLider * 0.9 || ((Math.trunc((timerace / 60) % 60) + Math.trunc(timerace / 60)) < raceTime)) {
-          uniqueRR.Pos = -1;
-        } else {
+        const timeCondition = (Math.trunc((timerace / 3600) % 60) + Math.trunc(timerace / 60));
+        if (timeCondition >= raceTime) {
           uniqueRR.Pos = pos;
+          // } else if (uniqueRR.Laps <= Math.trunc(vueltasLider * 0.9)){
+          //   uniqueRR.Pos = -1;
+        } else {
+          uniqueRR.Pos = -1;
         }
       }
     }
@@ -551,6 +561,30 @@ function getGapToFirst(rr: RaceResult[], rl: RaceLap[]): RaceLap[] {
   return gapToFirst;
 }
 
+function recalculatePositions(rr: RaceResult[], raceTime: number): RaceResult[] {
+  let vueltasLider = 0;
+  for (let item of rr)
+    if (item.Pos === 1) {
+      item.Pos = 1;
+      vueltasLider = item.Laps;
+    } else {
+      if (item.Pos === -2) {
+        item.Pos = -2;
+      } else {
+        const timerace = (item.TotalTime) + (item.Penalties);
+        const timeCondition = (Math.trunc((timerace / 3600) % 60) + Math.trunc(timerace / 60));
+        if (timeCondition >= raceTime) {
+          item.Pos = item.Pos;
+          // } else if (uniqueRR.Laps <= Math.trunc(vueltasLider * 0.9)){
+          //   uniqueRR.Pos = -1;
+        } else {
+          item.Pos = -1;
+        }
+      }
+    }
+  return rr;
+}
+
 // FUNCIONES A EXPORTAR
 
 export function createRaceData(datos: any): RaceData {
@@ -576,6 +610,7 @@ export function createRaceData(datos: any): RaceData {
   rd.RaceResult = getLeadLaps(rd.RaceResult, rd.RaceLaps);
 
   rd.RaceConfig = createRaceConfig(datos, rd.RaceResult, rd.BestLap[0]);
+  rd.RaceConfig.NumberofSplit = 1;
 
   if (rd.RaceResult[0].GridPosition === -1) {
     rd.RaceResult = calculateGridPosition(rd.RaceResult, rd.RaceLaps);
@@ -586,11 +621,13 @@ export function createRaceData(datos: any): RaceData {
   rd.RaceResult.map((itemRD) => {
     if (itemRD.Laps === 0) {
       itemRD.Laps = rd.RaceLaps
-      .filter((item1) => item1.SteamID === itemRD.SteamID)
-      .map((item2) => item2.Laps.length)
-      .reduce((acc, laps) => acc + laps, 0);
+        .filter((item1) => item1.SteamID === itemRD.SteamID)
+        .map((item2) => item2.Laps.length)
+        .reduce((acc, laps) => acc + laps, 0);
     }
   });
+
+  rd.RaceResult = recalculatePositions(rd.RaceResult, datos.SessionConfig.time);
 
   return rd;
 }
