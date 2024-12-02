@@ -22,7 +22,8 @@ export function initCarManagement() {
 
       const newClassName = formData.get("newClassName") as string;
       const newClassShortName = formData.get("newClassShortName") as string;
-      const newClassDesign = formData.get("newClassDesign") as string;
+      const newClassBackgroundColor = formData.get("newClassBackgroundColor") as string;
+      const newClassTextColor = formData.get("newClassTextColor") as string;
 
       const powerCar = formData.get("powerCar") as string;
       const torqueCar = formData.get("torqueCar") as string;
@@ -63,7 +64,7 @@ export function initCarManagement() {
               location: newCountryCar,
               foundation: Number(newFoundationCar),
             });
-            if (insertBrandError) throw insertBrandError;
+          if (insertBrandError) throw insertBrandError;
 
         } catch (error) {
           console.error("Error al crear la marca del coche:", error);
@@ -73,8 +74,8 @@ export function initCarManagement() {
         lastBrandID = Number(carBrandSelect);
       }
 
-      if(carClassSelect === 'new') {
-        try{
+      if (carClassSelect === 'new') {
+        try {
           const { data: getLastClass } = await supabase
             .from('carclass')
             .select('id')
@@ -82,9 +83,11 @@ export function initCarManagement() {
             .limit(1)
             .single();
 
-            lastClassID = getLastClass ? (getLastClass.id + 1) : 1;
+          lastClassID = getLastClass ? (getLastClass.id + 1) : 1;
 
-            const { data: insertBrandData, error: insertClassError } = await supabase
+          const newClassDesign = ` bg-[${newClassBackgroundColor}] text-[${newClassTextColor}]`;
+
+          const { data: insertBrandData, error: insertClassError } = await supabase
             .from('carclass')
             .insert({
               id: lastClassID,
@@ -93,18 +96,18 @@ export function initCarManagement() {
               class_design: newClassDesign,
             });
 
-            if (insertClassError) throw insertClassError;
+          if (insertClassError) throw insertClassError;
 
-        }catch(error){
+        } catch (error) {
           console.error("Error al crear la clase del coche:", error);
           alert("Hubo un error al crear la clase del coche. Por favor, inténtalo de nuevo.");
         }
-      } else{
+      } else {
         lastClassID = Number(carClassSelect);
       }
 
-      console.log('BrandID'+lastBrandID);
-      console.log('ClassID'+lastClassID);
+      console.log('BrandID' + lastBrandID);
+      console.log('ClassID' + lastClassID);
 
       const { data: insertData, error: insertError } = await supabase
         .from('car')

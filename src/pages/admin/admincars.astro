@@ -45,7 +45,7 @@ if (userData?.roleesp !== 1) {
 
 const { data: carsData } = await supabase
   .from("car")
-  .select("id, carbrand!inner(name), model, year, carclass!inner(name)")
+  .select("id, carbrand!inner(name), model, year, carclass!inner(short_name, class_design)")
   .order("id", { ascending: true });
 
 const { data: carBrandsData } = await supabase
@@ -88,7 +88,7 @@ const { data: carClassesData } = await supabase
                 {car.carbrand.name} {car.model}
               </td>
               <td>{car.year}</td>
-              <td>{car.carclass.name}</td>
+              <td class={car.carclass.class_design}>{car.carclass.short_name}</td>
               <td>
                 <a href={`/admin/cars/${car.id}`}>
                   <Edit moreClass="w-6 text-center mx-auto" />
@@ -144,9 +144,14 @@ const { data: carClassesData } = await supabase
 
         <!-- Nueva Marca de Coche -->
         <div id="newBrandContainer" class="hidden">
-          <div class="grid grid-cols-1 gap-4 bg-[#19191c] px-2 pt-2 border border-[#da392b] rounded-xl sm:grid-cols-2">
+          <div
+            class="grid grid-cols-1 gap-4 bg-[#19191c] px-2 pt-2 border border-[#da392b] rounded-xl sm:grid-cols-2"
+          >
             <div>
-              <label class="text-[#f9f9f9] text-lg font-medium" for="newBrandCar">
+              <label
+                class="text-[#f9f9f9] text-lg font-medium"
+                for="newBrandCar"
+              >
                 Marca
               </label>
               <input
@@ -159,7 +164,10 @@ const { data: carClassesData } = await supabase
             </div>
 
             <div>
-              <label class="text-[#f9f9f9] text-lg font-medium" for="newImgBrandCar">
+              <label
+                class="text-[#f9f9f9] text-lg font-medium"
+                for="newImgBrandCar"
+              >
                 Imagen
               </label>
               <input
@@ -171,7 +179,10 @@ const { data: carClassesData } = await supabase
               />
             </div>
             <div>
-              <label class="text-[#f9f9f9] text-lg font-medium" for="newCountryCar">
+              <label
+                class="text-[#f9f9f9] text-lg font-medium"
+                for="newCountryCar"
+              >
                 País
               </label>
               <input
@@ -184,7 +195,10 @@ const { data: carClassesData } = await supabase
             </div>
 
             <div>
-              <label class="text-[#f9f9f9] text-lg font-medium" for="newFoundationCar">
+              <label
+                class="text-[#f9f9f9] text-lg font-medium"
+                for="newFoundationCar"
+              >
                 Fundado en...
               </label>
               <input
@@ -241,10 +255,16 @@ const { data: carClassesData } = await supabase
         </select>
 
         <!-- Nueva Clase -->
-        <div id="newClassContainer" class = 'hidden'>
-          <div class="grid grid-cols-1 gap-4 bg-[#19191c] px-2 pt-2 border border-[#da392b] rounded-xl sm:grid-cols-3">
+        <div
+          id="newClassContainer"
+          class="hidden px-2 pt-2 bg-[#19191c] border border-[#da392b] rounded-xl"
+        >
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <label class="text-[#f9f9f9] text-lg font-medium" for="newClassName">
+              <label
+                class="text-[#f9f9f9] text-lg font-medium"
+                for="newClassName"
+              >
                 Nombre de Clase
               </label>
               <input
@@ -257,7 +277,10 @@ const { data: carClassesData } = await supabase
             </div>
 
             <div>
-              <label class="text-[#f9f9f9] text-lg font-medium" for="newClassShortName">
+              <label
+                class="text-[#f9f9f9] text-lg font-medium"
+                for="newClassShortName"
+              >
                 Nombre de Clase Corto
               </label>
               <input
@@ -270,16 +293,45 @@ const { data: carClassesData } = await supabase
             </div>
 
             <div>
-              <label class="text-[#f9f9f9] text-lg font-medium" for="newClassDesign">
-                Diseño de Clase
+              <label
+                class="text-[#f9f9f9] text-lg font-medium"
+                for="newClassBackgroundColor"
+              >
+                Color Fondo de Clase
               </label>
               <input
-                class="w-full p-3 border border-solid border-[#f7f7f7] rounded-md mt-2 mb-4 resize-y text-white bg-[#0f0f0f] hover:border-[#da392b]"
-                type="text"
-                id="newClassDesign"
-                name="newClassDesign"
-                placeholder="bg-[#006fba] text-[#f9f9f9]"
+                class="p-3 border border-solid border-[#f7f7f7] rounded-md mt-2 mb-4 text-white bg-[#0f0f0f] hover:border-[#da392b]"
+                type="color"
+                id="newClassBackgroundColor"
+                name="newClassBackgroundColor"
+                value="#006fba"
               />
+            </div>
+
+            <div>
+              <label
+                class="text-[#f9f9f9] text-lg font-medium"
+                for="newClassTextColor"
+              >
+                Color Texto de Clase
+              </label>
+              <input
+                class="p-3 border border-solid border-[#f7f7f7] rounded-md mt-2 mb-4 text-white bg-[#0f0f0f] hover:border-[#da392b]"
+                type="color"
+                id="newClassTextColor"
+                name="newClassTextColor"
+                value="#f9f9f9"
+              />
+            </div>
+
+            <div class="col-span-2">
+
+              <div
+                id="classPreview"
+                class="mb-2 p-4 rounded-md text-center font-bold w-2/4 mx-auto"
+              >
+                GTX
+              </div>
             </div>
           </div>
         </div>
@@ -328,7 +380,10 @@ const { data: carClassesData } = await supabase
             />
           </div>
           <div>
-            <label class="text-[#f9f9f9] text-lg font-medium" for="tyreTimeChange">
+            <label
+              class="text-[#f9f9f9] text-lg font-medium"
+              for="tyreTimeChange"
+            >
               Cambio de gomas (en segundos)
             </label>
             <input
@@ -342,7 +397,10 @@ const { data: carClassesData } = await supabase
             />
           </div>
           <div>
-            <label class="text-[#f9f9f9] text-lg font-medium" for="fuelLiterTime">
+            <label
+              class="text-[#f9f9f9] text-lg font-medium"
+              for="fuelLiterTime"
+            >
               Refuel (seg/litros de combustible)
             </label>
             <input
@@ -409,9 +467,10 @@ const { data: carClassesData } = await supabase
     initCarManagement();
     initDeleteCarButtons();
     initCarForm();
+    initColorPickers();
   });
 
-  function initCarForm(){
+  function initCarForm() {
     const CarForm = document.getElementById("uploadForm");
     const carBrandSelect = document.getElementById("carbrand");
     const carClassSelect = document.getElementById("carClasses");
@@ -435,5 +494,31 @@ const { data: carClassesData } = await supabase
         newClassContainer?.classList.add("hidden");
       }
     });
+  }
+
+  function initColorPickers() {
+    const backgroundColorPicker = document.getElementById('newClassBackgroundColor') as HTMLInputElement;
+    const textColorPicker = document.getElementById('newClassTextColor') as HTMLInputElement;
+    const backgroundColorCode = document.getElementById('backgroundColorCode');
+    const textColorCode = document.getElementById('textColorCode');
+    const classPreview = document.getElementById('classPreview');
+    const shortNameInput = document.getElementById('newClassShortName') as HTMLInputElement;
+
+    function updatePreview() {
+      if (backgroundColorCode) backgroundColorCode.textContent = backgroundColorPicker.value;
+      if (textColorCode) textColorCode.textContent = textColorPicker.value;
+      if (classPreview) {
+        classPreview.style.backgroundColor = backgroundColorPicker.value;
+        classPreview.style.color = textColorPicker.value;
+        classPreview.textContent = shortNameInput.value || 'GTX';
+      }
+    }
+
+    backgroundColorPicker.addEventListener('input', updatePreview);
+    textColorPicker.addEventListener('input', updatePreview);
+    shortNameInput.addEventListener('input', updatePreview);
+
+    // Inicializar la vista previa
+    updatePreview();
   }
 </script>
