@@ -1,0 +1,52 @@
+---
+import { CldImage } from "astro-cloudinary";
+---
+
+<div
+  id="imageModal"
+  class="fixed inset-0 bg-black bg-opacity-80 z-50 hidden flex items-center justify-center"
+>
+  <div class="max-w-full max-h-full p-2 bg-[#0f0f0f] rounded-lg overflow-hidden relative">
+    <div id="modalImageContainer" class="w-full h-full flex items-center justify-center">
+      <!-- CldImage se insertará aquí dinámicamente -->
+    </div>
+    <button id="closeModal"
+    class="absolute top-4 right-4 text-white text-2xl bg-black bg-opacity-50 w-8 h-8 rounded-full flex items-center justify-center"
+      >&times;</button
+    >
+  </div>
+</div>
+
+<script>
+  const modal = document.getElementById("imageModal");
+  const modalImageContainer = document.getElementById("modalImageContainer");
+  const closeButton = document.getElementById("closeModal");
+
+  function openModal(publicId: string, width: number, height: number) {
+    if (modal && modalImageContainer) {
+      modalImageContainer.innerHTML = ""; // Limpiar contenido previo
+
+      const img = document.createElement("img");
+      img.src = `https://res.cloudinary.com/dwsv1q1ib/image/upload/c_scale,w_1200/${publicId}`;
+      img.alt = "Imagen ampliada";
+      img.className = "max-w-full max-h-[calc(100vh-2rem)] object-contain";
+
+      modalImageContainer.appendChild(img);
+      modal.classList.remove("hidden");
+    }
+  }
+
+  function closeModal() {
+    if (modal) {
+      modal.classList.add("hidden");
+    }
+  }
+
+  // Exponer la función openModal globalmente
+  (window as any).openModal = openModal;
+
+  closeButton?.addEventListener("click", closeModal);
+  modal?.addEventListener("click", (e) => {
+    if (e.target === modal) closeModal();
+  });
+</script>
