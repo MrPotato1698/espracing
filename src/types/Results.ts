@@ -26,11 +26,13 @@ export interface RaceResult {
   LedLaps: number;
   Ballast: number;
   Restrictor: number;
+  Split: number;
 }
 
 export interface RaceLap{
   DriverName: string;
   SteamID: string;
+  Split: number;
   Laps: Lap [];
   Average: number[];
   Best: number[];
@@ -92,7 +94,7 @@ export interface RaceConfig{
   RaceDurationTime: number;
   RaceDurationLaps: number;
   DisableP2P: boolean;
-  NumberofSplit: number;
+  NumberofSplits: number;
 }
 
 export interface RaceDriversResume{

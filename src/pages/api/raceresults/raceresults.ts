@@ -4,7 +4,7 @@ import { cars } from "@/consts/cars";
 import { circuits } from "@/consts/circuits";
 import { circuitlayouts } from "@/consts/circuitlayouts";
 import { points } from "@/consts/pointsystem";
-import { createRaceData, formatTwoIntegersPlusThreeDecimals, formatTwoIntegers, getClassShortName, getColorClass } from "@/lib/results/resultConverter";
+import { createRaceData, createRaceDataMultipleSplits, formatTwoIntegersPlusThreeDecimals, formatTwoIntegers, getClassShortName, getColorClass } from "@/lib/results/resultConverter";
 
 import type { RaceData, RaceResult, RaceLap, Lap, BestLap, Consistency, BestSector, Incident, RaceConfig } from "@/types/Results";
 import type { Points } from "@/types/Points";
@@ -46,13 +46,16 @@ function initializeScript() {
 
         try {
             console.log('Cargando datos de la carrera: ' + seleccion);
-            const response = await fetch(`/api/raceresults/getRaceResults?race=${seleccion}`);
-            //const response = await fetch(`/testRace7.json`); //Pruebas para no leer constantemente de la BD
+            //const response = await fetch(`/api/raceresults/getRaceResults?race=${seleccion}`);
+            const response1 = await fetch(`/testRace8S1.json`); //Pruebas para no leer constantemente de la BD
+            const response2 = await fetch(`/testRace8S2.json`); //Pruebas para no leer constantemente de la BD
 
-            const datosRAW = await response.json();
+            const datosRAW1 = await response1.json();
+            const datosRAW2 = await response2.json();
             //console.log('DatosRAW a usar: ', datosRAW);
 
-            const datos: RaceData = createRaceData(datosRAW);
+            //const datos: RaceData = createRaceData(datosRAW1);
+            const datos: RaceData = createRaceDataMultipleSplits(datosRAW1, datosRAW2);
             console.log('Datos a usar: ', datos);
 
             const dresult: RaceResult[] = datos.RaceResult;
