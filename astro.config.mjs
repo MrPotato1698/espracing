@@ -12,5 +12,5 @@ export default defineConfig({
       enabled: true
     }
   }),
-  experimental: { contentLayer: true }
+  
 });
