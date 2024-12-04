@@ -8,8 +8,30 @@ import { createRaceData, createRaceDataMultipleSplits, formatTwoIntegersPlusThre
 
 import type { RaceData, RaceResult, RaceLap, Lap, BestLap, Consistency, BestSector, Incident, RaceConfig } from "@/types/Results";
 import type { Points } from "@/types/Points";
+import ResultsTable from '@/sections/ResultsTable.astro';
 
 /* *************************** */
+
+interface ResultTableData {
+    gridPositionClass: string;
+    gainsAbs: string;
+    posicionFinal: string;
+    driverName: string;
+    carColorClass: string;
+    carClass: string;
+    carBrand: string;
+    carName: string;
+    team: string;
+    totalLaps: string;
+    timeadjust: string;
+    gap: string;
+    interval: string;
+    flapClass: string;
+    bestlapToString: string;
+    tyre: string;
+    points: string;
+    splitNumber: number;
+}
 
 function initializeScript() {
     const loadButton = document.getElementById('loadButtonRace');
@@ -93,294 +115,60 @@ function initializeScript() {
             // *** Mejor vuelta de carrera ***
             const bestlapDriverID = dbestlaps[0].SteamID;
 
+            const resultTable = getResultTableData(datos, pointsystemName, pointArray ?? { Name: "NoPoints", Puntuation: [], FastestLap: 0 });
+
             // *** Clasificacion de Carrera
-            for (let itemResult of dresult) {
-                postabla++;
-                pos = itemResult.Pos;
-                //console.log('Item ',pos, '. Nombre: ',item.DriverName);
-                let gridPositionClass;
-                let gains = itemResult.GridPosition - postabla
-                let gainsAbs: string = Math.abs(gains).toString();
-                if ((gains > 0) && (pos > -2)) {
-                    gridPositionClass = '<svg viewBox="0 0 24 24" fill="#00f000" class="w-6 float mx-auto"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M11.375 6.22l-5 4a1 1 0 0 0 -.375 .78v6l.006 .112a1 1 0 0 0 1.619 .669l4.375 -3.501l4.375 3.5a1 1 0 0 0 1.625 -.78v-6a1 1 0 0 0 -.375 -.78l-5 -4a1 1 0 0 0 -1.25 0z" /></svg>';
-                } else if ((gains < 0) && (pos > -2)) {
-                    gridPositionClass = '<svg viewBox="0 0 24 24" fill="#ff0000" class="w-6 float mx-auto rotate-180"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M11.375 6.22l-5 4a1 1 0 0 0 -.375 .78v6l.006 .112a1 1 0 0 0 1.619 .669l4.375 -3.501l4.375 3.5a1 1 0 0 0 1.625 -.78v-6a1 1 0 0 0 -.375 -.78l-5 -4a1 1 0 0 0 -1.25 0z" /></svg>';
-                } else if (gains === 0 || pos <= -2) {
-                    gridPositionClass = '<svg viewBox="0 0 24 24" fill="#ffc800" class="w-6 float mx-auto rotate-90"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M11.375 6.22l-5 4a1 1 0 0 0 -.375 .78v6l.006 .112a1 1 0 0 0 1.619 .669l4.375 -3.501l4.375 3.5a1 1 0 0 0 1.625 -.78v-6a1 1 0 0 0 -.375 -.78l-5 -4a1 1 0 0 0 -1.25 0z" /></svg>';
-                    gainsAbs = "0";
+            let secondSplitInit: boolean = false;
+            for (let i = 0; i < resultTable.length; i++) {
+                if (resultTable[i].splitNumber === 2 && !secondSplitInit) {
+                    tablaResultados.innerHTML += `
+                            <tr class="bg-[#da392b]">
+                                <td colspan="14 class = "text-center font-medium">Segundo Split</td>
+                            </tr>
+                    `;
+                    secondSplitInit = true;
                 }
-                if (pos <= -3) {
-                    gridPositionClass = "";
-                    gainsAbs = "";
-                }
-
-                // Obtener nombre de equipo + Ping Min-Max
-                let carID = itemResult.CarId;
-                let equipo = itemResult.Team;
-
-
-                // Obtener el nombre real del coche
-                const isCarExists = cars.find((car) => car.filename === itemResult.CarFileName);
-                let carName: string;
-                let carBrand: string;
-                let carClass: string;
-                let carColorClass: string;
-                if (isCarExists) {
-                    carName = isCarExists.brand + " " + isCarExists.model;
-                    carBrand = isCarExists.imgbrand;
-                    carClass = getClassShortName(isCarExists.subclass);
-                    carColorClass = getColorClass(isCarExists.subclass);
-                } else {
-                    carName = itemResult.CarFileName;
-                    carBrand = "";
-                    carClass = "";
-                    carColorClass = "";
-                }
-
-                // Obtener tiempo total de carrera
-                let timeadjust;
-                if (itemResult.Pos !== -2) {
-                    if (itemResult.TotalTime >= 0) {
-                        timeadjust = itemResult.TotalTime + itemResult.Penalties;
-                        const seconds = formatTwoIntegersPlusThreeDecimals(timeadjust % 60);
-                        const minutes = formatTwoIntegers(Math.trunc((timeadjust / 60) % 60));
-                        const hours = formatTwoIntegers(Math.trunc(timeadjust / 3600));
-                        //console.log("Pos: "+pos+" ->"+hours+":"+minutes+":"+seconds);
-
-                        if (Number(hours) > 0) {
-                            if (itemResult.Penalties !== 0) {
-                                timeadjust = hours + ":" + minutes + ":" + seconds + " <span class='rounded bg-[#da392b] text-xs px-1 py-0.5 ml-1'> + " + (itemResult.Penalties) + "s</span>";
-                            } else {
-                                timeadjust = hours + ":" + minutes + ":" + seconds;
-                            }
-                        } else {
-                            if (itemResult.Penalties !== 0) {
-                                timeadjust = minutes + ":" + seconds + " <span class='rounded bg-[#da392b] text-xs px-1 py-0.5 ml-1'> + " + (itemResult.Penalties) + "s";
-                            } else {
-                                timeadjust = minutes + ":" + seconds;
-                            }
-                        }
-                    } else {
-                        timeadjust = "No Time";
-                    }
-                } else {
-                    timeadjust = "DQ";
-                }
-
-                if (itemResult.Pos <= -3) {
-                    timeadjust = "";
-                }
-
-                // Obtener numero de vueltas totales / vuelta rapida / neumatico
-                let vueltastotales = 0;
-                if (itemResult.Laps === undefined || itemResult.Laps === null || itemResult.Laps === 0) {
-                    for (let itemLap of dlaps) {
-                        if (itemLap.SteamID === itemResult.SteamID) {
-                            vueltastotales = itemLap.Laps.length;
-                        }
-                    }
-                } else {
-                    vueltastotales = itemResult.Laps;
-                }
-
-                let tyre;
-                let cuts = 0;
-
-                for (let itemLap of dlaps) {
-                    if (itemLap.SteamID === itemResult.SteamID) {
-                        for (let itemLap2 of itemLap.Laps) {
-                            if (itemLap2.LapTime === itemResult.BestLap) {
-                                tyre = "(" + itemLap2.Tyre + ")";
-                            }
-                        }
-                    }
-                }
-
-                for (let itemLap of dlaps) {
-                    if (itemLap.SteamID === itemResult.SteamID) {
-                        cuts += itemLap.Laps.filter((lap) => lap.Cut > 0).length;
-                    }
-                }
-
-                if (tyre === undefined || tyre === null || tyre === "") {
-                    tyre = "(ND)";
-                }
-
-                let posicionFinal: string = "";
-
-                if (pos === 1) {
-                    vueltasLider = vueltastotales;
-                    posicionFinal = '1';
-                } else {
-                    switch (itemResult.Pos) {
-                        case -1: posicionFinal = 'DNF'; break;
-                        case -2: posicionFinal = 'DQ'; break;
-                        case -3: posicionFinal = 'DNS'; break;
-                        case -4:
-                            switch (itemResult.Team) {
-                                case "STREAMING":
-                                    posicionFinal = 'TV';
-                                    break;
-                                case "ESP Racing Staff":
-                                    posicionFinal = 'STAFF';
-                                    break;
-                                case "Safety Car":
-                                    posicionFinal = 'SC';
-                                    break;
-                                default:
-                                    posicionFinal = 'DNS';
-                                    break;
-                            }
-                            break;
-                        default:
-                            posicionFinal = pos.toString();
-                    }
-                    if (itemResult.Pos === -4 && itemResult.DriverName === "STREAMING") {
-                        posicionFinal = 'TV';
-                    }
-                }
-
-                let bestlap = itemResult.BestLap;
-                let secondsbl = formatTwoIntegersPlusThreeDecimals(bestlap % 60);
-                let minutesbl = formatTwoIntegers(Math.trunc((bestlap / 60) % 60));
-
-                //console.log("Mejor vuelta Usuario ", pos, ": " + bestlap);
-
-                let bestlapToString = "";
-                if (pos >= -1) {
-                    bestlapToString = minutesbl.toString() + ":" + secondsbl.toString();
-                } else {
-                    tyre = "";
-                }
-
-                if (itemResult.BestLap >= 999999.999) {
-                    bestlapToString = "No Time";
-                    tyre = "";
-                }
-                //bestlap = minutesbl.toString + ":" + secondsbl.toString;
-
-
-                // *** Intervalo de tiempo con el lider ***
-                let gap: string = "";
-                if (pos <= -2) {
-                    gap = "";
-                } else if (postabla > 1 && vueltasLider === vueltastotales) {
-                    const gapTime = ((itemResult.TotalTime + itemResult.Penalties) - (dresult[0].TotalTime + dresult[0].Penalties));
-                    let secondsgap = formatTwoIntegersPlusThreeDecimals(gapTime % 60);
-                    let minutesgap = formatTwoIntegers(Math.trunc((gapTime / 60) % 60));
-
-                    if (minutesgap === "00") {
-                        gap = "+ " + secondsgap;
-                    } else {
-                        gap = "+ " + minutesgap + ":" + secondsgap;
-                    }
-                } else if (postabla > 1 && vueltasLider !== vueltastotales) {
-                    gap = "+ " + (vueltasLider - vueltastotales) + "L";
-                } else if (postabla === 1) {
-                    gap = "";
-                }
-
-                // *** Intervalo con el anterior piloto ***
-                let interval: string = "";
-                let vueltasPrevio: number = 0;
-                if (postabla > 1) {
-                    for (let itemLap of dlaps) {
-                        if (itemLap.SteamID === dresult[postabla - 2].SteamID) {
-                            vueltasPrevio = itemLap.Laps.length;
-                        }
-                    }
-                    if (pos <= -2) {
-                        interval = "";
-                    } else if (postabla > 1 && vueltasPrevio === vueltastotales) {
-                        const intervalTime = (itemResult.TotalTime + itemResult.Penalties) - (dresult[postabla - 2].TotalTime + dresult[postabla - 2].Penalties);
-                        let secondsInterval = formatTwoIntegersPlusThreeDecimals(intervalTime % 60);
-                        let minutesInterval = formatTwoIntegers(Math.trunc((intervalTime / 60) % 60));
-
-                        if (minutesInterval === "00") {
-                            interval = "+ " + secondsInterval;
-                        } else {
-                            interval = "+ " + minutesInterval + ":" + secondsInterval;
-                        }
-                    } else if (postabla > 1 && vueltasPrevio !== vueltastotales) {
-                        interval = "+ " + (vueltasPrevio - vueltastotales) + "L";
-                    }
-                } else {
-                    interval = "";
-                }
-
-                // *** Añadir puntuaciones a la tabla ***
-                let puntos: number = 0;
-                let puntosString: string = "";
-                if (pointsystemName !== "NoPoints") {
-                    if (pos > 0) {
-                        puntos = pointArray?.Puntuation[pos - 1] || 0;
-                        if (bestlapDriverID === itemResult.SteamID) {
-                            puntos += pointArray?.FastestLap || 0;
-                        }
-                        puntosString = '+ ' + puntos.toString();
-                    } else if (pos === -1) {
-                        puntosString = "+ 0";
-                    }
-                } else {
-                    puntosString = "";
-                }
-
-                let flapClass = "";
-                if (bestlapDriverID === itemResult.SteamID) {
-                    if (pos >= -1) {
-                        flapClass = ' bg-[#c100ff] text-white font-bold rounded-full w-content px-5';
-                    } else {
-                        flapClass = '';
-                    }
-                }
-
-                let vueltasTotalesString: string = "";
-                if (pos > -2) {
-                    vueltasTotalesString = vueltastotales.toString();
-                } else {
-                    vueltasTotalesString = "";
-                }
-
-                if (postabla % 2 === 0) {
+                if (i % 2 === 0) {
                     tablaResultados.innerHTML += `
                             <tr class="bg-[#0f0f0f]">
-                                <td class = "text-center">${gridPositionClass}</td>                                                 <!-- Gan/Per (Flechas)-->
-                                <td class = "text-center">${gainsAbs}</td>                                                          <!-- Gan/Per (Número)-->
-                                <td class = "font-medium text-center">${posicionFinal}</td>                                         <!-- Posicion -->
-                                <td class = "text-start">${itemResult.DriverName}</td>                                              <!-- Nombre -->
-                                <td class = "text-center"><span ${carColorClass}>${carClass}</span></td>                            <!-- Clase del Coche -->
-                                <td class = "text-center"><img class='w-4 justify-end' src='${carBrand}' alt=''></img></td>         <!-- Logo Coche -->
-                                <td class = "text-start">${carName}</td>                                                            <!-- Coche -->
-                                <td class = "text-start">${equipo}</td>                                                             <!-- Equipo -->
-                                <td class = "text-center">${vueltasTotalesString}</td>                                              <!-- Nº Vueltas -->
-                                <td class = "text-center">${timeadjust}</td>                                                        <!-- Tiempo Total -->
-                                <td class = "text-center">${gap}</td>                                                               <!-- Gap con primero -->
-                                <td class = "text-center">${interval}</td>                                                          <!-- Intervalo -->
-                                <td class = "text-center"><span class = "${flapClass}">${bestlapToString + " " + tyre}</span></td>  <!-- Vuelta Rapida  + Neumaticos-->
-                                <td class = "text-center">${puntosString}</td>                                                      <!-- Ballast/Restrictor -->
+                                <td class = "text-center">${resultTable[i].gridPositionClass}</td>                                                  <!-- Gan/Per (Flechas)-->
+                                <td class = "text-center">${resultTable[i].gainsAbs}</td>                                                           <!-- Gan/Per (Número)-->
+                                <td class = "font-medium text-center">${resultTable[i].posicionFinal}</td>                                          <!-- Posicion -->
+                                <td class = "text-start">${resultTable[i].driverName}</td>                                                          <!-- Nombre -->
+                                <td class = "text-center"><span ${resultTable[i].carColorClass}>${resultTable[i].carClass}</span></td>              <!-- Clase del Coche -->
+                                <td class = "text-center"><img class='w-4 justify-end' src='${resultTable[i].carBrand}' alt=''></img></td>          <!-- Logo Coche -->
+                                <td class = "text-start">${resultTable[i].carName}</td>                                                             <!-- Coche -->
+                                <td class = "text-start">${resultTable[i].team}</td>                                                                <!-- Equipo -->
+                                <td class = "text-center">${resultTable[i].totalLaps}</td>                                                          <!-- Nº Vueltas -->
+                                <td class = "text-center">${resultTable[i].timeadjust}</td>                                                         <!-- Tiempo Total -->
+                                <td class = "text-center">${resultTable[i].gap}</td>                                                                <!-- Gap con primero -->
+                                <td class = "text-center">${resultTable[i].interval}</td>                                                           <!-- Intervalo -->
+                                <td class = "text-center"><span class = "${resultTable[i].flapClass}">${resultTable[i].bestlapToString + " " + resultTable[i].tyre}</span></td>  <!-- Vuelta Rapida  + Neumaticos-->
+                                <td class = "text-center">${resultTable[i].points}</td>                                                             <!-- Ballast/Restrictor -->
                             </tr>
                     `;
                 } else {
                     tablaResultados.innerHTML += `
                             <tr class="bg-[#19191c]">
-                                <td class = "text-center">${gridPositionClass}</td>                                                 <!-- Gan/Per (Flechas)-->
-                                <td class = "text-center">${gainsAbs}</td>                                                          <!-- Gan/Per (Número)-->
-                                <td class = "font-medium text-center">${posicionFinal}</td>                                         <!-- Posicion -->
-                                <td class = "text-start">${itemResult.DriverName}</td>                                              <!-- Nombre -->
-                                <td class = "text-center"><span ${carColorClass}>${carClass}</span></td>                            <!-- Clase del Coche -->
-                                <td class = "text-center"><img class='w-4 justify-end' src='${carBrand}' alt=''></img></td>         <!-- Logo Coche -->
-                                <td class = "text-start">${carName}</td>                                                            <!-- Coche -->
-                                <td class = "text-start">${equipo}</td>                                                             <!-- Equipo -->
-                                <td class = "text-center">${vueltasTotalesString}</td>                                              <!-- Nº Vueltas -->
-                                <td class = "text-center">${timeadjust}</td>                                                        <!-- Tiempo Total -->
-                                <td class = "text-center">${gap}</td>                                                               <!-- Gap con primero -->
-                                <td class = "text-center">${interval}</td>                                                          <!-- Intervalo -->
-                                <td class = "text-center"><span class = "${flapClass} ">${bestlapToString + " " + tyre}</span></td> <!-- Vuelta Rapida  + Neumaticos-->
-                                <td class = "text-center">${puntosString}</td>                                                      <!-- Ballast/Restrictor -->
+                                <td class = "text-center">${resultTable[i].gridPositionClass}</td>                                                  <!-- Gan/Per (Flechas)-->
+                                <td class = "text-center">${resultTable[i].gainsAbs}</td>                                                           <!-- Gan/Per (Número)-->
+                                <td class = "font-medium text-center">${resultTable[i].posicionFinal}</td>                                          <!-- Posicion -->
+                                <td class = "text-start">${resultTable[i].driverName}</td>                                                          <!-- Nombre -->
+                                <td class = "text-center"><span ${resultTable[i].carColorClass}>${resultTable[i].carClass}</span></td>              <!-- Clase del Coche -->
+                                <td class = "text-center"><img class='w-4 justify-end' src='${resultTable[i].carBrand}' alt=''></img></td>          <!-- Logo Coche -->
+                                <td class = "text-start">${resultTable[i].carName}</td>                                                             <!-- Coche -->
+                                <td class = "text-start">${resultTable[i].team}</td>                                                                <!-- Equipo -->
+                                <td class = "text-center">${resultTable[i].totalLaps}</td>                                                          <!-- Nº Vueltas -->
+                                <td class = "text-center">${resultTable[i].timeadjust}</td>                                                         <!-- Tiempo Total -->
+                                <td class = "text-center">${resultTable[i].gap}</td>                                                                <!-- Gap con primero -->
+                                <td class = "text-center">${resultTable[i].interval}</td>                                                           <!-- Intervalo -->
+                                <td class = "text-center"><span class = "${resultTable[i].flapClass}">${resultTable[i].bestlapToString + " " + resultTable[i].tyre}</span></td>  <!-- Vuelta Rapida  + Neumaticos-->
+                                <td class = "text-center">${resultTable[i].points}</td>                                                             <!-- Ballast/Restrictor -->
                             </tr>
                     `;
                 }
             }
+
 
             // *** Pista y datos de la carrera ***
 
@@ -1026,6 +814,291 @@ function initializeScript() {
     }
 }
 
+function getResultTableData(datos: RaceData, pointsystemName: String, pointArray: Points): ResultTableData[] {
+    let resultTableData: ResultTableData[] = [];
+    const dresult: RaceResult[] = datos.RaceResult;
+    const dlaps: RaceLap[] = datos.RaceLaps;
+    const dbestlaps: BestLap[] = datos.BestLap;
+
+    let pos: number = 0;
+    let postabla: number = 0;
+    let vueltasLider: number = 0;
+
+    // *** Mejor vuelta de carrera ***
+    const bestlapDriverID = dbestlaps[0].SteamID;
+
+    for (let itemResult of dresult) {
+        let item: ResultTableData;
+        postabla++;
+        pos = itemResult.Pos;
+        //console.log('Item ',pos, '. Nombre: ',item.DriverName);
+        let gridPositionClass = "";
+        let gains = itemResult.GridPosition - postabla
+        let gainsAbs: string = Math.abs(gains).toString();
+        if ((gains > 0) && (pos > -2)) {
+            gridPositionClass = '<svg viewBox="0 0 24 24" fill="#00f000" class="w-6 float mx-auto"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M11.375 6.22l-5 4a1 1 0 0 0 -.375 .78v6l.006 .112a1 1 0 0 0 1.619 .669l4.375 -3.501l4.375 3.5a1 1 0 0 0 1.625 -.78v-6a1 1 0 0 0 -.375 -.78l-5 -4a1 1 0 0 0 -1.25 0z" /></svg>';
+        } else if ((gains < 0) && (pos > -2)) {
+            gridPositionClass = '<svg viewBox="0 0 24 24" fill="#ff0000" class="w-6 float mx-auto rotate-180"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M11.375 6.22l-5 4a1 1 0 0 0 -.375 .78v6l.006 .112a1 1 0 0 0 1.619 .669l4.375 -3.501l4.375 3.5a1 1 0 0 0 1.625 -.78v-6a1 1 0 0 0 -.375 -.78l-5 -4a1 1 0 0 0 -1.25 0z" /></svg>';
+        } else if (gains === 0 || pos <= -2) {
+            gridPositionClass = '<svg viewBox="0 0 24 24" fill="#ffc800" class="w-6 float mx-auto rotate-90"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M11.375 6.22l-5 4a1 1 0 0 0 -.375 .78v6l.006 .112a1 1 0 0 0 1.619 .669l4.375 -3.501l4.375 3.5a1 1 0 0 0 1.625 -.78v-6a1 1 0 0 0 -.375 -.78l-5 -4a1 1 0 0 0 -1.25 0z" /></svg>';
+            gainsAbs = "0";
+        }
+        if (pos <= -3) {
+            gridPositionClass = "";
+            gainsAbs = "";
+        }
+
+        // Obtener nombre de equipo + Ping Min-Max
+        let equipo = itemResult.Team;
+
+
+        // Obtener el nombre real del coche
+        const isCarExists = cars.find((car) => car.filename === itemResult.CarFileName);
+        let carName: string;
+        let carBrand: string;
+        let carClass: string;
+        let carColorClass: string;
+        if (isCarExists) {
+            carName = isCarExists.brand + " " + isCarExists.model;
+            carBrand = isCarExists.imgbrand;
+            carClass = getClassShortName(isCarExists.subclass);
+            carColorClass = getColorClass(isCarExists.subclass);
+        } else {
+            carName = itemResult.CarFileName;
+            carBrand = "";
+            carClass = "";
+            carColorClass = "";
+        }
+
+        // Obtener tiempo total de carrera
+        let timeadjust;
+        if (itemResult.Pos !== -2) {
+            if (itemResult.TotalTime >= 0) {
+                timeadjust = itemResult.TotalTime + itemResult.Penalties;
+                const seconds = formatTwoIntegersPlusThreeDecimals(timeadjust % 60);
+                const minutes = formatTwoIntegers(Math.trunc((timeadjust / 60) % 60));
+                const hours = formatTwoIntegers(Math.trunc(timeadjust / 3600));
+                //console.log("Pos: "+pos+" ->"+hours+":"+minutes+":"+seconds);
+
+                if (Number(hours) > 0) {
+                    if (itemResult.Penalties !== 0) {
+                        timeadjust = hours + ":" + minutes + ":" + seconds + " <span class='rounded bg-[#da392b] text-xs px-1 py-0.5 ml-1'> + " + (itemResult.Penalties) + "s</span>";
+                    } else {
+                        timeadjust = hours + ":" + minutes + ":" + seconds;
+                    }
+                } else {
+                    if (itemResult.Penalties !== 0) {
+                        timeadjust = minutes + ":" + seconds + " <span class='rounded bg-[#da392b] text-xs px-1 py-0.5 ml-1'> + " + (itemResult.Penalties) + "s";
+                    } else {
+                        timeadjust = minutes + ":" + seconds;
+                    }
+                }
+            } else {
+                timeadjust = "No Time";
+            }
+        } else {
+            timeadjust = "DQ";
+        }
+
+        if (itemResult.Pos <= -3) {
+            timeadjust = "";
+        }
+
+        // Obtener numero de vueltas totales / vuelta rapida / neumatico
+        let vueltastotales = 0;
+        if (itemResult.Laps === undefined || itemResult.Laps === null || itemResult.Laps === 0) {
+            for (let itemLap of dlaps) {
+                if (itemLap.SteamID === itemResult.SteamID) {
+                    vueltastotales = itemLap.Laps.length;
+                }
+            }
+        } else {
+            vueltastotales = itemResult.Laps;
+        }
+
+        let tyre;
+        let cuts = 0;
+
+        for (let itemLap of dlaps) {
+            if (itemLap.SteamID === itemResult.SteamID) {
+                for (let itemLap2 of itemLap.Laps) {
+                    if (itemLap2.LapTime === itemResult.BestLap) {
+                        tyre = "(" + itemLap2.Tyre + ")";
+                    }
+                }
+            }
+        }
+
+        for (let itemLap of dlaps) {
+            if (itemLap.SteamID === itemResult.SteamID) {
+                cuts += itemLap.Laps.filter((lap) => lap.Cut > 0).length;
+            }
+        }
+
+        if (tyre === undefined || tyre === null || tyre === "") {
+            tyre = "(ND)";
+        }
+
+        let posicionFinal: string = "";
+
+        if (pos === 1) {
+            vueltasLider = vueltastotales;
+            posicionFinal = '1';
+        } else {
+            switch (itemResult.Pos) {
+                case -1: posicionFinal = 'DNF'; break;
+                case -2: posicionFinal = 'DQ'; break;
+                case -3: posicionFinal = 'DNS'; break;
+                case -4:
+                    switch (itemResult.Team) {
+                        case "STREAMING":
+                            posicionFinal = 'TV';
+                            break;
+                        case "ESP Racing Staff":
+                            posicionFinal = 'STAFF';
+                            break;
+                        case "Safety Car":
+                            posicionFinal = 'SC';
+                            break;
+                        default:
+                            posicionFinal = 'DNS';
+                            break;
+                    }
+                    break;
+                default:
+                    posicionFinal = pos.toString();
+            }
+            if (itemResult.Pos === -4 && itemResult.DriverName === "STREAMING") {
+                posicionFinal = 'TV';
+            }
+        }
+
+        let bestlap = itemResult.BestLap;
+        let secondsbl = formatTwoIntegersPlusThreeDecimals(bestlap % 60);
+        let minutesbl = formatTwoIntegers(Math.trunc((bestlap / 60) % 60));
+
+        //console.log("Mejor vuelta Usuario ", pos, ": " + bestlap);
+
+        let bestlapToString = "";
+        if (pos >= -1) {
+            bestlapToString = minutesbl.toString() + ":" + secondsbl.toString();
+        } else {
+            tyre = "";
+        }
+
+        if (itemResult.BestLap >= 999999.999) {
+            bestlapToString = "No Time";
+            tyre = "";
+        }
+        //bestlap = minutesbl.toString + ":" + secondsbl.toString;
+
+
+        // *** Intervalo de tiempo con el lider ***
+        let gap: string = "";
+        if (pos <= -2) {
+            gap = "";
+        } else if (postabla > 1 && vueltasLider === vueltastotales) {
+            const gapTime = ((itemResult.TotalTime + itemResult.Penalties) - (dresult[0].TotalTime + dresult[0].Penalties));
+            let secondsgap = formatTwoIntegersPlusThreeDecimals(gapTime % 60);
+            let minutesgap = formatTwoIntegers(Math.trunc((gapTime / 60) % 60));
+
+            if (minutesgap === "00") {
+                gap = "+ " + secondsgap;
+            } else {
+                gap = "+ " + minutesgap + ":" + secondsgap;
+            }
+        } else if (postabla > 1 && vueltasLider !== vueltastotales) {
+            gap = "+ " + (vueltasLider - vueltastotales) + "L";
+        } else if (postabla === 1) {
+            gap = "";
+        }
+
+        // *** Intervalo con el anterior piloto ***
+        let interval: string = "";
+        let vueltasPrevio: number = 0;
+        if (postabla > 1) {
+            for (let itemLap of dlaps) {
+                if (itemLap.SteamID === dresult[postabla - 2].SteamID) {
+                    vueltasPrevio = itemLap.Laps.length;
+                }
+            }
+            if (pos <= -2) {
+                interval = "";
+            } else if (postabla > 1 && vueltasPrevio === vueltastotales) {
+                const intervalTime = (itemResult.TotalTime + itemResult.Penalties) - (dresult[postabla - 2].TotalTime + dresult[postabla - 2].Penalties);
+                let secondsInterval = formatTwoIntegersPlusThreeDecimals(intervalTime % 60);
+                let minutesInterval = formatTwoIntegers(Math.trunc((intervalTime / 60) % 60));
+
+                if (minutesInterval === "00") {
+                    interval = "+ " + secondsInterval;
+                } else {
+                    interval = "+ " + minutesInterval + ":" + secondsInterval;
+                }
+            } else if (postabla > 1 && vueltasPrevio !== vueltastotales) {
+                interval = "+ " + (vueltasPrevio - vueltastotales) + "L";
+            }
+        } else {
+            interval = "";
+        }
+
+        // *** Añadir puntuaciones a la tabla ***
+        let puntos: number = 0;
+        let puntosString: string = "";
+        if (pointsystemName !== "NoPoints") {
+            if (pos > 0) {
+                puntos = pointArray?.Puntuation[pos - 1] || 0;
+                if (bestlapDriverID === itemResult.SteamID) {
+                    puntos += pointArray?.FastestLap || 0;
+                }
+                puntosString = '+ ' + puntos.toString();
+            } else if (pos === -1) {
+                puntosString = "+ 0";
+            }
+        } else {
+            puntosString = "";
+        }
+
+        let flapClass = "";
+        if (bestlapDriverID === itemResult.SteamID) {
+            if (pos >= -1) {
+                flapClass = ' bg-[#c100ff] text-white font-bold rounded-full w-content px-5';
+            } else {
+                flapClass = '';
+            }
+        }
+
+        let vueltasTotalesString: string = "";
+        if (pos > -2) {
+            vueltasTotalesString = vueltastotales.toString();
+        } else {
+            vueltasTotalesString = "";
+        }
+        item = {
+            gridPositionClass: gridPositionClass,
+            gainsAbs: gainsAbs,
+            posicionFinal: posicionFinal,
+            driverName: itemResult.DriverName,
+            carColorClass: carColorClass,
+            carClass: carClass,
+            carBrand: carBrand,
+            carName: carName,
+            team: equipo,
+            totalLaps: vueltasTotalesString,
+            timeadjust: timeadjust,
+            gap: gap,
+            interval: interval,
+            flapClass: flapClass,
+            bestlapToString: bestlapToString,
+            tyre: tyre,
+            points: puntosString,
+            splitNumber: itemResult.Split
+        }
+        resultTableData.push(item);
+    }
+    return resultTableData;
+}
+
+
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initializeScript);
 } else {
@@ -1044,3 +1117,4 @@ document.addEventListener('astro:page-load', initializeScript);
 
 // Limpiar event listeners antes de descargar la página
 //document.addEventListener('astro:page-unload', cleanupEventListeners);
+
