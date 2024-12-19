@@ -127,235 +127,6 @@ function createRaceResults(dcars: CarJSON[], devents: EventJSON[], dlaps: LapJSO
   return rr;
 }
 
-function createRaceResultsMultipleSplits(dcarsS1: CarJSON[], deventsS1: EventJSON[], dlapsS1: LapJSON[], dresultS1: ResultJSON[], raceTimeS1: number, dcarsS2: CarJSON[], deventsS2: EventJSON[], dlapsS2: LapJSON[], dresultS2: ResultJSON[], raceTimeS2: number): RaceResult[] {
-  let rr: RaceResult[] = [];
-  let rrS1: RaceResult[] = [];
-  let rrS2: RaceResult[] = [];
-  let pos: number = 0; // Posición en la carrera:
-  //-1 = no clasificado
-  //-2 = descalificado
-  //-3 = no presentado
-  //-4 = SC o Staff ESP
-  //0 = no clasificado
-  //1 = primero
-  //2 = segundo, etc.
-  let vueltasLider = 0;
-
-  for (let itemR of dresultS1) {
-    pos++;
-    let uniqueRR: RaceResult = {} as RaceResult;
-
-    uniqueRR.SteamID = itemR.DriverGuid;
-    uniqueRR.CarId = itemR.CarId;
-    uniqueRR.DriverName = itemR.DriverName;
-    uniqueRR.Team = dcarsS1[itemR.CarId].Driver.Team;
-    uniqueRR.CarFileName = itemR.CarModel;
-    uniqueRR.TotalTime = (itemR.TotalTime / 1000);
-    uniqueRR.Penalties = (itemR.PenaltyTime / 1000000000);
-    uniqueRR.Laps = itemR.NumLaps;
-    uniqueRR.BestLap = (itemR.BestLap / 1000);
-    uniqueRR.LedLaps = 0;
-    uniqueRR.Ballast = itemR.BallastKG;
-    uniqueRR.Restrictor = itemR.Restrictor;
-    uniqueRR.Split = 1;
-
-    // Obtener posición de salida
-    if (itemR.GridPosition !== 0) {
-      uniqueRR.GridPosition = itemR.GridPosition;
-    } else {
-      uniqueRR.GridPosition = -1;
-    }
-
-    // Obtener posición final (uniqueRR.Pos)
-    if (pos === 1) {
-      uniqueRR.Pos = pos;
-      vueltasLider = uniqueRR.Laps;
-    } else {
-      if (itemR.Disqualified === true) {
-        uniqueRR.Pos = -2;
-      } else {
-        const timerace = (uniqueRR.TotalTime) + (uniqueRR.Penalties);
-        const timeCondition = (Math.trunc((timerace / 3600) % 60) + Math.trunc(timerace / 60));
-        if (timeCondition >= raceTimeS1) {
-          uniqueRR.Pos = pos;
-          // } else if (uniqueRR.Laps <= Math.trunc(vueltasLider * 0.9)){
-          //   uniqueRR.Pos = -1;
-        } else {
-          uniqueRR.Pos = -1;
-        }
-      }
-    }
-
-    //Obtener tiempo medio
-    let avg = 0;
-    let lapsWithoutCuts = 0;
-    for (let itemL of dlapsS1) {
-      if (itemL.CarId === uniqueRR.CarId) {
-        if (itemL.Cuts < 1) {
-          const currentLap = itemL.LapTime;
-          lapsWithoutCuts++;
-          avg += currentLap;
-        }
-      }
-    }
-    uniqueRR.AvgLap = (avg / lapsWithoutCuts) / 1000;
-
-    // Obtener colisiones (uniqueRR.Collisions)
-    uniqueRR.Collisions = 0;
-    for (let item4 of deventsS1) {
-      if (item4.CarId === uniqueRR.CarId) {
-        uniqueRR.Collisions += 1;
-      }
-    }
-    rrS1.push(uniqueRR);
-  }
-
-  for (let itemR of dresultS2) {
-    pos++;
-    let uniqueRR: RaceResult = {} as RaceResult;
-
-    uniqueRR.SteamID = itemR.DriverGuid;
-    uniqueRR.CarId = itemR.CarId;
-    uniqueRR.DriverName = itemR.DriverName;
-    uniqueRR.Team = dcarsS1[itemR.CarId].Driver.Team;
-    uniqueRR.CarFileName = itemR.CarModel;
-    uniqueRR.TotalTime = (itemR.TotalTime / 1000);
-    uniqueRR.Penalties = (itemR.PenaltyTime / 1000000000);
-    uniqueRR.Laps = itemR.NumLaps;
-    uniqueRR.BestLap = (itemR.BestLap / 1000);
-    uniqueRR.LedLaps = 0;
-    uniqueRR.Ballast = itemR.BallastKG;
-    uniqueRR.Restrictor = itemR.Restrictor;
-    uniqueRR.Split = 2;
-
-    // Obtener posición de salida
-    if (itemR.GridPosition !== 0) {
-      uniqueRR.GridPosition = itemR.GridPosition;
-    } else {
-      uniqueRR.GridPosition = -1;
-    }
-
-    // Obtener posición final (uniqueRR.Pos)
-    if (pos === 1) {
-      uniqueRR.Pos = pos;
-      vueltasLider = uniqueRR.Laps;
-    } else {
-      if (itemR.Disqualified === true) {
-        uniqueRR.Pos = -2;
-      } else {
-        const timerace = (uniqueRR.TotalTime) + (uniqueRR.Penalties);
-        const timeCondition = (Math.trunc((timerace / 3600) % 60) + Math.trunc(timerace / 60));
-        if (timeCondition >= raceTimeS2) {
-          uniqueRR.Pos = pos;
-          // } else if (uniqueRR.Laps <= Math.trunc(vueltasLider * 0.9)){
-          //   uniqueRR.Pos = -1;
-        } else {
-          uniqueRR.Pos = -1;
-        }
-      }
-    }
-
-    //Obtener tiempo medio
-    let avg = 0;
-    let lapsWithoutCuts = 0;
-    for (let itemL of dlapsS1) {
-      if (itemL.CarId === uniqueRR.CarId) {
-        if (itemL.Cuts < 1) {
-          const currentLap = itemL.LapTime;
-          lapsWithoutCuts++;
-          avg += currentLap;
-        }
-      }
-    }
-    uniqueRR.AvgLap = (avg / lapsWithoutCuts) / 1000;
-
-    // Obtener colisiones (uniqueRR.Collisions)
-    uniqueRR.Collisions = 0;
-    for (let item4 of deventsS1) {
-      if (item4.CarId === uniqueRR.CarId) {
-        uniqueRR.Collisions += 1;
-      }
-    }
-    rrS2.push(uniqueRR);
-  }
-
-  for (let itemdC of dcarsS1) {
-    const carID = itemdC.CarId;
-    const driverFound = rrS1.some(result => result.CarId === carID);
-    if (!driverFound) {
-      if (itemdC.Driver.Name !== "") { //Si el piloto no tiene nombre, no se le añade a la lista
-        let uniqueRR: RaceResult = {} as RaceResult;
-        uniqueRR.SteamID = itemdC.Driver.Guid;
-        uniqueRR.CarId = itemdC.CarId;
-        uniqueRR.DriverName = itemdC.Driver.Name;
-        uniqueRR.Team = itemdC.Driver.Team;
-        uniqueRR.CarFileName = itemdC.Model;
-        uniqueRR.TotalTime = 0;
-        uniqueRR.Penalties = 0;
-        uniqueRR.Laps = 0;
-        uniqueRR.BestLap = 0;
-        uniqueRR.LedLaps = 0;
-        uniqueRR.Ballast = itemdC.BallastKG;
-        uniqueRR.Restrictor = itemdC.Restrictor;
-
-        //Diferenciar entre personal del staff y pilotos no presentados
-        if (itemdC.Driver.Team === "ESP Racing Staff" || itemdC.Driver.Team === "Safety Car" || itemdC.Driver.Team === "STREAMING" || itemdC.Driver.Name === "STREAMING") {
-          uniqueRR.Pos = -4;
-          uniqueRR.GridPosition = -4;
-
-        } else {
-          uniqueRR.GridPosition = -3;
-          uniqueRR.Pos = -3;
-        }
-        uniqueRR.AvgLap = 0;
-        uniqueRR.Collisions = 0;
-        uniqueRR.Ballast = itemdC.BallastKG;
-        uniqueRR.Restrictor = itemdC.Restrictor;
-        rrS1.push(uniqueRR);
-      }
-    }
-  }
-
-  for (let itemdC of dcarsS2) {
-    const carID = itemdC.CarId;
-    const driverFound = rrS2.some(result => result.CarId === carID);
-    if (!driverFound) {
-      if (itemdC.Driver.Name !== "") { //Si el piloto no tiene nombre, no se le añade a la lista
-        let uniqueRR: RaceResult = {} as RaceResult;
-        uniqueRR.SteamID = itemdC.Driver.Guid;
-        uniqueRR.CarId = itemdC.CarId;
-        uniqueRR.DriverName = itemdC.Driver.Name;
-        uniqueRR.Team = itemdC.Driver.Team;
-        uniqueRR.CarFileName = itemdC.Model;
-        uniqueRR.TotalTime = 0;
-        uniqueRR.Penalties = 0;
-        uniqueRR.Laps = 0;
-        uniqueRR.BestLap = 0;
-        uniqueRR.LedLaps = 0;
-        uniqueRR.Ballast = itemdC.BallastKG;
-        uniqueRR.Restrictor = itemdC.Restrictor;
-
-        //Diferenciar entre personal del staff y pilotos no presentados
-        if (itemdC.Driver.Team === "ESP Racing Staff" || itemdC.Driver.Team === "Safety Car" || itemdC.Driver.Team === "STREAMING" || itemdC.Driver.Name === "STREAMING") {
-          uniqueRR.Pos = -4;
-          uniqueRR.GridPosition = -4;
-
-        } else {
-          uniqueRR.GridPosition = -3;
-          uniqueRR.Pos = -3;
-        }
-        uniqueRR.AvgLap = 0;
-        uniqueRR.Collisions = 0;
-        uniqueRR.Ballast = itemdC.BallastKG;
-        uniqueRR.Restrictor = itemdC.Restrictor;
-        rrS2.push(uniqueRR);
-      }
-    }
-  }
-  rr = sortingPositionsMultipleSplits(rrS1, rrS2);
-  return rr;
-}
-
 function sortingPositionsMultipleSplits(rrS1: RaceResult[], rrS2: RaceResult[]): RaceResult[] {
   let rr: RaceResult[] = [];
 
@@ -374,6 +145,15 @@ function sortingPositionsMultipleSplits(rrS1: RaceResult[], rrS2: RaceResult[]):
   else if (!rrAux3 && rrAux4) rrAux5.concat(rrAux4);
   if (rrAux5) rr.concat(rrAux5);
 
+  // Pilotos no presentados
+  const rrAux9 = rrS1.filter((item) => item.Pos === -3);
+  const rrAux10 = rrS2.filter((item) => item.Pos === -3);
+  let rrAux11: RaceResult[] = [];
+  if (rrAux9 && rrAux10) rrAux11 = rrAux9.concat(rrAux10);
+  else if (rrAux9 && !rrAux10) rrAux11.concat(rrAux9);
+  else if (!rrAux9 && rrAux10) rrAux11.concat(rrAux10);
+  if (rrAux11) rr.concat(rrAux11);
+
   // Pilotos descalificados
   const rrAux6 = rrS1.filter((item) => item.Pos === -2);
   const rrAux7 = rrS2.filter((item) => item.Pos === -2);
@@ -383,14 +163,6 @@ function sortingPositionsMultipleSplits(rrS1: RaceResult[], rrS2: RaceResult[]):
   else if (!rrAux6 && rrAux7) rrAux8.concat(rrAux7);
   if (rrAux8) rr.concat(rrAux8);
 
-  // Pilotos no presentados
-  const rrAux9 = rrS1.filter((item) => item.Pos === -3);
-  const rrAux10 = rrS2.filter((item) => item.Pos === -3);
-  let rrAux11: RaceResult[] = [];
-  if (rrAux9 && rrAux10) rrAux11 = rrAux9.concat(rrAux10);
-  else if (rrAux9 && !rrAux10) rrAux11.concat(rrAux9);
-  else if (!rrAux9 && rrAux10) rrAux11.concat(rrAux10);
-  if (rrAux11) rr.concat(rrAux11);
 
   // Personal de Staff
   const rrAux12: RaceResult[] = rrS1.filter((item) => item.Pos === -4);
@@ -1090,7 +862,10 @@ export function createRaceDataMultipleSplits(dataFileS1: any, dataFileS2: any): 
   const dresultS2 = dataFileS2.Result;
   const dpenaltiesS2 = dataFileS2.Penalties;
 
-  rd.RaceResult = createRaceResultsMultipleSplits(dcarsS1, deventsS1, dlapsS1, dresultS1, dataFileS1.SessionConfig.time, dcarsS2, deventsS2, dlapsS2, dresultS2, dataFileS2.SessionConfig.time);
+  const rr1 = createRaceResults(dcarsS1, deventsS1, dlapsS1, dresultS1, dataFileS1.SessionConfig.time);
+  const rr2 = createRaceResults(dcarsS2, deventsS2, dlapsS2, dresultS2, dataFileS2.SessionConfig.time);
+  rd.RaceResult = sortingPositionsMultipleSplits(rr1, rr2);
+
   rd.RaceLaps = createRaceLapMultipleSplits(dlapsS1, dlapsS2, rd.RaceResult);
 
   if (dataFileS1.Version < 6) {
