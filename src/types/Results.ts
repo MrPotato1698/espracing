@@ -71,6 +71,7 @@ export interface BestSector{
   SectorNumber: number;
   DriverName: string;
   SteamID: string;
+  Split: number;
   CarFileName: string;
   BestSector: number;
 }
