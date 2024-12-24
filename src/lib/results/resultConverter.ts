@@ -6,7 +6,7 @@ interface DriverLapData {
   timestamp: number;
 }
 
-function createRaceResults(dcars: CarJSON[], devents: EventJSON[], dlaps: LapJSON[], dresult: ResultJSON[], raceTime: number): RaceResult[] {
+function createRaceResults(dcars: CarJSON[], devents: EventJSON[], dlaps: LapJSON[], dresult: ResultJSON[], raceTime: number, split: number): RaceResult[] {
   let rr: RaceResult[] = [];
   let pos: number = 0; // Posición en la carrera:
   //-1 = no clasificado
@@ -34,7 +34,7 @@ function createRaceResults(dcars: CarJSON[], devents: EventJSON[], dlaps: LapJSO
     uniqueRR.LedLaps = 0;
     uniqueRR.Ballast = itemR.BallastKG;
     uniqueRR.Restrictor = itemR.Restrictor;
-    uniqueRR.Split = 1;
+    uniqueRR.Split = split;
 
     // Obtener posición de salida
     if (itemR.GridPosition !== 0) {
@@ -133,47 +133,51 @@ function sortingPositionsMultipleSplits(rrS1: RaceResult[], rrS2: RaceResult[]):
   // Posiciones Normales, pilotos con carrera completa
   const rrAux1 = rrS1.filter((item) => item.Pos > 0);
   const rrAux2 = rrS2.filter((item) => item.Pos > 0);
-  if (rrAux1) rr.concat(rrAux1);
-  if (rrAux2) rr.concat(rrAux2);
+
+  if (rrAux1.length > 0) rr = rr.concat(rrAux1);
+  if (rrAux2.length > 0) rr = rr.concat(rrAux2);
 
   // Pilotos que no han completado la carrera
   const rrAux3 = rrS1.filter((item) => item.Pos === -1);
   const rrAux4 = rrS2.filter((item) => item.Pos === -1);
+
   let rrAux5: RaceResult[] = [];
-  if (rrAux3 && rrAux4) rrAux5 = rrAux3.concat(rrAux4).sort((a, b) => (a.TotalTime + a.Penalties) - (b.TotalTime + b.Penalties));
-  else if (rrAux3 && !rrAux4) rrAux5.concat(rrAux3);
-  else if (!rrAux3 && rrAux4) rrAux5.concat(rrAux4);
-  if (rrAux5) rr.concat(rrAux5);
+  if (rrAux3.length > 0 && rrAux4.length > 0) rrAux5 = rrAux3.concat(rrAux4).sort((a, b) => (a.TotalTime + a.Penalties) - (b.TotalTime + b.Penalties));
+  else if (rrAux3.length > 0 && rrAux4.length <= 0) rrAux5 = rrAux5.concat(rrAux3);
+  else if (rrAux3.length <= 0 && rrAux4.length > 0) rrAux5 = rrAux5.concat(rrAux4);
+  if (rrAux5.length > 0) rr =  rr.concat(rrAux5);
 
   // Pilotos no presentados
   const rrAux9 = rrS1.filter((item) => item.Pos === -3);
   const rrAux10 = rrS2.filter((item) => item.Pos === -3);
+
   let rrAux11: RaceResult[] = [];
-  if (rrAux9 && rrAux10) rrAux11 = rrAux9.concat(rrAux10);
-  else if (rrAux9 && !rrAux10) rrAux11.concat(rrAux9);
-  else if (!rrAux9 && rrAux10) rrAux11.concat(rrAux10);
-  if (rrAux11) rr.concat(rrAux11);
+  if (rrAux9.length > 0 && rrAux10.length > 0) rrAux11 = rrAux9.concat(rrAux10);
+  else if (rrAux9.length > 0 && !(rrAux10.length > 0)) rrAux11 = rrAux11.concat(rrAux9);
+  else if (!(rrAux9.length > 0) && rrAux10.length > 0) rrAux11 = rrAux11.concat(rrAux10);
+  if (rrAux11.length > 0) rr = rr.concat(rrAux11);
 
   // Pilotos descalificados
   const rrAux6 = rrS1.filter((item) => item.Pos === -2);
   const rrAux7 = rrS2.filter((item) => item.Pos === -2);
-  let rrAux8: RaceResult[] = [];
-  if (rrAux6 && rrAux7) rrAux8 = rrAux6.concat(rrAux7).sort((a, b) => (a.TotalTime + a.Penalties) - (b.TotalTime + b.Penalties));
-  else if (rrAux6 && !rrAux7) rrAux8.concat(rrAux6);
-  else if (!rrAux6 && rrAux7) rrAux8.concat(rrAux7);
-  if (rrAux8) rr.concat(rrAux8);
 
+  let rrAux8: RaceResult[] = [];
+  if (rrAux6.length > 0 && rrAux7.length > 0) rrAux8 = rrAux6.concat(rrAux7).sort((a, b) => (a.TotalTime + a.Penalties) - (b.TotalTime + b.Penalties));
+  else if (rrAux6.length > 0 && !(rrAux7.length > 0)) rrAux8 = rrAux8.concat(rrAux6);
+  else if (!(rrAux6.length > 0) && rrAux7.length > 0) rrAux8 = rrAux8.concat(rrAux7);
+  if (rrAux8.length > 0) rr =  rr.concat(rrAux8);
 
   // Personal de Staff
   const rrAux12: RaceResult[] = rrS1.filter((item) => item.Pos === -4);
   const rrAux13: RaceResult[] = rrS2.filter((item) => item.Pos === -4);
+
   let rrAux14: RaceResult[] = [];
-  if (rrAux12 && rrAux13) {
-    const rrAux15 = rrAux13.filter(item => !rrAux12.some(item2 => item2.SteamID === item.SteamID));
+  if (rrAux12.length > 0 && rrAux13.length > 0) {
+    const rrAux15 = rrAux13.filter(item => !rrAux12.some(item2 => item2.SteamID === item.SteamID || item2.Team === item.Team));
     rrAux14 = rrAux12.concat(rrAux15);
-  } else if (rrAux12 && !rrAux13) rrAux14.concat(rrAux12);
-  else if (!rrAux12 && rrAux13) rrAux14.concat(rrAux13);
-  if (rrAux14) rr.concat(rrAux14);
+  } else if (rrAux12.length > 0 && !(rrAux13.length > 0)) rrAux14 = rrAux14.concat(rrAux12);
+  else if (!(rrAux12.length > 0) && rrAux13.length > 0) rrAux14 = rrAux14.concat(rrAux13);
+  if (rrAux14.length > 0) rr = rr.concat(rrAux14);
 
   return rr;
 }
@@ -183,8 +187,6 @@ function createRaceLap(dlaps: LapJSON[], rr: RaceResult[]): RaceLap[] {
   let i = 0;
   for (let driver of rr) {
     i++;
-    //console.log('Driver ',i,': ', driver);
-
     let uniqueRL: RaceLap = {} as RaceLap;
 
     if (driver.Pos === -3 || driver.Pos === -4) {
@@ -197,6 +199,7 @@ function createRaceLap(dlaps: LapJSON[], rr: RaceResult[]): RaceLap[] {
     } else {
       uniqueRL.DriverName = driver.DriverName;
       uniqueRL.SteamID = driver.SteamID;
+      uniqueRL.Split = driver.Split;
       uniqueRL.Laps = createLap(dlaps, driver);
       uniqueRL.Average = getAvgLapTimes(uniqueRL.Laps);
       uniqueRL.Best = getBestLapTime(uniqueRL.Laps);
@@ -214,10 +217,9 @@ function createRaceLap(dlaps: LapJSON[], rr: RaceResult[]): RaceLap[] {
 function createRaceLapMultipleSplits(dlapsS1: LapJSON[], dlapsS2: LapJSON[], rr: RaceResult[]): RaceLap[] {
   let rl: RaceLap[] = [];
   let i = 0;
+
   for (let driver of rr) {
     i++;
-    //console.log('Driver ',i,': ', driver);
-
     let uniqueRL: RaceLap = {} as RaceLap;
 
     if (driver.Pos === -3 || driver.Pos === -4) {
@@ -230,6 +232,7 @@ function createRaceLapMultipleSplits(dlapsS1: LapJSON[], dlapsS2: LapJSON[], rr:
     } else {
       uniqueRL.DriverName = driver.DriverName;
       uniqueRL.SteamID = driver.SteamID;
+      uniqueRL.Split = driver.Split;
       if (driver.Split === 1) {
         uniqueRL.Laps = createLap(dlapsS1, driver);
       } else {
@@ -239,9 +242,9 @@ function createRaceLapMultipleSplits(dlapsS1: LapJSON[], dlapsS2: LapJSON[], rr:
       uniqueRL.Best = getBestLapTime(uniqueRL.Laps);
       uniqueRL.Optimal = getBestTheoricalTime(uniqueRL.Laps);
     }
+
     rl.push(uniqueRL);
   }
-
   // Obtener el valor de la posición de cada piloto en cada vuelta
   const rlAdjust = getPositionInEveryLap(rl);
 
@@ -286,7 +289,6 @@ function getAvgLapTimes(rl: Lap[]): number[] {
   const avgSectorTimes = totalSectors.map(total => total / rl.length);
 
   avgTimes.push(avgLapTime, ...avgSectorTimes);
-
   return avgTimes;
 }
 
@@ -309,7 +311,6 @@ function getBestLapTime(rl: Lap[]): number[] {
 
 function getBestTheoricalTime(rl: Lap[]): number[] {
   let bestTheoricalTime: number[] = [];
-
   let bestLapTime = Number.MAX_VALUE;
   let bestSectorTimes: number[] = rl[0].Sector.map(() => Number.MAX_VALUE);
 
@@ -336,8 +337,8 @@ function getBestTheoricalTime(rl: Lap[]): number[] {
 
 function getPositionInEveryLap(rlAux: RaceLap[]): RaceLap[] {
   let rl: RaceLap[] = rlAux;
-  let rl1: RaceLap[] = rlAux.filter((item) => item.Split === 1);
-  let rl2: RaceLap[] = rlAux.filter((item) => item.Split === 2);
+  let rl1: RaceLap[] = rl.filter((item) => item.Split === 1);
+  let rl2: RaceLap[] = rl.filter((item) => item.Split === 2);
 
   for (let i = 0; i < rl1[0].Laps.length; i++) {
     let driver: DriverLapData[] = [];
@@ -519,6 +520,7 @@ function createBestSector(rl: RaceLap[]): BestSector[] {
             if (itemL.Sector[s] < uniqueSector.BestSector) {
               uniqueSector.DriverName = itemRL.DriverName;
               uniqueSector.SteamID = itemRL.SteamID;
+              uniqueSector.Split = itemRL.Split;
               uniqueSector.CarFileName = itemL.CarFileName;
               uniqueSector.BestSector = itemL.Sector[s];
             }
@@ -676,7 +678,7 @@ function createRaceConfig(data: GeneralDataJSON, rr: RaceResult[], bestLap: Best
 
 function createRaceConfigMultipleSplits(dataS1: GeneralDataJSON, dataS2: GeneralDataJSON, rr: RaceResult[], bestLap: BestLap): RaceConfig {
   let rc: RaceConfig = {} as RaceConfig;
-  rc.RaceID = dataS1.SessionFile+"#"+dataS2.SessionFile;
+  rc.RaceID = dataS1.SessionFile + "#" + dataS2.SessionFile;
   rc.Date = dataS1.Date;
   rc.Session = dataS1.Type;
   rc.Track = dataS1.TrackName;
@@ -729,72 +731,111 @@ function calculateGridPosition(rr: RaceResult[], rl: RaceLap[]): RaceResult[] {
   let rrAdjusted: RaceResult[] = rr;
   for (let itemRR of rrAdjusted) {
     let gridPosition = 0;
-    for (let itemRL of rl) {
-      if (itemRR.SteamID === itemRL.SteamID) {
-        if (itemRL.Laps.length > 0) {
-          gridPosition = itemRL.Laps[0].Position;
-        }
-      }
-    }
+    const matchingLap = rl.find(itemRL => itemRL.SteamID === itemRR.SteamID && itemRL.Laps.length > 0);
+    gridPosition = matchingLap ? matchingLap.Laps[0].Position : gridPosition;
     itemRR.GridPosition = gridPosition;
   }
 
   return rrAdjusted;
 }
 
-function getGapToFirst(rr: RaceResult[], rl: RaceLap[]): RaceLap[] {
-  let gapToFirst: RaceLap[] = rl;
-  const numberOfLaps = gapToFirst[0].Laps.length;
+function getGapToFirst(rr: RaceResult[], rl: RaceLap[], numberOfSplits: number): RaceLap[] {
+  let raceLaps: RaceLap[] = rl;
 
-  for (let lapIndex = 0; lapIndex < numberOfLaps; lapIndex++) {
-    let firstLapTime: number | null = null;
+  // Encontrar el tiempo por vuelta del coche en primera posición para la vuelta actual
+  const numberOfLapsBySplit = Array.from({ length: numberOfSplits }, (_, splitIndex) => {
+    const splitNumber = splitIndex + 1;
+    const firstDriverInSplit = rr.find(driver => driver.Split === splitNumber);
+    if (!firstDriverInSplit) return 0;
 
-    // Encontrar el tiempo por vuelta del coche en primera posición para la vuelta actual
-    for (let driverLap of gapToFirst) {
-      if (driverLap.Laps[lapIndex] && driverLap.Laps[lapIndex].Position === 1) {
-        firstLapTime = driverLap.Laps[lapIndex].LapTime;
-        break;
+    const matchingLaps = raceLaps.find(item => item.SteamID === firstDriverInSplit.SteamID);
+    return matchingLaps ? matchingLaps.Laps.length : 0;
+  });
+
+  for (let splitIndex = 0; splitIndex < numberOfSplits; splitIndex++) {
+    const currentSplit = splitIndex + 1;
+    const numberOfLaps = numberOfLapsBySplit[splitIndex];
+
+    for (let lapIndex = 0; lapIndex < numberOfLaps; lapIndex++) { //Recorrer cada vuelta
+      let firstLapTime: number | null = null;
+
+      // Buscar el tiempo del líder en este split
+      for (let driverLap of raceLaps) {
+        if (driverLap.Laps[lapIndex] && driverLap.Laps[lapIndex].Position === 1 && driverLap.Split === currentSplit) {
+          firstLapTime = driverLap.Laps[lapIndex].LapTime;
+          break;
+        }
       }
-    }
 
-    if (firstLapTime !== null) {
-      // Calcular la diferencia para cada piloto con respecto al coche en primera posición
-      for (let driverLap of gapToFirst) {
-        if (driverLap.Laps[lapIndex]) {
-          if (lapIndex > 0) {
-            const lastLapGap = driverLap.Laps[lapIndex - 1].GaptoFirst;
-            driverLap.Laps[lapIndex].GaptoFirst = parseFloat(((driverLap.Laps[lapIndex].LapTime - firstLapTime) + lastLapGap).toFixed(3)); // Convertir a segundos
-            if (driverLap.Laps[lapIndex].GaptoFirst <= 0 || driverLap.Laps[lapIndex].Position === 1) {
-              driverLap.Laps[lapIndex].GaptoFirst = 0;
+      if (firstLapTime !== null) {
+        // Calcular gaps para cada piloto en este split
+        for (let driverLap of raceLaps) {
+          if (driverLap.Laps[lapIndex] && driverLap.Split === currentSplit) {
+            if (lapIndex > 0) {
+              const lastLapGap = driverLap.Laps[lapIndex - 1].GaptoFirst;
+              driverLap.Laps[lapIndex].GaptoFirst = parseFloat(
+                ((driverLap.Laps[lapIndex].LapTime - firstLapTime) + lastLapGap).toFixed(3));
+
+              if (driverLap.Laps[lapIndex].GaptoFirst <= 0 || driverLap.Laps[lapIndex].Position === 1) {
+                driverLap.Laps[lapIndex].GaptoFirst = 0;
+              }
+
+            } else {
+              driverLap.Laps[lapIndex].GaptoFirst = parseFloat(
+                (driverLap.Laps[lapIndex].LapTime - firstLapTime).toFixed(3));
             }
-          } else {
-            driverLap.Laps[lapIndex].GaptoFirst = parseFloat((driverLap.Laps[lapIndex].LapTime - firstLapTime).toFixed(3)); // Convertir a segundos
           }
         }
       }
     }
   }
-  return gapToFirst;
+  return raceLaps;
 }
 
 function recalculatePositions(rr: RaceResult[], raceTime: number): RaceResult[] {
-  let vueltasLider = 0;
   for (let item of rr)
-    if (item.Pos === 1) {
-      item.Pos = 1;
-      vueltasLider = item.Laps;
-    } else {
+    if (item.Split === 1) {
       if (item.Pos === -2) {
         item.Pos = -2;
+
       } else {
         const timerace = (item.TotalTime) + (item.Penalties);
         const timeCondition = (Math.trunc((timerace / 3600) % 60) + Math.trunc(timerace / 60));
         if (timeCondition >= raceTime) {
           item.Pos = item.Pos;
-          // } else if (uniqueRR.Laps <= Math.trunc(vueltasLider * 0.9)){
-          //   uniqueRR.Pos = -1;
         } else {
-          item.Pos = -1;
+          if (item.Team === 'ESP Racing Staff' || item.Team === 'STREAMING' || item.Team === 'Safety Car' || item.DriverName === 'STREAMING') {
+            item.Pos = -4;    // Organización
+          } else {
+            if (item.TotalTime <= 0) {
+              item.Pos = -3;  // DNS
+            } else {
+              item.Pos = -1;  // DNF
+            }
+          }
+        }
+      }
+
+    } else { // Split diferente a 1
+      if (item.Pos === -2) {
+        item.Pos = -2;
+
+      } else {
+        const timerace = (item.TotalTime) + (item.Penalties);
+        const timeCondition = (Math.trunc((timerace / 3600) % 60) + Math.trunc(timerace / 60));
+        if (timeCondition >= raceTime) {
+          item.Pos = item.Pos;
+
+        } else {
+          if (item.Team === 'ESP Racing Staff' || item.Team === 'STREAMING' || item.Team === 'Safety Car' || item.DriverName === 'STREAMING') {
+            item.Pos = -4;    // Organización
+          } else {
+            if (item.TotalTime <= 0) {
+              item.Pos = -3;  // DNS
+            } else {
+              item.Pos = -1;  // DNF
+            }
+          }
         }
       }
     }
@@ -811,9 +852,8 @@ export function createRaceData(dataFile: any): RaceData {
   const dresult = dataFile.Result;
   //const dpenalties = datos.Penalties;
 
-  rd.RaceResult = createRaceResults(dcars, devents, dlaps, dresult, dataFile.SessionConfig.time);
+  rd.RaceResult = createRaceResults(dcars, devents, dlaps, dresult, dataFile.SessionConfig.time, 1);
   rd.RaceLaps = createRaceLap(dlaps, rd.RaceResult);
-
   if (dataFile.Version < 6) {
     rd.RaceResult = calculateNumLaps(rd.RaceResult, rd.RaceLaps);
   }
@@ -832,7 +872,7 @@ export function createRaceData(dataFile: any): RaceData {
     rd.RaceResult = calculateGridPosition(rd.RaceResult, rd.RaceLaps);
   }
 
-  rd.RaceLaps = getGapToFirst(rd.RaceResult, rd.RaceLaps);
+  rd.RaceLaps = getGapToFirst(rd.RaceResult, rd.RaceLaps, rd.RaceConfig.NumberofSplits);
 
   rd.RaceResult.map((itemRD) => {
     if (itemRD.Laps === 0) {
@@ -862,8 +902,9 @@ export function createRaceDataMultipleSplits(dataFileS1: any, dataFileS2: any): 
   const dresultS2 = dataFileS2.Result;
   const dpenaltiesS2 = dataFileS2.Penalties;
 
-  const rr1 = createRaceResults(dcarsS1, deventsS1, dlapsS1, dresultS1, dataFileS1.SessionConfig.time);
-  const rr2 = createRaceResults(dcarsS2, deventsS2, dlapsS2, dresultS2, dataFileS2.SessionConfig.time);
+  const rr1 = createRaceResults(dcarsS1, deventsS1, dlapsS1, dresultS1, dataFileS1.SessionConfig.time, 1);
+  const rr2 = createRaceResults(dcarsS2, deventsS2, dlapsS2, dresultS2, dataFileS2.SessionConfig.time, 2);
+
   rd.RaceResult = sortingPositionsMultipleSplits(rr1, rr2);
 
   rd.RaceLaps = createRaceLapMultipleSplits(dlapsS1, dlapsS2, rd.RaceResult);
@@ -874,6 +915,7 @@ export function createRaceDataMultipleSplits(dataFileS1: any, dataFileS2: any): 
 
   rd.BestLap = createBestLap(rd.RaceLaps);
   rd.Consistency = createConsistency(rd.RaceResult, rd.RaceLaps);
+
   rd.BestSector = createBestSector(rd.RaceLaps);
   rd.Incident = createIncidentMultipleSplits(deventsS1, deventsS2);
 
@@ -882,12 +924,11 @@ export function createRaceDataMultipleSplits(dataFileS1: any, dataFileS2: any): 
   rd.RaceConfig = createRaceConfigMultipleSplits(dataFileS1, dataFileS2, rd.RaceResult, rd.BestLap[0]);
   rd.RaceConfig.NumberofSplits = 2;
 
-  //TODO: Revisar de aquí hacia abajo
   if (rd.RaceResult[0].GridPosition === -1) {
     rd.RaceResult = calculateGridPosition(rd.RaceResult, rd.RaceLaps);
   }
 
-  rd.RaceLaps = getGapToFirst(rd.RaceResult, rd.RaceLaps);
+  rd.RaceLaps = getGapToFirst(rd.RaceResult, rd.RaceLaps, rd.RaceConfig.NumberofSplits);
 
   rd.RaceResult.map((itemRD) => {
     if (itemRD.Laps === 0) {
