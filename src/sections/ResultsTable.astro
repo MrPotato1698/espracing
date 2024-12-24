@@ -1,12 +1,12 @@
 ---
-import { turso } from "@/turso";
+import { supabase } from "@/db/supabase";
 
 interface Race {
-  ChampID: string;
-  ChampName: string;
   RaceName: string;
   filename: string;
-  pointsystem: string;
+  pointsystem: number;
+  ChampID: string;
+  ChampName: string;
 }
 
 interface Championship {
@@ -22,21 +22,39 @@ const { actualchamp } = Astro.props;
 
 let resultSet;
 
-if (actualchamp==="true") {
-  const lastchamp = await turso.execute(
-    "SELECT MAX(championship) AS lastchamp FROM Race"
-  );
+if (actualchamp === "true") {
+  const { data: lastChampData } = await supabase
+    .from("championship")
+    .select("id")
+    .order("id", { ascending: false })
+    .single();
 
-  resultSet = await turso.execute(
-    `SELECT DISTINCT R.name AS RaceName, R.filename, R.pointsystem, C.name AS ChampName, C.id AS ChampID FROM Championship AS C INNER JOIN Race AS R ON C.id = R.championship WHERE C.id = ${lastchamp.rows[0].lastchamp}`
-  );
+  if (!lastChampData) {
+    console.log("No hay datos");
+  } else {
+    const { data: resultSetData } = await supabase
+      .from("race")
+      .select("name, filename, pointsystem, championship!inner(id, name)")
+      .eq("championship", lastChampData.id);
+
+    resultSet = resultSetData;
+  }
+
 } else {
-  resultSet = await turso.execute(
-    "SELECT DISTINCT R.name AS RaceName, R.filename, R.pointsystem, C.name AS ChampName, C.id AS ChampID FROM Championship AS C INNER JOIN Race AS R ON C.id = R.championship"
-  );
+  const { data: resultSetData } = await supabase
+    .from("race")
+    .select("name, filename, pointsystem, championship!inner(id, name)");
+
+  resultSet = resultSetData;
 }
 
-const RacesData: Race[] = resultSet.rows as unknown as Race[];
+const RacesData: Race[] = (resultSet ?? []).map(race => ({
+  RaceName: race.name ?? '',
+  filename: race.filename,
+  pointsystem: race.pointsystem,
+  ChampID: race.championship.id.toString(),
+  ChampName: race.championship.name ?? ''
+}));
 
 let racesByChampionship: { [key: string]: Championship } = {};
 
@@ -59,15 +77,18 @@ if (RacesData.length == 0) {
   );
 }
 ---
-{actualchamp === "true" ? (
-  <p class="py-4 text-4xl font-bold text-center">
-    Selecciona la carrera a revisar
-  </p>
-) : (
-  <p class="py-4 text-4xl font-bold text-center">
-    Selecciona el campeonato y carrera pasada a revisar
-  </p>
-)}
+
+{
+  actualchamp === "true" ? (
+    <p class="py-4 text-4xl font-bold text-center">
+      Selecciona la carrera a revisar
+    </p>
+  ) : (
+    <p class="py-4 text-4xl font-bold text-center">
+      Selecciona el campeonato y carrera pasada a revisar
+    </p>
+  )
+}
 
 <select
   id="select-champs"
@@ -133,11 +154,7 @@ if (RacesData.length == 0) {
   </div>
 
   <div class="w-11/12 mx-auto mt-4 tablecharts">
-    <div
-      id="chartGaps"
-      class="border-2 rounded-lg border-[#da392b]"
-    >
-    </div>
+    <div id="chartGaps" class="border-2 rounded-lg border-[#da392b]"></div>
   </div>
 
   <div class="grid gap-2 mx-auto mt-4 sectorTables">

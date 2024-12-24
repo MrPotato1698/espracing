@@ -75,9 +75,9 @@ function initializeScript() {
             const datosRAW1 = await response1.json();
             const datosRAW2 = await response2.json();
             //console.log('DatosRAW a usar: ', datosRAW);
-
             //const datos: RaceData = createRaceData(datosRAW1);
             const datos: RaceData = createRaceDataMultipleSplits(datosRAW1, datosRAW2);
+            pointsystemName = 'Proto';
             console.log('Datos a usar: ', datos);
 
             const dresult: RaceResult[] = datos.RaceResult;
@@ -122,8 +122,8 @@ function initializeScript() {
             for (let i = 0; i < resultTable.length; i++) {
                 if (resultTable[i].splitNumber === 2 && !secondSplitInit) {
                     tablaResultados.innerHTML += `
-                            <tr class="bg-[#da392b]">
-                                <td colspan="14 class = "text-center font-medium">Segundo Split</td>
+                            <tr class="bg-[#da392b] text-center font-bold">
+                                <td colspan="14">Segundo Split</td>
                             </tr>
                     `;
                     secondSplitInit = true;
@@ -201,22 +201,36 @@ function initializeScript() {
             }
 
             // *** Cambios de posiciones ***
-            const seriesDataPositions = dlaps
+            // Crea un array para almacenar los datos de la serie para cada split
+            let seriesDataPositions: { name: string, data: number[] }[][] = [];
+
+            // Obtiene todos los splits de los resultados, sin duplicados
+            const splitsPositionChange = [...new Set(dresult.map(result => result.Split))];
+
+            // Inicializa un array para cada split
+            splitsPositionChange.forEach(() => seriesDataPositions.push([]));
+
+            // Mapea los datos para cada split
+            dlaps
                 .filter((lapData) => lapData.Laps.length > 0)
-                .map((lapData) => {
+                .forEach((lapData) => {
                     const driverResult = dresult.find(result => result.SteamID === lapData.SteamID);
-                    const gridPosition = driverResult ? driverResult.GridPosition : 0;
-                    return {
-                        name: lapData.DriverName,
-                        data: [gridPosition, ...lapData.Laps.map((lap) => lap.Position)],
-                    };
+                    if (driverResult) {
+                        const splitIndex = driverResult.Split - 1;
+                        const gridPosition = driverResult.GridPosition;
+
+                        seriesDataPositions[splitIndex].push({
+                            name: lapData.DriverName,
+                            data: [gridPosition, ...lapData.Laps.map((lap) => lap.Position)],
+                        });
+                    }
                 });
 
             const numlaps: number[] = Array.from({ length: dlaps[0].Laps.length + 1 }, (_, i) => i);
 
             var optionsChangePositions = {
                 title: {
-                    text: 'Cambios de posiciones',
+                    text: 'Cambios de posiciones (Split 1)',
                     align: 'center',
                     style: {
                         color: '#f9f9f9',
@@ -225,7 +239,7 @@ function initializeScript() {
                     },
                 },
 
-                series: seriesDataPositions,
+                series: seriesDataPositions[0],
                 colors: ['#2E93fA', '#66DA26', '#E91E63', '#FF9800', '#fff700', '#00ffd4', '#0036ff', '#e91ec4', '#9e57ff', '#ff0000', '#00ffbd', '#546E7A'],
 
                 chart: {
@@ -335,15 +349,31 @@ function initializeScript() {
             chartChangePosition.render();
 
             // *** Gaps durante las vueltas ***
-            const seriesDataGaps = dlaps.filter((lapData) => lapData.Laps.length > 0)
-                .map((lapData) => ({
-                    name: lapData.DriverName,
-                    data: lapData.Laps.map((lap) => lap.GaptoFirst),
-                }));
+            let seriesDataGaps: { name: string, data: number[] }[][] = [];
+
+            // Obtiene todos los splits de los resultados, sin duplicados
+            const splitsGapVariation = [...new Set(dresult.map(result => result.Split))];
+
+            // Inicializa un array para cada split
+            splitsGapVariation.forEach(() => seriesDataGaps.push([]));
+
+            // Mapea los datos para cada split
+            dlaps
+                .filter((lapData) => lapData.Laps.length > 0)
+                .forEach((lapData) => {
+                    const driverResult = dresult.find(result => result.SteamID === lapData.SteamID);
+                    if (driverResult) {
+                        const splitIndex = driverResult.Split - 1;
+                        seriesDataGaps[splitIndex].push({
+                            name: lapData.DriverName,
+                            data: lapData.Laps.map((lap) => lap.GaptoFirst),
+                        });
+                    }
+                });
 
             var optionsGaps = {
                 title: {
-                    text: 'Distancia al líder',
+                    text: 'Distancia al líder (Split 1)',
                     align: 'center',
                     style: {
                         color: '#f9f9f9',
@@ -352,7 +382,7 @@ function initializeScript() {
                     },
                 },
 
-                series: seriesDataGaps,
+                series: seriesDataGaps[0],
                 colors: ['#2E93fA', '#66DA26', '#546E7A', '#E91E63', '#FF9800', '#fff700', '#00ffd4', '#0036ff', '#e91ec4', '#9e57ff', '#ff0000', '#00ffbd'],
 
                 chart: {
@@ -464,6 +494,8 @@ function initializeScript() {
             chartGapsProgression.resetSeries();
             chartGapsProgression.render();
 
+            // Flag para indicar si hay más de un split
+            const flagMoreSplits: Boolean = dresult.some((driver) => driver.Split > 1);
 
             // *** Sectores ***
             const sectorsList = Array.from({ length: Math.max(...dbestsectors.map(sector => sector.SectorNumber)) }, (_, i) => i + 1)
@@ -515,29 +547,20 @@ function initializeScript() {
                             carColorClass = "";
                         }
 
-                        if (pos % 2 === 0) {
-                            sectorHTML += `
-                            <tr class="bg-[#0f0f0f] text-center">
-                                <td>${pos}</td>
-                                <td>${i.DriverName}</td>
+                        if (pos % 2 === 0) sectorHTML += `<tr class="bg-[#0f0f0f] text-center">`;
+                        else sectorHTML += `<tr class="bg-[#19191c] text-center">`;
+                        sectorHTML += `<td>${pos}</td>`;
+
+                        if(flagMoreSplits) sectorHTML += `<td>${i.DriverName} (s${i.Split})</td>`;
+                        else sectorHTML += `<td>${i.DriverName}</td>`;
+
+                        sectorHTML += `
                                 <td><span ${carColorClass}>${carClass}</span></td>
                                 <td><img class='w-4 justify-end' src='${carBrand}' alt=''></img></td>
                                 <td>${carName}</td>
                                 <td>${sectorTimeString}</td>
                                 <td>${gap}</td>
                             </tr>`;
-                        } else {
-                            sectorHTML += `
-                            <tr class="bg-[#19191c] text-center">
-                                <td>${pos}</td>
-                                <td>${i.DriverName}</td>
-                                <td><span ${carColorClass}>${carClass}</span></td>
-                                <td><img class='w-4 justify-end' src='${carBrand}' alt=''></img></td>
-                                <td>${carName}</td>
-                                <td>${sectorTimeString}</td>
-                                <td>${gap}</td>
-                            </tr>`;
-                        }
                     }
                     sectorHTML += `</tbody></table>`;
                     sectorTable.innerHTML = sectorHTML;
@@ -680,8 +703,15 @@ function initializeScript() {
 
                 if (pos >= -3) {
                     tablaIndividualesHTML += `<div class = "mt-8">
-                        <div class="text-center bg-[#19191c] rounded-lg py-5">
-                            <p class = "text-3xl font-bold border-b border-[#da392b] w-fit mx-auto mb-2">${driverName}</p>
+                        <div class="text-center bg-[#19191c] rounded-lg py-5">`;
+                        if(flagMoreSplits){
+                        tablaIndividualesHTML += `
+                            <p class = "text-3xl font-bold border-b border-[#da392b] w-fit mx-auto mb-2">${driverName} (Split ${itemRL.Split})</p>`;
+                        } else{
+                            tablaIndividualesHTML += `
+                            <p class = "text-3xl font-bold border-b border-[#da392b] w-fit mx-auto mb-2">${driverName}</p>`;
+                        }
+                            tablaIndividualesHTML += `
                             <div class = "grid grid-cols-1">
                                 <p class="text-2xl font-semibold align-middle">Coche: ${carName}</p>
                                 <div class = "block">
@@ -824,6 +854,16 @@ function getResultTableData(datos: RaceData, pointsystemName: String, pointArray
     let postabla: number = 0;
     let vueltasLider: number = 0;
 
+    // Obtener el número de pilotos por split, que hayan terminado la carrera
+    const driversPerSplitQualified = dresult.reduce((acc: number[], driver) => {
+        if (driver.Pos > 0) {
+            const splitIndex = driver.Split - 1;
+            if (!acc[splitIndex]) acc[splitIndex] = 0;
+            acc[splitIndex]++;
+        }
+        return acc;
+    }, []);
+
     // *** Mejor vuelta de carrera ***
     const bestlapDriverID = dbestlaps[0].SteamID;
 
@@ -831,9 +871,11 @@ function getResultTableData(datos: RaceData, pointsystemName: String, pointArray
         let item: ResultTableData;
         postabla++;
         pos = itemResult.Pos;
-        //console.log('Item ',pos, '. Nombre: ',item.DriverName);
         let gridPositionClass = "";
-        let gains = itemResult.GridPosition - postabla
+
+        // Obtener ganancias/perdidas de posición
+        const positionsOtherSplits = driversPerSplitQualified.slice(0, itemResult.Split - 1).reduce((sum, current) => sum + current, 0);
+        let gains = itemResult.GridPosition - postabla + positionsOtherSplits;
         let gainsAbs: string = Math.abs(gains).toString();
         if ((gains > 0) && (pos > -2)) {
             gridPositionClass = '<svg viewBox="0 0 24 24" fill="#00f000" class="w-6 float mx-auto"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M11.375 6.22l-5 4a1 1 0 0 0 -.375 .78v6l.006 .112a1 1 0 0 0 1.619 .669l4.375 -3.501l4.375 3.5a1 1 0 0 0 1.625 -.78v-6a1 1 0 0 0 -.375 -.78l-5 -4a1 1 0 0 0 -1.25 0z" /></svg>';
@@ -878,7 +920,6 @@ function getResultTableData(datos: RaceData, pointsystemName: String, pointArray
                 const seconds = formatTwoIntegersPlusThreeDecimals(timeadjust % 60);
                 const minutes = formatTwoIntegers(Math.trunc((timeadjust / 60) % 60));
                 const hours = formatTwoIntegers(Math.trunc(timeadjust / 3600));
-                //console.log("Pos: "+pos+" ->"+hours+":"+minutes+":"+seconds);
 
                 if (Number(hours) > 0) {
                     if (itemResult.Penalties !== 0) {
@@ -977,8 +1018,6 @@ function getResultTableData(datos: RaceData, pointsystemName: String, pointArray
         let secondsbl = formatTwoIntegersPlusThreeDecimals(bestlap % 60);
         let minutesbl = formatTwoIntegers(Math.trunc((bestlap / 60) % 60));
 
-        //console.log("Mejor vuelta Usuario ", pos, ": " + bestlap);
-
         let bestlapToString = "";
         if (pos >= -1) {
             bestlapToString = minutesbl.toString() + ":" + secondsbl.toString();
@@ -990,15 +1029,16 @@ function getResultTableData(datos: RaceData, pointsystemName: String, pointArray
             bestlapToString = "No Time";
             tyre = "";
         }
-        //bestlap = minutesbl.toString + ":" + secondsbl.toString;
-
 
         // *** Intervalo de tiempo con el lider ***
         let gap: string = "";
         if (pos <= -2) {
             gap = "";
         } else if (postabla > 1 && vueltasLider === vueltastotales) {
-            const gapTime = ((itemResult.TotalTime + itemResult.Penalties) - (dresult[0].TotalTime + dresult[0].Penalties));
+            const splitLeaderTime = dresult.find(driver => driver.Split === itemResult.Split)?.TotalTime ?? 0;
+            const splitLeaderPenalties = dresult.find(driver => driver.Split === itemResult.Split)?.Penalties ?? 0;
+
+            const gapTime = ((itemResult.TotalTime + itemResult.Penalties) - (splitLeaderTime + splitLeaderPenalties));
             let secondsgap = formatTwoIntegersPlusThreeDecimals(gapTime % 60);
             let minutesgap = formatTwoIntegers(Math.trunc((gapTime / 60) % 60));
 
@@ -1006,6 +1046,9 @@ function getResultTableData(datos: RaceData, pointsystemName: String, pointArray
                 gap = "+ " + secondsgap;
             } else {
                 gap = "+ " + minutesgap + ":" + secondsgap;
+            }
+            if (gapTime === 0) {
+                gap = "";
             }
         } else if (postabla > 1 && vueltasLider !== vueltastotales) {
             gap = "+ " + (vueltasLider - vueltastotales) + "L";
