@@ -7,86 +7,189 @@ export type Json =
   | Json[]
 
 export type Database = {
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          operationName?: string
+          query?: string
+          variables?: Json
+          extensions?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
       car: {
         Row: {
-          brand: string | null
-          class: string | null
+          brand: number | null
+          class: number
           description: string | null
-          filename: string | null
+          filename: string
+          fuelLiterTime: number | null
           id: number
-          imgbrand: string | null
+          maxLiter: number | null
           model: string | null
           power: number | null
           torque: number | null
+          tyreTimeChange: number | null
           weight: number | null
           year: number | null
         }
         Insert: {
-          brand?: string | null
-          class?: string | null
+          brand?: number | null
+          class?: number
           description?: string | null
-          filename?: string | null
+          filename: string
+          fuelLiterTime?: number | null
           id: number
-          imgbrand?: string | null
+          maxLiter?: number | null
           model?: string | null
           power?: number | null
           torque?: number | null
+          tyreTimeChange?: number | null
           weight?: number | null
           year?: number | null
         }
         Update: {
-          brand?: string | null
-          class?: string | null
+          brand?: number | null
+          class?: number
           description?: string | null
-          filename?: string | null
+          filename?: string
+          fuelLiterTime?: number | null
           id?: number
-          imgbrand?: string | null
+          maxLiter?: number | null
           model?: string | null
           power?: number | null
           torque?: number | null
+          tyreTimeChange?: number | null
           weight?: number | null
           year?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "car_brand_fkey"
+            columns: ["brand"]
+            isOneToOne: false
+            referencedRelation: "carbrand"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "car_class_fkey"
+            columns: ["class"]
+            isOneToOne: false
+            referencedRelation: "carclass"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      carbrand: {
+        Row: {
+          foundation: number | null
+          id: number
+          imgbrand: string | null
+          location: string | null
+          name: string | null
+        }
+        Insert: {
+          foundation?: number | null
+          id?: number
+          imgbrand?: string | null
+          location?: string | null
+          name?: string | null
+        }
+        Update: {
+          foundation?: number | null
+          id?: number
+          imgbrand?: string | null
+          location?: string | null
+          name?: string | null
+        }
+        Relationships: []
+      }
+      carclass: {
+        Row: {
+          class_design: string | null
+          id: number
+          name: string | null
+          short_name: string | null
+        }
+        Insert: {
+          class_design?: string | null
+          id?: number
+          name?: string | null
+          short_name?: string | null
+        }
+        Update: {
+          class_design?: string | null
+          id?: number
+          name?: string | null
+          short_name?: string | null
         }
         Relationships: []
       }
       championship: {
         Row: {
           id: number
+          ischampionship: boolean | null
           key_search: string | null
           name: string | null
+          season: string | null
+          year: number
         }
         Insert: {
           id: number
+          ischampionship?: boolean | null
           key_search?: string | null
           name?: string | null
+          season?: string | null
+          year?: number
         }
         Update: {
           id?: number
+          ischampionship?: boolean | null
           key_search?: string | null
           name?: string | null
+          season?: string | null
+          year?: number
         }
         Relationships: []
       }
       circuit: {
         Row: {
-          filename: string | null
+          filename: string
           id: number
           location: string | null
           name: string | null
+          shortname: string | null
         }
         Insert: {
-          filename?: string | null
+          filename: string
           id: number
           location?: string | null
           name?: string | null
+          shortname?: string | null
         }
         Update: {
-          filename?: string | null
+          filename?: string
           id?: number
           location?: string | null
           name?: string | null
+          shortname?: string | null
         }
         Relationships: []
       }
@@ -94,7 +197,7 @@ export type Database = {
         Row: {
           capacity: number | null
           circuit: number
-          filename: string | null
+          filename: string
           id: number
           length: number | null
           name: string | null
@@ -102,7 +205,7 @@ export type Database = {
         Insert: {
           capacity?: number | null
           circuit: number
-          filename?: string | null
+          filename: string
           id: number
           length?: number | null
           name?: string | null
@@ -110,7 +213,7 @@ export type Database = {
         Update: {
           capacity?: number | null
           circuit?: number
-          filename?: string | null
+          filename?: string
           id?: number
           length?: number | null
           name?: string | null
@@ -127,33 +230,41 @@ export type Database = {
       }
       inscription: {
         Row: {
-          id: string
+          id: number
           position: string | null
+          profile: string | null
           race: string | null
-          user: string | null
           valid_laps: string | null
         }
         Insert: {
-          id: string
+          id: number
           position?: string | null
+          profile?: string | null
           race?: string | null
-          user?: string | null
           valid_laps?: string | null
         }
         Update: {
-          id?: string
+          id?: number
           position?: string | null
+          profile?: string | null
           race?: string | null
-          user?: string | null
           valid_laps?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "inscription_profile_fkey"
+            columns: ["profile"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       message: {
         Row: {
           description: string | null
-          discord: string | null
-          id: string
+          discord: string
+          id: number
           name_emissor: string
           name_receiver: string
           readed: boolean | null
@@ -161,29 +272,58 @@ export type Database = {
         }
         Insert: {
           description?: string | null
-          discord?: string | null
-          id: string
+          discord: string
+          id: number
           name_emissor: string
-          name_receiver: string
+          name_receiver?: string
           readed?: boolean | null
           region?: string | null
         }
         Update: {
           description?: string | null
-          discord?: string | null
-          id?: string
+          discord?: string
+          id?: number
           name_emissor?: string
           name_receiver?: string
           readed?: boolean | null
           region?: string | null
         }
+        Relationships: [
+          {
+            foreignKeyName: "message_name_receiver_fkey"
+            columns: ["name_receiver"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pointsystem: {
+        Row: {
+          fastestlap: number
+          id: number
+          name: string
+          points: string
+        }
+        Insert: {
+          fastestlap?: number
+          id?: number
+          name: string
+          points?: string
+        }
+        Update: {
+          fastestlap?: number
+          id?: number
+          name?: string
+          points?: string
+        }
         Relationships: []
       }
       profiles: {
         Row: {
-          avatar: string | null
+          avatar: string
           dnf: number | null
-          email: string | null
+          email: string
           flaps: number | null
           full_name: string | null
           id: string
@@ -192,18 +332,17 @@ export type Database = {
           podiums: number | null
           poles: number | null
           races: number | null
-          roleesp: string | null
-          steam_id: string | null
+          roleesp: number | null
+          steam_id: string
           team: number | null
           top10: number | null
           top5: number | null
-          updated_at: string | null
           wins: number | null
         }
         Insert: {
-          avatar?: string | null
+          avatar?: string
           dnf?: number | null
-          email?: string | null
+          email: string
           flaps?: number | null
           full_name?: string | null
           id: string
@@ -212,18 +351,17 @@ export type Database = {
           podiums?: number | null
           poles?: number | null
           races?: number | null
-          roleesp?: string | null
-          steam_id?: string | null
+          roleesp?: number | null
+          steam_id: string
           team?: number | null
           top10?: number | null
           top5?: number | null
-          updated_at?: string | null
           wins?: number | null
         }
         Update: {
-          avatar?: string | null
+          avatar?: string
           dnf?: number | null
-          email?: string | null
+          email?: string
           flaps?: number | null
           full_name?: string | null
           id?: string
@@ -232,20 +370,19 @@ export type Database = {
           podiums?: number | null
           poles?: number | null
           races?: number | null
-          roleesp?: string | null
-          steam_id?: string | null
+          roleesp?: number | null
+          steam_id?: string
           team?: number | null
           top10?: number | null
           top5?: number | null
-          updated_at?: string | null
           wins?: number | null
         }
         Relationships: [
           {
-            foreignKeyName: "profiles_id_fkey"
-            columns: ["id"]
-            isOneToOne: true
-            referencedRelation: "users"
+            foreignKeyName: "profiles_roleesp_fkey"
+            columns: ["roleesp"]
+            isOneToOne: false
+            referencedRelation: "role"
             referencedColumns: ["id"]
           },
           {
@@ -259,32 +396,72 @@ export type Database = {
       }
       race: {
         Row: {
-          championship: number | null
+          championship: number
           filename: string
           id: number
           name: string | null
+          orderinchamp: number
+          pointsystem: number
+          qualy_data: Json | null
+          race_data_1: Json | null
+          race_data_2: Json | null
+          splits: number
         }
         Insert: {
-          championship?: number | null
+          championship?: number
           filename: string
           id: number
           name?: string | null
+          orderinchamp?: number
+          pointsystem?: number
+          qualy_data?: Json | null
+          race_data_1?: Json | null
+          race_data_2?: Json | null
+          splits?: number
         }
         Update: {
-          championship?: number | null
+          championship?: number
           filename?: string
           id?: number
           name?: string | null
+          orderinchamp?: number
+          pointsystem?: number
+          qualy_data?: Json | null
+          race_data_1?: Json | null
+          race_data_2?: Json | null
+          splits?: number
         }
         Relationships: [
           {
-            foreignKeyName: "Race_championship_fkey"
+            foreignKeyName: "race_championship_fkey"
             columns: ["championship"]
             isOneToOne: false
             referencedRelation: "championship"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "race_pointsystem_fkey"
+            columns: ["pointsystem"]
+            isOneToOne: false
+            referencedRelation: "pointsystem"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      role: {
+        Row: {
+          id: number
+          name: string | null
+        }
+        Insert: {
+          id?: number
+          name?: string | null
+        }
+        Update: {
+          id?: number
+          name?: string | null
+        }
+        Relationships: []
       }
       team: {
         Row: {
@@ -306,6 +483,49 @@ export type Database = {
           name?: string
         }
         Relationships: []
+      }
+      teamsapplication: {
+        Row: {
+          id: number
+          team_manager: string
+          team_requesting: number
+          user_application: string
+        }
+        Insert: {
+          id?: number
+          team_manager?: string
+          team_requesting: number
+          user_application?: string
+        }
+        Update: {
+          id?: number
+          team_manager?: string
+          team_requesting?: number
+          user_application?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teamsapplication_team_manager_fkey"
+            columns: ["team_manager"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "teamsapplication_team_requesting_fkey"
+            columns: ["team_requesting"]
+            isOneToOne: false
+            referencedRelation: "team"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "teamsapplication_user_application_fkey"
+            columns: ["user_application"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
@@ -403,4 +623,19 @@ export type Enums<
   ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
     ? PublicSchema["Enums"][PublicEnumNameOrOptions]
+    : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof PublicSchema["CompositeTypes"]
+    | { schema: keyof Database },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof PublicSchema["CompositeTypes"]
+    ? PublicSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
