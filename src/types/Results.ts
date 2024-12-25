@@ -6,6 +6,8 @@ export interface RaceData{
   BestSector: BestSector [];
   Incident: Incident [];
   RaceConfig: RaceConfig;
+  RaceDriversResume: RaceDriversResume [];
+  RaceCarResume: RaceCarResume [];
 }
 
 export interface RaceResult {
