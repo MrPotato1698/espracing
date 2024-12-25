@@ -1,4 +1,5 @@
-import type { RaceData, RaceResult, RaceLap, Lap, BestLap, Consistency, BestSector, Incident, RaceConfig } from "@/types/Results";
+import { supabase } from "@/db/supabase";
+import type { RaceData, RaceResult, RaceLap, Lap, BestLap, Consistency, BestSector, Incident, RaceConfig, RaceDriversResume, RaceCarResume } from "@/types/Results";
 import type { GeneralDataJSON, CarJSON, EventJSON, LapJSON, ResultJSON } from "@/types/ResultsJSON";
 
 interface DriverLapData {
@@ -842,9 +843,44 @@ function recalculatePositions(rr: RaceResult[], raceTime: number): RaceResult[] 
   return rr;
 }
 
+function createRaceDriversResume(rr: RaceResult[], bl: BestLap[]): RaceDriversResume[] {
+  let rdr: RaceDriversResume[] = [];
+
+  for (let item of rr) {
+    let uniqueRDR: RaceDriversResume = {} as RaceDriversResume;
+    uniqueRDR.DriverName = item.DriverName;
+    uniqueRDR.Position = item.Pos;
+    uniqueRDR.BestLap = uniqueRDR.SteamID === bl[0].SteamID;
+    rdr.push(uniqueRDR);
+  }
+
+  return rdr;
+}
+
+// function createRaceCarResume(rr: RaceResult[]): RaceCarResume[] {
+//   let rcr: RaceCarResume[] = [];
+//   const carMap = new Map<string, number>();
+
+//   for (let item of rr) {
+//     carMap.set(item.CarFileName, (carMap.get(item.CarFileName) ?? 0) + 1);
+//   }
+
+//   for (const [car, count] of carMap) {
+//     const { data: carDataID } = await supabase.from('car').select('class').eq('filename', car).single();
+//     const uniqueRCR: RaceCarResume = {
+//       CarFileName: car,
+//       CarClassID: carDataID ? carDataID.class : 0,
+//       numberOfCars: count
+//     };
+//     rcr.push(uniqueRCR);
+//   }
+
+//   return rcr;
+// }
+
 // FUNCIONES A EXPORTAR
 
-export function createRaceData(dataFile: any): RaceData {
+export function createRaceData(dataFile: any): RaceData{
   let rd: RaceData = {} as RaceData;
   const dcars = dataFile.Cars as CarJSON[];
   const devents = dataFile.Events;
@@ -884,6 +920,8 @@ export function createRaceData(dataFile: any): RaceData {
   });
 
   rd.RaceResult = recalculatePositions(rd.RaceResult, dataFile.SessionConfig.time);
+  rd.RaceDriversResume = createRaceDriversResume(rd.RaceResult, rd.BestLap);
+  //rd.RaceCarResume = await createRaceCarResume(rd.RaceResult);
 
   return rd;
 }
@@ -940,6 +978,8 @@ export function createRaceDataMultipleSplits(dataFileS1: any, dataFileS2: any): 
   });
 
   rd.RaceResult = recalculatePositions(rd.RaceResult, dataFileS1.SessionConfig.time);
+  rd.RaceDriversResume = createRaceDriversResume(rd.RaceResult, rd.BestLap);
+  //rd.RaceCarResume = await createRaceCarResume(rd.RaceResult);
 
   return rd;
 }

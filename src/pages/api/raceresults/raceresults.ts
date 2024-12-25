@@ -75,8 +75,8 @@ function initializeScript() {
             const datosRAW1 = await response1.json();
             const datosRAW2 = await response2.json();
             //console.log('DatosRAW a usar: ', datosRAW);
-            //const datos: RaceData = createRaceData(datosRAW1);
-            const datos: RaceData = createRaceDataMultipleSplits(datosRAW1, datosRAW2);
+            //const datos: RaceData = await createRaceData(datosRAW1);
+            const datos: RaceData = await createRaceDataMultipleSplits(datosRAW1, datosRAW2);
             pointsystemName = 'Proto';
             console.log('Datos a usar: ', datos);
 
