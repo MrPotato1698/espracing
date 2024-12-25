@@ -1,54 +1,218 @@
 import { supabase } from '@/db/supabase';
-import { createRaceData } from "@/lib/results/resultConverter";
+import { createRaceData, createRaceDataMultipleSplits } from "@/lib/results/resultConverter";
 
 export function initRaceManagement() {
   const form = document.getElementById("uploadForm") as HTMLFormElement;
-  const fileInput = document.getElementById("fileInput") as HTMLInputElement;
-  const fileInfo = document.getElementById("fileInfo") as HTMLDivElement;
-  const fileName = document.getElementById("fileName") as HTMLSpanElement;
+  const switchS2Element = document.getElementById("switch-S2") as HTMLInputElement | null;
+  const switchQElement = document.getElementById("switch-Q") as HTMLInputElement | null;
+  const switchR2Element = document.getElementById("switch-R2") as HTMLInputElement | null;
 
-  fileInput.addEventListener("change", () => {
-    const file = fileInput.files?.[0];
+  const fileInputS1R1 = document.getElementById("fileInputS1R1") as HTMLInputElement;
+  const fileInfoS1R1 = document.getElementById("fileInfoS1R1") as HTMLDivElement;
+  const fileNameS1R1 = document.getElementById("fileNameS1R1") as HTMLSpanElement;
+
+  const splitS2R1File = document.getElementById("split2R1File");
+  const fileInputS2R1 = document.getElementById("fileInputS2R1") as HTMLInputElement;
+  const fileInfoS2R1 = document.getElementById("fileInfoS2R1") as HTMLDivElement;
+  const fileNameS2R1 = document.getElementById("fileNameS2R1") as HTMLSpanElement;
+
+  const containerRace2 = document.getElementById("race2Files");
+  const fileInputS1R2 = document.getElementById("fileInputS1R2") as HTMLInputElement;
+  const fileInfoS1R2 = document.getElementById("fileInfoS1R2") as HTMLDivElement;
+  const fileNameS1R2 = document.getElementById("fileNameS1R2") as HTMLSpanElement;
+
+  const splitS2R2File = document.getElementById("split2R2File");
+  const fileInputS2R2 = document.getElementById("fileInputS2R2") as HTMLInputElement;
+  const fileInfoS2R2 = document.getElementById("fileInfoS2R2") as HTMLDivElement;
+  const fileNameS2R2 = document.getElementById("fileNameS2R2") as HTMLSpanElement;
+
+  const fileQContainer = document.getElementById("QFile");
+  const fileInputQ = document.getElementById("fileInputQ") as HTMLInputElement;
+  const fileInfoQ = document.getElementById("fileInfoQ") as HTMLDivElement;
+  const fileNameQ = document.getElementById("fileNameQ") as HTMLSpanElement;
+
+  function toggleInputsS2() {
+    if (splitS2R1File && splitS2R2File && switchS2Element) {
+      splitS2R1File.style.display = !switchS2Element.checked ? "none" : "block";
+      splitS2R2File.style.display = !switchS2Element.checked ? "none" : "block";
+    }
+  }
+
+  function toggleInputR2() {
+    if (containerRace2 && switchR2Element) {
+      containerRace2.style.display = !switchR2Element.checked ? "none" : "block";
+    }
+  }
+
+  function toggleInputsQ() {
+    if (fileQContainer && switchQElement) {
+      fileQContainer.style.display = !switchQElement.checked ? "none" : "block";
+    }
+  }
+
+    switchS2Element ? switchS2Element.addEventListener("change", toggleInputsS2) : null;
+    switchR2Element ? switchR2Element.addEventListener("change", toggleInputR2) : null;
+    switchQElement ? switchQElement.addEventListener("change", toggleInputsQ) : null;
+
+  fileInputS1R1.addEventListener("change", () => {
+    const file = fileInputS1R1.files?.[0];
     if (file) {
       if (file.type === "application/json") {
-        fileName.textContent = file.name;
-        fileInfo.classList.remove("hidden");
+        fileNameS1R1.textContent = file.name;
+        fileInfoS1R1.classList.remove("hidden");
       } else {
         alert("Por favor, selecciona un archivo JSON válido.");
-        fileInput.value = ""; // Limpiar la selección
-        fileInfo.classList.add("hidden");
+        fileInputS1R1.value = ""; // Limpiar la selección
+        fileInfoS1R1.classList.add("hidden");
       }
     } else {
-      fileInfo.classList.add("hidden");
+      fileInfoS1R1.classList.add("hidden");
+    }
+  });
+
+  fileInputS2R1.addEventListener("change", () => {
+    const file = fileInputS2R1.files?.[0];
+    if (file) {
+      if (file.type === "application/json") {
+        fileNameS2R1.textContent = file.name;
+        fileInfoS2R1.classList.remove("hidden");
+      } else {
+        alert("Por favor, selecciona un archivo JSON válido.");
+        fileInputS2R1.value = ""; // Limpiar la selección
+        fileInfoS2R1.classList.add("hidden");
+      }
+    } else {
+      fileInfoS2R1.classList.add("hidden");
+    }
+  });
+
+  fileInputS1R2.addEventListener("change", () => {
+    const file = fileInputS1R2.files?.[0];
+    if (file) {
+      if (file.type === "application/json") {
+        fileNameS1R2.textContent = file.name;
+        fileInfoS1R2.classList.remove("hidden");
+      } else {
+        alert("Por favor, selecciona un archivo JSON válido.");
+        fileInputS1R2.value = ""; // Limpiar la selección
+        fileInfoS1R2.classList.add("hidden");
+      }
+    } else {
+      fileInfoS1R2.classList.add("hidden");
+    }
+  });
+
+  fileInputS2R2.addEventListener("change", () => {
+    const file = fileInputS2R2.files?.[0];
+    if (file) {
+      if (file.type === "application/json") {
+        fileNameS2R2.textContent = file.name;
+        fileInfoS2R2.classList.remove("hidden");
+      } else {
+        alert("Por favor, selecciona un archivo JSON válido.");
+        fileInputS2R2.value = ""; // Limpiar la selección
+        fileInfoS2R2.classList.add("hidden");
+      }
+    } else {
+      fileInfoS2R2.classList.add("hidden");
+    }
+  });
+
+  fileInputQ.addEventListener("change", () => {
+    const file = fileInputQ.files?.[0];
+    if (file) {
+      if (file.type === "application/json") {
+        fileNameQ.textContent = file.name;
+        fileInfoQ.classList.remove("hidden");
+      } else {
+        alert("Por favor, selecciona un archivo JSON válido.");
+        fileInputQ.value = ""; // Limpiar la selección
+        fileInfoQ.classList.add("hidden");
+      }
+    } else {
+      fileInfoQ.classList.add("hidden");
     }
   });
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const file = fileInput.files?.[0];
-    if (!file) {
-      alert("Por favor, selecciona un archivo JSON.");
+    const fileS1R1 = fileInputS1R1.files?.[0];
+    let fileS2R1;
+    let fileS1R2;
+    let fileS2R2;
+    let fileQ;
+    let numSplits: number = 1;
+    if (!fileS1R1) {
+      alert("Por favor, selecciona un archivo JSON para la Carrera 1 del Split 1.");
       return;
     }
 
+    if (switchR2Element?.checked) {
+      fileS1R2 = fileInputS1R2.files?.[0];
+      if (!fileS1R2) {
+        alert("Por favor, selecciona un archivo JSON para la Carrera 2 del Split 1.");
+        return;
+      }
+    }
+
+    if (switchS2Element?.checked) {
+      fileS2R1 = fileInputS2R1.files?.[0];
+      if (!fileS2R1) {
+        alert("Por favor, selecciona un archivo JSON para la Carrera 1 del Split 2.");
+        return;
+      }
+      if (switchR2Element?.checked) {
+        fileS2R2 = fileInputS2R2.files?.[0];
+        if (!fileS2R2) {
+          alert("Por favor, selecciona un archivo JSON para la Carrera 2 del Split 2.");
+          return;
+        }
+      }
+      numSplits = 2;
+    }
+
+    if (switchQElement?.checked) {
+      fileQ = fileInputQ.files?.[0];
+      if (!fileQ) {
+        alert("Por favor, selecciona un archivo JSON para Qualy.");
+        return;
+      }
+    }
+
     try {
-      const content = await file.text();
+      const contentS1R1 = await fileS1R1.text();
       const formData = new FormData(form);
       const racename = formData.get('racename') as string;
       const champID = formData.get('champID') as string;
       const numrace = formData.get('numrace') as string;
       const pointsystem = formData.get('pointsystem') as string;
 
-      const json = JSON.parse(content);
-      const transformedJson = JSON.stringify(createRaceData(json));
-
-      // const { data, error } = await supabase.storage
-      //   .from('results')
-      //   .upload(`${file.name}`, transformedJson, {
-      //     contentType: 'application/json',
-      //   });
-
-      // if (error) throw error;
+      const jsonS1R1 = JSON.parse(contentS1R1);
+      let jsonS1R2;
+      let transformedJsonR1: string;
+      let transformedJsonR2: string= "{}";
+      if(switchR2Element?.checked) {
+        const contentS1R2 = await fileS1R2?.text();
+        if (!contentS1R2) throw new Error("Sin contenido en el archivo de Carrera 2 Split 1");
+        jsonS1R2 = JSON.parse(contentS1R2);
+      }
+      if(switchS2Element?.checked) {
+        if(switchR2Element?.checked) {
+          const contentS2R2 = await fileS1R2?.text();
+          if (!contentS2R2) throw new Error("Sin contenido en el archivo de Carrera 2 Split 2");
+          const jsonS2R2 = JSON.parse(contentS2R2);
+          transformedJsonR2 = JSON.stringify(createRaceDataMultipleSplits(jsonS1R2, jsonS2R2));
+        }
+        const contentS2R1 = await fileS2R1?.text();
+        if (!contentS2R1) throw new Error("Sin contenido en el archivo de Carrera 2 Split 2");
+        const jsonS2R1 = JSON.parse(contentS2R1);
+        transformedJsonR1 = JSON.stringify(createRaceDataMultipleSplits(jsonS1R1, jsonS2R1));
+      }else{
+        transformedJsonR1 = JSON.stringify(createRaceData(jsonS1R1));
+        if(switchR2Element?.checked) {
+          transformedJsonR2 = JSON.stringify(createRaceData(jsonS1R2));
+        }
+      }
 
       const { data: getLastRace } = await supabase
         .from('race')
@@ -64,18 +228,20 @@ export function initRaceManagement() {
         .insert({
           id: lastRaceID,
           name: racename,
-          filename: file.name,
+          filename: fileS1R1.name,
           championship: Number(champID),
           orderinchamp: Number(numrace),
           pointsystem: Number(pointsystem),
-          race_data: transformedJson,
+          splits: numSplits,
+          race_data_1: transformedJsonR1,
+          race_data_2: transformedJsonR2,
         });
 
       if (insertError) throw insertError;
 
       alert("Carrera creada con éxito");
       form.reset();
-      fileInfo.classList.add("hidden");
+      fileInfoS1R1.classList.add("hidden");
       window.location.reload();
     } catch (error) {
       console.error("Error al procesar el archivo:", error);
