@@ -4,7 +4,6 @@ import { supabase } from "@/db/supabase";
 interface Race {
   RaceName: string;
   filename: string;
-  pointsystem: number;
   ChampID: string;
   ChampName: string;
 }
@@ -34,7 +33,7 @@ if (actualchamp === "true") {
   } else {
     const { data: resultSetData } = await supabase
       .from("race")
-      .select("name, filename, pointsystem, championship!inner(id, name)")
+      .select("name, filename, championship!inner(id, name)")
       .eq("championship", lastChampData.id);
 
     resultSet = resultSetData;
@@ -43,7 +42,7 @@ if (actualchamp === "true") {
 } else {
   const { data: resultSetData } = await supabase
     .from("race")
-    .select("name, filename, pointsystem, championship!inner(id, name)");
+    .select("name, filename, championship!inner(id, name)");
 
   resultSet = resultSetData;
 }
@@ -51,7 +50,6 @@ if (actualchamp === "true") {
 const RacesData: Race[] = (resultSet ?? []).map(race => ({
   RaceName: race.name ?? '',
   filename: race.filename,
-  pointsystem: race.pointsystem,
   ChampID: race.championship.id.toString(),
   ChampName: race.championship.name ?? ''
 }));
@@ -100,7 +98,7 @@ if (RacesData.length == 0) {
         {champData.races.map((race) => (
           <option
             value={
-              race.filename?.toString() + "@" + race.pointsystem?.toString()
+              race.filename?.toString()
             }
             class="text-[#f7f7f7]"
             data-champ={champData.name}

@@ -9,6 +9,7 @@ import { createRaceData, createRaceDataMultipleSplits, formatTwoIntegersPlusThre
 import type { RaceData, RaceResult, RaceLap, Lap, BestLap, Consistency, BestSector, Incident, RaceConfig } from "@/types/Results";
 import type { Points } from "@/types/Points";
 import ResultsTable from '@/sections/ResultsTable.astro';
+import { supabase } from '@/db/supabase';
 
 /* *************************** */
 
@@ -46,20 +47,7 @@ function initializeScript() {
     const tablaIndividuales = document.getElementById('tableIndividualLaps');
 
     async function loadData() {
-
-        const arraySeleccion = opcionesTabla.value.split("@");
-
-        const seleccion = arraySeleccion[0];
-
-        let pointsystemName: string | undefined = undefined;
-        let pointArray: Points | undefined = undefined;
-        if (arraySeleccion[1] === null || arraySeleccion[1] === undefined || arraySeleccion[1] === "") {
-            pointsystemName = "NoPoints";
-        }
-        else {
-            pointsystemName = arraySeleccion[1];
-            pointArray = points.find((point) => point.Name === arraySeleccion[1]);
-        }
+        const seleccion = opcionesTabla.value;
 
         if (!seleccion) {
             alert('Por favor, selecciona una opción');
@@ -69,15 +57,32 @@ function initializeScript() {
         try {
             console.log('Cargando datos de la carrera: ' + seleccion);
             //const response = await fetch(`/api/raceresults/getRaceResults?race=${seleccion}`);
-            const response1 = await fetch(`/testRace8S1.json`); //Pruebas para no leer constantemente de la BD
-            const response2 = await fetch(`/testRace8S2.json`); //Pruebas para no leer constantemente de la BD
+            //const response1 = await fetch(`/testRace8S1.json`); //Pruebas para no leer constantemente de la BD
+            //const response2 = await fetch(`/testRace8S2.json`); //Pruebas para no leer constantemente de la BD
 
-            const datosRAW1 = await response1.json();
-            const datosRAW2 = await response2.json();
+            //const datosRAW1 = await response1.json();
+            //const datosRAW2 = await response2.json();
             //console.log('DatosRAW a usar: ', datosRAW);
             //const datos: RaceData = await createRaceData(datosRAW1);
-            const datos: RaceData = await createRaceDataMultipleSplits(datosRAW1, datosRAW2);
-            pointsystemName = 'Proto';
+            //const datos: RaceData = await createRaceDataMultipleSplits(datosRAW1, datosRAW2);
+
+            const { data: resultSetData, error } = await supabase
+                .from('race')
+                .select('pointsystem!inner(name, points, fastestlap), race_data_1')
+                .eq('filename', seleccion)
+                .single();
+
+            if(error || !resultSetData){
+                return alert('No se ha encontrado la carrera seleccionada');
+            }
+
+            const datos = JSON.parse(resultSetData?.race_data_1 as string);
+            const points:Points = {
+                Name: resultSetData.pointsystem.name,
+                Puntuation: resultSetData.pointsystem.points.split(',').map((point) => parseInt(point)),
+                FastestLap: resultSetData.pointsystem.fastestlap
+            };
+
             console.log('Datos a usar: ', datos);
 
             const dresult: RaceResult[] = datos.RaceResult;
@@ -115,7 +120,7 @@ function initializeScript() {
             // *** Mejor vuelta de carrera ***
             const bestlapDriverID = dbestlaps[0].SteamID;
 
-            const resultTable = getResultTableData(datos, pointsystemName, pointArray ?? { Name: "NoPoints", Puntuation: [], FastestLap: 0 });
+            const resultTable = getResultTableData(datos, points.Name, points);
 
             // *** Clasificacion de Carrera
             let secondSplitInit: boolean = false;
@@ -168,7 +173,6 @@ function initializeScript() {
                     `;
                 }
             }
-
 
             // *** Pista y datos de la carrera ***
 

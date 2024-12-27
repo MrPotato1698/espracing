@@ -857,26 +857,13 @@ function createRaceDriversResume(rr: RaceResult[], bl: BestLap[]): RaceDriversRe
   return rdr;
 }
 
-// function createRaceCarResume(rr: RaceResult[]): RaceCarResume[] {
-//   let rcr: RaceCarResume[] = [];
-//   const carMap = new Map<string, number>();
-
-//   for (let item of rr) {
-//     carMap.set(item.CarFileName, (carMap.get(item.CarFileName) ?? 0) + 1);
-//   }
-
-//   for (const [car, count] of carMap) {
-//     const { data: carDataID } = await supabase.from('car').select('class').eq('filename', car).single();
-//     const uniqueRCR: RaceCarResume = {
-//       CarFileName: car,
-//       CarClassID: carDataID ? carDataID.class : 0,
-//       numberOfCars: count
-//     };
-//     rcr.push(uniqueRCR);
-//   }
-
-//   return rcr;
-// }
+function createRaceCarResume(rr: RaceResult[]): RaceCarResume[] {
+  const rcr = Array.from(
+    rr.reduce((acc, { CarFileName }) =>
+      acc.set(CarFileName, (acc.get(CarFileName) ?? 0) + 1), new Map<string, number>()))
+    .map(([CarFileName, numberOfCars]) => ({ CarFileName, numberOfCars }));
+  return rcr;
+}
 
 // FUNCIONES A EXPORTAR
 
@@ -886,7 +873,7 @@ export function createRaceData(dataFile: any): RaceData{
   const devents = dataFile.Events;
   const dlaps = dataFile.Laps;
   const dresult = dataFile.Result;
-  //const dpenalties = datos.Penalties;
+  const dpenalties = dataFile.Penalties;
 
   rd.RaceResult = createRaceResults(dcars, devents, dlaps, dresult, dataFile.SessionConfig.time, 1);
   rd.RaceLaps = createRaceLap(dlaps, rd.RaceResult);
@@ -921,7 +908,7 @@ export function createRaceData(dataFile: any): RaceData{
 
   rd.RaceResult = recalculatePositions(rd.RaceResult, dataFile.SessionConfig.time);
   rd.RaceDriversResume = createRaceDriversResume(rd.RaceResult, rd.BestLap);
-  //rd.RaceCarResume = await createRaceCarResume(rd.RaceResult);
+  rd.RaceCarResume = createRaceCarResume(rd.RaceResult);
 
   return rd;
 }
@@ -979,7 +966,7 @@ export function createRaceDataMultipleSplits(dataFileS1: any, dataFileS2: any): 
 
   rd.RaceResult = recalculatePositions(rd.RaceResult, dataFileS1.SessionConfig.time);
   rd.RaceDriversResume = createRaceDriversResume(rd.RaceResult, rd.BestLap);
-  //rd.RaceCarResume = await createRaceCarResume(rd.RaceResult);
+  rd.RaceCarResume = createRaceCarResume(rd.RaceResult);
 
   return rd;
 }
