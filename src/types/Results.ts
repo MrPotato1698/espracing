@@ -109,6 +109,5 @@ export interface RaceDriversResume{
 
 export interface RaceCarResume{
   CarFileName: string;
-  CarClassID: number;
   numberOfCars: number;
 }
