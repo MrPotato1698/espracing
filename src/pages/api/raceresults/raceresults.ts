@@ -1,10 +1,9 @@
 import ApexCharts from 'apexcharts';
 
-import { cars } from "@/consts/cars";
 import { circuits } from "@/consts/circuits";
 import { circuitlayouts } from "@/consts/circuitlayouts";
 import { points } from "@/consts/pointsystem";
-import { createRaceData, createRaceDataMultipleSplits, formatTwoIntegersPlusThreeDecimals, formatTwoIntegers, getClassShortName, getColorClass } from "@/lib/results/resultConverter";
+import { createRaceData, createRaceDataMultipleSplits, formatTwoIntegersPlusThreeDecimals, formatTwoIntegers} from "@/lib/results/resultConverter";
 
 import type { RaceData, RaceResult, RaceLap, Lap, BestLap, Consistency, BestSector, Incident, RaceConfig } from "@/types/Results";
 import type { Points } from "@/types/Points";
@@ -32,6 +31,15 @@ interface ResultTableData {
     tyre: string;
     points: string;
     splitNumber: number;
+}
+
+interface CarData{
+    filename: string;
+    brand: string;
+    model: string;
+    classShortName: string;
+    classColor: string;
+    imgbrand: string;
 }
 
 function initializeScript() {
@@ -85,6 +93,30 @@ function initializeScript() {
 
             console.log('Datos a usar: ', datos);
 
+            let carData: CarData[] = [];
+            for (let carResume of datos.RaceCarResume) {
+                const { data: carDataSupabase, error: errorCarData } = await supabase
+                    .from('car')
+                    .select('filename, carbrand!inner(name, imgbrand), model, carclass!inner(short_name, class_design)')
+                    .eq('filename', carResume.CarFileName)
+                    .single();
+
+                console.log('Car: ', carResume.CarFileName);
+                console.log('CarDataSupabase: ', carDataSupabase);
+                console.log('ErrorCarData: ', errorCarData);
+
+                if (carDataSupabase) {
+                    carData.push({
+                        filename: carDataSupabase.filename,
+                        brand: carDataSupabase.carbrand.name ?? "",
+                        model: carDataSupabase.model ?? "",
+                        classShortName: carDataSupabase.carclass.short_name ?? "",
+                        classColor: carDataSupabase.carclass.class_design ?? "",
+                        imgbrand: carDataSupabase.carbrand.imgbrand ?? ""
+                    });
+                }
+            }
+
             const dresult: RaceResult[] = datos.RaceResult;
             const dlaps: RaceLap[] = datos.RaceLaps;
             const dbestlaps: BestLap[] = datos.BestLap;
@@ -120,7 +152,7 @@ function initializeScript() {
             // *** Mejor vuelta de carrera ***
             const bestlapDriverID = dbestlaps[0].SteamID;
 
-            const resultTable = getResultTableData(datos, points.Name, points);
+            const resultTable = getResultTableData(datos, points.Name, points, carData);
 
             // *** Clasificacion de Carrera
             let secondSplitInit: boolean = false;
@@ -534,7 +566,7 @@ function initializeScript() {
                         const sectorTimeString: string = formatTwoIntegersPlusThreeDecimals(i.BestSector / 1000);
 
                         // Obtener el nombre real del coche
-                        const isCarExists = cars.find((car) => car.filename === i.CarFileName);
+                        const isCarExists = carData.find((car) => car.filename === i.CarFileName);
                         let carName: string;
                         let carBrand: string;
                         let carClass: string;
@@ -542,8 +574,8 @@ function initializeScript() {
                         if (isCarExists) {
                             carName = isCarExists.brand + " " + isCarExists.model;
                             carBrand = isCarExists.imgbrand;
-                            carClass = getClassShortName(isCarExists.subclass);
-                            carColorClass = getColorClass(isCarExists.subclass);
+                            carClass = isCarExists.classShortName;
+                            carColorClass =  'class = "'+isCarExists.classColor +  ' rounded text-xs font-bold px-1 py-0.5 ml-1"';
                         } else {
                             carName = i.CarFileName;
                             carBrand = "";
@@ -595,7 +627,8 @@ function initializeScript() {
                 let BestLapFound: boolean = false;
 
                 const CarFileNameFromDriver = dresult.find((driver) => driver.SteamID === driverID)?.CarFileName;
-                const isCarExists = cars.find((car) => car.filename === CarFileNameFromDriver);
+                // Obtener el nombre real del coche
+                const isCarExists = carData.find((car) => car.filename === CarFileNameFromDriver);
                 let carName: string;
                 let carBrand: string;
                 let carClass: string;
@@ -603,10 +636,10 @@ function initializeScript() {
                 if (isCarExists) {
                     carName = isCarExists.brand + " " + isCarExists.model;
                     carBrand = isCarExists.imgbrand;
-                    carClass = getClassShortName(isCarExists.subclass);
-                    carColorClass = getColorClass(isCarExists.subclass);
+                    carClass = isCarExists.classShortName;
+                    carColorClass =  'class = "'+isCarExists.classColor +  ' rounded text-xs font-bold px-1 py-0.5 ml-1"';
                 } else {
-                    carName = CarFileNameFromDriver || "Coche no encontrado";
+                    carName = CarFileNameFromDriver?? "";
                     carBrand = "";
                     carClass = "";
                     carColorClass = "";
@@ -848,7 +881,7 @@ function initializeScript() {
     }
 }
 
-function getResultTableData(datos: RaceData, pointsystemName: String, pointArray: Points): ResultTableData[] {
+function getResultTableData(datos: RaceData, pointsystemName: String, pointArray: Points, cars: CarData[]): ResultTableData[] {
     let resultTableData: ResultTableData[] = [];
     const dresult: RaceResult[] = datos.RaceResult;
     const dlaps: RaceLap[] = datos.RaceLaps;
@@ -899,6 +932,7 @@ function getResultTableData(datos: RaceData, pointsystemName: String, pointArray
 
 
         // Obtener el nombre real del coche
+        // Obtener el nombre real del coche
         const isCarExists = cars.find((car) => car.filename === itemResult.CarFileName);
         let carName: string;
         let carBrand: string;
@@ -907,8 +941,8 @@ function getResultTableData(datos: RaceData, pointsystemName: String, pointArray
         if (isCarExists) {
             carName = isCarExists.brand + " " + isCarExists.model;
             carBrand = isCarExists.imgbrand;
-            carClass = getClassShortName(isCarExists.subclass);
-            carColorClass = getColorClass(isCarExists.subclass);
+            carClass = isCarExists.classShortName;
+            carColorClass =  'class = "'+isCarExists.classColor +  ' rounded text-xs font-bold px-1 py-0.5 ml-1"';
         } else {
             carName = itemResult.CarFileName;
             carBrand = "";
