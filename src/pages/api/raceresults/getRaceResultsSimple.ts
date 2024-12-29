@@ -1,11 +1,8 @@
-import ApexCharts from 'apexcharts';
-
-import { cars } from "@/consts/cars";
 import { circuits } from "@/consts/circuits";
 import { circuitlayouts } from "@/consts/circuitlayouts";
-import { createRaceData, createRaceDataMultipleSplits, formatTwoIntegersPlusThreeDecimals, formatTwoIntegers, getClassShortName, getColorClass } from "@/lib/results/resultConverter";
+import { formatTwoIntegersPlusThreeDecimals, formatTwoIntegers} from "@/lib/results/resultConverter";
 
-import type { RaceData, RaceResult, RaceLap, Lap, BestLap, Consistency, BestSector, Incident, RaceConfig } from "@/types/Results";
+import type { RaceData, RaceResult, RaceLap, BestLap, RaceConfig } from "@/types/Results";
 import type { Points } from "@/types/Points";
 import { supabase } from '@/db/supabase';
 
@@ -44,14 +41,7 @@ interface CarData{
 function initializeScript() {
     const loadButton = document.getElementById('loadButtonSimpleResults');
     const opcionesTabla = document.getElementById('select-race') as HTMLSelectElement;
-
     const tablaResultados = document.getElementById('tablaResultados');
-    const datosCircuito = document.getElementById('datosCircuito');
-
-    const chartCambiosPosiciones = document.getElementById('chartCambiosPosiciones');
-    const chartGaps = document.getElementById('chartGaps');
-
-    //const tablaIndividuales = document.getElementById('tableIndividualLaps');
 
     async function loadData() {
         const seleccion = opcionesTabla.value;
@@ -106,15 +96,6 @@ function initializeScript() {
                     });
                 }
             }
-            console.log('CarDataSupabase: ', carData);
-
-            const dresult: RaceResult[] = datos.RaceResult;
-            const dlaps: RaceLap[] = datos.RaceLaps;
-            const dbestlaps: BestLap[] = datos.BestLap;
-            const dconsistency: Consistency[] = datos.Consistency;
-            const dbestsectors: BestSector[] = datos.BestSector;
-            const devents: Incident[] = datos.Incident;
-            const dconfig: RaceConfig = datos.RaceConfig;
 
             if (tablaResultados) {
                 tablaResultados.innerHTML = '';
@@ -122,17 +103,38 @@ function initializeScript() {
                 throw new Error('Elemento con id "resultado" no encontrado.');
             }
 
-            if (datosCircuito) {
-                datosCircuito.innerHTML = '';
-            } else {
-                throw new Error('Elemento con id "resultado2" no encontrado.');
-            }
-
-            // *** Mejor vuelta de carrera ***
-            const bestlapDriverID = dbestlaps[0].SteamID;
-
             const resultTable = getResultTableData(datos, points.Name, points, carData);
+
+            // *** Pista y datos de la carrera ***
+            const dconfig: RaceConfig = datos.RaceConfig;
+            const isCircuitExists = circuits.find((circuit) => circuit.filename === dconfig.Track);
             let tablaResultadosString: string = "";
+            if (isCircuitExists) {
+                const circuitName = isCircuitExists.name;
+                const circuitLocation = isCircuitExists.location;
+                if (dconfig.TrackLayout === null || dconfig.TrackLayout === undefined || dconfig.TrackLayout === "") {
+                    dconfig.TrackLayout = "";
+                }
+                const layout = circuitlayouts.find((layout) => (layout.filename === dconfig.TrackLayout) && (layout.circuit === isCircuitExists.id));
+                const layoutName = layout?.name;
+                const layoutLength = layout?.length;
+                const layoutCapacity = layout?.capacity;
+
+                tablaResultadosString += `
+                        <div class="text-center bg-[#19191c] rounded-lg py-5" style = "width=99%">
+                        <p class = "text-3xl font-bold border-b border-[#da392b] w-fit mx-auto mb-2">Datos del circuito</p>
+                            <div class = "grid grid-cols-1">
+                                <p class="text-2xl font-semibold">Circuito: ${circuitName} (Variante ${layoutName})</p>
+                                <p class="text-xl">Localización: ${circuitLocation}</p>
+                            </div>
+                            <div class = "grid grid-cols-2 text-lg mt-2">
+                                <p>Longitud: ${layoutLength} m</p>
+                                <p>Capacidad: ${layoutCapacity} pilotos</p>
+                            </div>
+                        </div>
+                        <p class="text-3xl font-bold border-b border-[#da392b] w-fit mx-auto mt-4 mb-2">Resultado de carrera</p>
+                    `;
+            }
 
             // *** Clasificacion de Carrera
             tablaResultadosString += `<table class="w-full border-collapse border border-[#f9f9f9]">
@@ -206,37 +208,6 @@ function initializeScript() {
             }
             tablaResultadosString += ` </tbody></table>`;
             tablaResultados.innerHTML = tablaResultadosString;
-
-            // *** Pista y datos de la carrera ***
-
-            const isCircuitExists = circuits.find((circuit) => circuit.filename === dconfig.Track);
-            if (isCircuitExists) {
-                const circuitName = isCircuitExists.name;
-                const circuitLocation = isCircuitExists.location;
-                if (dconfig.TrackLayout === null || dconfig.TrackLayout === undefined || dconfig.TrackLayout === "") {
-                    dconfig.TrackLayout = "";
-                }
-                const layout = circuitlayouts.find((layout) => (layout.filename === dconfig.TrackLayout) && (layout.circuit === isCircuitExists.id));
-                const layoutName = layout?.name;
-                const layoutLength = layout?.length;
-                const layoutCapacity = layout?.capacity;
-
-                datosCircuito.innerHTML += `
-                        <div class="text-center bg-[#19191c] rounded-lg py-5" style = "width=99%">
-                        <p class = "text-3xl font-bold border-b border-[#da392b] w-fit mx-auto mb-2">Datos del circuito</p>
-                            <div class = "grid grid-cols-1">
-                                <p class="text-2xl font-semibold">Circuito: ${circuitName} (Variante ${layoutName})</p>
-                                <p class="text-xl">Localización: ${circuitLocation}</p>
-                            </div>
-                            <div class = "grid grid-cols-2 text-lg mt-2">
-                                <p>Longitud: ${layoutLength} m</p>
-                                <p>Capacidad: ${layoutCapacity} pilotos</p>
-                            </div>
-                        </div>
-                        <p class="text-3xl font-bold border-b border-[#da392b] w-fit mx-auto mt-4 mb-2">Resultado de carrera</p>
-                    `;
-            }
-
 
         } catch (error) {
             console.error('Error al cargar los resultados de carrera: ' + error);
@@ -315,8 +286,8 @@ function getResultTableData(datos: RaceData, pointsystemName: String, pointArray
         if (isCarExists) {
             carName = isCarExists.brand + " " + isCarExists.model;
             carBrand = isCarExists.imgbrand;
-            carClass = getClassShortName(isCarExists.classShortName);
-            carColorClass = getColorClass(isCarExists.classColor);
+            carClass = isCarExists.classShortName;
+            carColorClass =  'class = "'+isCarExists.classColor +  ' rounded text-xs font-bold px-1 py-0.5 ml-1"';
         } else {
             carName = itemResult.CarFileName;
             carBrand = "";
