@@ -45,7 +45,9 @@ if (userData?.roleesp !== 1) {
 
 const { data: carsData } = await supabase
   .from("car")
-  .select("id, carbrand!inner(name), model, year, carclass!inner(short_name, class_design)")
+  .select(
+    "id, carbrand!inner(name), model, year, carclass!inner(short_name, class_design)"
+  )
   .order("id", { ascending: true });
 
 const { data: carBrandsData } = await supabase
@@ -57,6 +59,14 @@ const { data: carClassesData } = await supabase
   .from("carclass")
   .select("id, name")
   .order("name", { ascending: true });
+
+const carDataOrderer = carsData?.sort((a, b) => {
+  const brandComparison = (a.carbrand?.name ?? '').localeCompare(b.carbrand?.name ?? '');
+  if (brandComparison === 0) {
+    return (a.model ?? '').localeCompare(b.model ?? '');
+  }
+  return brandComparison;
+});
 ---
 
 <Layout title="ESP Racing:  Administrar Carreras">
@@ -81,14 +91,15 @@ const { data: carClassesData } = await supabase
       </thead>
       <tbody>
         {
-          carsData?.map((car, index) => (
+          carDataOrderer?.map((car, index) => (
             <tr>
               <td class="font-semibold">{index + 1}</td>
               <td>
                 {car.carbrand.name} {car.model}
               </td>
               <td>{car.year}</td>
-              <td class={car.carclass.class_design}>{car.carclass.short_name}</td>
+              <td class = 'text-sm font-bold'>{car.carclass.short_name}
+              </td>
               <td>
                 <a href={`/admin/cars/${car.id}`}>
                   <Edit moreClass="w-6 text-center mx-auto" />
@@ -325,7 +336,6 @@ const { data: carClassesData } = await supabase
             </div>
 
             <div class="col-span-2">
-
               <div
                 id="classPreview"
                 class="mb-2 p-4 rounded-md text-center font-bold w-2/4 mx-auto"
@@ -440,7 +450,7 @@ const { data: carClassesData } = await supabase
         <input
           class="bg-[#da392b] text-white font-bold py-3 px-5 border-solid border-[#da392b] border-2 rounded-md hover:bg-[#19191c] hover:text-[#f9f9f9] mt-4"
           type="submit"
-          value="Enviar"
+          value="Subir Coche"
         />
       </form>
     </div>
@@ -497,26 +507,33 @@ const { data: carClassesData } = await supabase
   }
 
   function initColorPickers() {
-    const backgroundColorPicker = document.getElementById('newClassBackgroundColor') as HTMLInputElement;
-    const textColorPicker = document.getElementById('newClassTextColor') as HTMLInputElement;
-    const backgroundColorCode = document.getElementById('backgroundColorCode');
-    const textColorCode = document.getElementById('textColorCode');
-    const classPreview = document.getElementById('classPreview');
-    const shortNameInput = document.getElementById('newClassShortName') as HTMLInputElement;
+    const backgroundColorPicker = document.getElementById(
+      "newClassBackgroundColor"
+    ) as HTMLInputElement;
+    const textColorPicker = document.getElementById(
+      "newClassTextColor"
+    ) as HTMLInputElement;
+    const backgroundColorCode = document.getElementById("backgroundColorCode");
+    const textColorCode = document.getElementById("textColorCode");
+    const classPreview = document.getElementById("classPreview");
+    const shortNameInput = document.getElementById(
+      "newClassShortName"
+    ) as HTMLInputElement;
 
     function updatePreview() {
-      if (backgroundColorCode) backgroundColorCode.textContent = backgroundColorPicker.value;
+      if (backgroundColorCode)
+        backgroundColorCode.textContent = backgroundColorPicker.value;
       if (textColorCode) textColorCode.textContent = textColorPicker.value;
       if (classPreview) {
         classPreview.style.backgroundColor = backgroundColorPicker.value;
         classPreview.style.color = textColorPicker.value;
-        classPreview.textContent = shortNameInput.value || 'GTX';
+        classPreview.textContent = shortNameInput.value || "GTX";
       }
     }
 
-    backgroundColorPicker.addEventListener('input', updatePreview);
-    textColorPicker.addEventListener('input', updatePreview);
-    shortNameInput.addEventListener('input', updatePreview);
+    backgroundColorPicker.addEventListener("input", updatePreview);
+    textColorPicker.addEventListener("input", updatePreview);
+    shortNameInput.addEventListener("input", updatePreview);
 
     // Inicializar la vista previa
     updatePreview();
