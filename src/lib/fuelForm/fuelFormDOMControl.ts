@@ -1,5 +1,6 @@
 import type { Car } from "@/types/Car";
 import { cars } from "@/consts/cars";
+import { supabase } from "@/db/supabase";
 
 export function initializeFuelFormControls() {
   const switchElement = document.getElementById("switch-2") as HTMLInputElement | null;
@@ -23,7 +24,7 @@ export function initializeFuelFormControls() {
     }
   }
 
-  function handleSubmit(event: Event) {
+  async function handleSubmit(event: Event) {
     event.preventDefault(); // Prevenir el envío del formulario
 
     // Obtener los datos del formulario
@@ -34,21 +35,27 @@ export function initializeFuelFormControls() {
 
     const formData = new FormData(formulario);
     const CarFileName = formData.get('carname') as string;
-    let fuelTank;
+    const {data: carData} = await supabase
+      .from('car')
+      .select("tyreTimeChange, fuelLiterTime, maxLiter")
+      .eq('filename', CarFileName)
+      .single();
+    let fuelTank: number;
 
     if (CarFileName === 'othercar') {
-      const fuelTankInput = formData.get('fuelTankCapacity');
+      const fuelTankInput = document.getElementById('fuelTankCapacity') as HTMLInputElement;
       if (!fuelTankInput) {
         alert('Por favor, ingrese la capacidad del tanque de combustible');
         return;
       }
-      fuelTank = parseFloat(fuelTankInput as string);
+      fuelTank = parseFloat(fuelTankInput.value);
     } else {
-      const selectedCar = cars.find((car: Car) => car.filename === CarFileName);
-      fuelTank = selectedCar ? selectedCar.maxLiter : 0;
+      console.log('Car data:', carData);
+      fuelTank = carData?.maxLiter ?? 0;
     }
 
     const fuelConsumption = parseFloat(formData.get('fuelConsumption') as string);
+    console.log('Fuel tank:', fuelTank);
     const isLapsBased = switchElement?.checked;
 
     let distance: number;
@@ -73,9 +80,8 @@ export function initializeFuelFormControls() {
     }
 
     //Tanque de combustible del coche, tiempo en repostar y tiempo en cambiar gomas
-    const selectedCar = cars.find((car: Car) => car.filename === CarFileName);
-    const carFuelTimeperLiter = selectedCar ? selectedCar.fuelLiterTime : 0;
-    const carTiresTime = selectedCar ? selectedCar.tyreTimeChange : 0;
+    const carFuelTimeperLiter = carData?.fuelLiterTime ?? 0;
+    const carTiresTime = carData?.tyreTimeChange ?? 0;
 
     //Calcular vueltas con un solo deposito
     const maxLapsperTank = fuelTank / fuelConsumption;

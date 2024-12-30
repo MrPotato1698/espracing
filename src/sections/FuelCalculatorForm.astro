@@ -1,11 +1,21 @@
 ---
-import type { Car } from "@/types/Car";
+import { supabase } from "@/db/supabase";
 
-import { cars } from "@/consts/cars";
+const { data: carsData } = await supabase
+  .from("car")
+  .select("id, filename, carbrand!inner(name), model, tyreTimeChange, fuelLiterTime, maxLiter")
+  .gt("tyreTimeChange", 0)
+  .gt("fuelLiterTime", 0)
+  .gt("maxLiter", 0)
+  .order("id", { ascending: true });
 
-const carList: Car[] = cars
-  .map((car) => car)
-  .sort((a, b) => a.brand.localeCompare(b.brand));
+const carList = carsData?.sort((a, b) => {
+  const brandComparison = (a.carbrand?.name ?? '').localeCompare(b.carbrand?.name ?? '');
+  if (brandComparison === 0) {
+    return (a.model ?? '').localeCompare(b.model ?? '');
+  }
+  return brandComparison;
+});
 ---
 
 <div class="box-border p-5 m-auto bg-white rounded-md max-w-screen-2xl">
@@ -19,9 +29,9 @@ const carList: Car[] = cars
       name="carname"
     >
       {
-        carList.map((car) => (
+        (carList ?? []).map((car) => (
           <option value={car.filename?.toString()}>
-            {car.brand} {car.model}
+            {car.carbrand.name} {car.model}
           </option>
         ))
       }
