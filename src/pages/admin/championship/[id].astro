@@ -80,13 +80,16 @@ const { data: champsData } = await supabase
       class="bg-[#19191c] text-[#f9f9f9] text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
     />
 
-    <label class="mt-5 text-lg font-semibold" for="yearChamp">
-      Año de inicio del campeonato
+    <label class="mt-5 text-lg font-semibold" for="numbertotalraces">
+      Número de carreras totales del campeonato
     </label>
     <input
-      type="text"
-      name="yearChamp"
-      value={champsData?.year}
+      type="number"
+      step="1"
+      min="1"
+      max="32760"
+      name="numbertotalraces"
+      value={champsData?.number_of_races_total}
       class="bg-[#19191c] text-[#f9f9f9] text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
     />
 
@@ -108,6 +111,19 @@ const { data: champsData } = await supabase
       <option value="0">Sin Temporada / Otra</option>
     </select>
 
+    <label class="mt-5 text-lg font-semibold" for="yearChamp">
+      Año de inicio del campeonato
+    </label>
+    <input
+      type="number"
+      step="1"
+      min="1"
+      max="32760"
+      name="yearChamp"
+      value={champsData?.year}
+      class="bg-[#19191c] text-[#f9f9f9] text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
+    />
+
     <div class="mb-4">
       <label class="text-[#f9f9f9] text-lg font-medium" for="champORevent">
         ¿Es un evento suelto o un campeonato completo?
@@ -119,6 +135,7 @@ const { data: champsData } = await supabase
             name="champORevent"
             type="checkbox"
             class="sr-only peer"
+            checked={champsData?.ischampionship}
           />
           <div
             class="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-[#da392b] dark:peer-focus:ring-[#da392b] dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-[#da392b]"
@@ -126,13 +143,34 @@ const { data: champsData } = await supabase
           </div>
         </label>
         <span id="eventTypeText" class="text-[#f9f9f9] text-sm font-medium">
-          Evento suelto
+          {champsData?.ischampionship ? "Campeonato completo" : "Evento suelto"}
         </span>
       </div>
     </div>
 
+    <div class="mb-4"></div>
+    <label class="text-[#f9f9f9] text-lg font-medium" for="isFinished">
+      ¿El campeonato ha finalizado?
+    </label>
+    <div class="flex items-center gap-2 mt-2">
+      <label class="relative inline-flex cursor-pointer">
+        <input
+          id="isFinished"
+          name="isFinished"
+          type="checkbox"
+          class="sr-only peer"
+          checked={champsData?.isfinished}
+        />
+        <div
+          class="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-[#da392b] dark:peer-focus:ring-[#da392b] dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-[#da392b]"
+        >
+        </div>
+      </label>
+      <span id="isFinishedText" class="text-[#f9f9f9] text-sm font-medium">
+        {champsData?.isfinished ? "Finalizado" : "No finalizado"}
+      </span>
+    </div>
     <input type="hidden" name="champ_id" value={id} />
-
     <div>
       <button
         type="submit"
@@ -142,13 +180,15 @@ const { data: champsData } = await supabase
       </button>
 
       <button
-        onclick="window, location.href = '/admin/adminraces'"
+        type="button"
+        onclick="window, location.href = '/admin/adminchampionship'"
         class="py-1.5 px-3 w-fit bg-[#0f0f0f] text-white border-[#da392b] border-2 rounded-md my-4 font-medium text-lg hover:bg-[#da392b] hover:text-[#0f0f0f]"
       >
         Cancelar
       </button>
     </div>
   </form>
+
 </Layout>
 
 <script>
@@ -169,6 +209,21 @@ const { data: champsData } = await supabase
     });
   }
 
+  const isFinishedSwitch = document.getElementById(
+    "isFinished"
+  ) as HTMLInputElement;
+  const isFinishedText = document.getElementById("isFinishedText");
+
+  if (isFinishedSwitch && isFinishedText) {
+    isFinishedSwitch.addEventListener("change", () => {
+      if (isFinishedSwitch.checked) {
+        isFinishedText.textContent = "Finalizado";
+      } else {
+        isFinishedText.textContent = "No finalizado";
+      }
+    });
+  }
+
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const formData = new FormData(form);
@@ -180,7 +235,7 @@ const { data: champsData } = await supabase
       });
 
       if (!response.ok) {
-        throw new Error("Error en la respuesta del servidor");
+        throw new Error(`Error en la respuesta del servidor: ${response.status}`);
       }
 
       const result = await response.json();
@@ -193,9 +248,7 @@ const { data: champsData } = await supabase
       }
     } catch (error) {
       console.error("Error al actualizar el campeonato:", error);
-      alert(
-        "Hubo un error al actualizar el campeonato. Por favor, inténtalo de nuevo."
-      );
+      alert(`Error al actualizar el campeonato: ${error}`);
     }
   });
 </script>
