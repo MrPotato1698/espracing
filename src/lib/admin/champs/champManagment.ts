@@ -10,6 +10,7 @@ export function initRaceManagement() {
       let keysearchAPI = formData.get('keySearchAPI') as string | null;
       const year = formData.get('yearChamp') as string;
       const season = formData.get('season') as string;
+      const numberTotalRaces = formData.get('numbertotalraces') as string;
       const champORevent = formData.get('champORevent') === 'on';
 
       const seasonPart1 = '20' + season.slice(0, 2);
@@ -36,6 +37,7 @@ export function initRaceManagement() {
           year: Number(year),
           season: formattedSeason,
           ischampionship: champORevent,
+          number_of_races_total: Number(numberTotalRaces),
         });
 
       if (insertError) throw insertError;

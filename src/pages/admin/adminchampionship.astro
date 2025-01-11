@@ -46,13 +46,15 @@ if (userData?.roleesp !== 1) {
 
 const { data: champsData } = await supabase
   .from("championship")
-  .select(`id, name, season, race:race(id)`)
-  .eq("ischampionship", true);
+  .select(`id, name, season, race:race(id), number_of_races_total, isfinished`)
+  .eq("ischampionship", true)
+  .order("id", { ascending: true });
 
 const { data: eventsData } = await supabase
   .from("championship")
   .select(`id, name, season, race:race(id)`)
-  .eq("ischampionship", false);
+  .eq("ischampionship", false)
+  .order("id", { ascending: true });
 ---
 
 <Layout title="ESP Racing: Administrar Campeonatos">
@@ -120,8 +122,8 @@ const { data: eventsData } = await supabase
           champsData?.map((champ, index) => (
             <tr class="bg-[#19191c]">
               <td class="font-semibold">{index + 1}</td>
-              <td>{champ.name}</td>
-              <td>{champ.race.length}</td>
+              <td>{(champ.race.length < champ.number_of_races_total) && champ.isfinished ? champ.name + ' - CANCELADO': champ.name}</td>
+              <td>{champ.race.length}/{champ.number_of_races_total}</td>
               <td>{champ.season}</td>
               <td>
                 <a href={`/admin/championship/${champ.id}`}>
@@ -150,7 +152,7 @@ const { data: eventsData } = await supabase
     >
       <form id="uploadForm" data-astro-reload>
         <label class="text-[#f9f9f9] text-lg font-medium" for="champname">
-          Nombre del campeonato
+          Nombre del campeonato/evento
         </label>
         <input
           class="w-full p-3 border border-solid border-[#f7f7f7] rounded-md mt-2 mb-4 resize-y text-white bg-[#19191c] hover:border-[#da392b]"
@@ -161,8 +163,7 @@ const { data: eventsData } = await supabase
         />
 
         <label class="text-[#f9f9f9] text-lg font-medium" for="keySearchAPI">
-          Keysearch del campeonato (sentencia para buscar el campeonato en la
-          API del servidor)
+          Keysearch del campeonato/evento (sentencia para buscar el campeonato en la API del servidor)
         </label>
         <input
           class="w-full p-3 border border-solid border-[#f7f7f7] rounded-md mt-2 mb-4 resize-y text-white bg-[#19191c] hover:border-[#da392b]"
@@ -173,7 +174,7 @@ const { data: eventsData } = await supabase
         />
 
         <label class="text-[#f9f9f9] text-lg font-medium" for="yearChamp">
-          Año de inicio del campeonato
+          Año de inicio del campeonato/evento
         </label>
         <input
           class="w-full p-3 border border-solid border-[#f7f7f7] rounded-md mt-2 mb-4 resize-y text-white bg-[#19191c] hover:border-[#da392b]"
@@ -202,6 +203,20 @@ const { data: eventsData } = await supabase
           <option value="2627">2026/2027</option>
           <option value="0">Sin Temporada / Otra</option>
         </select>
+
+        <label class="text-[#f9f9f9] text-lg font-medium" for="numbertotalraces">
+          Número de carreras totales del campeonato/evento
+        </label>
+        <input
+          class="w-full p-3 border border-solid border-[#f7f7f7] rounded-md mt-2 mb-4 resize-y text-white bg-[#19191c] hover:border-[#da392b]"
+          type="number"
+          step="1"
+          min="1"
+          max="32760"
+          id="numbertotalraces"
+          name="numbertotalraces"
+          placeholder="4"
+        />
 
         <div class="mb-4">
           <label class="text-[#f9f9f9] text-lg font-medium" for="champORevent">
