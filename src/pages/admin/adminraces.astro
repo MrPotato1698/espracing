@@ -171,101 +171,155 @@ const { data: pointsystemData } = await supabase
           <label class="relative inline-flex cursor-pointer">
             <input id="switch-S2" type="checkbox" class="peer sr-only" />
             <label for="switch-S2" class="hidden"></label>
-            <div class="peer h-4 w-11 rounded-full border bg-slate-200 after:absolute after:-top-1 after:left-0 after:h-6 after:w-6 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-[#da392b] peer-checked:after:translate-x-full peer-focus:ring-[#da392b]">
+            <div
+              class="peer h-4 w-11 rounded-full border bg-slate-200 after:absolute after:-top-1 after:left-0 after:h-6 after:w-6 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-[#da392b] peer-checked:after:translate-x-full peer-focus:ring-[#da392b]"
+            >
             </div>
           </label>
-          <label
-          class="text-[#f0f0f0] text-lg font-medium" for="switch-S2">
-          ¿1 o 2 splits?
+          <label class="text-[#f0f0f0] text-lg font-medium" for="switch-S2">
+            ¿1 o 2 splits?
           </label>
         </div>
 
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 mb-6">
           <label class="relative inline-flex cursor-pointer">
             <input id="switch-R2" type="checkbox" class="peer sr-only" />
             <label for="switch-R2" class="hidden"></label>
-            <div class="peer h-4 w-11 rounded-full border bg-slate-200 after:absolute after:-top-1 after:left-0 after:h-6 after:w-6 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-[#da392b] peer-checked:after:translate-x-full peer-focus:ring-[#da392b]">
+            <div
+              class="peer h-4 w-11 rounded-full border bg-slate-200 after:absolute after:-top-1 after:left-0 after:h-6 after:w-6 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-[#da392b] peer-checked:after:translate-x-full peer-focus:ring-[#da392b]"
+            >
             </div>
           </label>
-          <label
-            class="text-[#f0f0f0] text-lg font-medium" for="switch-R2">
+          <label class="text-[#f0f0f0] text-lg font-medium" for="switch-R2">
             ¿1 o 2 carreras por GP?
           </label>
         </div>
 
-        <div class="mb-4">
-          <label for="fileInputS1R1" class="block text-[#f9f9f9] text-sm font-bold mb-2">
-            Selecciona el archivo JSON de la carrera de Split 1 - Carrera 1
-          </label>
-          <input
-            type="file"
-            id="fileInputS1R1"
-            name="fileInputS1"
-            accept=".json"
-            class="block w-full text-sm text-[#f9f9f9] file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#da392b] file:text-white hover:file:bg-[#b32d22]"
-          />
-        </div>
-        <div id="fileInfoS1R1" class="mb-4 hidden">
-          <p class="text-sm text-[#f9f9f9]">
-            Archivo seleccionado: <span id="fileNameS1R1"></span>
-          </p>
+        <div class="mb-6 p-6 border-2 border-[#da392b] rounded-lg bg-[#19191c]">
+          <div class="mb-4">
+            <label for="fileInputS1R1" class="block text-[#f9f9f9] text-lg font-semibold mb-3">
+              Selecciona el archivo JSON de la carrera de Split 1 - Carrera 1
+            </label>
+            <div class="relative">
+              <input
+                type="file"
+                id="fileInputS1R1"
+                name="fileInputS1R1"
+                accept=".json"
+                class="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
+              />
+              <div class="flex items-center justify-between p-4 border-2 border-dashed border-[#da392b] rounded-lg bg-[#19191c] text-[#f9f9f9]">
+                <div class="flex items-center gap-2">
+                  <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                  </svg>
+                  <span class="text-sm font-medium">Arrastra y suelta tu archivo aquí o haz click para seleccionar</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div id="fileInfoS1R1" class="mb-4 hidden">
+            <p class="text-sm text-[#f9f9f9] bg-[#0f0f0f] p-3 rounded-lg border border-[#da392b]">
+              Archivo seleccionado:
+              <span id="fileNameS1R1" class="font-medium"></span>
+            </p>
+          </div>
         </div>
 
-        <div class="mb-4" id="split2R1File" style="display: none;">
-          <label for="fileInputS2R1" class="block text-[#f9f9f9] text-sm font-bold mb-2">
-            Selecciona el archivo JSON de la carrera de Split 2 - Carrera 1
-          </label>
-          <input
-            type="file"
-            id="fileInputS2R1"
-            name="fileInputS2R1"
-            accept=".json"
-            class="block w-full text-sm text-[#f9f9f9] file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#da392b] file:text-white hover:file:bg-[#b32d22]"
-          />
-        </div>
-        <div id="fileInfoS2R1" class="mb-4 hidden">
-          <p class="text-sm text-[#f9f9f9]">
-            Archivo seleccionado: <span id="fileNameS2R1"></span>
-          </p>
+        <div class="mb-6 p-6 border-2 border-[#da392b] rounded-lg bg-[#19191c]" id="split2R1File" style="display: none;">
+          <div class="mb-4">
+            <label for="split2R1File" class="block text-[#f9f9f9] text-lg font-semibold mb-3">
+              Selecciona el archivo JSON de la carrera de Split 2 - Carrera 1
+            </label>
+            <div class="relative">
+              <input
+                type="file"
+                id="fileInputS2R1"
+                name="fileInputS2R1"
+                accept=".json"
+                class="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
+              />
+              <div class="flex items-center justify-between p-4 border-2 border-dashed border-[#da392b] rounded-lg bg-[#19191c] text-[#f9f9f9]">
+                <div class="flex items-center gap-2">
+                  <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                  </svg>
+                  <span class="text-sm font-medium">Arrastra y suelta tu archivo aquí o haz click para seleccionar</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div id="fileInfoS2R1" class="mb-4 hidden">
+            <p class="text-sm text-[#f9f9f9] bg-[#0f0f0f] p-3 rounded-lg border border-[#da392b]">
+              Archivo seleccionado:
+              <span id="fileNameS2R1" class="font-medium"></span>
+            </p>
+          </div>
         </div>
 
         <div id="race2Files" style="display: none;">
-        <div class="mb-4">
-          <label for="fileInputS1R2" class="block text-[#f9f9f9] text-sm font-bold mb-2">
-            Selecciona el archivo JSON de la carrera de Split 1 - Carrera 2
-          </label>
-          <input
-            type="file"
-            id="fileInputS1R2"
-            name="fileInputS2"
-            accept=".json"
-            class="block w-full text-sm text-[#f9f9f9] file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#da392b] file:text-white hover:file:bg-[#b32d22]"
-          />
-        </div>
-        <div id="fileInfoS1R2" class="mb-4 hidden">
-          <p class="text-sm text-[#f9f9f9]">
-            Archivo seleccionado: <span id="fileNameS1R2"></span>
-          </p>
-        </div>
+          <div class="mb-6 p-6 border-2 border-[#da392b] rounded-lg bg-[#19191c]">
+            <div class="mb-4">
+              <label for="fileInputS1R2" class="block text-[#f9f9f9] text-lg font-semibold mb-3">
+                Selecciona el archivo JSON de la carrera de Split 1 - Carrera 2
+              </label>
+              <div class="relative">
+                <input
+                  type="file"
+                  id="fileInputS1R2"
+                  name="fileInputS1R2"
+                  accept=".json"
+                  class="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
+                />
+                <div class="flex items-center justify-between p-4 border-2 border-dashed border-[#da392b] rounded-lg bg-[#19191c] text-[#f9f9f9]">
+                  <div class="flex items-center gap-2">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    <span class="text-sm font-medium">Arrastra y suelta tu archivo aquí o haz click para seleccionar</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div id="fileInfoS1R2" class="mb-4 hidden">
+              <p class="text-sm text-[#f9f9f9] bg-[#0f0f0f] p-3 rounded-lg border border-[#da392b]">
+                Archivo seleccionado:
+                <span id="fileNameS1R2" class="font-medium"></span>
+              </p>
+            </div>
+          </div>
 
-        <div class="mb-4" id="split2R2File" style="display: none;">
-          <label for="fileInputS2R2" class="block text-[#f9f9f9] text-sm font-bold mb-2">
-            Selecciona el archivo JSON de la carrera de Split 2 - Carrera 2
-          </label>
-          <input
-            type="file"
-            id="fileInputS2R2"
-            name="fileInputS2R2"
-            accept=".json"
-            class="block w-full text-sm text-[#f9f9f9] file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#da392b] file:text-white hover:file:bg-[#b32d22]"
-          />
+          <div class="mb-6 p-6 border-2 border-[#da392b] rounded-lg bg-[#19191c]" id="split2R2File" style="display: none;">
+            <div class="mb-4">
+              <label for="split2R2File" class="block text-[#f9f9f9] text-lg font-semibold mb-3">
+                Selecciona el archivo JSON de la carrera de Split 2 - Carrera 2
+              </label>
+              <div class="relative">
+                <input
+                  type="file"
+                  id="fileInputS2R2"
+                  name="fileInputS2R2"
+                  accept=".json"
+                  class="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
+                />
+                <div class="flex items-center justify-between p-4 border-2 border-dashed border-[#da392b] rounded-lg bg-[#19191c] text-[#f9f9f9]">
+                  <div class="flex items-center gap-2">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    <span class="text-sm font-medium">Arrastra y suelta tu archivo aquí o haz click para seleccionar</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div id="fileInfoS2R2" class="mb-4 hidden">
+              <p class="text-sm text-[#f9f9f9] bg-[#0f0f0f] p-3 rounded-lg border border-[#da392b]">
+                Archivo seleccionado:
+                <span id="fileNameS2R2" class="font-medium"></span>
+              </p>
+            </div>
+          </div>
         </div>
-        <div id="fileInfoS2R2" class="mb-4 hidden">
-          <p class="text-sm text-[#f9f9f9]">
-            Archivo seleccionado: <span id="fileNameS2R2"></span>
-          </p>
-        </div>
-      </div>
 
         <input
           class="bg-[#da392b] text-white font-bold py-3 px-5 border-solid border-[#da392b] border-2 rounded-md hover:bg-[#19191c] hover:text-[#f9f9f9] mt-4"
@@ -278,7 +332,10 @@ const { data: pointsystemData } = await supabase
 </Layout>
 
 <script>
-  import { initRaceManagement, initDeleteRaceButtons } from '@/lib/admin/races/raceManagment';
+  import {
+    initRaceManagement,
+    initDeleteRaceButtons,
+  } from "@/lib/admin/races/raceManagment";
 
   initRaceManagement();
 
