@@ -4,7 +4,6 @@ import { createRaceData, createRaceDataMultipleSplits } from "@/lib/results/resu
 export function initRaceManagement() {
   const form = document.getElementById("uploadForm") as HTMLFormElement;
   const switchS2Element = document.getElementById("switch-S2") as HTMLInputElement | null;
-  const switchQElement = document.getElementById("switch-Q") as HTMLInputElement | null;
   const switchR2Element = document.getElementById("switch-R2") as HTMLInputElement | null;
 
   const fileInputS1R1 = document.getElementById("fileInputS1R1") as HTMLInputElement;
@@ -26,10 +25,6 @@ export function initRaceManagement() {
   const fileInfoS2R2 = document.getElementById("fileInfoS2R2") as HTMLDivElement;
   const fileNameS2R2 = document.getElementById("fileNameS2R2") as HTMLSpanElement;
 
-  const fileQContainer = document.getElementById("QFile");
-  const fileInputQ = document.getElementById("fileInputQ") as HTMLInputElement;
-  const fileInfoQ = document.getElementById("fileInfoQ") as HTMLDivElement;
-  const fileNameQ = document.getElementById("fileNameQ") as HTMLSpanElement;
 
   function toggleInputsS2() {
     if (splitS2R1File && splitS2R2File && switchS2Element) {
@@ -44,15 +39,8 @@ export function initRaceManagement() {
     }
   }
 
-  function toggleInputsQ() {
-    if (fileQContainer && switchQElement) {
-      fileQContainer.style.display = !switchQElement.checked ? "none" : "block";
-    }
-  }
-
-    switchS2Element ? switchS2Element.addEventListener("change", toggleInputsS2) : null;
-    switchR2Element ? switchR2Element.addEventListener("change", toggleInputR2) : null;
-    switchQElement ? switchQElement.addEventListener("change", toggleInputsQ) : null;
+  switchS2Element ? switchS2Element.addEventListener("change", toggleInputsS2) : null;
+  switchR2Element ? switchR2Element.addEventListener("change", toggleInputR2) : null;
 
   fileInputS1R1.addEventListener("change", () => {
     const file = fileInputS1R1.files?.[0];
@@ -118,29 +106,12 @@ export function initRaceManagement() {
     }
   });
 
-  fileInputQ.addEventListener("change", () => {
-    const file = fileInputQ.files?.[0];
-    if (file) {
-      if (file.type === "application/json") {
-        fileNameQ.textContent = file.name;
-        fileInfoQ.classList.remove("hidden");
-      } else {
-        alert("Por favor, selecciona un archivo JSON válido.");
-        fileInputQ.value = ""; // Limpiar la selección
-        fileInfoQ.classList.add("hidden");
-      }
-    } else {
-      fileInfoQ.classList.add("hidden");
-    }
-  });
-
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const fileS1R1 = fileInputS1R1.files?.[0];
     let fileS2R1;
     let fileS1R2;
     let fileS2R2;
-    let fileQ;
     let numSplits: number = 1;
     if (!fileS1R1) {
       alert("Por favor, selecciona un archivo JSON para la Carrera 1 del Split 1.");
@@ -171,13 +142,6 @@ export function initRaceManagement() {
       numSplits = 2;
     }
 
-    if (switchQElement?.checked) {
-      fileQ = fileInputQ.files?.[0];
-      if (!fileQ) {
-        alert("Por favor, selecciona un archivo JSON para Qualy.");
-        return;
-      }
-    }
 
     try {
       const contentS1R1 = await fileS1R1.text();
@@ -190,14 +154,14 @@ export function initRaceManagement() {
       const jsonS1R1 = JSON.parse(contentS1R1);
       let jsonS1R2;
       let transformedJsonR1: string;
-      let transformedJsonR2: string= "{}";
-      if(switchR2Element?.checked) {
+      let transformedJsonR2: string = "{}";
+      if (switchR2Element?.checked) {
         const contentS1R2 = await fileS1R2?.text();
         if (!contentS1R2) throw new Error("Sin contenido en el archivo de Carrera 2 Split 1");
         jsonS1R2 = JSON.parse(contentS1R2);
       }
-      if(switchS2Element?.checked) {
-        if(switchR2Element?.checked) {
+      if (switchS2Element?.checked) {
+        if (switchR2Element?.checked) {
           const contentS2R2 = await fileS1R2?.text();
           if (!contentS2R2) throw new Error("Sin contenido en el archivo de Carrera 2 Split 2");
           const jsonS2R2 = JSON.parse(contentS2R2);
@@ -207,9 +171,9 @@ export function initRaceManagement() {
         if (!contentS2R1) throw new Error("Sin contenido en el archivo de Carrera 2 Split 2");
         const jsonS2R1 = JSON.parse(contentS2R1);
         transformedJsonR1 = JSON.stringify(createRaceDataMultipleSplits(jsonS1R1, jsonS2R1));
-      }else{
+      } else {
         transformedJsonR1 = JSON.stringify(createRaceData(jsonS1R1));
-        if(switchR2Element?.checked) {
+        if (switchR2Element?.checked) {
           transformedJsonR2 = JSON.stringify(createRaceData(jsonS1R2));
         }
       }
