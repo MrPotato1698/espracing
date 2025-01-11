@@ -146,24 +146,30 @@ export type Database = {
         Row: {
           id: number
           ischampionship: boolean | null
+          isfinished: boolean
           key_search: string | null
           name: string | null
+          number_of_races_total: number
           season: string | null
           year: number
         }
         Insert: {
           id: number
           ischampionship?: boolean | null
+          isfinished?: boolean
           key_search?: string | null
           name?: string | null
+          number_of_races_total?: number
           season?: string | null
           year?: number
         }
         Update: {
           id?: number
           ischampionship?: boolean | null
+          isfinished?: boolean
           key_search?: string | null
           name?: string | null
+          number_of_races_total?: number
           season?: string | null
           year?: number
         }
@@ -231,21 +237,21 @@ export type Database = {
       inscription: {
         Row: {
           id: number
-          position: string | null
+          position: number
           profile: string | null
           race: string | null
           valid_laps: string | null
         }
         Insert: {
           id: number
-          position?: string | null
+          position?: number
           profile?: string | null
           race?: string | null
           valid_laps?: string | null
         }
         Update: {
           id?: number
-          position?: string | null
+          position?: number
           profile?: string | null
           race?: string | null
           valid_laps?: string | null
@@ -402,7 +408,6 @@ export type Database = {
           name: string | null
           orderinchamp: number
           pointsystem: number
-          qualy_data: Json | null
           race_data_1: Json | null
           race_data_2: Json | null
           splits: number
@@ -414,7 +419,6 @@ export type Database = {
           name?: string | null
           orderinchamp?: number
           pointsystem?: number
-          qualy_data?: Json | null
           race_data_1?: Json | null
           race_data_2?: Json | null
           splits?: number
@@ -426,7 +430,6 @@ export type Database = {
           name?: string | null
           orderinchamp?: number
           pointsystem?: number
-          qualy_data?: Json | null
           race_data_1?: Json | null
           race_data_2?: Json | null
           splits?: number
