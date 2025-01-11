@@ -5,7 +5,7 @@ import { circuits } from "@/consts/circuits";
 import { circuitlayouts } from "@/consts/circuitlayouts";
 import { points } from "@/consts/pointsystem";
 
-import { createRaceData, formatTwoIntegersPlusThreeDecimals, formatTwoIntegers, getClassShortName, getColorClass } from "@/lib/results/resultConverter";
+import { createRaceData, formatTwoIntegersPlusThreeDecimals, formatTwoIntegers} from "@/lib/results/resultConverter";
 
 import type { RaceData, RaceResult, RaceLap, Lap, BestLap, Consistency, BestSector, Incident, RaceConfig } from "@/types/Results";
 import type { Points } from "@/types/Points";
@@ -147,8 +147,10 @@ function initializeScript() {
         if (isCarExists) {
           carName = isCarExists.brand + " " + isCarExists.model;
           carBrand = isCarExists.imgbrand;
-          carClass = getClassShortName(isCarExists.subclass);
-          carColorClass = getColorClass(isCarExists.subclass);
+          // carClass = getClassShortName(isCarExists.subclass);
+          // carColorClass = getColorClass(isCarExists.subclass);
+          carClass = "";
+          carColorClass = "";
         } else {
           carName = itemDriver.car;
           carBrand = "";
