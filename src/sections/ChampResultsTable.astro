@@ -1,6 +1,6 @@
 ---
 import type { Championship } from "@/lib/tursotypes";
-import { turso } from "@/turso";
+import { supabase } from "@/db/supabase";
 
 interface Props {
   actualchamp: string;
@@ -31,20 +31,31 @@ interface GroupedChamp {
 let resultSet;
 
 if (actualchamp === "true") {
-  const lastchamp = await turso.execute(
-    "SELECT MAX(championship) AS lastchamp FROM Race"
-  );
+  const { data: lastchamp } = await supabase
+    .from("championship")
+    .select("*")
+    .eq('ischampionship', true)
+    .order('id', { ascending: false })
+    .single();
 
-  resultSet = await turso.execute(
-    `SELECT DISTINCT C.id AS ChampID, C.name AS ChampName, C.season AS ChampSeason, R.pointsystem AS RacePoints FROM Championship AS C INNER JOIN Race AS R ON C.id = R.championship WHERE C.id = ${lastchamp.rows[0].lastchamp}`
-  );
+  if(!lastchamp) {
+    throw new Error('No hay campeonatos activos');
+  }
+
+  const { data: champResultSet } = await supabase
+    .from ('race')
+    .select('pointsystem, championship!inner(id, name, season)')
+    .eq('id', lastchamp.id);
+  resultSet = champResultSet;
+
 } else {
-  resultSet = await turso.execute(
-    "SELECT DISTINCT C.id AS ChampID, C.name AS ChampName, C.season AS ChampSeason, R.pointsystem AS RacePoints FROM Championship AS C INNER JOIN Race AS R ON C.id = R.championship WHERE C.isChampionship = 1"
-  );
+  const { data: champResultSet } = await supabase
+    .from ('race')
+    .select('pointsystem, championship!inner(id, name, season)')
+    .eq('ischampionship', true);
+  resultSet = champResultSet;
 }
-const ChampionshipData: Championship[] =
-  resultSet.rows as unknown as Championship[];
+const ChampionshipData: Championship[] = resultSet as unknown as Championship[];
 
 const groupedChampionships = ChampionshipData.reduce(
   (acc, champ) => {
@@ -57,7 +68,7 @@ const groupedChampionships = ChampionshipData.reduce(
   {} as Record<string, Championship[]>
 );
 
-const ChampData: Race[] = resultSet.rows as unknown as Race[];
+const ChampData: Race[] = resultSet as unknown as Race[];
 
 function groupByChamp(resultSet: Race[]): GroupedChamp[] {
   // Creamos un objeto auxiliar para agrupar los campeonatos

@@ -1,17 +1,18 @@
 ---
 import Layout from "@/layouts/NormalLayout.astro";
-import { turso } from "@/turso";
+import { supabase } from "@/db/supabase";
 
-const { rows: UsersData } = await turso.execute(
-  "SELECT DISTINCT U.image, U.name AS UserName, U.number_plate, U.races, U.wins, U.podiums, U.flaps, U.poles, U.top5, U.top10, U.dnf, T.name AS TeamName FROM User AS U LEFT JOIN Team AS T ON U.team = T.id ORDER BY U.races DESC"
-);
+const { data: UsersData, error: errorUsers } = await supabase
+  .from("profiles")
+  .select('full_name, number_plate, avatar, races, wins, podiums, flaps, poles, top5, top10, dnf, team!inner(name)')
+  .order('full_name', { ascending: true });
 ---
 
 <Layout title="ESP Racing: Pilotos">
   <div class="py-4 mx-auto text-center" style="width: 99%">
-    <p2 class="text-5xl font-bold border-b border-[#da392b] w-fit mx-auto"
-      >Tabla de Pilotos</p2
-    >
+    <h2 class="text-5xl font-bold border-b border-[#da392b] w-fit mx-auto">
+      Tabla de Pilotos
+    </h2>
     <table class="mt-6 w-full border-collapse border border-[#f9f9f9]">
       <thead class="font-medium bg-[#da392b]">
         <tr>
@@ -30,18 +31,18 @@ const { rows: UsersData } = await turso.execute(
       </thead>
       <tbody>
         {
-          UsersData.map((user, index) => (
+          (UsersData ?? []).map((user, index) => (
             <tr class="bg-[#19191c]">
               <td class="font-semibold">{index + 1}</td>
-              <td><img src={String(user.image)} alt="Avatar" class="w-8 py-1 rounded-full justify-end"/></td>
+              <td><img src={String(user.avatar)} alt="Avatar" class="w-8 py-1 rounded-full justify-end"/></td>
               {user.number_plate === null || user.number_plate === 0 ? (
-                <td>#0 - {user.UserName}</td>
+                <td>#0 - {user.full_name}</td>
               ) : (
                 <td>
-                  #{user.number_plate} - {user.UserName}
+                  #{user.number_plate} - {user.full_name}
                 </td>
               )}
-              <td>{user.TeamName}</td>
+              <td>{user.team.name}</td>
               <td>{user.races}</td>
               <td>{user.wins}</td>
               <td>{user.podiums}</td>

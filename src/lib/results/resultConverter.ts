@@ -1,4 +1,3 @@
-import { supabase } from "@/db/supabase";
 import type { RaceData, RaceResult, RaceLap, Lap, BestLap, Consistency, BestSector, Incident, RaceConfig, RaceDriversResume, RaceCarResume } from "@/types/Results";
 import type { GeneralDataJSON, CarJSON, EventJSON, LapJSON, ResultJSON } from "@/types/ResultsJSON";
 
@@ -253,24 +252,18 @@ function createRaceLapMultipleSplits(dlapsS1: LapJSON[], dlapsS2: LapJSON[], rr:
 }
 
 function createLap(dlaps: LapJSON[], rr: RaceResult): Lap[] {
-  let l: Lap[] = [];
-  let numLaps = 0;
-  for (let lapItem of dlaps) {
-    if (rr.SteamID === lapItem.DriverGuid) {
-      numLaps++;
-      let uniqueL: Lap = {} as Lap;
-      uniqueL.LapNumber = numLaps;
-      uniqueL.Position = -1;
-      uniqueL.CarFileName = lapItem.CarModel;
-      uniqueL.LapTime = lapItem.LapTime / 1000;
-      uniqueL.Sector = lapItem.Sectors;
-      uniqueL.Tyre = lapItem.Tyre;
-      uniqueL.Cut = lapItem.Cuts;
-      uniqueL.Timestamp = lapItem.Timestamp;
-      l.push(uniqueL);
-    }
-  }
-  return l;
+  return dlaps
+    .filter(lapItem => rr.SteamID === lapItem.DriverGuid)
+    .map((lapItem, index) => ({
+      LapNumber: index + 1,
+      Position: -1,
+      CarFileName: lapItem.CarModel,
+      LapTime: lapItem.LapTime / 1000,
+      Sector: lapItem.Sectors,
+      Tyre: lapItem.Tyre,
+      Cut: lapItem.Cuts,
+      Timestamp: lapItem.Timestamp
+    } as Lap));
 }
 
 function getAvgLapTimes(rl: Lap[]): number[] {
@@ -311,28 +304,24 @@ function getBestLapTime(rl: Lap[]): number[] {
 }
 
 function getBestTheoricalTime(rl: Lap[]): number[] {
-  let bestTheoricalTime: number[] = [];
+  const bestSectorTimes = rl[0].Sector.map(() => Number.MAX_VALUE);
+
   let bestLapTime = Number.MAX_VALUE;
-  let bestSectorTimes: number[] = rl[0].Sector.map(() => Number.MAX_VALUE);
+  for (const lap of rl) {
+    bestLapTime = Math.min(bestLapTime, lap.LapTime);
 
-  for (let lap of rl) {
-    if (lap.LapTime < bestLapTime) {
-      bestLapTime = lap.LapTime;
+    if (lap.Cut <= 0) {
+      lap.Sector.forEach((sectorTime, index) => {
+        bestSectorTimes[index] = Math.min(bestSectorTimes[index], sectorTime);
+      });
     }
-    lap.Sector.forEach((sectorTime, index) => {
-      if (sectorTime < bestSectorTimes[index] && lap.Cut <= 0) {
-        bestSectorTimes[index] = sectorTime;
-      }
-    });
   }
 
-  bestTheoricalTime.push(bestLapTime, ...bestSectorTimes);
-  switch (bestTheoricalTime.length) {
-    case 2: bestTheoricalTime[0] = (bestTheoricalTime[1]) / 1000; break;
-    case 3: bestTheoricalTime[0] = (bestTheoricalTime[1] + bestTheoricalTime[2]) / 1000; break;
-    case 4: bestTheoricalTime[0] = (bestTheoricalTime[1] + bestTheoricalTime[2] + bestTheoricalTime[3]) / 1000; break;
-    case 5: bestTheoricalTime[0] = (bestTheoricalTime[1] + bestTheoricalTime[2] + bestTheoricalTime[3] + bestTheoricalTime[4]) / 1000; break;
-  }
+  const bestTheoricalTime = [bestLapTime, ...bestSectorTimes];
+
+  // Calculate sum of best sectors divided by 1000
+  bestTheoricalTime[0] = bestSectorTimes.reduce((sum, time) => sum + time, 0) / 1000;
+
   return bestTheoricalTime;
 }
 
@@ -546,186 +535,98 @@ function createBestSector(rl: RaceLap[]): BestSector[] {
 }
 
 function createIncident(devents: EventJSON[]): Incident[] {
-  let i: Incident[] = [];
+  return devents.map(event => {
+    const timestamp = new Date(event.Timestamp);
+    const driverName = event.Driver.Name;
+    const impactSpeed = event.ImpactSpeed.toFixed(3);
 
-  for (let itemE of devents) {
-    let uniqueI: Incident = {} as Incident;
-    let timestamp = new Date(itemE.Timestamp);
-    uniqueI.Date = timestamp.toString();
-    let driverName = itemE.Driver.Name;
-    let impactSpeed = itemE.ImpactSpeed.toFixed(3);
+    const incident = event.Type === "COLLISION_WITH_CAR"
+      ? `${driverName} colisionó contra el vehiculo de ${event.OtherDriver.Name} a una velocidad de ${impactSpeed} km/h`
+      : `${driverName} colisionó con el entorno a una velocidad de ${impactSpeed} km/h`;
 
-    switch (itemE.Type) {
-      case "COLLISION_WITH_CAR":
-        let otherDriverName = itemE.OtherDriver.Name;
-        uniqueI.Incident = `${driverName} colisionó contra el vehiculo de ${otherDriverName} a una velocidad de ${impactSpeed} km/h`;
-        break;
-      case "COLLISION_WITH_ENV":
-        uniqueI.Incident = `${driverName} colisionó con el entorno a una velocidad de ${impactSpeed} km/h`;
-        break;
-    }
-
-    uniqueI.AfterSession = itemE.AfterSessionEnd;
-    i.push(uniqueI);
-  }
-
-  return i;
+    return {
+      Date: timestamp.toString(),
+      Incident: incident,
+      AfterSession: event.AfterSessionEnd
+    };
+  });
 }
 
 function createIncidentMultipleSplits(deventsS1: EventJSON[], deventsS2: EventJSON[]): Incident[] {
-  let i: Incident[] = [];
+  return [...deventsS1, ...deventsS2].map(event => {
+    const timestamp = new Date(event.Timestamp);
+    const driverName = event.Driver.Name;
+    const impactSpeed = event.ImpactSpeed.toFixed(3);
 
-  for (let itemE of deventsS1) {
-    let uniqueI: Incident = {} as Incident;
-    let timestamp = new Date(itemE.Timestamp);
-    uniqueI.Date = timestamp.toString();
-    let driverName = itemE.Driver.Name;
-    let impactSpeed = itemE.ImpactSpeed.toFixed(3);
+    const incident = event.Type === "COLLISION_WITH_CAR"
+      ? `${driverName} colisionó contra el vehiculo de ${event.OtherDriver.Name} a una velocidad de ${impactSpeed} km/h`
+      : `${driverName} colisionó con el entorno a una velocidad de ${impactSpeed} km/h`;
 
-    switch (itemE.Type) {
-      case "COLLISION_WITH_CAR":
-        let otherDriverName = itemE.OtherDriver.Name;
-        uniqueI.Incident = `${driverName} colisionó contra el vehiculo de ${otherDriverName} a una velocidad de ${impactSpeed} km/h`;
-        break;
-      case "COLLISION_WITH_ENV":
-        uniqueI.Incident = `${driverName} colisionó con el entorno a una velocidad de ${impactSpeed} km/h`;
-        break;
-    }
-
-    uniqueI.AfterSession = itemE.AfterSessionEnd;
-    i.push(uniqueI);
-  }
-
-  for (let itemE of deventsS2) {
-    let uniqueI: Incident = {} as Incident;
-    let timestamp = new Date(itemE.Timestamp);
-    uniqueI.Date = timestamp.toString();
-    let driverName = itemE.Driver.Name;
-    let impactSpeed = itemE.ImpactSpeed.toFixed(3);
-
-    switch (itemE.Type) {
-      case "COLLISION_WITH_CAR":
-        let otherDriverName = itemE.OtherDriver.Name;
-        uniqueI.Incident = `${driverName} colisionó contra el vehiculo de ${otherDriverName} a una velocidad de ${impactSpeed} km/h`;
-        break;
-      case "COLLISION_WITH_ENV":
-        uniqueI.Incident = `${driverName} colisionó con el entorno a una velocidad de ${impactSpeed} km/h`;
-        break;
-    }
-
-    uniqueI.AfterSession = itemE.AfterSessionEnd;
-    i.push(uniqueI);
-  }
-
-  return i;
+    return {
+      Date: timestamp.toString(),
+      Incident: incident,
+      AfterSession: event.AfterSessionEnd
+    };
+  });
 }
 
 function getLeadLaps(rrAux: RaceResult[], rl: RaceLap[]): RaceResult[] {
-  let rr: RaceResult[] = rrAux;
-
-  for (let itemRL of rl) {
-    let lapsLed = 0;
-    for (let itemL of itemRL.Laps) {
-      if (itemL.Position === 1) {
-        lapsLed++;
-      }
-    }
-
-    for (let itemRR of rr) {
-      if (itemRL.SteamID === itemRR.SteamID) {
-        itemRR.LedLaps = lapsLed;
-      }
-    }
-  }
-
-  return rr;
+  return rrAux.map(raceResult => {
+    const driverLaps = rl.find(raceLap => raceLap.SteamID === raceResult.SteamID);
+    const lapsLed = driverLaps?.Laps.filter(lap => lap.Position === 1).length || 0;
+    return { ...raceResult, LedLaps: lapsLed };
+  });
 }
 
 function createRaceConfig(data: GeneralDataJSON, rr: RaceResult[], bestLap: BestLap): RaceConfig {
-  let rc: RaceConfig = {} as RaceConfig;
-  rc.RaceID = data.SessionFile;
-  rc.Date = data.Date;
-  rc.Session = data.Type;
-  rc.Track = data.TrackName;
-  rc.TrackLayout = data.TrackConfig;
-  rc.Winner = rr[0].DriverName;
+  const mostLapsLeader = rr.reduce((prev, curr) =>
+    curr.LedLaps > prev.LedLaps ? curr : prev
+  );
 
-  //Piloto que más vueltas ha liderado
-  let mostLedLaps = 0;
-  let driverName = "";
-  for (let item of rr) {
-    if (item.LedLaps > mostLedLaps) {
-      mostLedLaps = item.LedLaps;
-      driverName = item.DriverName;
-    }
-  }
-  rc.LedMostLaps = driverName;
-
-  rc.BestLap = bestLap;
-  rc.NumberOfLaps = rr[0].Laps;
-
-  //Dependiendo de como esté configurada la sesión, se mostrará el tiempo o no
-  if (data.SessionConfig.time > 0) {
-    rc.RaceDurationTime = data.SessionConfig.time;
-    rc.RaceDurationLaps = 0;
-  } else {
-    rc.RaceDurationTime = 0;
-    rc.RaceDurationLaps = data.SessionConfig.laps;
-  }
-
-  rc.DisableP2P = data.SessionConfig.disable_push_to_pass;
-  return rc;
+  return {
+    RaceID: data.SessionFile,
+    Date: data.Date,
+    Session: data.Type,
+    Track: data.TrackName,
+    TrackLayout: data.TrackConfig,
+    Winner: rr[0].DriverName,
+    LedMostLaps: mostLapsLeader.DriverName,
+    BestLap: bestLap,
+    NumberOfLaps: rr[0].Laps,
+    RaceDurationTime: data.SessionConfig.time > 0 ? data.SessionConfig.time : 0,
+    RaceDurationLaps: data.SessionConfig.time > 0 ? 0 : data.SessionConfig.laps,
+    DisableP2P: data.SessionConfig.disable_push_to_pass,
+    NumberofSplits: 1
+  };
 }
 
 function createRaceConfigMultipleSplits(dataS1: GeneralDataJSON, dataS2: GeneralDataJSON, rr: RaceResult[], bestLap: BestLap): RaceConfig {
-  let rc: RaceConfig = {} as RaceConfig;
-  rc.RaceID = dataS1.SessionFile + "#" + dataS2.SessionFile;
-  rc.Date = dataS1.Date;
-  rc.Session = dataS1.Type;
-  rc.Track = dataS1.TrackName;
-  rc.TrackLayout = dataS1.TrackConfig;
-  rc.Winner = rr[0].DriverName;
+  const mostLapsLeader = rr.reduce((prev, curr) =>
+    curr.LedLaps > prev.LedLaps ? curr : prev
+  );
 
-  //Piloto que más vueltas ha liderado
-  let mostLedLaps = 0;
-  let driverName = "";
-  for (let item of rr) {
-    if (item.LedLaps > mostLedLaps) {
-      mostLedLaps = item.LedLaps;
-      driverName = item.DriverName;
-    }
-  }
-  rc.LedMostLaps = driverName;
-
-  rc.BestLap = bestLap;
-  rc.NumberOfLaps = rr[0].Laps;
-
-  //Dependiendo de como esté configurada la sesión, se mostrará el tiempo o no
-  if (dataS1.SessionConfig.time > 0) {
-    rc.RaceDurationTime = dataS1.SessionConfig.time;
-    rc.RaceDurationLaps = 0;
-  } else {
-    rc.RaceDurationTime = 0;
-    rc.RaceDurationLaps = dataS1.SessionConfig.laps;
-  }
-
-  rc.DisableP2P = dataS1.SessionConfig.disable_push_to_pass;
-  return rc;
+  return {
+    RaceID: `${dataS1.SessionFile}#${dataS2.SessionFile}`,
+    Date: dataS1.Date,
+    Session: dataS1.Type,
+    Track: dataS1.TrackName,
+    TrackLayout: dataS1.TrackConfig,
+    Winner: rr[0].DriverName,
+    LedMostLaps: mostLapsLeader.DriverName,
+    BestLap: bestLap,
+    NumberOfLaps: rr[0].Laps,
+    RaceDurationTime: dataS1.SessionConfig.time > 0 ? dataS1.SessionConfig.time : 0,
+    RaceDurationLaps: dataS1.SessionConfig.time > 0 ? 0 : dataS1.SessionConfig.laps,
+    DisableP2P: dataS1.SessionConfig.disable_push_to_pass,
+    NumberofSplits: 2
+  };
 }
 
 function calculateNumLaps(rr: RaceResult[], rl: RaceLap[]): RaceResult[] {
-  let rrAdjusted: RaceResult[] = rr;
-
-  for (let itemRR of rrAdjusted) {
-    let numLaps = 0;
-    for (let itemRL of rl) {
-      if (itemRR.SteamID === itemRL.SteamID) {
-        numLaps = itemRL.Laps.length;
-      }
-    }
-    itemRR.Laps = numLaps;
-  }
-  return rrAdjusted;
+  return rr.map(itemRR => ({
+    ...itemRR,
+    Laps: rl.find(itemRL => itemRR.SteamID === itemRL.SteamID)?.Laps.length || 0
+  }));
 }
 
 function calculateGridPosition(rr: RaceResult[], rl: RaceLap[]): RaceResult[] {
@@ -794,53 +695,40 @@ function getGapToFirst(rr: RaceResult[], rl: RaceLap[], numberOfSplits: number):
 }
 
 function recalculatePositions(rr: RaceResult[], raceTime: number): RaceResult[] {
-  for (let item of rr)
-    if (item.Split === 1) {
-      if (item.Pos === -2) {
-        item.Pos = -2;
-
-      } else {
-        const timerace = (item.TotalTime) + (item.Penalties);
-        const timeCondition = (Math.trunc((timerace / 3600) % 60) + Math.trunc(timerace / 60));
-        if (timeCondition >= raceTime) {
-          item.Pos = item.Pos;
-        } else {
-          if (item.Team === 'ESP Racing Staff' || item.Team === 'STREAMING' || item.Team === 'Safety Car' || item.DriverName === 'STREAMING') {
-            item.Pos = -4;    // Organización
-          } else {
-            if (item.TotalTime <= 0) {
-              item.Pos = -3;  // DNS
-            } else {
-              item.Pos = -1;  // DNF
-            }
-          }
-        }
-      }
-
-    } else { // Split diferente a 1
-      if (item.Pos === -2) {
-        item.Pos = -2;
-
-      } else {
-        const timerace = (item.TotalTime) + (item.Penalties);
-        const timeCondition = (Math.trunc((timerace / 3600) % 60) + Math.trunc(timerace / 60));
-        if (timeCondition >= raceTime) {
-          item.Pos = item.Pos;
-
-        } else {
-          if (item.Team === 'ESP Racing Staff' || item.Team === 'STREAMING' || item.Team === 'Safety Car' || item.DriverName === 'STREAMING') {
-            item.Pos = -4;    // Organización
-          } else {
-            if (item.TotalTime <= 0) {
-              item.Pos = -3;  // DNS
-            } else {
-              item.Pos = -1;  // DNF
-            }
-          }
-        }
-      }
+  // Calcular tiempo de lideres por split
+  const timeSplitLeader = rr.reduce((acc, item) => {
+    if (!acc[item.Split]) {
+      const timerace = item.TotalTime + item.Penalties;
+      acc[item.Split] = Math.trunc((timerace / 3600) % 60) + Math.trunc(timerace / 60);
     }
-  return rr;
+    return acc;
+  }, {} as { [key: number]: number });
+
+
+  return rr.map(item => {
+    // Pilotos DQ
+    if (item.Pos === -2) {
+      return item;
+    }
+
+    const timerace = item.TotalTime + item.Penalties;
+    const timeCondition = Math.trunc((timerace / 3600) % 60) + Math.trunc(timerace / 60);
+
+    // Pilotos que han completado la carrera
+    // Si el tiempo del piloto es mayor que la duración de la carrera y mayor que el tiempo del lider del split, se asigna la posición
+    if (timeCondition >= raceTime && timeCondition >= timeSplitLeader[item.Split]) {
+      return item;
+    }
+
+    // Casos especiales
+    if (['ESP Racing Staff', 'STREAMING', 'Safety Car'].includes(item.Team) || item.DriverName === 'STREAMING') {
+      item.Pos = -4; // Organization
+    } else {
+      item.Pos = item.TotalTime <= 0 ? -3 : -1; // DNS o DNF
+    }
+
+    return item;
+  });
 }
 
 function createRaceDriversResume(rr: RaceResult[], bl: BestLap[]): RaceDriversResume[] {

@@ -1,5 +1,3 @@
-import type { Car } from "@/types/Car";
-import { cars } from "@/consts/cars";
 import { supabase } from "@/db/supabase";
 
 export function initializeFuelFormControls() {
@@ -98,35 +96,33 @@ export function initializeFuelFormControls() {
     let stintLaps: number[] = [];
     let stintFuel: number[] = [];
     let extraLap: boolean = false;
-    if (minimumStints >= completeStints && minimumStints > 1) {
-      for (let i = 0; i < completeStints; i++) {
-        const laps = Math.floor(maxLapsperTank);
-        stintLaps.push(laps);
-        const fuel = i === 0 ? fuelTank : (laps * fuelConsumption);
-        stintFuel.push(fuel);
-      }
-      // Ultimo Stint
-      let lastStintLaps = VueltasTotales - (completeStints) * Math.floor(maxLapsperTank);
-      let lastStintFuel;
-      if (lastStintLaps > Math.floor(maxLapsperTank)) {
-        const laps = Math.floor(maxLapsperTank);
-        stintLaps.push(laps);
-        const fuel = (laps * fuelConsumption);
-        stintFuel.push(fuel);
-        lastStintLaps -= laps;
-        lastStintFuel = (lastStintLaps * fuelConsumption) - (fuelTank - stintFuel[stintFuel.length - 1]);
-        stintLaps.push(lastStintLaps);
-        stintFuel.push(lastStintFuel);
-        extraLap = true;
-      } else {
-        lastStintFuel = (lastStintLaps * fuelConsumption) - (fuelTank - stintFuel[stintFuel.length - 1]);
-        stintLaps.push(lastStintLaps);
-        stintFuel.push(lastStintFuel);
-        extraLap = false;
-      }
-    } else if (minimumStints === 1) {
+    if (minimumStints === 1) {
       stintLaps.push(VueltasTotales);
       stintFuel.push(VueltasTotales * fuelConsumption);
+    } else {
+      // Manejar stint completos
+      const completeStintLaps = Math.floor(maxLapsperTank);
+      for (let i = 0; i < completeStints; i++) {
+        stintLaps.push(completeStintLaps);
+        stintFuel.push(i === 0 ? fuelTank : (completeStintLaps * fuelConsumption));
+      }
+
+      // Manejar vueltas restantes
+      let remainingLaps = VueltasTotales - (completeStints * completeStintLaps);
+      const lastFullStintFuel = stintFuel[stintFuel.length - 1] || 0;
+      const remainingFuelInTank = fuelTank - lastFullStintFuel;
+
+      if (remainingLaps > completeStintLaps) {
+        stintLaps.push(completeStintLaps);
+        stintFuel.push(completeStintLaps * fuelConsumption);
+        remainingLaps -= completeStintLaps;
+        extraLap = true;
+      } else {
+        extraLap = false;
+      }
+
+      stintLaps.push(remainingLaps);
+      stintFuel.push((remainingLaps * fuelConsumption) - remainingFuelInTank);
     }
 
     // Calcular tiempo total de repostaje
@@ -134,53 +130,49 @@ export function initializeFuelFormControls() {
 
 
     // Mostrar el resultado con AJAX
-    if (resultadoDiv) {
-      let resultHTML = `
+    if (!resultadoDiv) return;
+
+    const createListItem = (text: string) => `<li><span class='font-medium text-[#da392b]'>${text}</span>`;
+    const stintDetails = stintLaps.map((laps, index) =>
+      `${createListItem(`Stint ${index + 1}:`)}</span> ${laps} vueltas, ${stintFuel[index].toFixed(2)} litros
+      para realizar el stint, ${totalFuelperStint[index].toFixed(2)} segundos solo la parada + tiempo de paso por boxes. 
+      (${carFuelTimeperLiter} s/litros repostado).</li>`
+    ).join('');
+
+    const stintInfo = `${createListItem(`${stints.toFixed(2)} stints`)}
+      (${Math.floor(stints) + (extraLap ? 1 : 0)} paradas${extraLap ? ', si no se ahorra combustible lo que indica el ultimo stint' : ''}).</li>`;
+
+    const baseInfo = stints > 1 ? `
+      ${createListItem(`${totalFuel.toFixed(2)} litros`)} de combustible para completar la carrera.</li>
+      ${createListItem(`${fuelTank} litros`)} de tanque de combustible.</li>
+      ${createListItem(`${maxLapsperTank.toFixed(0)} vueltas`)} completas por deposito.</li>
+    ` : ``;
+
+    const singleStintInfo = stints <= 1 ? `
+      ${createListItem('Unico stint:')}</span> ${stintLaps[0]} vueltas, ${stintFuel[0].toFixed(2)} litros.
+      No es necesario parar, pero recuerda que cada litro añadido en la parada son ${carFuelTimeperLiter} segundos sin contar paso por boxes.</li>
+    ` : ``;
+
+    const tiresInfo = carTiresTime > 0 ? `
+      <p class="mt-4">*Si se quiere realizar un cambio de gomas, recuerde que en este coche son 
+      <span class='font-medium text-[#da392b]'>${carTiresTime} segundos</span>, mire los diferentes stints y si el tiempo de parada es superior 
+      al cambio de goma, recuerde que tiene un cambio de gomas "gratis" en lo que perdida de tiempo se refiere.</p>
+    ` : '';
+
+    resultadoDiv.innerHTML = `
       <h2 class="font-bold">Resultado</h2>
       <p class="font-semibold">Para completar la carrera necesitas:</p>
-      <ul>`;
-      if (extraLap) {
-        resultHTML += `
-        <li><span class = 'font-medium text-[#da392b]'>${stints.toFixed(2)} stints</span> (${Math.floor(stints) + 1} paradas, si no se ahorra combustible lo que 
-        indica el ultimo stint).</li>`;
-      } else {
-        resultHTML += `
-        <li><span class = 'font-medium text-[#da392b]'>${stints.toFixed(2)} stints</span> (${Math.floor(stints)} paradas).</li>`;
-      }
-      if (stints > 1) {
-        resultHTML += `
-          <li><span class = 'font-medium text-[#da392b]'>${totalFuel.toFixed(2)} litros</span> de combustible para completar la carrera.</li>
-          <li><span class = 'font-medium text-[#da392b]'>${fuelTank} litros</span> de tanque de combustible.</li>
-          <li><span class = 'font-medium text-[#da392b]'>${maxLapsperTank.toFixed(0)} vueltas</span> completas por deposito.</li>
-        </ul>
-        <p class = "mt-2 font-semibold">Detalle de los diferentes stints:</p>
-        <ul>
-          ${stintLaps.map((item, index) => {
-          return `<li><span class = 'font-medium text-[#da392b]'>Stint ${index + 1}:</span> ${item} vueltas, ${stintFuel[index].toFixed(2)} litros 
-          para realizar el stint, ${totalFuelperStint[index].toFixed(2)} segundos solo la parada + tiempo de paso por boxes. (${carFuelTimeperLiter} s/litros repostado).
-          </li>`;
-        }).join('')}
-        </ul>
-        `;
-      } else {
-        resultHTML += `
-        <p class = "mt-2 font-semibold">Detalle del stint de carrera:</p>
-        <ul>
-          <li><span class = 'font-medium text-[#da392b]'>Unico stint:</span> ${stintLaps[0]} vueltas, ${stintFuel[0].toFixed(2)} litros.
-          No es necesario parar, pero recuerda que cada litro añadido en la parada son ${carFuelTimeperLiter} segundos sin contar paso por boxes.</li>
-        </ul>
-        `;
-      }
-      if (carTiresTime > 0) {
-        resultHTML += `
-        <p class = "mt-4">*Si se quiere realizar un cambio de gomas, recuerde que en este coche son <span class = 'font-medium text-[#da392b]'>
-        ${carTiresTime} segundos</span>, mire los diferentes stints y si el tiempo de parada es superior al cambio de goma, recuerde que tiene un
-        cambio de gomas "gratis" en lo que perdida de tiempo se refiere.</p>
-      `;
-      }
-      resultadoDiv.innerHTML = resultHTML;
-      resultadoDiv.style.display = "block";
-    }
+      <ul>
+      ${stintInfo}
+      ${baseInfo}
+      </ul>
+      <p class="mt-2 font-semibold">Detalle de ${stints > 1 ? 'los diferentes stints' : 'el stint de carrera'}:</p>
+      <ul>
+      ${stints > 1 ? stintDetails : singleStintInfo}
+      </ul>
+      ${tiresInfo}
+    `;
+    resultadoDiv.style.display = "block";
 
   }
 
