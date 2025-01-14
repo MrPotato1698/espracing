@@ -55,31 +55,29 @@ if(rolUser === null) {
 
 <!-- Nombre Inicial + Redes -->
 <button
-  data-drawer-target="default-sidebar"
-  data-drawer-toggle="default-sidebar"
-  aria-controls="default-sidebar"
-  type="button"
-  class="inline-flex items-center p-2 mt-2 ml-3 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
+id="sidebarButton"
+type="button"
+class="fixed z-50 left-0 top-1/2 -translate-y-1/2 p-2 bg-[#19191c] text-[#f9f9f9] border-y-2 border-r-2 border-[#da392b] rounded-r-xl transition-all duration-300 sm:hidden hover:bg-[#0f0f0f]"
 >
-  <span class="sr-only">Abrir sidebar</span>
-  <svg
-    class="w-6 h-6"
-    aria-hidden="true"
-    fill="currentColor"
-    viewBox="0 0 20 20"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path
-      clip-rule="evenodd"
-      fill-rule="evenodd"
-      d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z"
-    ></path>
-  </svg>
+<svg
+  id="arrowIcon"
+  class="w-6 h-6 transition-transform duration-300"
+  fill="none"
+  stroke="currentColor"
+  viewBox="0 0 24 24"
+>
+  <path
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    stroke-width="2"
+    d="M9 5l7 7-7 7"
+  />
+</svg>
 </button>
 
 <aside
-  id="default-sidebar"
-  class="absolute top-0 left-0 z-40 w-64 h-screen transition-transform -translate-x-full sm:translate-x-0"
+  id="sidebar"
+  class="fixed top-0 left-0 z-40 w-64 h-screen transition-transform duration-300 ease-in-out -translate-x-full sm:translate-x-0"
   aria-label="Sidenav"
 >
   <div
@@ -389,8 +387,8 @@ if(rolUser === null) {
   </div>
 
   <div
-    class="absolute bottom-0 left-0 z-20 justify-center hidden w-full p-4 space-x-4 border-r-2 lg:flex bg-[#19191c] border-[#da392b]"
-  >
+    class="absolute bottom-0 left-0 z-20 justify-center w-full p-4 space-x-4 border-r-2 flex bg-[#19191c] border-[#da392b]"
+    >
     <div class="flex gap-4 py-1">
       <a href="https://x.com/EspRacingCom" target="_blank">
         <img
@@ -443,8 +441,108 @@ if(rolUser === null) {
   </div>
 </aside>
 
-<script
-  is:inline
-  data-astro-rerun
-  src="https://unpkg.com/@themesberg/flowbite@1.1.1/dist/flowbite.bundle.js"
-></script>
+<script>
+  function setupSidebar() {
+    const button = document.getElementById('sidebarButton');
+    const sidebar = document.getElementById('sidebar');
+    const arrowIcon = document.getElementById('arrowIcon');
+    let isOpen = false;
+
+    // Función para manejar cambios de tamaño
+    function handleResize() {
+      if (window.innerWidth >= 640) { // 640px es el breakpoint 'sm' de Tailwind
+        if (sidebar) sidebar.style.transform = 'translateX(0)';
+        if (button) button.style.left = '0';
+        isOpen = false;
+      } else {
+        if (sidebar) sidebar.style.transform = 'translateX(-100%)';
+        if (button) button.style.left = '0';
+        if (arrowIcon) arrowIcon.style.transform = 'rotate(0)';
+        isOpen = false;
+      }
+    }
+
+    if (button && sidebar && arrowIcon) {
+      button.addEventListener('click', () => {
+        isOpen = !isOpen;
+        sidebar.style.transform = isOpen ? 'translateX(0)' : 'translateX(-100%)';
+        arrowIcon.style.transform = isOpen ? 'rotate(180deg)' : 'rotate(0)';
+        button.style.left = isOpen ? '256px' : '0';
+      });
+
+      // Escuchar cambios de tamaño
+      window.addEventListener('resize', handleResize);
+    }
+
+    // Ejecutar al inicio
+    handleResize();
+  }
+
+  function setupDropdown() {
+    const dropdownButton = document.querySelector('[data-collapse-toggle="dropdown-sales"]');
+    const dropdownContent = document.getElementById('dropdown-sales');
+    const dropdownItems = dropdownContent?.querySelectorAll('li');
+    const chevron = document.querySelector('[data-collapse-toggle="dropdown-sales"] svg:last-child') as HTMLElement;
+    let isDropdownOpen = false;
+
+    if (dropdownButton && dropdownContent && dropdownItems) {
+      dropdownButton.addEventListener('click', () => {
+        isDropdownOpen = !isDropdownOpen;
+
+        if (isDropdownOpen) {
+          dropdownContent.classList.remove('hidden');
+          dropdownContent.classList.add('animate-dropdown');
+
+          // Animar cada elemento individualmente
+          dropdownItems.forEach((item, index) => {
+            const li = item as HTMLElement;
+            li.style.opacity = '0';
+            li.style.transform = 'translateY(-20px)';
+            setTimeout(() => {
+              li.style.transition = 'all 0.3s ease';
+              li.style.opacity = '1';
+              li.style.transform = 'translateY(0)';
+            }, index * 100); // Retraso incremental para cada item
+          });
+        } else {
+          // Animar ocultamiento en orden inverso
+          Array.from(dropdownItems).reverse().forEach((item, index) => {
+            const li = item as HTMLElement;
+            setTimeout(() => {
+              li.style.opacity = '0';
+              li.style.transform = 'translateY(-20px)';
+            }, index * 100);
+          });
+
+          // Ocultar el dropdown después de que termine la animación
+          setTimeout(() => {
+            dropdownContent.classList.add('hidden');
+            dropdownContent.classList.remove('animate-dropdown');
+          }, dropdownItems.length * 100);
+        }
+
+        // Rotar chevron
+        if (chevron) {
+          chevron.style.transform = isDropdownOpen ? 'rotate(180deg)' : 'rotate(0)';
+          chevron.style.transition = 'transform 0.5s ease';
+        }
+      });
+    }
+  }
+
+  setupSidebar();
+  setupDropdown();
+
+  document.addEventListener('astro:page-load', setupSidebar);
+  document.addEventListener('astro:page-load', setupDropdown);
+</script>
+
+<style>
+  .animate-dropdown {
+    transition: max-height 0.2s ease-in-out;
+  }
+
+  #dropdown-sales li {
+    transition: all 0.10s ease;
+  }
+</style>
