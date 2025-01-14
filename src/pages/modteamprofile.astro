@@ -30,11 +30,6 @@ if (errorAuth) {
 }
 
 const id = dataAuth?.user?.id || "";
-const rol = dataAuth?.user?.role;
-
-if (rol !== "low_administration" && rol !== "supabase_admin" && rol !== "team_manager"){
-  return redirect("/profile");
-}
 
 const {data: TeamData} = await supabase
   .from("team")
@@ -46,14 +41,14 @@ const {data: TeamData} = await supabase
 <Layout title="ESP Racing: Modificar Equipo">
   <h2 class="text-5xl font-bold border-b border-[#da392b] w-fit mx-auto">Modificar Perfil de Equipo</h2>
   <form
-    action = "/api/datamodification/modteamprofile"
-    method = "post"
+    id="teamForm"
+    class="flex flex-col mt-5"
     class = "flex flex-col mt-5">
     <label class="mt-5 text-lg font-semibold" for = "name">Nombre de Equipo:</label>
     <input
       type = "text"
       name = "name"
-      value = {TeamData[0].name.toString()}
+      value = {TeamData?.name.toString()}
       class = "bg-[#19191c] text-[#f9f9f9] text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
       >
 
@@ -83,3 +78,32 @@ const {data: TeamData} = await supabase
 
   </form>
 </Layout>
+
+<script>
+  const form = document.getElementById('teamForm');
+
+  if (form) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(form as HTMLFormElement);
+
+      try {
+        const response = await fetch('/api/datamodification/modteamprofile', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Error al actualizar el equipo');
+        }
+
+        // Redireccionar a myprofile tras éxito
+        window.location.href = '/myteam';
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Error al actualizar el equipo: '+error);
+      }
+    });
+  }
+</script>

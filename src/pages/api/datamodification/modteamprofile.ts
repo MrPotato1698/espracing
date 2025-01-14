@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { turso } from "@/turso";
+import { supabase } from "@/db/supabase";
 
 export const POST: APIRoute = async ({ request, redirect }) => {
   const formData = await request.formData();
@@ -16,10 +16,20 @@ export const POST: APIRoute = async ({ request, redirect }) => {
     return new Response("Todos los campos tienen que estar rellenos", { status: 400 });
   }
 
-  await turso.execute({
-    sql: "UPDATE Team SET name = ?, description = ? WHERE id = ?",
-    args: [name, description, id],
-  });
+  const {data: updateData, error: errorUpdateData} = await supabase
+  .from('team')
+  .update({name: name, description: description})
+  .eq('id', id);
 
-  return redirect("/myteam");
+  if(errorUpdateData) {
+    return new Response(
+      JSON.stringify({ error: "Error al actualizar el equipo" }),
+      { status: 500 }
+    );
+  }
+
+  return new Response(
+    JSON.stringify({ success: true }),
+    { status: 200 }
+  );
 };

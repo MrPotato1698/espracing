@@ -1,9 +1,6 @@
 ---
 import Layout from "@/layouts/ProfileLayout.astro";
-import ButtonProfiles from "@/components/ButtonProfiles.astro";
 import { supabase } from "@/db/supabase";
-import { type Database } from "@/types/supabase";
-import { turso } from "@/turso";
 
 const { cookies, redirect } = Astro;
 
@@ -35,122 +32,82 @@ if (errorAuth) {
 const id = dataAuth?.user?.id || "";
 const rol = dataAuth?.user?.role;
 
-if (rol !== "low_administration" && rol !== "supabase_admin"){
-  return redirect("/profile");
-}
-
-
 // Get user data
-const {rows: userData} = await turso.execute({
-  sql: 'SELECT * FROM User WHERE id = ?',
-  args: [id]
-});
-
+const { data: userData } = await supabase
+  .from("profiles")
+  .select("id, full_name, steam_id")
+  .eq("id", id)
+  .single();
 ---
 
 <Layout title="ESP Racing: Modificar datos">
-  <h2 class="text-5xl font-bold border-b border-[#da392b] w-fit mx-auto">Modificar Perfil</h2>
+  <h2 class="text-5xl font-bold border-b border-[#da392b] w-fit mx-auto">
+    Modificar Perfil
+  </h2>
   <form
-    action = "/api/datamodification/modprofile"
-    method = "post"
-    class = "flex flex-col mt-5">
-    <label class="mt-5 text-lg font-semibold" for = "name">Nombre:</label>
+    id="profileForm"
+    class="flex flex-col mt-5"
+  >
+    <label class="mt-5 text-lg font-semibold" for="name">Nombre:</label>
     <input
-      type = "text"
-      name = "name"
-      value = {userData[0].name.toString()}
-      class = "bg-[#19191c] text-[#f9f9f9] text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
-      >
+      type="text"
+      name="name"
+      value={userData?.full_name?.toString() ?? "No hay nombre"}
+      class="bg-[#19191c] text-[#f9f9f9] text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
+    />
 
-    <label class="mt-5 text-lg font-semibold" for = "steam_id">Steam ID:</label>
+    <label class="mt-5 text-lg font-semibold" for="steam_id">Steam ID:</label>
     <input
-      type = "text"
-      name = "steam_id"
-      value = {userData[0].steam_id.toString()}
-      class = "bg-[#19191c] text-[#f9f9f9] text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
-      >
-    <input type="hidden" name="id" value={id}>
+      type="text"
+      name="steam_id"
+      value={userData?.steam_id.toString() ?? "No hay Steam ID"}
+      class="bg-[#19191c] text-[#f9f9f9] text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
+    />
+    <input type="hidden" name="id" value={userData?.id} />
 
-    {
-    rol === "low_administration" || rol === "supabase_admin" ? (
-      <label class="mt-5 text-lg font-semibold" for="races">Carreras:</label>
-      <input
-        type="text"
-        name="races"
-        value= {userData[0].races.toString()}
-        class = "bg-[#19191c] text-[#f9f9f9] text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
-        >
-
-      <label class="mt-5 text-lg font-semibold" for="wins">Victorias:</label>
-      <input
-        type="text"
-        name="wins"
-        value= {userData[0].wins.toString()}
-        class = "bg-[#19191c] text-[#f9f9f9] text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
-        >
-
-      <label class="mt-5 text-lg font-semibold" for="poles">Pole Positions:</label>
-      <input
-        type="text"
-        name="poles"
-        value= {userData[0].poles.toString()}
-        class = "bg-[#19191c] text-[#f9f9f9] text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
-        >
-
-      <label class="mt-5 text-lg font-semibold" for="podiums">Podios:</label>
-      <input
-        type="text"
-        name="podiums"
-        value= {userData[0].podiums.toString()}
-        class = "bg-[#19191c] text-[#f9f9f9] text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
-        >
-
-      <label class="mt-5 text-lg font-semibold" for="top5">Top5:</label>
-      <input
-        type="text"
-        name="top5"
-        value= {userData[0].top5.toString()}
-        class = "bg-[#19191c] text-[#f9f9f9] text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
-        >
-
-      <label class="mt-5 text-lg font-semibold" for="top10">Top10:</label>
-      <input
-        type="text"
-        name="top10"
-        value= {userData[0].top10.toString()}
-        class = "bg-[#19191c] text-[#f9f9f9] text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
-        >
-
-      <label class="mt-5 text-lg font-semibold" for="flaps">Vueltas Rápidas:</label>
-      <input
-        type="text"
-        name="flaps"
-        value= {userData[0].flaps.toString()}
-        class = "bg-[#19191c] text-[#f9f9f9] text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
-        >
-
-      <label class="mt-5 text-lg font-semibold" for="dnf">DNF:</label>
-      <input
-        type="text"
-        name="dnf"
-        value= {userData[0].dnf.toString()}
-        class = "bg-[#19191c] text-[#f9f9f9] text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
-        >
-      ):null
-    }
     <div>
       <button
         type="submit"
-        class="py-1.5 px-3 w-fit mr-2 bg-[#0f0f0f] text-white border-[#29dd38] border-2 rounded-md my-4 font-medium text-lg hover:bg-[#29dd38] hover:text-[#0f0f0f]">
+        class="py-1.5 px-3 w-fit mr-2 bg-[#0f0f0f] text-white border-[#29dd38] border-2 rounded-md my-4 font-medium text-lg hover:bg-[#29dd38] hover:text-[#0f0f0f]"
+      >
         Aceptar
       </button>
 
       <button
         onclick="window, location.href = '/myprofile'"
-        class="py-1.5 px-3 w-fit bg-[#0f0f0f] text-white border-[#da392b] border-2 rounded-md my-4 font-medium text-lg hover:bg-[#da392b] hover:text-[#0f0f0f]">
+        class="py-1.5 px-3 w-fit bg-[#0f0f0f] text-white border-[#da392b] border-2 rounded-md my-4 font-medium text-lg hover:bg-[#da392b] hover:text-[#0f0f0f]"
+      >
         Cancelar
       </button>
     </div>
-
   </form>
 </Layout>
+
+<script>
+  const form = document.getElementById('profileForm');
+
+  if (form) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(form as HTMLFormElement);
+
+      try {
+        const response = await fetch('/api/datamodification/modprofile', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Error al actualizar el perfil');
+        }
+
+        // Redireccionar a myprofile tras éxito
+        window.location.href = '/myprofile';
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Error al actualizar el perfil: '+error);
+      }
+    });
+  }
+</script>
