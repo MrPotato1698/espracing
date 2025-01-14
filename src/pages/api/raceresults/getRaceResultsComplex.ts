@@ -118,19 +118,12 @@ function initializeScript() {
       .eq("circuit", isCircuitExists.id)
       .single();
 
-    if (!layout) {
-      return alert(
-        "No se ha encontrado el layout del circuito de la carrera seleccionada: " +
-          errorLayout
-      );
-    }
-
-    let circuitData: CircuitData = {
-      name: isCircuitExists.name || "",
-      layout: layout.name || "",
-      location: isCircuitExists.location || "",
-      length: layout.length || 0,
-      capacity: layout.capacity || 0,
+    const circuitData: CircuitData = {
+      name: isCircuitExists?.name || "",
+      layout: layout?.name || "Indefinido",
+      location: isCircuitExists?.location || "",
+      length: layout?.length || 0,
+      capacity: layout?.capacity || 0
     };
 
     const datosCircuitoHTML = `
