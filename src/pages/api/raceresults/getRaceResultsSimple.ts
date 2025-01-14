@@ -1,9 +1,9 @@
 import { supabase } from '@/db/supabase';
-import { getResultTableData } from '@/lib/utils';
+import { getResultTableData, getResultFastestLap } from '@/lib/utils';
 
 import type { Points } from "@/types/Points";
 import type { RaceConfig } from "@/types/Results";
-import type { ResultTableData, CarData } from "@/types/Utils";
+import type { CarData } from "@/types/Utils";
 
 /* *************************** */
 
@@ -66,7 +66,8 @@ function initializeScript() {
 				throw new Error('Elemento con id "resultado" no encontrado.');
 			}
 
-			const resultTable = getResultTableData(datos, points.Name, points, carData);
+			
+
 
 			// *** Pista y datos de la carrera ***
 			const dconfig: RaceConfig = datos.RaceConfig;
@@ -76,6 +77,7 @@ function initializeScript() {
 				.eq('filename', dconfig.Track)
 				.single();
 			let tablaResultadosString: string = "";
+			let layoutLength: number | null = 1;
 			if (isCircuitExists) {
 				const circuitName = isCircuitExists.name;
 				const circuitLocation = isCircuitExists.location;
@@ -89,7 +91,7 @@ function initializeScript() {
 					.eq('circuit', isCircuitExists.id)
 					.single();
 				const layoutName = layout?.name;
-				const layoutLength = layout?.length;
+				layoutLength = layout?.length ?? null;
 				const layoutCapacity = layout?.capacity;
 
 				tablaResultadosString += `
@@ -103,31 +105,15 @@ function initializeScript() {
 							<p>Longitud: ${layoutLength} m</p>
 							<p>Capacidad: ${layoutCapacity} pilotos</p>
 						</div>
-					</div>
-					<p class="text-3xl font-bold border-b border-[#da392b] w-fit mx-auto mt-4 mb-2">Resultado de carrera</p>
-			`;
+					</div>`;
 			}
 
-			// *** Clasificacion de Carrera
-			tablaResultadosString += `
-				<table class="w-full border-collapse border border-[#f9f9f9]">
-						<thead class="font-medium bg-[#da392b]">
-						<tr class="tabletitle">
-						<th colspan="2"></th>
-						<th>Pos</th>
-						<th>Nombre</th>
-						<th>Clase</th>
-						<th colspan="2">Coche</th>
-						<th>Equipo</th>
-						<th>Vueltas</th>
-						<th>Tiempo Total</th>
-						<th>Gap to 1st</th>
-						<th>Intervalo</th>
-						<th>Vuelta Rápida</th>
-						<th>Ptos</th>
-						</tr>
-						</thead>
-						<tbody class="font-normal">`;
+			// *** Clasificacion de Carrera ***
+			const resultTable = getResultTableData(datos, points.Name, points, carData);
+			const resultTableClasified = resultTable.filter((result) => Number(result.posicionFinal) > 0);
+			const resultTableDNF = resultTable.filter((result) => result.posicionFinal === 'DNF');
+			const resultTableDQ = resultTable.filter((result) => result.posicionFinal === 'DQ');
+			const resultFastestLap = getResultFastestLap(datos, points, carData, layoutLength);
 
 			const createResultRow = (result: any, index: number) => `
 				<tr class="bg-[${index % 2 === 0 ? '#0f0f0f' : '#19191c'}]">
@@ -147,8 +133,29 @@ function initializeScript() {
 					<td class="text-center">${result.points}</td>                                                                   <!-- Puntos -->
 				</tr>`;
 
+			tablaResultadosString += `
+			<p class="text-3xl font-bold border-b border-[#da392b] w-fit mx-auto mt-4 mb-2">Resultado de carrera</p>
+				<table class="w-full border-collapse border border-[#f9f9f9]">
+						<thead class="font-medium bg-[#da392b]">
+						<tr class="tabletitle">
+						<th colspan="2"></th>
+						<th>Pos</th>
+						<th>Nombre</th>
+						<th>Clase</th>
+						<th colspan="2">Coche</th>
+						<th>Equipo</th>
+						<th>Vueltas</th>
+						<th>Tiempo Total</th>
+						<th>Gap to 1st</th>
+						<th>Intervalo</th>
+						<th>Vuelta Rápida</th>
+						<th>Ptos</th>
+						</tr>
+						</thead>
+						<tbody class="font-normal">`;
+
 			let secondSplitInit = false;
-			resultTable.forEach((result, index) => {
+			resultTableClasified.forEach((result, index) => {
 				if (result.splitNumber === 2 && !secondSplitInit) {
 					tablaResultadosString += `
 						<tr class="bg-[#da392b] text-center font-bold">
@@ -161,6 +168,74 @@ function initializeScript() {
 			});
 
 			tablaResultadosString += '</tbody></table>';
+
+			// *** DNFs ***
+			if(resultTableDNF.length > 0) {
+				tablaResultadosString += `
+				<p class="text-3xl font-bold border-b border-[#da392b] w-fit mx-auto mt-4 mb-2">No Clasificados</p>
+
+				<table class="w-full border-collapse border border-[#f9f9f9]">
+						<thead class="font-medium bg-[#da392b]">
+						<tr class="tabletitle">
+						<th colspan="2"></th>
+						<th>Pos</th>
+						<th>Nombre</th>
+						<th>Clase</th>
+						<th colspan="2">Coche</th>
+						<th>Equipo</th>
+						<th>Vueltas</th>
+						<th>Tiempo Total</th>
+						<th>Gap to 1st</th>
+						<th>Intervalo</th>
+						<th>Vuelta Rápida</th>
+						<th>Ptos</th>
+						</tr>
+						</thead>
+						<tbody class="font-normal">`;
+
+				resultTableDNF.forEach((result, index) => {
+					tablaResultadosString += createResultRow(result, index);
+				});
+			// *** DQs ***
+			if(resultTableDQ.length > 0) {
+				resultTableDQ.forEach((result, index) => {
+					tablaResultadosString += createResultRow(result, index);
+				});
+			}
+				tablaResultadosString += '</tbody></table>';
+			}
+
+			// *** Vuelta Rápida ***
+			tablaResultadosString += `
+			<p class="text-3xl font-bold border-b border-[#da392b] w-fit mx-auto mt-4 mb-2">Vuelta Rápida</p>
+
+			<table class="w-full border-collapse border border-[#f9f9f9]">
+					<thead class="font-medium bg-[#da392b]">
+						<tr class="tabletitle">
+							<th>Nombre</th>
+							<th>Clase</th>
+							<th colspan="2">Coche</th>
+							<th>Equipo</th>
+							<th colspan="2">Vuelta rápida</th>
+							<th>Velocidad</th>
+							<th>Ptos</th>
+						</tr>
+					</thead>
+					<tbody class="font-normal">
+						<tr class="bg-['#0f0f0f']">
+							<td class="text-center">${resultFastestLap.driverName}</td>                                                                <!-- Nombre -->
+							<td class="text-center"><span ${resultFastestLap.carColorClass}>${resultFastestLap.carClass}</span></td>                   <!-- Clase del Coche -->
+							<td class="text-end"><img class='w-4' src='${resultFastestLap.carBrand}' alt=''></img></td>                <!-- Logo Coche -->
+							<td class="text-start">${resultFastestLap.carName}</td>                                                                   <!-- Coche -->
+							<td class="text-center">${resultFastestLap.team}</td>                                                                      <!-- Equipo -->
+							<td class="text-end">${resultFastestLap.time} (${resultFastestLap.tyre}) </td>                                                               <!-- Tiempo Total -->
+							<td class="text-start"> en la vuelta ${resultFastestLap.lap}</td>                                                                      <!-- Gap con primero -->
+							<td class="text-center">${resultFastestLap.avgspeed}</td>  <!-- Vuelta Rapida  + Neumaticos-->
+							<td class="text-center">${resultFastestLap.points}</td>                                                                   <!-- Puntos -->
+						</tr>
+					</tbody>
+				</table>`;
+
 			tablaResultados.innerHTML = tablaResultadosString;
 
 		} catch (error) {
