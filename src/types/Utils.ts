@@ -35,3 +35,17 @@ export interface CircuitData{
   length: number;
   capacity: number;
 }
+
+export interface RaceFastestLap{
+  driverName: string;
+  carColorClass: string;
+  carClass: string;
+  carBrand: string;
+  carName: string;
+  team: string;
+  time: string;
+  tyre: string;
+  lap:string;
+  avgspeed: string;
+  points: string;
+}
