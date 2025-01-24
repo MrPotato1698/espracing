@@ -535,39 +535,78 @@ function createBestSector(rl: RaceLap[]): BestSector[] {
 }
 
 function createIncident(devents: EventJSON[]): Incident[] {
-  return devents.map(event => {
-    const timestamp = new Date(event.Timestamp);
-    const driverName = event.Driver.Name;
-    const impactSpeed = event.ImpactSpeed.toFixed(3);
+  let i: Incident[] = [];
 
-    const incident = event.Type === "COLLISION_WITH_CAR"
-      ? `${driverName} colisionó contra el vehiculo de ${event.OtherDriver.Name} a una velocidad de ${impactSpeed} km/h`
-      : `${driverName} colisionó con el entorno a una velocidad de ${impactSpeed} km/h`;
+  for (let itemE of devents) {
+    let uniqueI: Incident = {} as Incident;
+    let timestamp = new Date(itemE.Timestamp);
+    uniqueI.Date = timestamp.toString();
+    let driverName = itemE.Driver.Name;
+    let impactSpeed = itemE.ImpactSpeed.toFixed(3);
 
-    return {
-      Date: timestamp.toString(),
-      Incident: incident,
-      AfterSession: event.AfterSessionEnd
-    };
-  });
+    switch (itemE.Type) {
+      case "COLLISION_WITH_CAR":
+        let otherDriverName = itemE.OtherDriver.Name;
+        uniqueI.Incident = `${driverName} colisionó contra el vehiculo de ${otherDriverName} a una velocidad de ${impactSpeed} km/h`;
+        break;
+      case "COLLISION_WITH_ENV":
+        uniqueI.Incident = `${driverName} colisionó con el entorno a una velocidad de ${impactSpeed} km/h`;
+        break;
+    }
+
+    uniqueI.AfterSession = itemE.AfterSessionEnd;
+    i.push(uniqueI);
+  }
+
+  return i;
 }
 
 function createIncidentMultipleSplits(deventsS1: EventJSON[], deventsS2: EventJSON[]): Incident[] {
-  return [...deventsS1, ...deventsS2].map(event => {
-    const timestamp = new Date(event.Timestamp);
-    const driverName = event.Driver.Name;
-    const impactSpeed = event.ImpactSpeed.toFixed(3);
+  let i: Incident[] = [];
 
-    const incident = event.Type === "COLLISION_WITH_CAR"
-      ? `${driverName} colisionó contra el vehiculo de ${event.OtherDriver.Name} a una velocidad de ${impactSpeed} km/h`
-      : `${driverName} colisionó con el entorno a una velocidad de ${impactSpeed} km/h`;
+  for (let itemE of deventsS1) {
+    let uniqueI: Incident = {} as Incident;
+    let timestamp = new Date(itemE.Timestamp);
+    uniqueI.Date = timestamp.toString();
+    let driverName = itemE.Driver.Name;
+    let impactSpeed = itemE.ImpactSpeed.toFixed(3);
 
-    return {
-      Date: timestamp.toString(),
-      Incident: incident,
-      AfterSession: event.AfterSessionEnd
-    };
-  });
+    switch (itemE.Type) {
+      case "COLLISION_WITH_CAR":
+        let otherDriverName = itemE.OtherDriver.Name;
+        uniqueI.Incident = `${driverName} colisionó contra el vehiculo de ${otherDriverName} a una velocidad de ${impactSpeed} km/h`;
+        break;
+      case "COLLISION_WITH_ENV":
+        uniqueI.Incident = `${driverName} colisionó con el entorno a una velocidad de ${impactSpeed} km/h`;
+        break;
+    }
+
+    uniqueI.AfterSession = itemE.AfterSessionEnd;
+    i.push(uniqueI);
+  }
+
+  for (let itemE of deventsS2) {
+    let uniqueI: Incident = {} as Incident;
+    let timestamp = new Date(itemE.Timestamp);
+    uniqueI.Date = timestamp.toString();
+    let driverName = itemE.Driver.Name;
+    let impactSpeed = itemE.ImpactSpeed.toFixed(3);
+
+    switch (itemE.Type) {
+      case "COLLISION_WITH_CAR":
+        let otherDriverName = itemE.OtherDriver.Name;
+        uniqueI.Incident = `${driverName} colisionó contra el vehiculo de ${otherDriverName} a una velocidad de ${impactSpeed} km/h`;
+        break;
+      case "COLLISION_WITH_ENV":
+        uniqueI.Incident = `${driverName} colisionó con el entorno a una velocidad de ${impactSpeed} km/h`;
+        break;
+    }
+
+    uniqueI.AfterSession = itemE.AfterSessionEnd;
+    i.push(uniqueI);
+  }
+
+  return i;
 }
 
 function getLeadLaps(rrAux: RaceResult[], rl: RaceLap[]): RaceResult[] {
@@ -696,13 +735,15 @@ function getGapToFirst(rr: RaceResult[], rl: RaceLap[], numberOfSplits: number):
 
 function recalculatePositions(rr: RaceResult[], raceTime: number): RaceResult[] {
   // Calcular tiempo de lideres por split
-  const timeSplitLeader = rr.reduce((acc, item) => {
-    if (!acc[item.Split]) {
-      const timerace = item.TotalTime + item.Penalties;
-      acc[item.Split] = Math.trunc((timerace / 3600) % 60) + Math.trunc(timerace / 60);
-    }
-    return acc;
-  }, {} as { [key: number]: number });
+  const timeSplitLeader: { [key: number]: number } = {};
+  const splitGroups = Object.groupBy(rr, item => item.Split);
+
+  for (const [split, drivers] of Object.entries(splitGroups)) {
+    if (!drivers) continue;
+    const leader = drivers[0];
+    const timerace = leader.TotalTime + leader.Penalties;
+    timeSplitLeader[Number(split)] = Math.trunc((timerace / 3600) % 60) + Math.trunc(timerace / 60);
+  }
 
 
   return rr.map(item => {
