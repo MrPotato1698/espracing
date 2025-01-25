@@ -70,16 +70,16 @@ const carDataOrderer = carsData?.sort((a, b) => {
 ---
 
 <Layout title="ESP Racing:  Administrar Carreras">
-  <h2 class="text-5xl font-extrabold border-b-2 border-[#da392b] w-full">
+  <h2 class="text-5xl font-extrabold border-b-2 border-primary w-full">
     Administración de Coches del Sistema
   </h2>
 
   <div class="py-4 mx-auto text-center" style="width: 99%">
-    <p class="text-5xl font-bold border-b border-[#da392b] w-fit mx-auto">
+    <p class="text-5xl font-bold border-b border-primary w-fit mx-auto">
       Lista de Coches del Sistema
     </p>
-    <table class="mt-6 w-full border-collapse border border-[#f9f9f9]">
-      <thead class="font-medium bg-[#da392b]">
+    <table class="mt-6 w-full border-collapse border border-light-primary">
+      <thead class="font-medium bg-primary">
         <tr>
           <th>Nº</th>
           <th>Nombre</th>
@@ -95,7 +95,7 @@ const carDataOrderer = carsData?.sort((a, b) => {
             <tr>
               <td class="font-semibold">{index + 1}</td>
               <td>
-                {car.carbrand.name} {car.model}
+                {car.carbrand?.name} {car.model}
               </td>
               <td>{car.year}</td>
               <td class = 'text-sm font-bold'>{car.carclass.short_name}
@@ -118,30 +118,30 @@ const carDataOrderer = carsData?.sort((a, b) => {
   </div>
 
   <div class="py-4 mx-auto text-center" style="width: 99%">
-    <p class="text-5xl font-bold border-b border-[#da392b] w-fit mx-auto">
+    <p class="text-5xl font-bold border-b border-primary w-fit mx-auto">
       Añadir nuevo Coche
     </p>
 
     <div
-      class="box-border p-5 m-auto bg-[#0f0f0f] rounded-md max-w-screen-2xl border border-[#da392b]"
+      class="box-border p-5 m-auto bg-dark-primary rounded-md max-w-screen-2xl border border-primary"
     >
       <form id="uploadForm" data-astro-reload>
-        <label class="text-[#f9f9f9] text-lg font-medium" for="filenameCarName">
+        <label class="text-light-primary text-lg font-medium" for="filenameCarName">
           Nombre de la carpeta del coche
         </label>
         <input
-          class="w-full p-3 border border-solid border-[#f7f7f7] rounded-md mt-2 mb-4 resize-y text-white bg-[#19191c] hover:border-[#da392b]"
+          class="w-full p-3 border border-solid border-light-second rounded-md mt-2 mb-4 resize-y text-white bg-dark-second hover:border-primary"
           type="text"
           id="filenameCarName"
           name="filenameCarName"
           placeholder="ks_generic_car"
         />
 
-        <label class="text-[#f9f9f9] text-lg font-medium" for="carbrand">
+        <label class="text-light-primary text-lg font-medium" for="carbrand">
           Marca del coche
         </label>
         <select
-          class="w-full p-3 border border-solid border-[#f7f7f7] rounded-md mt-2 mb-4 resize-y text-white bg-[#19191c] hover:border-[#da392b]"
+          class="w-full p-3 border border-solid border-light-second rounded-md mt-2 mb-4 resize-y text-white bg-dark-second hover:border-primary"
           id="carbrand"
           name="carbrand"
         >
@@ -156,17 +156,17 @@ const carDataOrderer = carsData?.sort((a, b) => {
         <!-- Nueva Marca de Coche -->
         <div id="newBrandContainer" class="hidden">
           <div
-            class="grid grid-cols-1 gap-4 bg-[#19191c] px-2 pt-2 border border-[#da392b] rounded-xl sm:grid-cols-2"
+            class="grid grid-cols-1 gap-4 bg-dark-second px-2 pt-2 border border-primary rounded-xl sm:grid-cols-2"
           >
             <div>
               <label
-                class="text-[#f9f9f9] text-lg font-medium"
+                class="text-light-primary text-lg font-medium"
                 for="newBrandCar"
               >
                 Marca
               </label>
               <input
-                class="w-full p-3 border border-solid border-[#f7f7f7] rounded-md mt-2 mb-4 resize-y text-white bg-[#0f0f0f] hover:border-[#da392b]"
+                class="w-full p-3 border border-solid border-light-second rounded-md mt-2 mb-4 resize-y text-white bg-dark-primary hover:border-primary"
                 type="text"
                 id="newBrandCar"
                 name="newBrandCar"
@@ -176,13 +176,13 @@ const carDataOrderer = carsData?.sort((a, b) => {
 
             <div>
               <label
-                class="text-[#f9f9f9] text-lg font-medium"
+                class="text-light-primary text-lg font-medium"
                 for="newImgBrandCar"
               >
                 Imagen
               </label>
               <input
-                class="w-full p-3 border border-solid border-[#f7f7f7] rounded-md mt-2 mb-4 resize-y text-white bg-[#0f0f0f] hover:border-[#da392b]"
+                class="w-full p-3 border border-solid border-light-second rounded-md mt-2 mb-4 resize-y text-white bg-dark-primary hover:border-primary"
                 type="text"
                 id="newImgBrandCar"
                 name="newImgBrandCar"
@@ -191,13 +191,13 @@ const carDataOrderer = carsData?.sort((a, b) => {
             </div>
             <div>
               <label
-                class="text-[#f9f9f9] text-lg font-medium"
+                class="text-light-primary text-lg font-medium"
                 for="newCountryCar"
               >
                 País
               </label>
               <input
-                class="w-full p-3 border border-solid border-[#f7f7f7] rounded-md mt-2 mb-4 resize-y text-white bg-[#0f0f0f] hover:border-[#da392b]"
+                class="w-full p-3 border border-solid border-light-second rounded-md mt-2 mb-4 resize-y text-white bg-dark-primary hover:border-primary"
                 type="text"
                 id="newCountryCar"
                 name="newCountryCar"
@@ -207,13 +207,13 @@ const carDataOrderer = carsData?.sort((a, b) => {
 
             <div>
               <label
-                class="text-[#f9f9f9] text-lg font-medium"
+                class="text-light-primary text-lg font-medium"
                 for="newFoundationCar"
               >
                 Fundado en...
               </label>
               <input
-                class="w-full p-3 border border-solid border-[#f7f7f7] rounded-md mt-2 mb-4 resize-y text-white bg-[#0f0f0f] hover:border-[#da392b]"
+                class="w-full p-3 border border-solid border-light-second rounded-md mt-2 mb-4 resize-y text-white bg-dark-primary hover:border-primary"
                 type="number"
                 id="newFoundationCar"
                 name="newFoundationCar"
@@ -225,22 +225,22 @@ const carDataOrderer = carsData?.sort((a, b) => {
           </div>
         </div>
 
-        <label class="text-[#f9f9f9] text-lg font-medium" for="modelCar">
+        <label class="text-light-primary text-lg font-medium" for="modelCar">
           Modelo del coche
         </label>
         <input
-          class="w-full p-3 border border-solid border-[#f7f7f7] rounded-md mt-2 mb-4 resize-y text-white bg-[#19191c] hover:border-[#da392b]"
+          class="w-full p-3 border border-solid border-light-second rounded-md mt-2 mb-4 resize-y text-white bg-dark-second hover:border-primary"
           type="text"
           id="modelCar"
           name="modelCar"
           placeholder="Model X V8"
         />
 
-        <label class="text-[#f9f9f9] text-lg font-medium" for="yearCar">
+        <label class="text-light-primary text-lg font-medium" for="yearCar">
           Año del coche
         </label>
         <input
-          class="w-full p-3 border border-solid border-[#f7f7f7] rounded-md mt-2 mb-4 resize-y text-white bg-[#19191c] hover:border-[#da392b]"
+          class="w-full p-3 border border-solid border-light-second rounded-md mt-2 mb-4 resize-y text-white bg-dark-second hover:border-primary"
           type="number"
           id="yearCar"
           name="yearCar"
@@ -249,11 +249,11 @@ const carDataOrderer = carsData?.sort((a, b) => {
           placeholder="1998"
         />
 
-        <label class="text-[#f9f9f9] text-lg font-medium" for="carClasses">
+        <label class="text-light-primary text-lg font-medium" for="carClasses">
           Clase del coche
         </label>
         <select
-          class="w-full p-3 border border-solid border-[#f7f7f7] rounded-md mt-2 mb-4 resize-y text-white bg-[#19191c] hover:border-[#da392b]"
+          class="w-full p-3 border border-solid border-light-second rounded-md mt-2 mb-4 resize-y text-white bg-dark-second hover:border-primary"
           id="carClasses"
           name="carClasses"
         >
@@ -268,18 +268,18 @@ const carDataOrderer = carsData?.sort((a, b) => {
         <!-- Nueva Clase -->
         <div
           id="newClassContainer"
-          class="hidden px-2 pt-2 bg-[#19191c] border border-[#da392b] rounded-xl"
+          class="hidden px-2 pt-2 bg-dark-second border border-primary rounded-xl"
         >
           <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label
-                class="text-[#f9f9f9] text-lg font-medium"
+                class="text-light-primary text-lg font-medium"
                 for="newClassName"
               >
                 Nombre de Clase
               </label>
               <input
-                class="w-full p-3 border border-solid border-[#f7f7f7] rounded-md mt-2 mb-4 resize-y text-white bg-[#0f0f0f] hover:border-[#da392b]"
+                class="w-full p-3 border border-solid border-light-second rounded-md mt-2 mb-4 resize-y text-white bg-dark-primary hover:border-primary"
                 type="text"
                 id="newClassName"
                 name="newClassName"
@@ -289,13 +289,13 @@ const carDataOrderer = carsData?.sort((a, b) => {
 
             <div>
               <label
-                class="text-[#f9f9f9] text-lg font-medium"
+                class="text-light-primary text-lg font-medium"
                 for="newClassShortName"
               >
                 Nombre de Clase Corto
               </label>
               <input
-                class="w-full p-3 border border-solid border-[#f7f7f7] rounded-md mt-2 mb-4 resize-y text-white bg-[#0f0f0f] hover:border-[#da392b]"
+                class="w-full p-3 border border-solid border-light-second rounded-md mt-2 mb-4 resize-y text-white bg-dark-primary hover:border-primary"
                 type="text"
                 id="newClassShortName"
                 name="newClassShortName"
@@ -305,13 +305,13 @@ const carDataOrderer = carsData?.sort((a, b) => {
 
             <div>
               <label
-                class="text-[#f9f9f9] text-lg font-medium"
+                class="text-light-primary text-lg font-medium"
                 for="newClassBackgroundColor"
               >
                 Color Fondo de Clase
               </label>
               <input
-                class="p-3 border border-solid border-[#f7f7f7] rounded-md mt-2 mb-4 text-white bg-[#0f0f0f] hover:border-[#da392b]"
+                class="p-3 border border-solid border-light-second rounded-md mt-2 mb-4 text-white bg-dark-primary hover:border-primary"
                 type="color"
                 id="newClassBackgroundColor"
                 name="newClassBackgroundColor"
@@ -321,13 +321,13 @@ const carDataOrderer = carsData?.sort((a, b) => {
 
             <div>
               <label
-                class="text-[#f9f9f9] text-lg font-medium"
+                class="text-light-primary text-lg font-medium"
                 for="newClassTextColor"
               >
                 Color Texto de Clase
               </label>
               <input
-                class="p-3 border border-solid border-[#f7f7f7] rounded-md mt-2 mb-4 text-white bg-[#0f0f0f] hover:border-[#da392b]"
+                class="p-3 border border-solid border-light-second rounded-md mt-2 mb-4 text-white bg-dark-primary hover:border-primary"
                 type="color"
                 id="newClassTextColor"
                 name="newClassTextColor"
@@ -348,11 +348,11 @@ const carDataOrderer = carsData?.sort((a, b) => {
 
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
           <div>
-            <label class="text-[#f9f9f9] text-lg font-medium" for="powerCar">
+            <label class="text-light-primary text-lg font-medium" for="powerCar">
               Potencia (en CV)
             </label>
             <input
-              class="w-full p-3 border border-solid border-[#f7f7f7] rounded-md mt-2 mb-4 resize-y text-white bg-[#19191c] hover:border-[#da392b]"
+              class="w-full p-3 border border-solid border-light-second rounded-md mt-2 mb-4 resize-y text-white bg-dark-second hover:border-primary"
               type="number"
               id="powerCar"
               name="powerCar"
@@ -362,11 +362,11 @@ const carDataOrderer = carsData?.sort((a, b) => {
             />
           </div>
           <div>
-            <label class="text-[#f9f9f9] text-lg font-medium" for="torqueCar">
+            <label class="text-light-primary text-lg font-medium" for="torqueCar">
               Par (en N/m)
             </label>
             <input
-              class="w-full p-3 border border-solid border-[#f7f7f7] rounded-md mt-2 mb-4 resize-y text-white bg-[#19191c] hover:border-[#da392b]"
+              class="w-full p-3 border border-solid border-light-second rounded-md mt-2 mb-4 resize-y text-white bg-dark-second hover:border-primary"
               type="number"
               id="torqueCar"
               name="torqueCar"
@@ -376,11 +376,11 @@ const carDataOrderer = carsData?.sort((a, b) => {
             />
           </div>
           <div>
-            <label class="text-[#f9f9f9] text-lg font-medium" for="weightCar">
+            <label class="text-light-primary text-lg font-medium" for="weightCar">
               Peso (en Kg)
             </label>
             <input
-              class="w-full p-3 border border-solid border-[#f7f7f7] rounded-md mt-2 mb-4 resize-y text-white bg-[#19191c] hover:border-[#da392b]"
+              class="w-full p-3 border border-solid border-light-second rounded-md mt-2 mb-4 resize-y text-white bg-dark-second hover:border-primary"
               type="number"
               id="weightCar"
               name="weightCar"
@@ -391,13 +391,13 @@ const carDataOrderer = carsData?.sort((a, b) => {
           </div>
           <div>
             <label
-              class="text-[#f9f9f9] text-lg font-medium"
+              class="text-light-primary text-lg font-medium"
               for="tyreTimeChange"
             >
               Cambio de gomas (en segundos)
             </label>
             <input
-              class="w-full p-3 border border-solid border-[#f7f7f7] rounded-md mt-2 mb-4 resize-y text-white bg-[#19191c] hover:border-[#da392b]"
+              class="w-full p-3 border border-solid border-light-second rounded-md mt-2 mb-4 resize-y text-white bg-dark-second hover:border-primary"
               type="number"
               id="tyreTimeChange"
               name="tyreTimeChange"
@@ -408,13 +408,13 @@ const carDataOrderer = carsData?.sort((a, b) => {
           </div>
           <div>
             <label
-              class="text-[#f9f9f9] text-lg font-medium"
+              class="text-light-primary text-lg font-medium"
               for="fuelLiterTime"
             >
               Refuel (seg/litros de combustible)
             </label>
             <input
-              class="w-full p-3 border border-solid border-[#f7f7f7] rounded-md mt-2 mb-4 resize-y text-white bg-[#19191c] hover:border-[#da392b]"
+              class="w-full p-3 border border-solid border-light-second rounded-md mt-2 mb-4 resize-y text-white bg-dark-second hover:border-primary"
               type="number"
               id="fuelLiterTime"
               name="fuelLiterTime"
@@ -424,11 +424,11 @@ const carDataOrderer = carsData?.sort((a, b) => {
             />
           </div>
           <div>
-            <label class="text-[#f9f9f9] text-lg font-medium" for="maxFuel">
+            <label class="text-light-primary text-lg font-medium" for="maxFuel">
               Combustible MAX. (en litros)
             </label>
             <input
-              class="w-full p-3 border border-solid border-[#f7f7f7] rounded-md mt-2 mb-4 resize-y text-white bg-[#19191c] hover:border-[#da392b]"
+              class="w-full p-3 border border-solid border-light-second rounded-md mt-2 mb-4 resize-y text-white bg-dark-second hover:border-primary"
               type="number"
               id="maxFuel"
               name="maxFuel"
@@ -438,17 +438,17 @@ const carDataOrderer = carsData?.sort((a, b) => {
             />
           </div>
         </div>
-        <label class="text-[#f9f9f9] text-lg font-medium" for="descriptionCar">
+        <label class="text-light-primary text-lg font-medium" for="descriptionCar">
           Descripción breve del coche
         </label>
         <textarea
-          class="w-full p-3 border border-solid border-[#f7f7f7] rounded-md mt-2 mb-4 text-white bg-[#19191c] hover:border-[#da392b] max-h-96 min-h-28 resize-y"
+          class="w-full p-3 border border-solid border-light-second rounded-md mt-2 mb-4 text-white bg-dark-second hover:border-primary max-h-96 min-h-28 resize-y"
           id="descriptionCar"
           name="descriptionCar"
           placeholder="Cualquier descripción adicional del coche"></textarea>
 
         <input
-          class="bg-[#da392b] text-white font-bold py-3 px-5 border-solid border-[#da392b] border-2 rounded-md hover:bg-[#19191c] hover:text-[#f9f9f9] mt-4"
+          class="bg-primary text-white font-bold py-3 px-5 border-solid border-primary border-2 rounded-md hover:bg-dark-second hover:text-light-primary mt-4"
           type="submit"
           value="Subir Coche"
         />

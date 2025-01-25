@@ -58,7 +58,7 @@ if (teamID) {
 ---
 
 <Layout title="ESP Racing: Mi Perfil">
-  <h2 class="text-5xl font-extrabold border-b-2 border-[#da392b] w-full">
+  <h2 class="text-5xl font-extrabold border-b-2 border-primary w-full">
     Mi Perfil
   </h2>
 
@@ -69,14 +69,14 @@ if (teamID) {
   />
   <div class="grid w-11/12 grid-cols-1 my-5 lg:grid-cols-2 xl:grid-cols-3">
     <div class="mb-2">
-      <h3 class="text-4xl font-semibold border-b-2 border-[#da392b] w-3/4">
+      <h3 class="text-4xl font-semibold border-b-2 border-primary w-3/4">
         Nombre
       </h3>
       <p class="pl-2 text-2xl font-medium">{userData.full_name}</p>
     </div>
 
     <div class="blockdata">
-      <h3 class="text-4xl font-semibold border-b-2 border-[#da392b] w-3/4">
+      <h3 class="text-4xl font-semibold border-b-2 border-primary w-3/4">
         Steam ID
       </h3>
       <p class="pl-2 text-2xl font-medium">{userData.steam_id}</p>
@@ -87,14 +87,14 @@ if (teamID) {
       TeamData?.name === undefined ||
       TeamData?.name === "" ? (
         <div class="blockdata">
-          <h3 class="text-4xl font-semibold border-b-2 border-[#da392b] w-3/4">
+          <h3 class="text-4xl font-semibold border-b-2 border-primary w-3/4">
             Equipo
           </h3>
           <p class="pl-2 text-2xl font-medium">Sin Equipo</p>
         </div>
       ) : (
         <div class="blockdata">
-          <h3 class="text-4xl font-semibold border-b-2 border-[#da392b] w-3/4">
+          <h3 class="text-4xl font-semibold border-b-2 border-primary w-3/4">
             Equipo
           </h3>
           <p class="pl-2 text-2xl font-medium">{TeamData.name}</p>
@@ -103,54 +103,54 @@ if (teamID) {
     }
   </div>
 
-  <h2 class="text-5xl font-extrabold border-b-2 border-[#da392b] w-full mt-12">
+  <h2 class="text-5xl font-extrabold border-b-2 border-primary w-full mt-12">
     Estadisticas de Carrera
   </h2>
   <div class="grid w-11/12 grid-cols-1 my-5 lg:grid-cols-2 xl:grid-cols-3">
     <div class="blockdata">
-      <h3 class="text-4xl font-semibold border-b-2 border-[#da392b] w-3/4">
+      <h3 class="text-4xl font-semibold border-b-2 border-primary w-3/4">
         Carreras
       </h3>
       <p class="pl-2 text-2xl font-medium">{userData.races}</p>
     </div>
 
     <div class="blockdata">
-      <h3 class="text-4xl font-semibold border-b-2 border-[#da392b] w-3/4">
+      <h3 class="text-4xl font-semibold border-b-2 border-primary w-3/4">
         Victorias
       </h3>
       <p class="pl-2 text-2xl font-medium">{userData.wins}</p>
     </div>
 
     <div class="blockdata">
-      <h3 class="text-4xl font-semibold border-b-2 border-[#da392b] w-3/4">
+      <h3 class="text-4xl font-semibold border-b-2 border-primary w-3/4">
         Podios
       </h3>
       <p class="pl-2 text-2xl font-medium">{userData.podiums}</p>
     </div>
 
     <div class="blockdata">
-      <h3 class="text-4xl font-semibold border-b-2 border-[#da392b] w-3/4">
+      <h3 class="text-4xl font-semibold border-b-2 border-primary w-3/4">
         Top 5
       </h3>
       <p class="pl-2 text-2xl font-medium">{userData.top5}</p>
     </div>
 
     <div class="blockdata">
-      <h3 class="text-4xl font-semibold border-b-2 border-[#da392b] w-3/4">
+      <h3 class="text-4xl font-semibold border-b-2 border-primary w-3/4">
         Top 10
       </h3>
       <p class="pl-2 text-2xl font-medium">{userData.top10}</p>
     </div>
 
     <div class="blockdata">
-      <h3 class="text-4xl font-semibold border-b-2 border-[#da392b] w-3/4">
+      <h3 class="text-4xl font-semibold border-b-2 border-primary w-3/4">
         Vueltas Rápidas
       </h3>
       <p class="pl-2 text-2xl font-medium">{userData.flaps}</p>
     </div>
 
     <div class="blockdata">
-      <h3 class="text-4xl font-semibold border-b-2 border-[#da392b] w-3/4">
+      <h3 class="text-4xl font-semibold border-b-2 border-primary w-3/4">
         DNF
       </h3>
       <p class="pl-2 text-2xl font-medium">{userData.dnf}</p>
@@ -160,7 +160,7 @@ if (teamID) {
   <div class="grid grid-flow-col mt-8">
     <a
       href="/modprofile"
-      class="py-1.5 px-2 w-fit bg-[#0f0f0f] text-white border-[#da392b] border-2 rounded-md font-medium text-lg hover:bg-[#19191c]"
+      class="py-1.5 px-2 w-fit bg-dark-primary text-light-primary border-primary border-2 rounded-md font-medium text-lg hover:bg-dark-second"
       >Modificar Perfil</a
     >
   </div>

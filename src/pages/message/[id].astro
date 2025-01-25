@@ -40,7 +40,7 @@ if (id === null || id === undefined) {
 const { data: MessageData } = await supabase
   .from("message")
   .select("*")
-  .eq("id", id)
+  .eq("id", Number(id))
   .single();
 
 if (!MessageData) {
@@ -64,26 +64,26 @@ const region = regionMap[MessageData.region as keyof typeof regionMap] ?? "Desco
 
 <Layout title={`ESP Racing: Mensaje Nº${id}`}>
   <form action="../api/messages/messageReaded" method="post" data-astro-reload>
-    <h2 class="text-5xl font-extrabold border-b-2 border-[#da392b] w-full">
+    <h2 class="text-5xl font-extrabold border-b-2 border-primary w-full">
       Mensaje
     </h2>
 
     <div class="grid w-11/12 grid-cols-1 my-5">
-      <h3 class="text-4xl font-semibold border-b-2 border-[#da392b] w-3/4">
+      <h3 class="text-4xl font-semibold border-b-2 border-primary w-3/4">
         Nombre Emisor / Discord
       </h3>
       <p class="pl-2 text-2xl font-medium">
         {MessageData.name_emissor} / {MessageData.discord}
       </p>
 
-      <h3 class="mt-5 text-4xl font-semibold border-b-2 border-[#da392b] w-3/4">
+      <h3 class="mt-5 text-4xl font-semibold border-b-2 border-primary w-3/4">
         Regíon/Pais de Procedencia
       </h3>
       <p class="pl-2 text-2xl font-medium">{region}</p>
     </div>
 
     <div class="grid w-11/12 grid-cols-1 my-5">
-      <h3 class="text-4xl font-semibold border-b-2 border-[#da392b] w-3/4">
+      <h3 class="text-4xl font-semibold border-b-2 border-primary w-3/4">
         Mensaje
       </h3>
       <p class="pl-2 text-2xl font-medium">{MessageData.description}</p>

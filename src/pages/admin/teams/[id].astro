@@ -49,12 +49,12 @@ if (roleData?.roleesp !== 1) {
 const { data: teamData } = await supabase
   .from("team")
   .select("*")
-  .eq("id", id)
+  .eq("id", parseInt(id))
   .single();
 ---
 
 <Layout title="ESP Racing: Modificación datos de campeonato">
-  <h2 class="text-5xl font-bold border-b border-[#da392b] w-fit mx-auto">
+  <h2 class="text-5xl font-bold border-b border-primary w-fit mx-auto">
     Modificar Datos de Equipo
   </h2>
   <form id="editTeamForm" class="flex flex-col mt-5">
@@ -65,7 +65,7 @@ const { data: teamData } = await supabase
       type="text"
       name="name"
       value={teamData?.name}
-      class="bg-[#19191c] text-[#f9f9f9] text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
+      class="bg-dark-second text-light-primary text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
     />
 
     <label class="mt-5 text-lg font-semibold" for="imageTeam">
@@ -76,7 +76,7 @@ const { data: teamData } = await supabase
       id="imageTeam"
       name="imageTeam"
       value={teamData?.image}
-      class="bg-[#19191c] text-[#f9f9f9] text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
+      class="bg-dark-second text-light-primary text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
     />
 
     <label class="mt-5 text-lg font-semibold" for="descriptionTeam">
@@ -86,7 +86,7 @@ const { data: teamData } = await supabase
       id="descriptionTeam"
       name="descriptionTeam"
       placeholder={teamData?.description}
-      class="bg-[#19191c] text-[#f9f9f9] text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px max-h-96 min-h-28 resize-y"
+      class="bg-dark-second text-light-primary text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px max-h-96 min-h-28 resize-y"
     ></textarea>
 
     <input type="hidden" name="champ_id" value={id} />
@@ -94,14 +94,14 @@ const { data: teamData } = await supabase
     <div>
       <button
         type="submit"
-        class="py-1.5 px-3 w-fit mr-2 bg-[#0f0f0f] text-white border-[#29dd38] border-2 rounded-md my-4 font-medium text-lg hover:bg-[#29dd38] hover:text-[#0f0f0f]"
+        class="py-1.5 px-3 w-fit mr-2 bg-dark-primary text-white border-[#29dd38] border-2 rounded-md my-4 font-medium text-lg hover:bg-[#29dd38] hover:text-dark-primary"
       >
         Aceptar
       </button>
 
       <button
         onclick="window, location.href = '/admin/adminteams'"
-        class="py-1.5 px-3 w-fit bg-[#0f0f0f] text-white border-[#da392b] border-2 rounded-md my-4 font-medium text-lg hover:bg-[#da392b] hover:text-[#0f0f0f]"
+        class="py-1.5 px-3 w-fit bg-dark-primary text-white border-primary border-2 rounded-md my-4 font-medium text-lg hover:bg-primary hover:text-dark-primary"
       >
         Cancelar
       </button>

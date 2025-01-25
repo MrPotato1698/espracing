@@ -39,7 +39,7 @@ import Chevron from "../icons/Chevron.astro";
 </div>
 
 <!-- NAVBAR -->
-<nav role="navigation" class="bg-[#da392b] border-[#da392b]">
+<nav role="navigation" class="bg-primary border-primary">
   <div class="flex flex-wrap items-center justify-between max-w-screen-xl p-4 mx-auto">
 
     <a href="/" class="flex items-center space-x-3 rtl:space-x-reverse">
@@ -57,7 +57,7 @@ import Chevron from "../icons/Chevron.astro";
     <button
       data-collapse-toggle="navbar-dropdown"
       type="button"
-      class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-white rounded-lg md:hidden hover:bg-white hover:text-[#da392b] focus:outline-none focus:ring-2 focus:ring-white"
+      class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-light-primary rounded-lg md:hidden hover:bg-light-primary hover:text-primary focus:outline-none focus:ring-2 focus:ring-light-primary"
       aria-controls="navbar-dropdown"
       aria-expanded="false"
     >
@@ -87,16 +87,16 @@ import Chevron from "../icons/Chevron.astro";
             data-dropdown-toggle="dropdownInicio"
             aria-expanded="true"
             aria-haspopup="true"
-            class ="flex items-center justify-between w-full py-2 px-3 text-white rounded hover:bg-white hover:text-[#da392b] md:hover:bg-white md:border-0 md:hover:text-[#da392b] md:p-1 md:w-auto">
+            class ="flex items-center justify-between w-full py-2 px-3 text-light-primary rounded hover:bg-light-primary hover:text-primary md:hover:bg-light-primary md:border-0 md:hover:text-primary md:p-1 md:w-auto">
             Inicio
             <Chevron />
           </button>
           <!-- Dropdown Inicio -->
           <div
             id="dropdownInicio"
-            class="z-10 hidden font-normal bg-white divide-y divide-gray-100 rounded-lg shadow w-44">
+            class="z-10 hidden font-normal bg-light-primary divide-y divide-gray-100 rounded-lg shadow w-44">
             <ul
-              class = "py-2 text-sm text-[#da392b]"
+              class = "py-2 text-sm text-primary"
               aria-labelledby="dropdownInicioLink">
               <li>
                 <a
@@ -136,16 +136,16 @@ import Chevron from "../icons/Chevron.astro";
             data-dropdown-toggle="dropdownCampeonatoActual"
             aria-expanded="true"
             aria-haspopup="true"
-            class ="flex items-center justify-between w-full py-2 px-3 text-white rounded hover:bg-white hover:text-[#da392b] md:hover:bg-white md:border-0 md:hover:text-[#da392b] md:p-1 md:w-auto">
+            class ="flex items-center justify-between w-full py-2 px-3 text-light-primary rounded hover:bg-light-primary hover:text-primary md:hover:bg-light-primary md:border-0 md:hover:text-primary md:p-1 md:w-auto">
             Campeonato Actual
             <Chevron />
           </button>
           <!-- Dropdown CampetoActual -->
           <div
             id="dropdownCampeonatoActual"
-            class="z-10 hidden font-normal bg-white divide-y divide-gray-100 rounded-lg shadow w-44">
+            class="z-10 hidden font-normal bg-light-primary divide-y divide-gray-100 rounded-lg shadow w-44">
             <ul
-              class = "py-2 text-sm text-[#da392b]"
+              class = "py-2 text-sm text-primary"
               aria-labelledby="dropdownLargeButton">
               <li>
                 <a
@@ -197,16 +197,16 @@ import Chevron from "../icons/Chevron.astro";
             data-dropdown-toggle="dropdownPasado"
             aria-expanded="true"
             aria-haspopup="true"
-            class ="flex items-center justify-between w-full py-2 px-3 text-white rounded hover:bg-white hover:text-[#da392b] md:hover:bg-white md:border-0 md:hover:text-[#da392b] md:p-1 md:w-auto">
+            class ="flex items-center justify-between w-full py-2 px-3 text-light-primary rounded hover:bg-light-primary hover:text-primary md:hover:bg-light-primary md:border-0 md:hover:text-primary md:p-1 md:w-auto">
             Carreras Pasadas
             <Chevron />
           </button>
           <!-- Dropdown CampetoActual -->
           <div
             id="dropdownPasado"
-            class="z-10 hidden font-normal bg-white divide-y divide-gray-100 rounded-lg shadow w-44">
+            class="z-10 hidden font-normal bg-light-primary divide-y divide-gray-100 rounded-lg shadow w-44">
             <ul
-              class = "py-2 text-sm text-[#da392b]"
+              class = "py-2 text-sm text-primary"
               aria-labelledby="dropdownLargeButton">
               <li>
                 <a
@@ -264,16 +264,16 @@ import Chevron from "../icons/Chevron.astro";
           <button
             id="dropdownPilotosEquiposLink"
             data-dropdown-toggle="dropdownPilotosEquipos"
-            class ="flex items-center justify-between w-full py-2 px-3 text-white rounded hover:bg-white hover:text-[#da392b] md:hover:bg-white md:border-0 md:hover:text-[#da392b] md:p-1 md:w-auto">
+            class ="flex items-center justify-between w-full py-2 px-3 text-light-primary rounded hover:bg-light-primary hover:text-primary md:hover:bg-light-primary md:border-0 md:hover:text-primary md:p-1 md:w-auto">
             Extras
             <Chevron />
           </button>
           <!-- Dropdown PilotosEquipos -->
           <div
             id="dropdownPilotosEquipos"
-            class="z-10 hidden font-normal bg-white divide-y divide-gray-100 rounded-lg shadow w-44">
+            class="z-10 hidden font-normal bg-light-primary divide-y divide-gray-100 rounded-lg shadow w-44">
             <ul
-              class = "py-2 text-sm text-[#da392b]"
+              class = "py-2 text-sm text-primary"
               aria-labelledby="dropdownLargeButton">
               <li>
                 <a
@@ -305,7 +305,7 @@ import Chevron from "../icons/Chevron.astro";
         <li>
           <a
             href="/login"
-            class ="flex items-center justify-between w-full py-2 px-3 text-white rounded hover:bg-white hover:text-[#da392b] md:hover:bg-white md:border-0 md:hover:text-[#da392b] md:p-1 md:w-auto">
+            class ="flex items-center justify-between w-full py-2 px-3 text-light-primary rounded hover:bg-white hover:text-primary md:hover:bg-light-primary md:border-0 md:hover:text-primary md:p-1 md:w-auto">
             Mi Perfil
           </a>
         </li>

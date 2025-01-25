@@ -122,15 +122,15 @@ for (let i = 0; i < finalResult.length; i++) {
 
 <select
   id="select-champs"
-  class="block m-auto w-4/5 px-4 py-3 text-lg font-medium rounded-xl pe-9 focus:border-[#da392b] disabled:opacity-50 disabled:pointer-events-none bg-[#19191c] border-neutral-700 text-[#f9f9f9] placeholder-neutral-500"
+  class="block m-auto w-4/5 px-4 py-3 text-lg font-medium rounded-xl pe-9 focus:border-primary disabled:opacity-50 disabled:pointer-events-none bg-dark-second border-neutral-700 text-light-primary placeholder-neutral-500"
 >
   {
     dataChamp.map((champ) => (
       <optgroup
         label={`Temporada ${champ.ChampSeason}`}
-        class="text-[#f7f7f7] font-semibold"
+        class="text-light-second font-semibold"
       >
-        <option value={champ.ChampID} class="text-[#f7f7f7]">
+        <option value={champ.ChampID} class="text-light-second">
           {champ.ChampName}
         </option>
       </optgroup>
@@ -143,16 +143,16 @@ for (let i = 0; i < finalResult.length; i++) {
   <div class="section">
     <button
       id="loadButtonChamp"
-      class="no-underline bg-[#19191c] rounded-xl my-4 font-medium text-white text-lg py-4 px-8 block mx-auto hover:text-[#0f0f0f] hover:bg-[#da392b]"
+      class="no-underline bg-dark-second rounded-xl my-4 font-medium text-light-primary text-lg py-4 px-8 block mx-auto hover:text-dark-primary hover:bg-primary"
     >
       Cargar Datos
     </button>
   </div>
 
   <div id="resultsIndyChampsTable"></div>
-  <div class="w-11/12 mx-auto mt-4 tablecharts"><div id="chartProgressiónIndyChamp" class = "border-2 border-[#da392b]"></div></div>
+  <div class="w-11/12 mx-auto mt-4 tablecharts"><div id="chartProgressiónIndyChamp" class = "border-2 border-primary"></div></div>
   <div id="resultsTeamsChampsTable"></div>
-  <div class="w-11/12 mx-auto mt-4 tablecharts"><div id="chartProgressiónTeamsChamp" class = "border-2 border-[#da392b]"></div></div>
+  <div class="w-11/12 mx-auto mt-4 tablecharts"><div id="chartProgressiónTeamsChamp" class = "border-2 border-primary"></div></div>
   <div id="resultTableOtherPrizes"></div>
 </div>
 

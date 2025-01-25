@@ -17,33 +17,33 @@ if (AdminsError || AdminsData === null) {
     method="post"
     data-astro-reload
   >
-    <label class="text-[#0f0f0f] text-lg font-medium" for="nameemissor">Nombre</label>
+    <label class="text-dark-primary text-lg font-medium" for="nameemissor">Nombre</label>
     <input
-      class="w-full p-3 border border-solid border-[#19191c] rounded-md mt-2 mb-4 resize-y text-black bg-white"
+      class="w-full p-3 border border-solid border-dark-second rounded-md mt-2 mb-4 resize-y text-dark-primary bg-light-primary"
       type="text"
       id="nameemissor"
       name="nameemissor"
       placeholder="Tu nombre..."
     />
 
-    <label class="text-[#0f0f0f] text-lg font-medium" for="discord"
+    <label class="text-dark-primary text-lg font-medium" for="discord"
       >Usuario Discord</label
     >
     <input
-      class="w-full p-3 border border-solid border-[#19191c] rounded-md mt-2 mb-4 resize-y text-black bg-white"
+      class="w-full p-3 border border-solid border-dark-second rounded-md mt-2 mb-4 resize-y text-dark-primary bg-light-primary"
       type="text"
       id="discord"
       name="discord"
       placeholder="@example123"
     />
 
-    <label class="text-[#0f0f0f] text-lg font-medium" for="region"
+    <label class="text-dark-primary text-lg font-medium" for="region"
       >Región de Procedencia</label
     >
     <select
       id="region"
       name="region"
-      class="w-full p-3 border border-solid border-[#19191c] rounded-md mt-2 mb-4 resize-y text-black bg-white"
+      class="w-full p-3 border border-solid border-dark-second rounded-md mt-2 mb-4 resize-y text-dark-primary bg-light-primary"
     >
       <option value="spain">España</option>
       <option value="latinoamerica">Latino America</option>
@@ -56,11 +56,11 @@ if (AdminsError || AdminsData === null) {
       <option value="oceania">Oceania</option>
     </select>
 
-    <label class="text-[#0f0f0f] text-lg font-medium" for="contactwho"
+    <label class="text-dark-primary text-lg font-medium" for="contactwho"
       >¿Con quien quiere contactar?</label
     >
     <select
-      class="w-full p-3 border border-solid border-[#19191c] rounded-md mt-2 mb-4 resize-y text-black bg-white"
+      class="w-full p-3 border border-solid border-dark-second rounded-md mt-2 mb-4 resize-y text-dark-primary bg-light-primary"
       id="contactwho"
       name="contactwho"
     >
@@ -71,17 +71,17 @@ if (AdminsError || AdminsData === null) {
       }
     </select>
 
-    <label class="text-[#0f0f0f] text-lg font-medium" for="description"
+    <label class="text-dark-primary text-lg font-medium" for="description"
       >Mensaje a escribir</label
     >
     <textarea
-      class="w-full h-52 max-h-96 min-h-28 p-3 border border-solid border-[#19191c] rounded-md mt-2 mb-4 resize-y text-black bg-white"
+      class="w-full h-52 max-h-96 min-h-28 p-3 border border-solid border-dark-second rounded-md mt-2 mb-4 resize-y text-dark-primary bg-light-primary"
       id="description"
       name="description"
       placeholder="Escriba lo que sea..."></textarea>
 
     <input
-      class="bg-[#da392b] text-white font-bold py-3 px-5 border-solid border-[#da392b] border-2 rounded-md hover:bg-white hover:text-[#19191c] mt-4"
+      class="bg-primary text-white font-bold py-3 px-5 border-solid border-primary border-2 rounded-md hover:bg-light-primary hover:text-dark-second mt-4"
       type="submit"
       value="Enviar"
     />

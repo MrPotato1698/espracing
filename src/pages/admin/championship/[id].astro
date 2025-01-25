@@ -49,12 +49,12 @@ if (roleData?.roleesp !== 1) {
 const { data: champsData } = await supabase
   .from("championship")
   .select("*")
-  .eq("id", id)
+  .eq("id", parseInt(id))
   .single();
 ---
 
 <Layout title="ESP Racing: Modificación datos de campeonato">
-  <h2 class="text-5xl font-bold border-b border-[#da392b] w-fit mx-auto">
+  <h2 class="text-5xl font-bold border-b border-primary w-fit mx-auto">
     Modificar Datos de Campeonato
   </h2>
   <form id="editChampForm" class="flex flex-col mt-5">
@@ -65,7 +65,7 @@ const { data: champsData } = await supabase
       type="text"
       name="name"
       value={champsData?.name}
-      class="bg-[#19191c] text-[#f9f9f9] text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
+      class="bg-dark-second text-light-primary text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
     />
 
     <label class="mt-5 text-lg font-semibold" for="keySearchAPI">
@@ -77,7 +77,7 @@ const { data: champsData } = await supabase
       id="keySearchAPI"
       name="keySearchAPI"
       value={champsData?.key_search}
-      class="bg-[#19191c] text-[#f9f9f9] text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
+      class="bg-dark-second text-light-primary text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
     />
 
     <label class="mt-5 text-lg font-semibold" for="numbertotalraces">
@@ -90,14 +90,14 @@ const { data: champsData } = await supabase
       max="32760"
       name="numbertotalraces"
       value={champsData?.number_of_races_total}
-      class="bg-[#19191c] text-[#f9f9f9] text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
+      class="bg-dark-second text-light-primary text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
     />
 
     <label class="mt-5 text-lg font-semibold" for="season">
       Temporada a la que pertenece (antiguo: {champsData?.season})
     </label>
     <select
-      class="w-full p-3 border border-solid border-[#f7f7f7] rounded-md mt-2 mb-4 resize-y text-white bg-[#19191c] hover:border-[#da392b]"
+      class="w-full p-3 border border-solid border-light-second rounded-md mt-2 mb-4 resize-y text-white bg-dark-second hover:border-primary"
       id="season"
       name="season"
     >
@@ -121,11 +121,11 @@ const { data: champsData } = await supabase
       max="32760"
       name="yearChamp"
       value={champsData?.year}
-      class="bg-[#19191c] text-[#f9f9f9] text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
+      class="bg-dark-second text-light-primary text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
     />
 
     <div class="mb-4">
-      <label class="text-[#f9f9f9] text-lg font-medium" for="champORevent">
+      <label class="text-light-primary text-lg font-medium" for="champORevent">
         ¿Es un evento suelto o un campeonato completo?
       </label>
       <div class="flex items-center gap-2 mt-2">
@@ -138,18 +138,18 @@ const { data: champsData } = await supabase
             checked={champsData?.ischampionship}
           />
           <div
-            class="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-[#da392b] dark:peer-focus:ring-[#da392b] dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-[#da392b]"
+            class="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-primary dark:peer-focus:ring-primary dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary"
           >
           </div>
         </label>
-        <span id="eventTypeText" class="text-[#f9f9f9] text-sm font-medium">
+        <span id="eventTypeText" class="text-light-primary text-sm font-medium">
           {champsData?.ischampionship ? "Campeonato completo" : "Evento suelto"}
         </span>
       </div>
     </div>
 
     <div class="mb-4"></div>
-    <label class="text-[#f9f9f9] text-lg font-medium" for="isFinished">
+    <label class="text-light-primary text-lg font-medium" for="isFinished">
       ¿El campeonato ha finalizado?
     </label>
     <div class="flex items-center gap-2 mt-2">
@@ -162,11 +162,11 @@ const { data: champsData } = await supabase
           checked={champsData?.isfinished}
         />
         <div
-          class="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-[#da392b] dark:peer-focus:ring-[#da392b] dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-[#da392b]"
+          class="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-primary dark:peer-focus:ring-primary dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary"
         >
         </div>
       </label>
-      <span id="isFinishedText" class="text-[#f9f9f9] text-sm font-medium">
+      <span id="isFinishedText" class="text-light-primary text-sm font-medium">
         {champsData?.isfinished ? "Finalizado" : "No finalizado"}
       </span>
     </div>
@@ -174,7 +174,7 @@ const { data: champsData } = await supabase
     <div>
       <button
         type="submit"
-        class="py-1.5 px-3 w-fit mr-2 bg-[#0f0f0f] text-white border-[#29dd38] border-2 rounded-md my-4 font-medium text-lg hover:bg-[#29dd38] hover:text-[#0f0f0f]"
+        class="py-1.5 px-3 w-fit mr-2 bg-dark-primary text-white border-[#29dd38] border-2 rounded-md my-4 font-medium text-lg hover:bg-[#29dd38] hover:text-dark-primary"
       >
         Aceptar
       </button>
@@ -182,7 +182,7 @@ const { data: champsData } = await supabase
       <button
         type="button"
         onclick="window, location.href = '/admin/adminchampionship'"
-        class="py-1.5 px-3 w-fit bg-[#0f0f0f] text-white border-[#da392b] border-2 rounded-md my-4 font-medium text-lg hover:bg-[#da392b] hover:text-[#0f0f0f]"
+        class="py-1.5 px-3 w-fit bg-dark-primary text-white border-primary border-2 rounded-md my-4 font-medium text-lg hover:bg-primary hover:text-dark-primary"
       >
         Cancelar
       </button>

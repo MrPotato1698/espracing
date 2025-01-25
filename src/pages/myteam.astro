@@ -60,14 +60,14 @@ const {data: TeamUsersData} = await supabase
 ---
 
 <Layout title="ESP Racing: Mi Equipo">
-  <h2 class="text-5xl font-extrabold border-b-2 border-[#da392b] w-full">
+  <h2 class="text-5xl font-extrabold border-b-2 border-primary w-full">
     Mi Equipo
   </h2>
 
   <img src={String(TeamData.image)} alt="Avatar" class="w-20 pt-5" />
   <div class="grid w-11/12 grid-cols-1 my-5">
     <div class="mb-2">
-      <h3 class="text-4xl font-semibold border-b-2 border-[#da392b] w-3/4">
+      <h3 class="text-4xl font-semibold border-b-2 border-primary w-3/4">
         Nombre
       </h3>
       <p class="pl-2 text-2xl font-medium">{TeamData.name}</p>
@@ -76,7 +76,7 @@ const {data: TeamUsersData} = await supabase
     <h2 class="w-full mt-12 text-5xl font-extrabold"></h2>
     <div class="grid w-11/12 grid-cols-1 my-5">
       <div class="blockdata">
-        <h3 class="text-4xl font-semibold border-b-2 border-[#da392b] w-3/4">
+        <h3 class="text-4xl font-semibold border-b-2 border-primary w-3/4">
           Descripción
         </h3>
         <p class="pl-2 text-2xl font-medium">{TeamData.description}</p>
@@ -84,11 +84,11 @@ const {data: TeamUsersData} = await supabase
     </div>
 
     <div class="py-4 mx-auto text-center" style="width: 99%">
-      <p2 class="text-5xl font-bold border-b border-[#da392b] w-fit mx-auto"
+      <p2 class="text-5xl font-bold border-b border-primary w-fit mx-auto"
         >Tabla de Pilotos</p2
       >
-      <table class="mt-6 w-full border-collapse border border-[#f9f9f9]">
-        <thead class="font-medium bg-[#da392b]">
+      <table class="mt-6 w-full border-collapse border border-light-primary">
+        <thead class="font-medium bg-primary">
           <tr>
             <th>Nº</th>
             <th>Nombre</th>
@@ -103,7 +103,7 @@ const {data: TeamUsersData} = await supabase
         <tbody>
           {
             TeamUsersData?.map((user, index) => (
-              <tr class="bg-[#19191c]">
+              <tr class="bg-dark-second">
                 <td class="font-semibold">{index + 1}</td>
                 {user.number_plate === null || user.number_plate === 0 ? (
                   <td>#0 - {user.full_name}</td>
@@ -130,14 +130,14 @@ const {data: TeamUsersData} = await supabase
         roleData?.roleesp === 1 || roleData?.roleesp === 2 ? (
           <a
             href="/modteamprofile"
-            class="py-1.5 px-2 w-fit bg-[#0f0f0f] text-white border-[#da392b] border-2 rounded-md font-medium text-lg hover:bg-[#19191c]"
+            class="py-1.5 px-2 w-fit bg-dark-primary text-light-primary border-primary border-2 rounded-md font-medium text-lg hover:bg-dark-second"
           >
             Modificar Perfil Equipo
           </a>
         ) : null
       }
       <button
-        class="exitTeam py-1.5 px-2 w-fit bg-[#0f0f0f] text-white border-[#da392b] border-2 rounded-md font-medium text-lg hover:bg-[#19191c]"
+        class="exitTeam py-1.5 px-2 w-fit bg-dark-primary text-light-primary border-primary border-2 rounded-md font-medium text-lg hover:bg-dark-second"
         data-id={id}
       >
         Salir del equipo

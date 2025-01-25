@@ -15,7 +15,7 @@ const {data: raceData} = await supabase
 <Layout title="ESP Racing: Estadisticas Completas">
   <button
       onclick="window.location.href = '/globalresults'"
-      class="no-underline bg-[#19191c] rounded-xl my-4 font-medium text-white text-lg py-4 px-8 block mx-auto hover:text-[#0f0f0f] hover:bg-[#da392b]"
+      class="no-underline bg-dark-second rounded-xl my-4 font-medium text-white text-lg py-4 px-8 block mx-auto hover:text-dark-primary hover:bg-primary"
     >
       Volver atras
     </button>
@@ -27,8 +27,8 @@ const {data: raceData} = await supabase
 
     <div id="datosCircuito"></div>
     <div id="tablaResultados"></div>
-    <div id="chartChangePosition" class="w-11/12 mx-auto mt-4 border-2 rounded-lg border-[#da392b]"></div>
-    <div id="chartGaps" class="w-11/12 mx-auto mt-4 border-2 rounded-lg border-[#da392b]"></div>
+    <div id="chartChangePosition" class="w-11/12 mx-auto mt-4 border-2 rounded-lg border-primary"></div>
+    <div id="chartGaps" class="w-11/12 mx-auto mt-4 border-2 rounded-lg border-primary"></div>
     <div class="grid gap-2 mx-auto mt-4 sectorTables">
       <div id="tablaS1"></div>
       <div id="tablaS2"></div>

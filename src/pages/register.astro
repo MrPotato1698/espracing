@@ -15,7 +15,7 @@ if (accessToken && refreshToken) {
 
 <Layout title="Registrarse">
   <div
-    class="absolute bottom-0 left-0 w-full h-full overflow-hidden leading-5 bg-[#f0f0f0] top-72 -z-10 bg-gradient-to-b from-[#da392b] via-[#da392b] to-[#0f0f0f]"
+    class="absolute bottom-0 left-0 w-full h-full overflow-hidden leading-5 bg-[#f0f0f0] top-72 -z-10 bg-gradient-to-b from-primary via-primary to-dark-primary"
   >
   </div>
 
@@ -25,7 +25,7 @@ if (accessToken && refreshToken) {
     <div
       class="z-10 flex flex-col self-center lg:px-14 sm:max-w-4xl xl:max-w-md"
     >
-      <div class="flex-col self-start hidden text-[#f9f9f9] lg:flex">
+      <div class="flex-col self-start hidden text-light-primary lg:flex">
         <h1 class="my-3 text-4xl font-semibold">Bienvenido por primera vez</h1>
         <p class="pr-3 text-sm opacity-90">
           Hola nuevo piloto, estamos felices de verte aquí. Por favor,
@@ -41,20 +41,20 @@ if (accessToken && refreshToken) {
       class="z-10 flex self-center justify-center"
       data-astro-reload
     >
-      <div class="p-12 mx-auto bg-white rounded-3xl w-96">
+      <div class="p-12 mx-auto bg-light-primary rounded-3xl w-96">
         <div class="mb-7">
           <h3 class="text-2xl font-semibold text-gray-800">Registrarse</h3>
           <p class="text-gray-400">
             ¿Ya tienes cuenta? <a
               href="/login"
-              class="text-sm text-[#0f0f0f] hover:text-[#da392b]"
+              class="text-sm text-dark-primary hover:text-primary"
               >Inicia Sesión</a
             >
           </p>
         </div>
         <div class="space-y-6">
         <input
-            class="w-full px-4 py-3 text-sm text-black bg-gray-200 border border-gray-200 rounded-lg focus:bg-gray-100 focus:outline-none focus:border-[#0f0f0f] focus:text-black"
+            class="w-full px-4 py-3 text-sm text-dark-primary bg-gray-200 border border-gray-200 rounded-lg focus:bg-gray-100 focus:outline-none focus:border-dark-primary focus:text-dark-second"
             type="text"
             name="name"
             id="name"
@@ -62,7 +62,7 @@ if (accessToken && refreshToken) {
           />
 
           <input
-            class="w-full px-4 py-3 text-sm text-black bg-gray-200 border border-gray-200 rounded-lg focus:bg-gray-100 focus:outline-none focus:border-[#0f0f0f] focus:text-black"
+            class="w-full px-4 py-3 text-sm text-dark-primary bg-gray-200 border border-gray-200 rounded-lg focus:bg-gray-100 focus:outline-none focus:border-dark-primary focus:text-dark-second"
             type="text"
             name="email"
             id="email"
@@ -74,7 +74,7 @@ if (accessToken && refreshToken) {
               :type="show ? 'password' : 'text'"
               name="password"
               id="password"
-              class="w-full px-4 py-3 text-sm text-black bg-gray-200 border border-gray-200 rounded-lg focus:bg-gray-100 focus:outline-none focus:border-[#0f0f0f] focus:text-black"
+              class="w-full px-4 py-3 text-sm text-dark-primary bg-gray-200 border border-gray-200 rounded-lg focus:bg-gray-100 focus:outline-none focus:border-dark-primary focus:text-dark-second"
               placeholder="Contraseña"
             />
             <div
@@ -86,7 +86,7 @@ if (accessToken && refreshToken) {
           </div>
 
           <input
-            class="w-full px-4 py-3 text-sm text-black bg-gray-200 border border-gray-200 rounded-lg focus:bg-gray-100 focus:outline-none focus:border-[#0f0f0f] focus:text-black"
+            class="w-full px-4 py-3 text-sm text-dark-primary bg-gray-200 border border-gray-200 rounded-lg focus:bg-gray-100 focus:outline-none focus:border-dark-primary focus:text-dark-second"
             type="text"
             name="steam_id"
             id="steam_id"
@@ -115,7 +115,7 @@ if (accessToken && refreshToken) {
 
           <button
             type="submit"
-            class="flex justify-center w-full p-3 font-semibold tracking-wide text-gray-100 transition duration-300 ease-in bg-[#da392b] border-2 border-white rounded-lg cursor-pointer hover:border-[#da392b] hover:bg-white hover:text-[#da392b]"
+            class="flex justify-center w-full p-3 font-semibold tracking-wide text-gray-100 transition duration-300 ease-in bg-primary border-2 border-light-primary rounded-lg cursor-pointer hover:border-primary hover:bg-light-primary hover:text-primary"
           >
             Registrarse
           </button>

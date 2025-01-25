@@ -19,11 +19,11 @@ for (const team of TeamsData || []) {
 
 <Layout title="ESP Racing: Equipos">
   <div class="py-4 mx-auto text-center" style="width: 99%">
-    <p2 class="text-5xl font-bold border-b border-[#da392b] w-fit mx-auto"
+    <p2 class="text-5xl font-bold border-b border-primary w-fit mx-auto"
       >Tabla de Equipos</p2
     >
-    <table class="mt-6 w-full border-collapse border border-[#f9f9f9]">
-      <thead class="font-medium bg-[#da392b]">
+    <table class="mt-6 w-full border-collapse border border-light-primary">
+      <thead class="font-medium bg-primary">
         <tr>
           <th>Nº</th>
           <th colspan="2">Nombre</th>
@@ -34,7 +34,7 @@ for (const team of TeamsData || []) {
       <tbody>
         {
           TeamsData?.map((team, index) =>
-            <tr class="bg-[#0f0f0f]">
+            <tr class="bg-dark-primary">
               <td class = "font-semibold">{index + 1}</td>
               <td><img src={String(team.image)} alt="Avatar" class="w-8 py-1"/></td>
               <td>{team.name}</td>

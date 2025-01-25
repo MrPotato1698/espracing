@@ -10,11 +10,11 @@ const { data: UsersData, error: errorUsers } = await supabase
 
 <Layout title="ESP Racing: Pilotos">
   <div class="py-4 mx-auto text-center" style="width: 99%">
-    <h2 class="text-5xl font-bold border-b border-[#da392b] w-fit mx-auto">
+    <h2 class="text-5xl font-bold border-b border-primary w-fit mx-auto">
       Tabla de Pilotos
     </h2>
-    <table class="mt-6 w-full border-collapse border border-[#f9f9f9]">
-      <thead class="font-medium bg-[#da392b]">
+    <table class="mt-6 w-full border-collapse border border-light-primary">
+      <thead class="font-medium bg-primary">
         <tr>
           <th>Nº</th>
           <th colspan="2">Nombre</th>
@@ -32,7 +32,7 @@ const { data: UsersData, error: errorUsers } = await supabase
       <tbody>
         {
           (UsersData ?? []).map((user, index) => (
-            <tr class="bg-[#19191c]">
+            <tr class="bg-dark-second">
               <td class="font-semibold">{index + 1}</td>
               <td><img src={String(user.avatar)} alt="Avatar" class="w-8 py-1 rounded-full justify-end"/></td>
               {user.number_plate === null || user.number_plate === 0 ? (
@@ -42,7 +42,7 @@ const { data: UsersData, error: errorUsers } = await supabase
                   #{user.number_plate} - {user.full_name}
                 </td>
               )}
-              <td>{user.team.name}</td>
+              <td>{user.team?.name}</td>
               <td>{user.races}</td>
               <td>{user.wins}</td>
               <td>{user.podiums}</td>
