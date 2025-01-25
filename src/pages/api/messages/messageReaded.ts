@@ -12,14 +12,14 @@ export const POST: APIRoute = async ({ request, redirect }) => {
   const {data: ReadedData} = await supabase
   .from('message')
   .select('readed')
-  .eq('id', id)
+  .eq('id', Number(id))
   .single();
 
   if(ReadedData?.readed === false){
     const {data: updateData} = await supabase
       .from('message')
       .update({readed: true})
-      .eq('id', id);
+      .eq('id', Number(id));
   }
 
   return redirect("/messageList");

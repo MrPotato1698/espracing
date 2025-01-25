@@ -19,7 +19,7 @@ export const POST: APIRoute = async ({ request, redirect }) => {
   const {data: updateData, error: errorUpdateData} = await supabase
   .from('team')
   .update({name: name, description: description})
-  .eq('id', id);
+  .eq('id', Number(id));
 
   if(errorUpdateData) {
     return new Response(

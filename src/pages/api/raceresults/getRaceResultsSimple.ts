@@ -51,11 +51,11 @@ function initializeScript() {
 				if (carDataSupabase) {
 					carData.push({
 						filename: carDataSupabase.filename,
-						brand: carDataSupabase.carbrand.name ?? "",
+						brand: carDataSupabase.carbrand?.name ?? "",
 						model: carDataSupabase.model ?? "",
 						classShortName: carDataSupabase.carclass.short_name ?? "",
 						classColor: carDataSupabase.carclass.class_design ?? "",
-						imgbrand: carDataSupabase.carbrand.imgbrand ?? ""
+						imgbrand: carDataSupabase.carbrand?.imgbrand ?? ""
 					});
 				}
 			}
@@ -95,8 +95,8 @@ function initializeScript() {
 				const layoutCapacity = layout?.capacity;
 
 				tablaResultadosString += `
-					<div class="text-center bg-[#19191c] rounded-lg py-5" style = "width=99%">
-					<p class = "text-3xl font-bold border-b border-[#da392b] w-fit mx-auto mb-2">Datos del circuito</p>
+					<div class="text-center bg-dark-second rounded-lg py-5" style = "width=99%">
+					<p class = "text-3xl font-bold border-b border-primary w-fit mx-auto mb-2">Datos del circuito</p>
 						<div class = "grid grid-cols-1">
 							<p class="text-2xl font-semibold">Circuito: ${circuitName} (Variante ${layoutName})</p>
 							<p class="text-xl">Localización: ${circuitLocation}</p>
@@ -134,9 +134,9 @@ function initializeScript() {
 				</tr>`;
 
 			tablaResultadosString += `
-			<p class="text-3xl font-bold border-b border-[#da392b] w-fit mx-auto mt-4 mb-2">Resultado de carrera</p>
-				<table class="w-full border-collapse border border-[#f9f9f9]">
-						<thead class="font-medium bg-[#da392b]">
+			<p class="text-3xl font-bold border-b border-primary w-fit mx-auto mt-4 mb-2">Resultado de carrera</p>
+				<table class="w-full border-collapse border border-light-primary">
+						<thead class="font-medium bg-primary">
 						<tr class="tabletitle">
 						<th colspan="2"></th>
 						<th>Pos</th>
@@ -158,7 +158,7 @@ function initializeScript() {
 			resultTableClasified.forEach((result, index) => {
 				if (result.splitNumber === 2 && !secondSplitInit) {
 					tablaResultadosString += `
-						<tr class="bg-[#da392b] text-center font-bold">
+						<tr class="bg-primary text-center font-bold">
 								<td colspan="14">Segundo Split</td>
 						</tr>`;
 					result.interval = "";
@@ -172,10 +172,10 @@ function initializeScript() {
 			// *** DNFs ***
 			if(resultTableDNF.length > 0) {
 				tablaResultadosString += `
-				<p class="text-3xl font-bold border-b border-[#da392b] w-fit mx-auto mt-4 mb-2">No Clasificados</p>
+				<p class="text-3xl font-bold border-b border-primary w-fit mx-auto mt-4 mb-2">No Clasificados</p>
 
-				<table class="w-full border-collapse border border-[#f9f9f9]">
-						<thead class="font-medium bg-[#da392b]">
+				<table class="w-full border-collapse border border-light-primary">
+						<thead class="font-medium bg-primary">
 						<tr class="tabletitle">
 						<th colspan="2"></th>
 						<th>Pos</th>
@@ -207,10 +207,10 @@ function initializeScript() {
 
 			// *** Vuelta Rápida ***
 			tablaResultadosString += `
-			<p class="text-3xl font-bold border-b border-[#da392b] w-fit mx-auto mt-4 mb-2">Vuelta Rápida</p>
+			<p class="text-3xl font-bold border-b border-primary w-fit mx-auto mt-4 mb-2">Vuelta Rápida</p>
 
-			<table class="w-full border-collapse border border-[#f9f9f9]">
-					<thead class="font-medium bg-[#da392b]">
+			<table class="w-full border-collapse border border-light-primary">
+					<thead class="font-medium bg-primary">
 						<tr class="tabletitle">
 							<th>Nombre</th>
 							<th>Clase</th>

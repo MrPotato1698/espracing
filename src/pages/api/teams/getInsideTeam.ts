@@ -16,7 +16,7 @@ try{
     .from('profiles')
     .select('id')
     .eq('is_team_manager', true)
-    .eq('team', team_id)
+    .eq('team', Number(team_id))
     .single();
 
   const {data: lastIDTeamsApplication} = await supabase

@@ -132,7 +132,7 @@ export function initializeFuelFormControls() {
     // Mostrar el resultado con AJAX
     if (!resultadoDiv) return;
 
-    const createListItem = (text: string) => `<li><span class='font-medium text-[#da392b]'>${text}</span>`;
+    const createListItem = (text: string) => `<li><span class='font-medium text-primary'>${text}</span>`;
     const stintDetails = stintLaps.map((laps, index) =>
       `${createListItem(`Stint ${index + 1}:`)}</span> ${laps} vueltas, ${stintFuel[index].toFixed(2)} litros
       para realizar el stint, ${totalFuelperStint[index].toFixed(2)} segundos solo la parada + tiempo de paso por boxes. 
@@ -155,7 +155,7 @@ export function initializeFuelFormControls() {
 
     const tiresInfo = carTiresTime > 0 ? `
       <p class="mt-4">*Si se quiere realizar un cambio de gomas, recuerde que en este coche son 
-      <span class='font-medium text-[#da392b]'>${carTiresTime} segundos</span>, mire los diferentes stints y si el tiempo de parada es superior 
+      <span class='font-medium text-primary'>${carTiresTime} segundos</span>, mire los diferentes stints y si el tiempo de parada es superior 
       al cambio de goma, recuerde que tiene un cambio de gomas "gratis" en lo que perdida de tiempo se refiere.</p>
     ` : '';
 

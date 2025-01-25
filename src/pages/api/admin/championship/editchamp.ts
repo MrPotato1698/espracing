@@ -35,7 +35,7 @@ export const POST: APIRoute = async ({ request }) => {
     const { error: updateError } = await supabase
       .from('championship')
       .update(updateData)
-      .eq('id', champ_id);
+      .eq('id', Number(champ_id));
 
     if (updateError) throw updateError;
 

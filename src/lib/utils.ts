@@ -97,7 +97,7 @@ export function getResultTableData(datos: RaceData, pointsystemName: String, poi
           }
         } else {
           if (itemResult.Penalties !== 0) {
-            timeadjust = minutes + ":" + seconds + " <span class='rounded bg-[#da392b] text-xs px-1 py-0.5 ml-1'> + " + (itemResult.Penalties) + "s";
+            timeadjust = minutes + ":" + seconds + " <span class='rounded bg-primary text-xs px-1 py-0.5 ml-1'> + " + (itemResult.Penalties) + "s";
           } else {
             timeadjust = minutes + ":" + seconds;
           }

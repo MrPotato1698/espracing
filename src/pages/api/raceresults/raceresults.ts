@@ -108,11 +108,11 @@ function initializeScript() {
                 if (carDataSupabase) {
                     carData.push({
                         filename: carDataSupabase.filename,
-                        brand: carDataSupabase.carbrand.name ?? "",
+                        brand: carDataSupabase.carbrand?.name ?? "",
                         model: carDataSupabase.model ?? "",
                         classShortName: carDataSupabase.carclass.short_name ?? "",
                         classColor: carDataSupabase.carclass.class_design ?? "",
-                        imgbrand: carDataSupabase.carbrand.imgbrand ?? ""
+                        imgbrand: carDataSupabase.carbrand?.imgbrand ?? ""
                     });
                 }
             }
