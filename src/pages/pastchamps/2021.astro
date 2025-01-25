@@ -1,63 +1,110 @@
 ---
 import Layout from "@/layouts/NormalLayout.astro";
-import { CldImage } from "astro-cloudinary";
-import { getCollection } from "astro:content";
-
-import ImageModal from "@/components/ImageModal.astro";
-
-const pastchamp2021 = await getCollection("pastchamp2021");
-let groupedChampImages: {[key: string]: Array<{id: string; data: { display_name: string; public_id: string; width: number; height: number;};}>;} = {};
-
-if (pastchamp2021 !== null) {
-  const sortedByDisplayName = pastchamp2021.sort((a, b) => a.id.localeCompare(b.id));
-
-  const groupImagesByNumber = (images: Array<{ id: string; collection: string; data: {display_name: string; public_id: string; width: number; height: number;};}>) => {
-    return images.reduce(
-      (groups: {[key: string]: Array<{id: string; data: {display_name: string; public_id: string; width: number; height: number;};}>;}, item) => {
-        const number = item.data.display_name.split("-")[0];
-        if (!groups[number]) {
-          groups[number] = [];
-        }
-        groups[number].push(item);
-        return groups;
-      },
-      {}
-    );
-  };
-
-  groupedChampImages = groupImagesByNumber(sortedByDisplayName as Array<{ id: string; collection: string; data: { display_name: string; public_id: string; width: number; height: number;};}>);
-}
 ---
 
 <Layout title="ESP Racing: pastchamp 2021">
-  <h2 class="text-5xl font-bold text-center border-b-2 border-[#da392b] w-fit mx-auto mb-8 mt-5">
+  <h2
+    class="text-5xl font-bold text-center border-b-2 border-primary w-fit mx-auto mb-8 mt-5"
+  >
     Campeonatos 2021
   </h2>
 
-  <div id="camp2021">
-    {
-      Object.entries(groupedChampImages).map(([group, images]) => (
-        <div class="pl-2 mb-8">
-          <h2 class="text-2xl font-bold mb-4">Campeonato {group}</h2>
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {images.map((image) => (
-              <div
-                class="rounded-lg p-2 cursor-pointer bg-[#080808]"
-                onclick={`openModal('${image.data.public_id}', ${image.data.width}, ${image.data.height})`}
-              >
-                <CldImage
-                  src={image.data.public_id}
-                  width={image.data.width}
-                  height={image.data.height}
-                  alt={`Imagen del Campeonato ${group}`}
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-      ))
-    }
-  </div>
+  <div
+    id="camp2021"
+    class="text-center grid gap-4 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3"
+  >
+    <div class="mb-5">
+      <a class="py-6 text-xl font-medium"
+        >1º Campeonato ESP Racing: Skoda Octavia VRS Cup</a
+      >
+      <img
+        class="mx-auto mb-1"
+        style="witdh = 95%"
+        src="/img/pastchamp/2021/01-SkodaOctaviaCartel.webp"
+      />
+      <img
+        class="mx-auto"
+        style="witdh = 95%"
+        src="/img/pastchamp/2021/01-SkodaOctaviaClasif.webp"
+      />
+    </div>
 
-  <ImageModal />
+    <div class="mb-5">
+      <a class="mt-5 py-6 text-xl font-medium"
+        >Campeonato ESP Racing: Ginetta G55 GT4</a
+      >
+      <img
+        class="mx-auto mb-1"
+        style="witdh = 95%"
+        src="/img/pastchamp/2021/02-GinettaGT4Cartel.webp"
+      />
+      <img
+        class="mx-auto mb-1"
+        style="witdh = 95%"
+        src="/img/pastchamp/2021/02-GinettaGT4Clasif.webp"
+      />
+    </div>
+
+    <div class="mb-5">
+      <a class="mt-5 py-6 text-xl font-medium"
+        >Nuevo Campeonato Multimarca TCR Esp Racing</a
+      >
+      <img
+        class="mx-auto mb-1"
+        style="witdh = 95%"
+        src="/img/pastchamp/2021/03-TCRCartel.webp"
+      />
+      <img
+        class="mx-auto mb-1"
+        style="witdh = 95%"
+        src="/img/pastchamp/2021/03-TCRClasifInd.webp"
+      />
+      <img
+        class="mx-auto mb-1"
+        style="witdh = 95%"
+        src="/img/pastchamp/2021/03-TCRClasifEq.webp"
+      />
+    </div>
+
+    <div class="mb-5">
+      <a class="mt-5 py-6 text-xl font-medium">Campeonato GT4 Esp Racing</a>
+      <img
+        class="mx-auto mb-1"
+        style="witdh = 95%"
+        src="/img/pastchamp/2021/04-GT4Cartel.webp"
+      />
+      <img
+        class="mx-auto mb-1"
+        style="witdh = 95%"
+        src="/img/pastchamp/2021/04-GT4ClasifInd.webp"
+      />
+      <img
+        class="mx-auto mb-1"
+        style="witdh = 95%"
+        src="/img/pastchamp/2021/04-GT4ClasifEq.webp"
+      />
+    </div>
+
+    <div class="mb-5">
+      <a class="mt-5 py-6 text-xl font-medium"
+        >Campeonato Formula RSS 2 Esp Racing</a
+      >
+      <img
+        class="mx-auto mb-1"
+        style="witdh = 95%"
+        src="/img/pastchamp/2021/05-F2Cartel.webp"
+      />
+      <img
+        class="mx-auto mb-1"
+        style="witdh = 95%"
+        src="/img/pastchamp/2021/05-F2ClasifInd.webp"
+      />
+      <img
+        class="mx-auto mb-1"
+        style="witdh = 95%"
+        src="/img/pastchamp/2021/05-F2ClasifEq.webp"
+      />
+      <a class="mt-5 py-6 text-xl font-medium"></a>
+    </div>
+  </div>
 </Layout>
