@@ -9,11 +9,13 @@ interface Props {
 const { actualchamp } = Astro.props;
 
 interface Race {
-  ChampID: number;
-  ChampName: string;
-  ChampSeason: string;
-  RaceOrder: number;
-  RacePoints: string;
+  pointsystem: string;
+  orderinchamp: number;
+  championship: {
+    id: string;
+    name: string;
+    season: string;
+  }
 }
 
 type RaceDetail = {
@@ -25,33 +27,34 @@ interface GroupedChamp {
   ChampID: string;
   ChampName: string;
   ChampSeason: string;
+  RacePointsList: string[];
   RaceDetails: RaceDetail[];
 }
 
 let resultSet;
 
 if (actualchamp === "true") {
-  const { data: lastchamp } = await supabase
+  const { data: lastchamp, error: errorlastchamp } = await supabase
     .from("championship")
     .select("*")
     .eq('ischampionship', true)
-    .order('id', { ascending: false })
-    .single();
+    .eq('isfinished', false)
+    .order('id', { ascending: false });
 
   if(!lastchamp) {
-    throw new Error('No hay campeonatos activos');
+    throw new Error('No hay campeonatos activos: ' + errorlastchamp.message);
   }
 
   const { data: champResultSet } = await supabase
     .from ('race')
-    .select('pointsystem, championship!inner(id, name, season)')
-    .eq('id', lastchamp.id);
+    .select('orderinchamp, pointsystem, championship!inner(id, name, season)')
+    .eq('id', lastchamp[0].id);
   resultSet = champResultSet;
 
 } else {
   const { data: champResultSet } = await supabase
     .from ('race')
-    .select('pointsystem, championship!inner(id, name, season)')
+    .select('orderinchamp, pointsystem, championship!inner(id, name, season)')
     .eq('ischampionship', true);
   resultSet = champResultSet;
 }
@@ -71,30 +74,28 @@ const groupedChampionships = ChampionshipData.reduce(
 const ChampData: Race[] = resultSet as unknown as Race[];
 
 function groupByChamp(resultSet: Race[]): GroupedChamp[] {
-  // Creamos un objeto auxiliar para agrupar los campeonatos
   const grouped: {
-    [key: number]: GroupedChamp & { RacePointsList: string[] };
+    [key: string]: GroupedChamp & { RacePointsList: string[] };
   } = {};
 
   resultSet.forEach((race) => {
-    if (!grouped[race.ChampID]) {
-      grouped[race.ChampID] = {
-        ChampID: race.ChampID.toString(),
-        ChampName: race.ChampName,
-        ChampSeason: race.ChampSeason,
+    const champId = race.championship.id;
+    if (!grouped[champId]) {
+      grouped[champId] = {
+        ChampID: champId,
+        ChampName: race.championship.name,
+        ChampSeason: race.championship.season,
         RacePointsList: [],
         RaceDetails: [],
       };
     }
 
-    // Añadimos los puntos de cada carrera a la lista del campeonato
-    grouped[race.ChampID].RaceDetails.push({
-      RaceOrder: race.RaceOrder,
-      RacePoints: race.RacePoints,
+    grouped[champId].RaceDetails.push({
+      RaceOrder: race.orderinchamp, // Ajusta según tus datos
+      RacePoints: race.pointsystem,
     });
   });
 
-  // Transformamos el objeto en un array
   return Object.values(grouped);
 }
 
