@@ -4,6 +4,8 @@ import type { RaceData, RaceResult, RaceLap, BestLap, RaceConfig } from "@/types
 import type { Points } from "@/types/Points";
 import type { ResultTableData, CarData, RaceFastestLap } from "@/types/Utils";
 
+export type ToastType = 'success' | 'error' | 'warning' | 'info';
+
 export function getResultTableData(datos: RaceData, pointsystemName: String, pointArray: Points, cars: CarData[]): ResultTableData[] {
   let resultTableData: ResultTableData[] = [];
   const dresult: RaceResult[] = datos.RaceResult;
@@ -340,4 +342,68 @@ export function getResultFastestLap(datos: RaceData, pointArray: Points, cars: C
     avgspeed: avgSpeed + " km/h",
     points: (driver?.Pos ?? 0) > 0 ? `+${pointArray.FastestLap}` : "0"
   };
+}
+
+export function showToast(message: string, type: ToastType = 'info') {
+  const id = `toast-${Date.now()}`;
+  const toastHTML = document.createElement('div');
+  const duration = 3000; // 3 segundos
+
+  const styles = {
+    success: { border: 'border-green-500', progress: 'bg-green-500' },
+    error: { border: 'border-red-500', progress: 'bg-red-500' },
+    warning: { border: 'border-yellow-500', progress: 'bg-yellow-500' },
+    info: { border: 'border-blue-500', progress: 'bg-blue-500' }
+  }[type];
+
+  toastHTML.innerHTML = `
+    <div id="${id}"
+      class="fixed bottom-4 right-4 p-4 rounded-lg border bg-dark-primary ${styles.border} text-ligth-primary
+      shadow-lg flex flex-col gap-2 opacity-0 transition-all duration-300 ease-in-out transform translate-y-2">
+      <div class="flex items-center gap-3">
+        <img src="/img/ESPRACINGLogoBlanco.webp" class="h-auto w-10" />
+        <p class="font-medium">${message}</p>
+        <button onclick="this.parentElement.parentElement.remove()" class="ml-auto">
+          <svg class = "w-4 h-4"viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4">
+          <path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M18 6l-12 12" /><path d="M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div class="h-1 w-full bg-gray-200 rounded-full overflow-hidden">
+        <div class="h-full ${styles.progress} rounded-full transition-all duration-[3000ms] ease-linear w-0"></div>
+      </div>
+    </div>
+  `;
+
+  if (toastHTML.firstElementChild) {
+    document.body.appendChild(toastHTML.firstElementChild);
+  }
+
+  requestAnimationFrame(() => {
+    const toast = document.getElementById(id);
+    if (toast) {
+      toast.style.opacity = '1';
+      toast.style.transform = 'translateY(0)';
+      // Animar la barra de progreso
+      const progressBar = toast.querySelector('div > div:last-child > div');
+      if (progressBar instanceof HTMLElement) {
+        progressBar.style.width = '100%';
+      }
+
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(2rem)';
+        setTimeout(() => toast.remove(), 300);
+      }, duration);
+    }
+  });
+}
+
+export function checkAndShowSavedToast() {
+  const savedToast = localStorage.getItem('toastMessage');
+  if (savedToast) {
+    const { message, type } = JSON.parse(savedToast);
+    showToast(message, type as 'success' | 'error' | 'warning' | 'info');
+    localStorage.removeItem('toastMessage');
+  }
 }
