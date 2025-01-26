@@ -1,5 +1,6 @@
 import { supabase } from '@/db/supabase';
 import { createRaceData, createRaceDataMultipleSplits } from "@/lib/results/resultConverter";
+import { showToast } from "@/lib/toast"
 
 export function initRaceManagement() {
   const form = document.getElementById("uploadForm") as HTMLFormElement;
@@ -49,7 +50,7 @@ export function initRaceManagement() {
         fileNameS1R1.textContent = file.name;
         fileInfoS1R1.classList.remove("hidden");
       } else {
-        alert("Por favor, selecciona un archivo JSON válido.");
+        showToast("Por favor, selecciona un archivo JSON válido.", "error")
         fileInputS1R1.value = ""; // Limpiar la selección
         fileInfoS1R1.classList.add("hidden");
       }
@@ -65,7 +66,7 @@ export function initRaceManagement() {
         fileNameS2R1.textContent = file.name;
         fileInfoS2R1.classList.remove("hidden");
       } else {
-        alert("Por favor, selecciona un archivo JSON válido.");
+        showToast("Por favor, selecciona un archivo JSON válido.", "error")
         fileInputS2R1.value = ""; // Limpiar la selección
         fileInfoS2R1.classList.add("hidden");
       }
@@ -81,7 +82,7 @@ export function initRaceManagement() {
         fileNameS1R2.textContent = file.name;
         fileInfoS1R2.classList.remove("hidden");
       } else {
-        alert("Por favor, selecciona un archivo JSON válido.");
+        showToast("Por favor, selecciona un archivo JSON válido.", "error");
         fileInputS1R2.value = ""; // Limpiar la selección
         fileInfoS1R2.classList.add("hidden");
       }
@@ -97,7 +98,7 @@ export function initRaceManagement() {
         fileNameS2R2.textContent = file.name;
         fileInfoS2R2.classList.remove("hidden");
       } else {
-        alert("Por favor, selecciona un archivo JSON válido.");
+        showToast("Por favor, selecciona un archivo JSON válido.", "error");
         fileInputS2R2.value = ""; // Limpiar la selección
         fileInfoS2R2.classList.add("hidden");
       }
@@ -114,14 +115,14 @@ export function initRaceManagement() {
     let fileS2R2;
     let numSplits: number = 1;
     if (!fileS1R1) {
-      alert("Por favor, selecciona un archivo JSON para la Carrera 1 del Split 1.");
+      showToast("Por favor, selecciona un archivo JSON para la Carrera 1 del Split 1.", "error");
       return;
     }
 
     if (switchR2Element?.checked) {
       fileS1R2 = fileInputS1R2.files?.[0];
       if (!fileS1R2) {
-        alert("Por favor, selecciona un archivo JSON para la Carrera 2 del Split 1.");
+        showToast("Por favor, selecciona un archivo JSON para la Carrera 2 del Split 1.", "error");
         return;
       }
     }
@@ -129,13 +130,13 @@ export function initRaceManagement() {
     if (switchS2Element?.checked) {
       fileS2R1 = fileInputS2R1.files?.[0];
       if (!fileS2R1) {
-        alert("Por favor, selecciona un archivo JSON para la Carrera 1 del Split 2.");
+        showToast("Por favor, selecciona un archivo JSON para la Carrera 1 del Split 2.", "error");
         return;
       }
       if (switchR2Element?.checked) {
         fileS2R2 = fileInputS2R2.files?.[0];
         if (!fileS2R2) {
-          alert("Por favor, selecciona un archivo JSON para la Carrera 2 del Split 2.");
+          showToast("Por favor, selecciona un archivo JSON para la Carrera 2 del Split 2.", "error");
           return;
         }
       }
@@ -203,15 +204,13 @@ export function initRaceManagement() {
 
       if (insertError) throw insertError;
 
-      alert("Carrera creada con éxito");
+      showToast("Carrera creada con éxito", "success");
       form.reset();
       fileInfoS1R1.classList.add("hidden");
       window.location.reload();
     } catch (error) {
       console.error("Error al procesar el archivo:", error);
-      alert(
-        "Hubo un error al procesar el archivo. Por favor, inténtalo de nuevo."
-      );
+      showToast("Hubo un error al procesar el archivo. Por favor, inténtalo de nuevo.", "error");
     }
   });
 }
@@ -239,11 +238,14 @@ export function initDeleteRaceButtons() {
             if (closestTr) {
               closestTr.remove();
             }
-            window.location.reload();
+            showToast("Carrera eliminada con éxito", "success");
+            setTimeout(() => {window.location.reload();}, 100);
           } else {
+            showToast("Error eliminando carrera", "error");
             console.error("Error eliminando carrera");
           }
         } catch (error) {
+          showToast("Error eliminando carrera", "error");
           console.error("Error:", error);
         }
       }
@@ -316,7 +318,7 @@ export function initEditRace() {
         fileNameS2R1.textContent = file.name;
         fileInfoS2R1.classList.remove("hidden");
       } else {
-        alert("Por favor, selecciona un archivo JSON válido.");
+        showToast("Por favor, selecciona un archivo JSON válido.", "error");
         fileInputS2R1.value = ""; // Limpiar la selección
         fileInfoS2R1.classList.add("hidden");
       }
@@ -332,7 +334,7 @@ export function initEditRace() {
         fileNameS1R2.textContent = file.name;
         fileInfoS1R2.classList.remove("hidden");
       } else {
-        alert("Por favor, selecciona un archivo JSON válido.");
+        showToast("Por favor, selecciona un archivo JSON válido.", "error");
         fileInputS1R2.value = ""; // Limpiar la selección
         fileInfoS1R2.classList.add("hidden");
       }
@@ -348,7 +350,7 @@ export function initEditRace() {
         fileNameS2R2.textContent = file.name;
         fileInfoS2R2.classList.remove("hidden");
       } else {
-        alert("Por favor, selecciona un archivo JSON válido.");
+        showToast("Por favor, selecciona un archivo JSON válido.", "error");
         fileInputS2R2.value = ""; // Limpiar la selección
         fileInfoS2R2.classList.add("hidden");
       }
@@ -374,14 +376,14 @@ export function initEditRace() {
       const result = await response.json();
 
       if (result.success) {
-        alert('Carrera actualizada con éxito');
+        showToast('Carrera actualizada con éxito', 'success');
         window.location.href = '/admin/adminraces';
       } else {
         throw new Error(result.error || 'Error desconocido');
       }
     } catch (error) {
+      showToast('Hubo un error al actualizar la carrera. Por favor, inténtalo de nuevo. Error: '+error, 'error');
       console.error('Error al actualizar la carrera:', error);
-      alert('Hubo un error al actualizar la carrera. Por favor, inténtalo de nuevo. Error: '+error);
     }
   });
 }
