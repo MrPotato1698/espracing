@@ -1,0 +1,20 @@
+---
+interface Props {
+  id: string;
+  type: 'success' | 'error' | 'warning' | 'info';
+  message: string;
+}
+
+const { id, type, message } = Astro.props;
+
+const bgColor = {
+  success: 'bg-green-500',
+  error: 'bg-red-500',
+  warning: 'bg-yellow-500',
+  info: 'bg-blue-500'
+}[type];
+---
+
+<div id={id} class={`fixed bottom-4 right-4 p-4 rounded-md text-light-primary ${bgColor} opacity-0 transition-opacity duration-300 ease-in-out`}>
+  {message}
+</div>
