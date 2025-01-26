@@ -24,5 +24,6 @@ export default {
 	},
 	plugins: [
 		require('@tailwindcss/aspect-ratio'),
+		require('tailwind-corner-smoothing'),
 	],
 } satisfies Config;
