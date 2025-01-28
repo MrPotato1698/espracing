@@ -1,6 +1,6 @@
 import { supabase } from '@/db/supabase';
 import { createRaceData, createRaceDataMultipleSplits } from "@/lib/results/resultConverter";
-import { showToast } from "@/lib/toast"
+import { showToast } from "@/lib\/utils"
 
 export function initRaceManagement() {
   const form = document.getElementById("uploadForm") as HTMLFormElement;
@@ -156,6 +156,8 @@ export function initRaceManagement() {
       let jsonS1R2;
       let transformedJsonR1: string;
       let transformedJsonR2: string = "{}";
+      let URLBucketsResults = new Array<string>(2).fill("");
+
       if (switchR2Element?.checked) {
         const contentS1R2 = await fileS1R2?.text();
         if (!contentS1R2) throw new Error("Sin contenido en el archivo de Carrera 2 Split 1");
@@ -179,6 +181,28 @@ export function initRaceManagement() {
         }
       }
 
+      const { data: uploadRace1, error: uploadErrorR1 } = await supabase
+        .storage
+        .from('results')
+        .upload(`${champID}/${numrace}_${racename}Race1`, transformedJsonR1, {
+          upsert: true
+        });
+
+      if (uploadErrorR1 || !uploadRace1) throw uploadErrorR1;
+      URLBucketsResults[0] = uploadRace1.path;
+
+      if(switchR2Element?.checked) {
+        const { data: uploadRace2, error: uploadErrorR2 } = await supabase
+        .storage
+        .from('results')
+        .upload(`${champID}/${numrace}_${racename}Race2`, transformedJsonR2, {
+          upsert: true
+        });
+
+        if (uploadErrorR2 || !uploadRace2) throw uploadErrorR2;
+        URLBucketsResults[1] = uploadRace2.path;
+      }
+
       const { data: getLastRace } = await supabase
         .from('race')
         .select('id')
@@ -198,8 +222,8 @@ export function initRaceManagement() {
           orderinchamp: Number(numrace),
           pointsystem: Number(pointsystem),
           splits: numSplits,
-          race_data_1: transformedJsonR1,
-          race_data_2: transformedJsonR2,
+          race_data_1: URLBucketsResults[0],
+          race_data_2: URLBucketsResults[1],
         });
 
       if (insertError) throw insertError;
@@ -257,13 +281,19 @@ export function initEditRace() {
 
   const form = document.getElementById('editRaceForm') as HTMLFormElement;
 
-  const switchS2Element = document.getElementById("switch-S2") as HTMLInputElement | null;
-  const switchR2Element = document.getElementById("switch-R2") as HTMLInputElement | null;
+  const switchRacesElement = document.getElementById("switch-Races") as HTMLInputElement;
+  const switchS2Element = document.getElementById("switch-S2") as HTMLInputElement;
+  const switchR2Element = document.getElementById("switch-R2") as HTMLInputElement;
+
+
+  const switchS2divElement = document.getElementById("switch-S2-DIV") as HTMLInputElement;
+  const switchR2divElement = document.getElementById("switch-R2-DIV") as HTMLInputElement;
 
   const fileInputS1R1 = document.getElementById("fileInputS1R1") as HTMLInputElement;
   const fileInfoS1R1 = document.getElementById("fileInfoS1R1") as HTMLDivElement;
   const fileNameS1R1 = document.getElementById("fileNameS1R1") as HTMLSpanElement;
 
+  const splitS1R1File = document.getElementById("split1R1File");
   const splitS2R1File = document.getElementById("split2R1File");
   const fileInputS2R1 = document.getElementById("fileInputS2R1") as HTMLInputElement;
   const fileInfoS2R1 = document.getElementById("fileInfoS2R1") as HTMLDivElement;
@@ -279,6 +309,15 @@ export function initEditRace() {
   const fileInfoS2R2 = document.getElementById("fileInfoS2R2") as HTMLDivElement;
   const fileNameS2R2 = document.getElementById("fileNameS2R2") as HTMLSpanElement;
 
+  function toggleInputsRaces(){
+    if (switchRacesElement && switchS2divElement && switchR2divElement && splitS1R1File) {
+      const isChecked = switchRacesElement.checked;
+      splitS1R1File.style.display = isChecked ? "block" : "none";
+      switchS2divElement.style.display = isChecked ? "block" : "none";
+      switchR2divElement.style.display = isChecked ? "block" : "none";
+    }
+  }
+
   function toggleInputsS2() {
     if (splitS2R1File && splitS2R2File && switchS2Element) {
       splitS2R1File.style.display = !switchS2Element.checked ? "none" : "block";
@@ -292,6 +331,7 @@ export function initEditRace() {
     }
   }
 
+  switchRacesElement ? switchRacesElement.addEventListener("change", toggleInputsRaces) : null;
   switchS2Element ? switchS2Element.addEventListener("change", toggleInputsS2) : null;
   switchR2Element ? switchR2Element.addEventListener("change", toggleInputR2) : null;
 
@@ -363,6 +403,10 @@ export function initEditRace() {
     e.preventDefault();
     const formData = new FormData(form);
 
+    formData.set('switch-Races', switchRacesElement?.checked.toString());
+    formData.set('switch-S2', switchS2Element?.checked.toString());
+    formData.set('switch-R2', switchR2Element?.checked.toString());
+
     try {
       const response = await fetch('/api/admin/race/editrace', {
         method: 'POST',
@@ -382,8 +426,11 @@ export function initEditRace() {
         throw new Error(result.error || 'Error desconocido');
       }
     } catch (error) {
-      showToast('Hubo un error al actualizar la carrera. Por favor, inténtalo de nuevo. Error: '+error, 'error');
-      console.error('Error al actualizar la carrera:', error);
+      showToast('Error al actualizar la carrera: ' + error, 'error');
+      console.error('Error:', error);
     }
   });
+  switchRacesElement?.addEventListener("change", toggleInputsRaces);
+  switchS2Element?.addEventListener("change", toggleInputsS2);
+  switchR2Element?.addEventListener("change", toggleInputR2);
 }

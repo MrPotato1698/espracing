@@ -46,7 +46,7 @@ if (userData?.roleesp !== 1) {
 const { data: raceData } = await supabase
   .from("race")
   .select("id, name, championship!inner(name), pointsystem!inner(name)")
-  .order("championship", { ascending: true });
+  .order("championship, orderinchamp", { ascending: true });
 
 const { data: champsData } = await supabase
   .from("championship")

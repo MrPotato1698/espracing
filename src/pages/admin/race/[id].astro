@@ -121,6 +121,23 @@ const { data: pointsystemData } = await supabase
 
     <div class="flex items-center gap-2">
       <label class="relative inline-flex cursor-pointer">
+        <input id="switch-Races" type="checkbox" class="peer sr-only" />
+        <label for="switch-Races" class="hidden"></label>
+        <div
+          class="peer h-4 w-11 rounded-full border bg-slate-200 after:absolute after:-top-1 after:left-0 after:h-6 after:w-6 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-full peer-focus:ring-primary"
+        >
+        </div>
+      </label>
+      <label class="text-[#f0f0f0] text-lg font-medium" for="switch-S2">
+        ¿Editar archivos de carrera?
+      </label>
+    </div>
+
+    <div
+      class="flex items-center gap-2"
+      id= "switch-S2-DIV"
+      style="display: none;">
+      <label class="relative inline-flex cursor-pointer">
         <input id="switch-S2" type="checkbox" class="peer sr-only" />
         <label for="switch-S2" class="hidden"></label>
         <div
@@ -133,7 +150,10 @@ const { data: pointsystemData } = await supabase
       </label>
     </div>
 
-    <div class="flex items-center gap-2 mb-6">
+    <div
+      class="flex items-center gap-2 mb-6"
+      id= "switch-R2-DIV"
+      style="display: none;">
       <label class="relative inline-flex cursor-pointer">
         <input id="switch-R2" type="checkbox" class="peer sr-only" />
         <label for="switch-R2" class="hidden"></label>
@@ -148,7 +168,10 @@ const { data: pointsystemData } = await supabase
     </div>
 
     <div class="w-11/12 grid grid-cols-1 gap-4 lg:grid-cols-2">
-      <div class="mb-6 p-6 border-2 border-primary rounded-lg bg-dark-second">
+      <div
+        class="mb-6 p-6 border-2 border-primary rounded-lg bg-dark-second"
+        id="split1R1File"
+        style="display: none;">
         <div class="mb-4">
           <label
             for="fileInputS1R1"
