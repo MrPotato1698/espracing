@@ -408,8 +408,8 @@ export type Database = {
           name: string | null
           orderinchamp: number
           pointsystem: number
-          race_data_1: Json | null
-          race_data_2: Json | null
+          race_data_1: string
+          race_data_2: string | null
           splits: number
         }
         Insert: {
@@ -419,8 +419,8 @@ export type Database = {
           name?: string | null
           orderinchamp?: number
           pointsystem?: number
-          race_data_1?: Json | null
-          race_data_2?: Json | null
+          race_data_1: string
+          race_data_2?: string | null
           splits?: number
         }
         Update: {
@@ -430,8 +430,8 @@ export type Database = {
           name?: string | null
           orderinchamp?: number
           pointsystem?: number
-          race_data_1?: Json | null
-          race_data_2?: Json | null
+          race_data_1?: string
+          race_data_2?: string | null
           splits?: number
         }
         Relationships: [
