@@ -1,5 +1,5 @@
 import { supabase } from '@/db/supabase';
-import { getResultTableData, getResultFastestLap } from '@/lib/utils';
+import { getResultTableData, getResultFastestLap, showToast } from '@/lib/utils';
 
 import type { Points } from "@/types/Points";
 import type { RaceConfig } from "@/types/Results";
@@ -16,8 +16,7 @@ function initializeScript() {
 		const seleccion = opcionesTabla.value;
 
 		if (!seleccion) {
-			alert('Por favor, selecciona una opción');
-			return;
+			return showToast('Por favor, selecciona una opción', 'info');
 		}
 
 		try {
@@ -28,10 +27,16 @@ function initializeScript() {
 				.single();
 
 			if (error || !resultSetData) {
-				return alert('No se ha encontrado la carrera seleccionada');
+				throw new Error ('No se ha encontrado la carrera seleccionada');
 			}
 
-			const datos = JSON.parse(resultSetData?.race_data_1 as string);
+			const {data: raceDataJSON, error: errorRaceDataJSON} = await supabase
+				.storage
+				.from('results')
+				.download(resultSetData.race_data_1);
+
+			if (errorRaceDataJSON || !raceDataJSON) throw new Error ('Error al cargar los datos de la carrera');
+			const datos = JSON.parse(await raceDataJSON.text());
 			const points: Points = {
 				Name: resultSetData.pointsystem.name,
 				Puntuation: resultSetData.pointsystem.points.split(',').map((point) => parseInt(point)),
@@ -63,11 +68,8 @@ function initializeScript() {
 			if (tablaResultados) {
 				tablaResultados.innerHTML = '';
 			} else {
-				throw new Error('Elemento con id "resultado" no encontrado.');
+				throw new Error ('Elemento con id "resultado" no encontrado.');
 			}
-
-			
-
 
 			// *** Pista y datos de la carrera ***
 			const dconfig: RaceConfig = datos.RaceConfig;
@@ -78,6 +80,7 @@ function initializeScript() {
 				.single();
 			let tablaResultadosString: string = "";
 			let layoutLength: number | null = 1;
+
 			if (isCircuitExists) {
 				const circuitName = isCircuitExists.name;
 				const circuitLocation = isCircuitExists.location;
@@ -240,12 +243,14 @@ function initializeScript() {
 
 		} catch (error) {
 			console.error('Error al cargar los resultados de carrera: ' + error);
+			showToast('Error al cargar los resultados de carrera: ' + error, 'error');
 		}
 	}
 	if (loadButton) {
 		loadButton.addEventListener('click', loadData);
 	} else {
 		console.error('Elemento con id "loadButton" no encontrado.');
+		showToast('Elemento con id "loadButton" no encontrado.', 'error');
 	}
 }
 
