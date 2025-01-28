@@ -734,42 +734,37 @@ function getGapToFirst(rr: RaceResult[], rl: RaceLap[], numberOfSplits: number):
 }
 
 function recalculatePositions(rr: RaceResult[], raceTime: number): RaceResult[] {
-  // Calcular tiempo de lideres por split
-  const timeSplitLeader: { [key: number]: number } = {};
-  const splitGroups = Object.groupBy(rr, item => item.Split);
+  for (let item of rr) {
+    if (item.Split === 1) {
+      if (item.Pos === -2)
+        item.Pos = -2;
+      else {
+        const timerace = (item.TotalTime) + (item.Penalties);
+        const timeCondition = (Math.trunc((timerace / 3600) % 60) + Math.trunc(timerace / 60));
+        if (timeCondition >= raceTime) item.Pos = item.Pos;
+        else {
+          if (item.Team === 'ESP Racing Staff' || item.Team === 'STREAMING' || item.Team === 'Safety Car' || item.DriverName === 'STREAMING')
+            item.Pos = -4;    // Organización
+          else {
+            if (item.TotalTime <= 0) item.Pos = -3;  // DNS
+            else item.Pos = -1;  // DNF
+          }
+        }
+      }
+    } else { // Split diferente a 1
+      if (item.Pos === -2)
+        item.Pos = -2;
 
-  for (const [split, drivers] of Object.entries(splitGroups)) {
-    if (!drivers) continue;
-    const leader = drivers[0];
-    const timerace = leader.TotalTime + leader.Penalties;
-    timeSplitLeader[Number(split)] = Math.trunc((timerace / 3600) % 60) + Math.trunc(timerace / 60);
+      else {
+        const timerace = (item.TotalTime) + (item.Penalties);
+        const timeCondition = (Math.trunc((timerace / 3600) % 60) + Math.trunc(timerace / 60));
+        if (timeCondition >= raceTime) {
+          item.Pos = item.Pos;
+        }
+      }
+    }
   }
-
-
-  return rr.map(item => {
-    // Pilotos DQ
-    if (item.Pos === -2) {
-      return item;
-    }
-
-    const timerace = item.TotalTime + item.Penalties;
-    const timeCondition = Math.trunc((timerace / 3600) % 60) + Math.trunc(timerace / 60);
-
-    // Pilotos que han completado la carrera
-    // Si el tiempo del piloto es mayor que la duración de la carrera y mayor que el tiempo del lider del split, se asigna la posición
-    if (timeCondition >= raceTime && timeCondition >= timeSplitLeader[item.Split]) {
-      return item;
-    }
-
-    // Casos especiales
-    if (['ESP Racing Staff', 'STREAMING', 'Safety Car'].includes(item.Team) || item.DriverName === 'STREAMING') {
-      item.Pos = -4; // Organization
-    } else {
-      item.Pos = item.TotalTime <= 0 ? -3 : -1; // DNS o DNF
-    }
-
-    return item;
-  });
+  return rr;
 }
 
 function createRaceDriversResume(rr: RaceResult[], bl: BestLap[]): RaceDriversResume[] {
