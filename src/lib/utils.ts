@@ -358,7 +358,7 @@ export function showToast(message: string, type: ToastType = 'info') {
 
   toastHTML.innerHTML = `
     <div id="${id}"
-      class="fixed bottom-4 right-4 p-4 rounded-lg border bg-dark-primary ${styles.border} text-ligth-primary
+      class="fixed bottom-4 right-4 p-4 rounded-lg border bg-darkPrimary ${styles.border} text-ligth-primary
       shadow-lg flex flex-col gap-2 opacity-0 transition-all duration-300 ease-in-out transform translate-y-2">
       <div class="flex items-center gap-3">
         <img src="/img/ESPRACINGLogoBlanco.webp" class="h-auto w-10" />

@@ -52,7 +52,7 @@ const { data: userData } = await supabase
       type="text"
       name="name"
       value={userData?.full_name?.toString() ?? "No hay nombre"}
-      class="bg-dark-second text-light-primary text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
+      class="bg-darkSecond text-lightPrimary text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
     />
 
     <label class="mt-5 text-lg font-semibold" for="steam_id">Steam ID:</label>
@@ -60,21 +60,21 @@ const { data: userData } = await supabase
       type="text"
       name="steam_id"
       value={userData?.steam_id.toString() ?? "No hay Steam ID"}
-      class="bg-dark-second text-light-primary text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
+      class="bg-darkSecond text-lightPrimary text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
     />
     <input type="hidden" name="id" value={userData?.id} />
 
     <div>
       <button
         type="submit"
-        class="py-1.5 px-3 w-fit mr-2 bg-dark-primary text-white border-[#29dd38] border-2 rounded-md my-4 font-medium text-lg hover:bg-[#29dd38] hover:text-dark-primary"
+        class="py-1.5 px-3 w-fit mr-2 bg-darkPrimary text-white border-[#29dd38] border-2 rounded-md my-4 font-medium text-lg hover:bg-[#29dd38] hover:text-darkPrimary"
       >
         Aceptar
       </button>
 
       <button
         onclick="window, location.href = '/myprofile'"
-        class="py-1.5 px-3 w-fit bg-dark-primary text-white border-primary border-2 rounded-md my-4 font-medium text-lg hover:bg-primary hover:text-dark-primary"
+        class="py-1.5 px-3 w-fit bg-darkPrimary text-white border-primary border-2 rounded-md my-4 font-medium text-lg hover:bg-primary hover:text-darkPrimary"
       >
         Cancelar
       </button>

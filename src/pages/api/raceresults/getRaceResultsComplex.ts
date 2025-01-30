@@ -127,7 +127,7 @@ function initializeScript() {
       };
 
       const datosCircuitoHTML = `
-      <div class="text-center bg-dark-second rounded-lg py-5" style = "width=99%">
+      <div class="text-center bg-darkSecond rounded-lg py-5" style = "width=99%">
       <p class = "text-3xl font-bold border-b border-primary w-fit mx-auto mb-2">Datos del circuito</p>
           <div class = "grid grid-cols-1">
               <p class="text-2xl font-semibold">Circuito: ${circuitData.name} (Variante ${circuitData.layout})</p>
@@ -146,7 +146,7 @@ function initializeScript() {
       // *** Datos simples de la carrera ***
       const resultTable = getResultTableData(datos, points.Name, points, carData);
       let tablaResultadosHTML = `
-      <table class="w-full border-collapse border border-light-primary">
+      <table class="w-full border-collapse border border-lightPrimary">
         <thead class="font-medium bg-primary">
           <tr class="tabletitle">
           <th colspan="2"></th>
@@ -581,7 +581,7 @@ function initializeScript() {
         const sectorTable = document.getElementById(`tablaS${index + 1}`);
         if (sectorTable) {
           let sectorHTML = `<p class="text-3xl font-bold border-b border-primary w-fit mx-auto mt-4 mb-2">Mejor Sector ${index + 1}</p>
-                          <table class="w-full border-collapse border border-light-primary">
+                          <table class="w-full border-collapse border border-lightPrimary">
                           <thead class="font-medium bg-primary">
                               <tr class="tabletitle">
                                   <th>Pos</th>
@@ -628,8 +628,8 @@ function initializeScript() {
             }
 
             pos % 2 === 0
-              ? (sectorHTML += `<tr class="bg-dark-primary text-center">`)
-              : (sectorHTML += `<tr class="bg-dark-second text-center">`);
+              ? (sectorHTML += `<tr class="bg-darkPrimary text-center">`)
+              : (sectorHTML += `<tr class="bg-darkSecond text-center">`);
             sectorHTML += `<td>${pos}</td>`;
 
             flagMoreSplits
@@ -796,7 +796,7 @@ function initializeScript() {
             const splitInfo = flagMoreSplits ? `(Split ${itemRL.Split})` : '';
             return `
             <div class="mt-8">
-              <div class="text-center bg-dark-second rounded-lg py-5">
+              <div class="text-center bg-darkSecond rounded-lg py-5">
                 <p class="text-3xl font-bold border-b border-primary w-fit mx-auto mb-2">${driverName} ${splitInfo}</p>
                 <div class="grid grid-cols-1">
                   <p class="text-2xl font-semibold align-middle">Coche: ${carName}</p>
@@ -855,7 +855,7 @@ function initializeScript() {
               ? `${formatTwoIntegers(Math.trunc((lap.LapTime / 60) % 60))}:${formatTwoIntegersPlusThreeDecimals(lap.LapTime % 60)}`
               : '';
 
-            const bgClass = lap.LapNumber % 2 === 0 ? 'bg-dark-primary' : 'bg-dark-second';
+            const bgClass = lap.LapNumber % 2 === 0 ? 'bg-darkPrimary' : 'bg-darkSecond';
             const cutClass = lap.Cut > 0 ? '"bg-primary text-black font-semibold rounded-full w-content px-5"' : '""';
 
             return `
@@ -878,7 +878,7 @@ function initializeScript() {
             const bestSectorsDriverID = sectorsList.map(sector => sector.find(s => s.SteamID === driverID)?.BestSector ?? 999999999);
 
             chunkHTML += `
-            <table class="w-full border-collapse border border-light-primary">
+            <table class="w-full border-collapse border border-lightPrimary">
               <thead class="font-medium bg-primary">
                 <tr class="tabletitle">
                   <th>Nº</th>

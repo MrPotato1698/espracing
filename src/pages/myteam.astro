@@ -87,7 +87,7 @@ const {data: TeamUsersData} = await supabase
       <p2 class="text-5xl font-bold border-b border-primary w-fit mx-auto"
         >Tabla de Pilotos</p2
       >
-      <table class="mt-6 w-full border-collapse border border-light-primary">
+      <table class="mt-6 w-full border-collapse border border-lightPrimary">
         <thead class="font-medium bg-primary">
           <tr>
             <th>Nº</th>
@@ -103,7 +103,7 @@ const {data: TeamUsersData} = await supabase
         <tbody>
           {
             TeamUsersData?.map((user, index) => (
-              <tr class="bg-dark-second">
+              <tr class="bg-darkSecond">
                 <td class="font-semibold">{index + 1}</td>
                 {user.number_plate === null || user.number_plate === 0 ? (
                   <td>#0 - {user.full_name}</td>
@@ -130,14 +130,14 @@ const {data: TeamUsersData} = await supabase
         roleData?.roleesp === 1 || roleData?.roleesp === 2 ? (
           <a
             href="/modteamprofile"
-            class="py-1.5 px-2 w-fit bg-dark-primary text-light-primary border-primary border-2 rounded-md font-medium text-lg hover:bg-dark-second"
+            class="py-1.5 px-2 w-fit bg-darkPrimary text-lightPrimary border-primary border-2 rounded-md font-medium text-lg hover:bg-darkSecond"
           >
             Modificar Perfil Equipo
           </a>
         ) : null
       }
       <button
-        class="exitTeam py-1.5 px-2 w-fit bg-dark-primary text-light-primary border-primary border-2 rounded-md font-medium text-lg hover:bg-dark-second"
+        class="exitTeam py-1.5 px-2 w-fit bg-darkPrimary text-lightPrimary border-primary border-2 rounded-md font-medium text-lg hover:bg-darkSecond"
         data-id={id}
       >
         Salir del equipo

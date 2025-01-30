@@ -99,7 +99,7 @@ if (RacesData.length == 0) {
     <p class = "font-semibold text-xl pl-2 pb-2">Temporada</p>
     <select
       id="select-season"
-      class="block m-auto w-full px-4 py-3 text-lg font-medium rounded-xl pe-9 focus:border-primary disabled:opacity-50 disabled:pointer-events-none bg-dark-second border-neutral-700 text-light-primary placeholder-neutral-500"
+      class="block m-auto w-full px-4 py-3 text-lg font-medium rounded-xl pe-9 focus:border-primary disabled:opacity-50 disabled:pointer-events-none bg-darkSecond border-neutral-700 text-lightPrimary placeholder-neutral-500"
     >
       {
         [
@@ -107,7 +107,7 @@ if (RacesData.length == 0) {
             Object.values(racesByChampionship).map((champ) => champ.season)
           ),
         ].map((season) => (
-          <option value={season} class="text-light-second">
+          <option value={season} class="text-lightSecond">
             {season}
           </option>
         ))
@@ -119,13 +119,13 @@ if (RacesData.length == 0) {
     <p class = "font-semibold text-xl pl-2 pb-2">Campeonato</p>
     <select
       id="select-champ"
-      class="block m-auto w-full px-4 py-3 text-lg font-medium rounded-xl pe-9 focus:border-primary disabled:opacity-50 disabled:pointer-events-none bg-dark-second border-neutral-700 text-light-primary placeholder-neutral-500"
+      class="block m-auto w-full px-4 py-3 text-lg font-medium rounded-xl pe-9 focus:border-primary disabled:opacity-50 disabled:pointer-events-none bg-darkSecond border-neutral-700 text-lightPrimary placeholder-neutral-500"
     >
       {
         Object.values(racesByChampionship).map((champ) => (
           <option
             value={champ.name}
-            class="text-light-second"
+            class="text-lightSecond"
             data-season={champ.season}
           >
             {champ.name}
@@ -139,14 +139,14 @@ if (RacesData.length == 0) {
     <p class = "font-semibold text-xl pl-2 pb-2">Carrera</p>
     <select
       id="select-race"
-      class="block m-auto w-full px-4 py-3 text-lg font-medium rounded-xl pe-9 focus:border-primary disabled:opacity-50 disabled:pointer-events-none bg-dark-second border-neutral-700 text-light-primary placeholder-neutral-500"
+      class="block m-auto w-full px-4 py-3 text-lg font-medium rounded-xl pe-9 focus:border-primary disabled:opacity-50 disabled:pointer-events-none bg-darkSecond border-neutral-700 text-lightPrimary placeholder-neutral-500"
     >
       {
         Object.values(racesByChampionship).flatMap((champ) =>
           champ.races.map((race) => (
             <option
               value={race.filename}
-              class="text-light-second"
+              class="text-lightSecond"
               data-season={champ.season}
               data-championship={champ.name}
             >
@@ -165,7 +165,7 @@ if (RacesData.length == 0) {
     <div class="mt-8 grid grid-cols-1 gap-4 mx-2 md:grid-cols-2 lg:grid-cols-3">
     <button
       id="loadButtonSimpleResults"
-      class="no-underline bg-dark-second rounded-xl my-4 font-medium text-white text-lg py-4 px-8 block mx-auto hover:text-dark-primary hover:bg-primary"
+      class="no-underline bg-darkSecond rounded-xl my-4 font-medium text-white text-lg py-4 px-8 block mx-auto hover:text-darkPrimary hover:bg-primary"
     >
       Cargar Resultados de Carrera
     </button>
@@ -173,7 +173,7 @@ if (RacesData.length == 0) {
     <button
       id="loadButtonComplexResults"
       onclick="window.location.href = '/complexracestats/'+document.getElementById('select-race').value"
-      class="no-underline bg-dark-second rounded-xl my-4 font-medium text-white text-lg py-4 px-8 block mx-auto hover:text-dark-primary hover:bg-primary"
+      class="no-underline bg-darkSecond rounded-xl my-4 font-medium text-white text-lg py-4 px-8 block mx-auto hover:text-darkPrimary hover:bg-primary"
     >
       Ver Estadistica Completa
     </button>
@@ -181,7 +181,7 @@ if (RacesData.length == 0) {
     <button
       id="loadButtonComparatives"
       onclick="window.location.href = '#'"
-      class="no-underline bg-dark-second rounded-xl my-4 font-medium text-white text-lg py-4 px-8 block mx-auto hover:text-dark-primary hover:bg-primary"
+      class="no-underline bg-darkSecond rounded-xl my-4 font-medium text-white text-lg py-4 px-8 block mx-auto hover:text-darkPrimary hover:bg-primary"
     >
       Comparativas entre Pilotos
     </button>

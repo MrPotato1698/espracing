@@ -65,7 +65,7 @@ const { data: teamData } = await supabase
       type="text"
       name="name"
       value={teamData?.name}
-      class="bg-dark-second text-light-primary text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
+      class="bg-darkSecond text-lightPrimary text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
     />
 
     <label class="mt-5 text-lg font-semibold" for="imageTeam">
@@ -76,7 +76,7 @@ const { data: teamData } = await supabase
       id="imageTeam"
       name="imageTeam"
       value={teamData?.image}
-      class="bg-dark-second text-light-primary text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
+      class="bg-darkSecond text-lightPrimary text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
     />
 
     <label class="mt-5 text-lg font-semibold" for="descriptionTeam">
@@ -86,7 +86,7 @@ const { data: teamData } = await supabase
       id="descriptionTeam"
       name="descriptionTeam"
       placeholder={teamData?.description}
-      class="bg-dark-second text-light-primary text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px max-h-96 min-h-28 resize-y"
+      class="bg-darkSecond text-lightPrimary text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px max-h-96 min-h-28 resize-y"
     ></textarea>
 
     <input type="hidden" name="champ_id" value={id} />
@@ -94,14 +94,14 @@ const { data: teamData } = await supabase
     <div>
       <button
         type="submit"
-        class="py-1.5 px-3 w-fit mr-2 bg-dark-primary text-white border-[#29dd38] border-2 rounded-md my-4 font-medium text-lg hover:bg-[#29dd38] hover:text-dark-primary"
+        class="py-1.5 px-3 w-fit mr-2 bg-darkPrimary text-white border-[#29dd38] border-2 rounded-md my-4 font-medium text-lg hover:bg-[#29dd38] hover:text-darkPrimary"
       >
         Aceptar
       </button>
 
       <button
         onclick="window, location.href = '/admin/adminteams'"
-        class="py-1.5 px-3 w-fit bg-dark-primary text-white border-primary border-2 rounded-md my-4 font-medium text-lg hover:bg-primary hover:text-dark-primary"
+        class="py-1.5 px-3 w-fit bg-darkPrimary text-white border-primary border-2 rounded-md my-4 font-medium text-lg hover:bg-primary hover:text-darkPrimary"
       >
         Cancelar
       </button>

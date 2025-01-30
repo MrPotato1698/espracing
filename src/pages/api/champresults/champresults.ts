@@ -113,7 +113,7 @@ function initializeScript() {
       // *** Tabla de resultados de pilotos ***
       let tablaIndyChampsHTML = `
       <p class="text-3xl font-bold border-b-2 border-primary w-fit mx-auto mt-4 mb-2">Clasificación Campeonato Individual</p>
-      <table class="table table-striped table-hover table-sm w-full border border-light-primary">
+      <table class="table table-striped table-hover table-sm w-full border border-lightPrimary">
         <thead class="font-medium bg-primary">
           <tr class="tabletitle">
             <th colspan="2">#</th>
@@ -161,9 +161,9 @@ function initializeScript() {
         const totalPoints = itemDriver.totalsPoints;
 
         if (posDriver % 2 === 0) {
-          tablaIndyChampsHTML += `<tr class="bg-dark-primary">`;
+          tablaIndyChampsHTML += `<tr class="bg-darkPrimary">`;
         } else {
-          tablaIndyChampsHTML += `<tr class="bg-dark-second">`;
+          tablaIndyChampsHTML += `<tr class="bg-darkSecond">`;
         }
         tablaIndyChampsHTML += `
           <td class = "text-center font-bold">${posDriver}</td>
@@ -411,7 +411,7 @@ function initializeScript() {
       // *** Tabla de resultados de equipos ***
       let tablaTeamChampsHTML = `
       <p class="text-3xl font-bold border-b-2 border-primary w-fit mx-auto mt-4 mb-2">Clasificación Campeonato Por Equipos</p>
-      <table class="table table-striped table-hover table-sm w-full border border-light-primary">
+      <table class="table table-striped table-hover table-sm w-full border border-lightPrimary">
         <thead class="font-medium bg-primary">
           <tr class="tabletitle">
             <th colspan="2">#</th>
@@ -441,9 +441,9 @@ function initializeScript() {
         //console.log('Equipo: ' + TeamName + ' - Piloto 1: ' + Driver1GUID + ' - Piloto 2: ' + Driver2GUID);
 
         if (posTeam % 2 === 0) {
-          tablaTeamChampsHTML += `<tr class="bg-dark-primary">`;
+          tablaTeamChampsHTML += `<tr class="bg-darkPrimary">`;
         } else {
-          tablaTeamChampsHTML += `<tr class="bg-dark-second">`;
+          tablaTeamChampsHTML += `<tr class="bg-darkSecond">`;
         }
         tablaTeamChampsHTML += `
           <td class = "text-center font-bold">${posTeam}</td>

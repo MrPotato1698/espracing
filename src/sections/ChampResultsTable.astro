@@ -123,15 +123,15 @@ for (let i = 0; i < finalResult.length; i++) {
 
 <select
   id="select-champs"
-  class="block m-auto w-4/5 px-4 py-3 text-lg font-medium rounded-xl pe-9 focus:border-primary disabled:opacity-50 disabled:pointer-events-none bg-dark-second border-neutral-700 text-light-primary placeholder-neutral-500"
+  class="block m-auto w-4/5 px-4 py-3 text-lg font-medium rounded-xl pe-9 focus:border-primary disabled:opacity-50 disabled:pointer-events-none bg-darkSecond border-neutral-700 text-lightPrimary placeholder-neutral-500"
 >
   {
     dataChamp.map((champ) => (
       <optgroup
         label={`Temporada ${champ.ChampSeason}`}
-        class="text-light-second font-semibold"
+        class="text-lightSecond font-semibold"
       >
-        <option value={champ.ChampID} class="text-light-second">
+        <option value={champ.ChampID} class="text-lightSecond">
           {champ.ChampName}
         </option>
       </optgroup>
@@ -144,7 +144,7 @@ for (let i = 0; i < finalResult.length; i++) {
   <div class="section">
     <button
       id="loadButtonChamp"
-      class="no-underline bg-dark-second rounded-xl my-4 font-medium text-light-primary text-lg py-4 px-8 block mx-auto hover:text-dark-primary hover:bg-primary"
+      class="no-underline bg-darkSecond rounded-xl my-4 font-medium text-lightPrimary text-lg py-4 px-8 block mx-auto hover:text-darkPrimary hover:bg-primary"
     >
       Cargar Datos
     </button>

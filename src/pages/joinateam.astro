@@ -59,7 +59,7 @@ const {data: TeamsData} = await supabase
     <p class="text-5xl font-bold border-b border-primary w-fit mx-auto"
       >Unirse a un equipo</p
     >
-    <table class="mt-6 w-full border-collapse border border-light-primary">
+    <table class="mt-6 w-full border-collapse border border-lightPrimary">
       <thead class="font-medium bg-primary">
         <tr>
           <th>Nº</th>
@@ -71,7 +71,7 @@ const {data: TeamsData} = await supabase
       <tbody>
         {
           TeamsData?.map((team, index) =>
-            <tr class="bg-dark-primary">
+            <tr class="bg-darkPrimary">
               <td class = "font-semibold">{index + 1}</td>
               <td><img src={String(team.image)} alt="Avatar" class="w-8 py-1"/></td>
               <td>{team.name}</td>
@@ -106,7 +106,7 @@ const {data: TeamsData} = await supabase
       <select
       id="select-team"
       name="select_team"
-      class="block m-auto w-4/5 px-4 py-3 mt-2 text-lg font-medium rounded-xl pe-9 focus:border-primary disabled:opacity-50 disabled:pointer-events-none bg-dark-second border-neutral-700 text-light-primary placeholder-neutral-500"
+      class="block m-auto w-4/5 px-4 py-3 mt-2 text-lg font-medium rounded-xl pe-9 focus:border-primary disabled:opacity-50 disabled:pointer-events-none bg-darkSecond border-neutral-700 text-lightPrimary placeholder-neutral-500"
       >
         {
           TeamsData?.map((team) => (
@@ -116,7 +116,7 @@ const {data: TeamsData} = await supabase
       </select>
       <input type="hidden" name="user_id" value={idAuth}>
       <button
-        class="cargarselector no-underline bg-dark-second rounded-xl my-4 font-medium text-light-primary text-lg py-4 px-8 block mx-auto mt-2"
+        class="cargarselector no-underline bg-darkSecond rounded-xl my-4 font-medium text-lightPrimary text-lg py-4 px-8 block mx-auto mt-2"
         id="btnCargarTabla"
         type="submit"
       >

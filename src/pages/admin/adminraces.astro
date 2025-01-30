@@ -68,7 +68,7 @@ const { data: pointsystemData } = await supabase
     <p class="text-5xl font-bold border-b border-primary w-fit mx-auto">
       Lista de Carreras del Sistema
     </p>
-    <table class="mt-6 w-full border-collapse border border-light-primary">
+    <table class="mt-6 w-full border-collapse border border-lightPrimary">
       <thead class="font-medium bg-primary">
         <tr>
           <th>Nº</th>
@@ -82,7 +82,7 @@ const { data: pointsystemData } = await supabase
       <tbody>
         {
           raceData?.map((race, index) => (
-            <tr class="bg-dark-second">
+            <tr class="bg-darkSecond">
               <td class="font-semibold">{index + 1}</td>
               <td>{race.name}</td>
               <td>{race.championship.name}</td>
@@ -110,25 +110,25 @@ const { data: pointsystemData } = await supabase
     </p>
 
     <div
-      class="box-border p-5 m-auto bg-dark-primary rounded-md max-w-screen-2xl border border-primary"
+      class="box-border p-5 m-auto bg-darkPrimary rounded-md max-w-screen-2xl border border-primary"
     >
       <form id="uploadForm" data-astro-reload>
-        <label class="text-light-primary text-lg font-medium" for="racename">
+        <label class="text-lightPrimary text-lg font-medium" for="racename">
           Nombre de la carrera
         </label>
         <input
-          class="w-full p-3 border border-solid border-light-second rounded-md mt-2 mb-4 resize-y text-white bg-dark-second hover:border-primary"
+          class="w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkSecond hover:border-primary"
           type="text"
           id="racename"
           name="racename"
           placeholder="Carrera X en cualquier sitio..."
         />
 
-        <label class="text-light-primary text-lg font-medium" for="champID">
+        <label class="text-lightPrimary text-lg font-medium" for="champID">
           Campeonato a la que pertenece la carrera
         </label>
         <select
-          class="w-full p-3 border border-solid border-light-second rounded-md mt-2 mb-4 resize-y text-white bg-dark-second hover:border-primary"
+          class="w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkSecond hover:border-primary"
           id="champID"
           name="champID"
         >
@@ -139,11 +139,11 @@ const { data: pointsystemData } = await supabase
           }
         </select>
 
-        <label class="text-light-primary text-lg font-medium" for="numrace">
+        <label class="text-lightPrimary text-lg font-medium" for="numrace">
           Orden al que pertenece en el campeonato
         </label>
         <input
-          class="w-full p-3 border border-solid border-light-second rounded-md mt-2 mb-4 resize-y text-white bg-dark-second hover:border-primary"
+          class="w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkSecond hover:border-primary"
           type="number"
           id="numrace"
           name="numrace"
@@ -152,11 +152,11 @@ const { data: pointsystemData } = await supabase
           placeholder="1"
         />
 
-        <label class="text-light-primary text-lg font-medium" for="pointsystem">
+        <label class="text-lightPrimary text-lg font-medium" for="pointsystem">
           Sistema de Puntuación de la carrera
         </label>
         <select
-          class="w-full p-3 border border-solid border-light-second rounded-md mt-2 mb-4 resize-y text-white bg-dark-second hover:border-primary"
+          class="w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkSecond hover:border-primary"
           id="pointsystem"
           name="pointsystem"
         >
@@ -195,9 +195,9 @@ const { data: pointsystemData } = await supabase
           </label>
         </div>
 
-        <div class="mb-6 p-6 border-2 border-primary rounded-lg bg-dark-second">
+        <div class="mb-6 p-6 border-2 border-primary rounded-lg bg-darkSecond">
           <div class="mb-4">
-            <label for="fileInputS1R1" class="block text-light-primary text-lg font-semibold mb-3">
+            <label for="fileInputS1R1" class="block text-lightPrimary text-lg font-semibold mb-3">
               Selecciona el archivo JSON de la carrera de Split 1 - Carrera 1
             </label>
             <div class="relative">
@@ -208,7 +208,7 @@ const { data: pointsystemData } = await supabase
                 accept=".json"
                 class="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
               />
-              <div class="flex items-center justify-between p-4 border-2 border-dashed border-primary rounded-lg bg-dark-second text-light-primary">
+              <div class="flex items-center justify-between p-4 border-2 border-dashed border-primary rounded-lg bg-darkSecond text-lightPrimary">
                 <div class="flex items-center gap-2">
                   <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
@@ -219,16 +219,16 @@ const { data: pointsystemData } = await supabase
             </div>
           </div>
           <div id="fileInfoS1R1" class="mb-4 hidden">
-            <p class="text-sm text-light-primary bg-dark-primary p-3 rounded-lg border border-primary">
+            <p class="text-sm text-lightPrimary bg-darkPrimary p-3 rounded-lg border border-primary">
               Archivo seleccionado:
               <span id="fileNameS1R1" class="font-medium"></span>
             </p>
           </div>
         </div>
 
-        <div class="mb-6 p-6 border-2 border-primary rounded-lg bg-dark-second" id="split2R1File" style="display: none;">
+        <div class="mb-6 p-6 border-2 border-primary rounded-lg bg-darkSecond" id="split2R1File" style="display: none;">
           <div class="mb-4">
-            <label for="split2R1File" class="block text-light-primary text-lg font-semibold mb-3">
+            <label for="split2R1File" class="block text-lightPrimary text-lg font-semibold mb-3">
               Selecciona el archivo JSON de la carrera de Split 2 - Carrera 1
             </label>
             <div class="relative">
@@ -239,7 +239,7 @@ const { data: pointsystemData } = await supabase
                 accept=".json"
                 class="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
               />
-              <div class="flex items-center justify-between p-4 border-2 border-dashed border-primary rounded-lg bg-dark-second text-light-primary">
+              <div class="flex items-center justify-between p-4 border-2 border-dashed border-primary rounded-lg bg-darkSecond text-lightPrimary">
                 <div class="flex items-center gap-2">
                   <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
@@ -250,7 +250,7 @@ const { data: pointsystemData } = await supabase
             </div>
           </div>
           <div id="fileInfoS2R1" class="mb-4 hidden">
-            <p class="text-sm text-light-primary bg-dark-primary p-3 rounded-lg border border-primary">
+            <p class="text-sm text-lightPrimary bg-darkPrimary p-3 rounded-lg border border-primary">
               Archivo seleccionado:
               <span id="fileNameS2R1" class="font-medium"></span>
             </p>
@@ -258,9 +258,9 @@ const { data: pointsystemData } = await supabase
         </div>
 
         <div id="race2Files" style="display: none;">
-          <div class="mb-6 p-6 border-2 border-primary rounded-lg bg-dark-second">
+          <div class="mb-6 p-6 border-2 border-primary rounded-lg bg-darkSecond">
             <div class="mb-4">
-              <label for="fileInputS1R2" class="block text-light-primary text-lg font-semibold mb-3">
+              <label for="fileInputS1R2" class="block text-lightPrimary text-lg font-semibold mb-3">
                 Selecciona el archivo JSON de la carrera de Split 1 - Carrera 2
               </label>
               <div class="relative">
@@ -271,7 +271,7 @@ const { data: pointsystemData } = await supabase
                   accept=".json"
                   class="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
                 />
-                <div class="flex items-center justify-between p-4 border-2 border-dashed border-primary rounded-lg bg-dark-second text-light-primary">
+                <div class="flex items-center justify-between p-4 border-2 border-dashed border-primary rounded-lg bg-darkSecond text-lightPrimary">
                   <div class="flex items-center gap-2">
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
@@ -282,16 +282,16 @@ const { data: pointsystemData } = await supabase
               </div>
             </div>
             <div id="fileInfoS1R2" class="mb-4 hidden">
-              <p class="text-sm text-light-primary bg-dark-primary p-3 rounded-lg border border-primary">
+              <p class="text-sm text-lightPrimary bg-darkPrimary p-3 rounded-lg border border-primary">
                 Archivo seleccionado:
                 <span id="fileNameS1R2" class="font-medium"></span>
               </p>
             </div>
           </div>
 
-          <div class="mb-6 p-6 border-2 border-primary rounded-lg bg-dark-second" id="split2R2File" style="display: none;">
+          <div class="mb-6 p-6 border-2 border-primary rounded-lg bg-darkSecond" id="split2R2File" style="display: none;">
             <div class="mb-4">
-              <label for="split2R2File" class="block text-light-primary text-lg font-semibold mb-3">
+              <label for="split2R2File" class="block text-lightPrimary text-lg font-semibold mb-3">
                 Selecciona el archivo JSON de la carrera de Split 2 - Carrera 2
               </label>
               <div class="relative">
@@ -302,7 +302,7 @@ const { data: pointsystemData } = await supabase
                   accept=".json"
                   class="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
                 />
-                <div class="flex items-center justify-between p-4 border-2 border-dashed border-primary rounded-lg bg-dark-second text-light-primary">
+                <div class="flex items-center justify-between p-4 border-2 border-dashed border-primary rounded-lg bg-darkSecond text-lightPrimary">
                   <div class="flex items-center gap-2">
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
@@ -313,7 +313,7 @@ const { data: pointsystemData } = await supabase
               </div>
             </div>
             <div id="fileInfoS2R2" class="mb-4 hidden">
-              <p class="text-sm text-light-primary bg-dark-primary p-3 rounded-lg border border-primary">
+              <p class="text-sm text-lightPrimary bg-darkPrimary p-3 rounded-lg border border-primary">
                 Archivo seleccionado:
                 <span id="fileNameS2R2" class="font-medium"></span>
               </p>
@@ -322,7 +322,7 @@ const { data: pointsystemData } = await supabase
         </div>
 
         <input
-          class="bg-primary text-white font-bold py-3 px-5 border-solid border-primary border-2 rounded-md hover:bg-dark-second hover:text-light-primary mt-4"
+          class="bg-primary text-white font-bold py-3 px-5 border-solid border-primary border-2 rounded-md hover:bg-darkSecond hover:text-lightPrimary mt-4"
           type="submit"
           value="Enviar"
         />

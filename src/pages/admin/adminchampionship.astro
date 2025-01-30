@@ -65,7 +65,7 @@ const { data: eventsData } = await supabase
     <p class="text-5xl font-bold border-b border-primary w-fit mx-auto">
       Lista de Eventos del Sistema
     </p>
-    <table class="mt-6 w-full border-collapse border border-light-primary">
+    <table class="mt-6 w-full border-collapse border border-lightPrimary">
       <thead class="font-medium bg-primary">
         <tr>
           <th>Nº</th>
@@ -79,7 +79,7 @@ const { data: eventsData } = await supabase
       <tbody>
         {
           eventsData?.map((event, index) => (
-            <tr class="bg-dark-second">
+            <tr class="bg-darkSecond">
               <td class="font-semibold">{index + 1}</td>
               <td>{event.name}</td>
               <td>{event.race.length}</td>
@@ -105,7 +105,7 @@ const { data: eventsData } = await supabase
     <p class="text-5xl font-bold border-b border-primary w-fit mx-auto">
       Lista de Campeonatos del Sistema
     </p>
-    <table class="mt-6 w-full border-collapse border border-light-primary">
+    <table class="mt-6 w-full border-collapse border border-lightPrimary">
       <thead class="font-medium bg-primary">
         <tr>
           <th>Nº</th>
@@ -119,7 +119,7 @@ const { data: eventsData } = await supabase
       <tbody>
         {
           champsData?.map((champ, index) => (
-            <tr class="bg-dark-second">
+            <tr class="bg-darkSecond">
               <td class="font-semibold">{index + 1}</td>
               <td>{(champ.race.length < champ.number_of_races_total) && champ.isfinished ? champ.name + ' - CANCELADO': champ.name}</td>
               <td>{champ.race.length}/{champ.number_of_races_total}</td>
@@ -147,36 +147,36 @@ const { data: eventsData } = await supabase
     </p>
 
     <div
-      class="box-border p-5 m-auto bg-dark-primary rounded-md max-w-screen-2xl border border-primary"
+      class="box-border p-5 m-auto bg-darkPrimary rounded-md max-w-screen-2xl border border-primary"
     >
       <form id="uploadForm" data-astro-reload>
-        <label class="text-light-primary text-lg font-medium" for="champname">
+        <label class="text-lightPrimary text-lg font-medium" for="champname">
           Nombre del campeonato/evento
         </label>
         <input
-          class="w-full p-3 border border-solid border-light-second rounded-md mt-2 mb-4 resize-y text-white bg-dark-second hover:border-primary"
+          class="w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkSecond hover:border-primary"
           type="text"
           id="champname"
           name="champname"
           placeholder="Campeonato X en cualquier sitio..."
         />
 
-        <label class="text-light-primary text-lg font-medium" for="keySearchAPI">
+        <label class="text-lightPrimary text-lg font-medium" for="keySearchAPI">
           Keysearch del campeonato/evento (sentencia para buscar el campeonato en la API del servidor)
         </label>
         <input
-          class="w-full p-3 border border-solid border-light-second rounded-md mt-2 mb-4 resize-y text-white bg-dark-second hover:border-primary"
+          class="w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkSecond hover:border-primary"
           type="text"
           id="keySearchAPI"
           name="keySearchAPI"
           placeholder="+car_filename_1 +car_filename_2 +RACE"
         />
 
-        <label class="text-light-primary text-lg font-medium" for="yearChamp">
+        <label class="text-lightPrimary text-lg font-medium" for="yearChamp">
           Año de inicio del campeonato/evento
         </label>
         <input
-          class="w-full p-3 border border-solid border-light-second rounded-md mt-2 mb-4 resize-y text-white bg-dark-second hover:border-primary"
+          class="w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkSecond hover:border-primary"
           type="number"
           id="yearChamp"
           name="yearChamp"
@@ -185,11 +185,11 @@ const { data: eventsData } = await supabase
           placeholder="2020"
         />
 
-        <label class="text-light-primary text-lg font-medium" for="season">
+        <label class="text-lightPrimary text-lg font-medium" for="season">
           Temporada a la que pertenece
         </label>
         <select
-          class="w-full p-3 border border-solid border-light-second rounded-md mt-2 mb-4 resize-y text-white bg-dark-second hover:border-primary"
+          class="w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkSecond hover:border-primary"
           id="season"
           name="season"
         >
@@ -203,11 +203,11 @@ const { data: eventsData } = await supabase
           <option value="0">Sin Temporada / Otra</option>
         </select>
 
-        <label class="text-light-primary text-lg font-medium" for="numbertotalraces">
+        <label class="text-lightPrimary text-lg font-medium" for="numbertotalraces">
           Número de carreras totales del campeonato/evento
         </label>
         <input
-          class="w-full p-3 border border-solid border-light-second rounded-md mt-2 mb-4 resize-y text-white bg-dark-second hover:border-primary"
+          class="w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkSecond hover:border-primary"
           type="number"
           step="1"
           min="1"
@@ -218,7 +218,7 @@ const { data: eventsData } = await supabase
         />
 
         <div class="mb-4">
-          <label class="text-light-primary text-lg font-medium" for="champORevent">
+          <label class="text-lightPrimary text-lg font-medium" for="champORevent">
             ¿Es un evento suelto o un campeonato completo?
           </label>
           <div class="flex items-center gap-2 mt-2">
@@ -226,14 +226,14 @@ const { data: eventsData } = await supabase
               <input id="champORevent" name="champORevent" type="checkbox" class="sr-only peer" />
               <div class="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-primary dark:peer-focus:ring-primary dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
             </label>
-            <span id="eventTypeText" class="text-light-primary text-sm font-medium">
+            <span id="eventTypeText" class="text-lightPrimary text-sm font-medium">
               Evento suelto
             </span>
           </div>
         </div>
 
         <input
-          class="bg-primary text-white font-bold py-3 px-5 border-solid border-primary border-2 rounded-md hover:bg-dark-second hover:text-light-primary mt-4"
+          class="bg-primary text-white font-bold py-3 px-5 border-solid border-primary border-2 rounded-md hover:bg-darkSecond hover:text-lightPrimary mt-4"
           type="submit"
           value="Enviar"
         />

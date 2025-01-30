@@ -65,7 +65,7 @@ const { data: champsData } = await supabase
       type="text"
       name="name"
       value={champsData?.name}
-      class="bg-dark-second text-light-primary text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
+      class="bg-darkSecond text-lightPrimary text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
     />
 
     <label class="mt-5 text-lg font-semibold" for="keySearchAPI">
@@ -77,7 +77,7 @@ const { data: champsData } = await supabase
       id="keySearchAPI"
       name="keySearchAPI"
       value={champsData?.key_search}
-      class="bg-dark-second text-light-primary text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
+      class="bg-darkSecond text-lightPrimary text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
     />
 
     <label class="mt-5 text-lg font-semibold" for="numbertotalraces">
@@ -90,14 +90,14 @@ const { data: champsData } = await supabase
       max="32760"
       name="numbertotalraces"
       value={champsData?.number_of_races_total}
-      class="bg-dark-second text-light-primary text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
+      class="bg-darkSecond text-lightPrimary text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
     />
 
     <label class="mt-5 text-lg font-semibold" for="season">
       Temporada a la que pertenece (antiguo: {champsData?.season})
     </label>
     <select
-      class="w-full p-3 border border-solid border-light-second rounded-md mt-2 mb-4 resize-y text-white bg-dark-second hover:border-primary"
+      class="w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkSecond hover:border-primary"
       id="season"
       name="season"
     >
@@ -121,11 +121,11 @@ const { data: champsData } = await supabase
       max="32760"
       name="yearChamp"
       value={champsData?.year}
-      class="bg-dark-second text-light-primary text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
+      class="bg-darkSecond text-lightPrimary text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
     />
 
     <div class="mb-4">
-      <label class="text-light-primary text-lg font-medium" for="champORevent">
+      <label class="text-lightPrimary text-lg font-medium" for="champORevent">
         ¿Es un evento suelto o un campeonato completo?
       </label>
       <div class="flex items-center gap-2 mt-2">
@@ -142,14 +142,14 @@ const { data: champsData } = await supabase
           >
           </div>
         </label>
-        <span id="eventTypeText" class="text-light-primary text-sm font-medium">
+        <span id="eventTypeText" class="text-lightPrimary text-sm font-medium">
           {champsData?.ischampionship ? "Campeonato completo" : "Evento suelto"}
         </span>
       </div>
     </div>
 
     <div class="mb-4"></div>
-    <label class="text-light-primary text-lg font-medium" for="isFinished">
+    <label class="text-lightPrimary text-lg font-medium" for="isFinished">
       ¿El campeonato ha finalizado?
     </label>
     <div class="flex items-center gap-2 mt-2">
@@ -166,7 +166,7 @@ const { data: champsData } = await supabase
         >
         </div>
       </label>
-      <span id="isFinishedText" class="text-light-primary text-sm font-medium">
+      <span id="isFinishedText" class="text-lightPrimary text-sm font-medium">
         {champsData?.isfinished ? "Finalizado" : "No finalizado"}
       </span>
     </div>
@@ -174,7 +174,7 @@ const { data: champsData } = await supabase
     <div>
       <button
         type="submit"
-        class="py-1.5 px-3 w-fit mr-2 bg-dark-primary text-white border-[#29dd38] border-2 rounded-md my-4 font-medium text-lg hover:bg-[#29dd38] hover:text-dark-primary"
+        class="py-1.5 px-3 w-fit mr-2 bg-darkPrimary text-white border-[#29dd38] border-2 rounded-md my-4 font-medium text-lg hover:bg-[#29dd38] hover:text-darkPrimary"
       >
         Aceptar
       </button>
@@ -182,7 +182,7 @@ const { data: champsData } = await supabase
       <button
         type="button"
         onclick="window, location.href = '/admin/adminchampionship'"
-        class="py-1.5 px-3 w-fit bg-dark-primary text-white border-primary border-2 rounded-md my-4 font-medium text-lg hover:bg-primary hover:text-dark-primary"
+        class="py-1.5 px-3 w-fit bg-darkPrimary text-white border-primary border-2 rounded-md my-4 font-medium text-lg hover:bg-primary hover:text-darkPrimary"
       >
         Cancelar
       </button>

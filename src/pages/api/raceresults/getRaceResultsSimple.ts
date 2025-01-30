@@ -98,7 +98,7 @@ function initializeScript() {
 				const layoutCapacity = layout?.capacity;
 
 				tablaResultadosString += `
-					<div class="text-center bg-dark-second rounded-lg py-5" style = "width=99%">
+					<div class="text-center bg-darkSecond rounded-lg py-5" style = "width=99%">
 					<p class = "text-3xl font-bold border-b border-primary w-fit mx-auto mb-2">Datos del circuito</p>
 						<div class = "grid grid-cols-1">
 							<p class="text-2xl font-semibold">Circuito: ${circuitName} (Variante ${layoutName})</p>
@@ -138,7 +138,7 @@ function initializeScript() {
 
 			tablaResultadosString += `
 			<p class="text-3xl font-bold border-b border-primary w-fit mx-auto mt-4 mb-2">Resultado de carrera</p>
-				<table class="w-full border-collapse border border-light-primary">
+				<table class="w-full border-collapse border border-lightPrimary">
 						<thead class="font-medium bg-primary">
 						<tr class="tabletitle">
 						<th colspan="2"></th>
@@ -177,7 +177,7 @@ function initializeScript() {
 				tablaResultadosString += `
 				<p class="text-3xl font-bold border-b border-primary w-fit mx-auto mt-4 mb-2">No Clasificados</p>
 
-				<table class="w-full border-collapse border border-light-primary">
+				<table class="w-full border-collapse border border-lightPrimary">
 						<thead class="font-medium bg-primary">
 						<tr class="tabletitle">
 						<th colspan="2"></th>
@@ -212,7 +212,7 @@ function initializeScript() {
 			tablaResultadosString += `
 			<p class="text-3xl font-bold border-b border-primary w-fit mx-auto mt-4 mb-2">Vuelta Rápida</p>
 
-			<table class="w-full border-collapse border border-light-primary">
+			<table class="w-full border-collapse border border-lightPrimary">
 					<thead class="font-medium bg-primary">
 						<tr class="tabletitle">
 							<th>Nombre</th>
