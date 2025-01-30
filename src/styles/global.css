@@ -1,0 +1,10 @@
+@import "tailwindcss";
+@plugin "tailwind-corner-smoothing";
+
+@theme{
+  --color-primary: #da392b; /*redESP: #da392b*/
+  --color-darkPrimary: #0f0f0f; /*black0f*/
+  --color-darkSecond: #19191c; /*black19*/
+  --color-lightPrimary: #f9f9f9; /*whitef9*/
+  --color-lightSecond: #f7f7f7; /*whitef7*/
+}

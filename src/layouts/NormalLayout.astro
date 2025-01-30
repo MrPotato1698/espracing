@@ -2,6 +2,7 @@
 import Header from "@/sections/HeaderMain.astro";
 import Footer from "@/sections/FooterMain.astro";
 import { ClientRouter } from "astro:transitions";
+import "@/styles/global.css";
 
 import  SpeedInsights  from "@vercel/speed-insights/astro"
 
@@ -16,7 +17,7 @@ const { title } = Astro.props;
 ---
 
 <!doctype html>
-<html class = "bg-dark-primary" lang="es">
+<html class = "bg-darkPrimary" lang="es">
   <head>
     <meta charset="UTF-8" />
     <meta name="description" content="Astro description" />
