@@ -1,7 +1,6 @@
 import ApexCharts from 'apexcharts';
 import { supabase } from "@/db/supabase";
-import { formatTwoIntegersPlusThreeDecimals, formatTwoIntegers, } from "@/lib/results/resultConverter";
-import { getResultTableData, showToast } from "@/lib/utils";
+import { getResultTableData, showToast, formatTwoIntegersPlusThreeDecimals, formatTwoIntegers } from "@/lib/utils";
 
 import type { Points } from "@/types/Points";
 import type { RaceData, RaceResult, RaceLap, BestLap, Consistency, BestSector, Incident, RaceConfig, } from "@/types/Results";
