@@ -5,7 +5,7 @@ import { circuits } from "@/consts/circuits";
 import { circuitlayouts } from "@/consts/circuitlayouts";
 import { points } from "@/consts/pointsystem";
 
-import { createRaceData, formatTwoIntegersPlusThreeDecimals, formatTwoIntegers} from "@/lib/results/resultConverter";
+import { createRaceData } from "@/lib/results/resultConverter";
 
 import type { RaceData, RaceResult, RaceLap, Lap, BestLap, Consistency, BestSector, Incident, RaceConfig } from "@/types/Results";
 import type { Points } from "@/types/Points";
