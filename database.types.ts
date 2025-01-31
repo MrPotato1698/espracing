@@ -328,60 +328,60 @@ export type Database = {
       profiles: {
         Row: {
           avatar: string
-          dnf: number | null
+          dnf: number
           email: string
-          flaps: number | null
+          flaps: number
           full_name: string | null
           id: string
           is_team_manager: boolean | null
           number_plate: number | null
-          podiums: number | null
-          poles: number | null
-          races: number | null
+          podiums: number
+          poles: number
+          races: number
           roleesp: number | null
           steam_id: string
           team: number | null
-          top10: number | null
-          top5: number | null
-          wins: number | null
+          top10: number
+          top5: number
+          wins: number
         }
         Insert: {
           avatar?: string
-          dnf?: number | null
+          dnf?: number
           email: string
-          flaps?: number | null
+          flaps?: number
           full_name?: string | null
           id: string
           is_team_manager?: boolean | null
           number_plate?: number | null
-          podiums?: number | null
-          poles?: number | null
-          races?: number | null
+          podiums?: number
+          poles?: number
+          races?: number
           roleesp?: number | null
           steam_id: string
           team?: number | null
-          top10?: number | null
-          top5?: number | null
-          wins?: number | null
+          top10?: number
+          top5?: number
+          wins?: number
         }
         Update: {
           avatar?: string
-          dnf?: number | null
+          dnf?: number
           email?: string
-          flaps?: number | null
+          flaps?: number
           full_name?: string | null
           id?: string
           is_team_manager?: boolean | null
           number_plate?: number | null
-          podiums?: number | null
-          poles?: number | null
-          races?: number | null
+          podiums?: number
+          poles?: number
+          races?: number
           roleesp?: number | null
           steam_id?: string
           team?: number | null
-          top10?: number | null
-          top5?: number | null
-          wins?: number | null
+          top10?: number
+          top5?: number
+          wins?: number
         }
         Relationships: [
           {
