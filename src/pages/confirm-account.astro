@@ -1,0 +1,53 @@
+---
+import Layout from '@/layouts/NormalLayout.astro';
+import { supabase } from '../db/supabase';
+
+let message = '';
+
+if (Astro.request.method === 'GET') {
+  const url = new URL(Astro.request.url);
+  const token = url.searchParams.get('token');
+  const type = url.searchParams.get('type');
+  const email = url.searchParams.get('email');
+
+  if (token && type === 'signup' && email) {
+    try {
+      const { data, error } = await supabase.auth.verifyOtp({ token, type, email });
+      if (error) {
+        message = 'Error al confirmar la cuenta: ' + error.message;
+      } else if (data.user) {
+        // Llamar a nuestro endpoint para manejar la confirmación
+        const response = await fetch('/api/confirmAccount', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ user: data.user }),
+        });
+
+        if (response.ok) {
+          message = 'Cuenta confirmada con éxito. Tus estadísticas se están calculando y estarán disponibles pronto.';
+        } else {
+          message = 'Error al procesar la confirmación de la cuenta.';
+        }
+      }
+    } catch (error) {
+      console.error('Error durante la confirmación:', error);
+      message = 'Ocurrió un error durante el proceso de confirmación.';
+    }
+  } else {
+    message = 'Parámetros de confirmación inválidos.';
+  }
+}
+---
+
+<Layout title="ESP Racing: Confirmar Cuenta">
+    <h1>Confirmación de Cuenta</h1>
+    <p>{message}</p>
+    <button
+      onclick="window, location.href = '/'"
+      class="py-1.5 px-3 w-fit bg-darkPrimary text-white border-primary border-2 rounded-md my-4 font-medium text-lg hover:bg-primary hover:text-darkPrimary"
+    >
+      Ir al Inicio
+    </button>
+</Layout>

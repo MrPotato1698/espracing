@@ -1,26 +1,27 @@
-import type { APIRoute } from "astro";
-import { supabase } from "@/db/supabase";
+import type { APIRoute } from "astro"
+import { supabase } from "@/db/supabase"
 
 export const POST: APIRoute = async ({ request, redirect }) => {
-  const formData = await request.formData();
-  const email = formData.get("email")?.toString();
-  const password = formData.get("password")?.toString();
-  const name = formData.get("name")?.toString();
-  const steamId = formData.get("steam_id")?.toString();
+  const formData = await request.formData()
+  const email = formData.get("email")?.toString()
+  const password = formData.get("password")?.toString()
+  const name = formData.get("name")?.toString()
+  const steamId = formData.get("steam_id")?.toString()
 
   if (!email || !password) {
-    return new Response("Correo electrónico y contraseña obligatorios", { status: 400 });
+    return new Response("Correo electrónico y contraseña obligatorios", { status: 400 })
   }
 
   if (!name) {
-    return new Response("Nombre obligatorio", { status: 400 });
+    return new Response("Nombre obligatorio", { status: 400 })
   }
 
   if (!steamId) {
-    return new Response("Steam ID obligatorio", { status: 400 });
+    return new Response("Steam ID obligatorio", { status: 400 })
   }
 
-  const { error: signUpError } = await supabase.auth.signUp({
+  try {
+  const { data: user, error: signUpError } = await supabase.auth.signUp({
     email,
     password,
     options: {
@@ -28,15 +29,35 @@ export const POST: APIRoute = async ({ request, redirect }) => {
         full_name: name,
         email: email,
         avatar: 'img/user/default.webp',
-        steam_id: steamId,
-        roleesp: 4
+        steam_id: steamId
       }
     }
   });
 
   if (signUpError) {
-    return new Response(signUpError.message, { status: 500 });
-  } else {
-    return redirect("/");
+    console.error("Error en signUp:", signUpError)
+    return new Response(signUpError.message, { status: 500 })
   }
-};
+
+  // Verificar si el perfil se creó correctamente
+  if (!user.user?.id) {
+    return new Response("Error: User ID not found", { status: 400 })
+  }
+
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", user.user.id)
+    .single()
+
+  if (profileError) {
+    console.error("Error al verificar el perfil:", profileError)
+    return new Response("Error al verificar el perfil del usuario", { status: 500 })
+  }
+
+  return redirect("/")
+} catch (error) {
+  console.error("Error inesperado:", error)
+  return new Response("Error inesperado al registrar usuario", { status: 500 })
+}
+}
