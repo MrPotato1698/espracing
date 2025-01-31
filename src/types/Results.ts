@@ -104,6 +104,7 @@ export interface RaceDriversResume{
   DriverName: string;
   SteamID: string;
   Position: number;
+  PolePosition: boolean;
   BestLap: Boolean;
 }
 
