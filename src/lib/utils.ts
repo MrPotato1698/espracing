@@ -1,5 +1,3 @@
-import { formatTwoIntegersPlusThreeDecimals, formatTwoIntegers } from "@/lib/results/resultConverter";
-
 import type { RaceData, RaceResult, RaceLap, BestLap, RaceConfig } from "@/types/Results";
 import type { Points } from "@/types/Points";
 import type { ResultTableData, CarData, RaceFastestLap } from "@/types/Utils";
@@ -406,4 +404,15 @@ export function checkAndShowSavedToast() {
     showToast(message, type as 'success' | 'error' | 'warning' | 'info');
     localStorage.removeItem('toastMessage');
   }
+}
+
+export function formatTwoIntegersPlusThreeDecimals(num: number) {
+  const integerPart = Math.floor(Math.abs(num)).toString().padStart(2, '0');
+  const decimalPart = Math.abs(num % 1).toFixed(3).slice(2);
+  const sign = num < 0 ? '-' : '';
+  return `${sign}${integerPart}.${decimalPart}`;
+}
+
+export function formatTwoIntegers(num: number): string {
+  return Math.abs(num).toString().padStart(2, '0').slice(-2);
 }

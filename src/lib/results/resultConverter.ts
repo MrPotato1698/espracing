@@ -767,13 +767,18 @@ function recalculatePositions(rr: RaceResult[], raceTime: number): RaceResult[] 
   return rr;
 }
 
-function createRaceDriversResume(rr: RaceResult[], bl: BestLap[]): RaceDriversResume[] {
+function createRaceDriversResume(rr: RaceResult[], bl: BestLap[], rl: RaceLap[]): RaceDriversResume[] {
   let rdr: RaceDriversResume[] = [];
 
   for (let item of rr) {
     let uniqueRDR: RaceDriversResume = {} as RaceDriversResume;
+    const driverLaps = rl.find(itemRL => item.SteamID === itemRL.SteamID);
+    uniqueRDR.SteamID = item.SteamID;
     uniqueRDR.DriverName = item.DriverName;
     uniqueRDR.Position = item.Pos;
+    if(item.Pos > -3) {
+    uniqueRDR.PolePosition = driverLaps?.Laps[0].Position === 1;
+  }
     uniqueRDR.BestLap = uniqueRDR.SteamID === bl[0].SteamID;
     rdr.push(uniqueRDR);
   }
@@ -831,7 +836,7 @@ export function createRaceData(dataFile: any): RaceData{
   });
 
   rd.RaceResult = recalculatePositions(rd.RaceResult, dataFile.SessionConfig.time);
-  rd.RaceDriversResume = createRaceDriversResume(rd.RaceResult, rd.BestLap);
+  rd.RaceDriversResume = createRaceDriversResume(rd.RaceResult, rd.BestLap, rd.RaceLaps);
   rd.RaceCarResume = createRaceCarResume(rd.RaceResult);
 
   return rd;
@@ -889,19 +894,8 @@ export function createRaceDataMultipleSplits(dataFileS1: any, dataFileS2: any): 
   });
 
   rd.RaceResult = recalculatePositions(rd.RaceResult, dataFileS1.SessionConfig.time);
-  rd.RaceDriversResume = createRaceDriversResume(rd.RaceResult, rd.BestLap);
+  rd.RaceDriversResume = createRaceDriversResume(rd.RaceResult, rd.BestLap, rd.RaceLaps);
   rd.RaceCarResume = createRaceCarResume(rd.RaceResult);
 
   return rd;
-}
-
-export function formatTwoIntegersPlusThreeDecimals(num: number) {
-  const integerPart = Math.floor(Math.abs(num)).toString().padStart(2, '0');
-  const decimalPart = Math.abs(num % 1).toFixed(3).slice(2);
-  const sign = num < 0 ? '-' : '';
-  return `${sign}${integerPart}.${decimalPart}`;
-}
-
-export function formatTwoIntegers(num: number): string {
-  return Math.abs(num).toString().padStart(2, '0').slice(-2);
 }
