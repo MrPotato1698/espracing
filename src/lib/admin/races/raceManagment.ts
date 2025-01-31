@@ -1,6 +1,6 @@
 import { supabase } from '@/db/supabase';
 import { createRaceData, createRaceDataMultipleSplits } from "@/lib/results/resultConverter";
-import { showToast } from "@/lib\/utils"
+import { showToast } from "@/lib/utils";
 
 export function initRaceManagement() {
   const form = document.getElementById("uploadForm") as HTMLFormElement;
@@ -227,6 +227,33 @@ export function initRaceManagement() {
         });
 
       if (insertError) throw insertError;
+
+      const raceData = JSON.parse(transformedJsonR1);
+      const response = await fetch('/api/admin/stats/newRaceStats', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ resume: raceData.RaceDriversResume })
+      });
+
+      if (!response.ok) {
+        throw new Error('Error actualizando estadísticas');
+      }
+      if (URLBucketsResults[1] !== "") {
+        const raceData2 = JSON.parse(transformedJsonR2);
+        const response2 = await fetch('/api/admin/stats/newRaceStats', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ resume: raceData2.RaceDriversResume })
+        });
+
+        if (!response2.ok) {
+          throw new Error('Error actualizando estadísticas de carrera 2');
+        }
+      }
 
       showToast("Carrera creada con éxito", "success");
       form.reset();
