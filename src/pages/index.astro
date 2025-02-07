@@ -10,12 +10,12 @@ const { cookies, redirect } = Astro;
 
 const url = Astro.url;
 const access_token = url.searchParams.get('access_token');
-console.log('url', url);
+//console.log('url', url);
 if(access_token) {
 	const { pathname, search } = url;
-	
-	console.log('pathname', pathname);
-	console.log('search', search);
+
+	// console.log('pathname', pathname);
+	// console.log('search', search);
 	//redirect(`${pathname}${search}`);
 }
 
