@@ -535,7 +535,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_circuit_layouts_count: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          circuit_id: number
+          circuit_name: string
+          circuit_location: string
+          layouts_count: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
