@@ -49,18 +49,3 @@ export interface RaceFastestLap{
   avgspeed: string;
   points: string;
 }
-
-export interface CircuitLayoutData {
-  name: string;
-  filename: string;
-  length: number;
-  capacity: number;
-}
-
-export interface CircuitDataFile {
-  name: string;
-  shortname: string;
-  filename: string;
-  location: string;
-  layouts: CircuitLayoutData[];
-}
