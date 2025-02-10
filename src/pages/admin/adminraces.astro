@@ -82,7 +82,7 @@ const { data: pointsystemData } = await supabase
       <tbody>
         {
           raceData?.map((race, index) => (
-            <tr class="bg-darkSecond">
+            <tr>
               <td class="font-semibold">{index + 1}</td>
               <td>{race.name}</td>
               <td>{race.championship.name}</td>
@@ -208,12 +208,13 @@ const { data: pointsystemData } = await supabase
                 accept=".json"
                 class="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
               />
-              <div class="flex items-center justify-between p-4 border-2 border-dashed border-primary rounded-lg bg-darkSecond text-lightPrimary">
+              <div class="flex flex-col items-center justify-center p-8 border-2 border-dashed border-primary rounded-lg bg-darkSecond text-lightPrimary cursor-pointer min-h-[150px] transition-colors hover:border-primary-dark">
                 <div class="flex items-center gap-2">
-                  <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="w-12 h-12 mb-3 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                   </svg>
-                  <span class="text-sm font-medium">Arrastra y suelta tu archivo aquí o haz click para seleccionar</span>
+                  <span class="text-sm font-medium">Arrastra y suelta tu JSON aquí</span>
+                  <span class="text-xs text-lightSecond mt-1">o haz clic para seleccionar</span>
                 </div>
               </div>
             </div>
@@ -239,12 +240,13 @@ const { data: pointsystemData } = await supabase
                 accept=".json"
                 class="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
               />
-              <div class="flex items-center justify-between p-4 border-2 border-dashed border-primary rounded-lg bg-darkSecond text-lightPrimary">
+              <div class="flex flex-col items-center justify-center p-8 border-2 border-dashed border-primary rounded-lg bg-darkSecond text-lightPrimary cursor-pointer min-h-[150px] transition-colors hover:border-primary-dark">
                 <div class="flex items-center gap-2">
-                  <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="w-12 h-12 mb-3 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                   </svg>
-                  <span class="text-sm font-medium">Arrastra y suelta tu archivo aquí o haz click para seleccionar</span>
+                  <span class="text-sm font-medium">Arrastra y suelta tu JSON aquí</span>
+                  <span class="text-xs text-lightSecond mt-1">o haz clic para seleccionar</span>
                 </div>
               </div>
             </div>
@@ -271,12 +273,13 @@ const { data: pointsystemData } = await supabase
                   accept=".json"
                   class="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
                 />
-                <div class="flex items-center justify-between p-4 border-2 border-dashed border-primary rounded-lg bg-darkSecond text-lightPrimary">
+                <div class="flex flex-col items-center justify-center p-8 border-2 border-dashed border-primary rounded-lg bg-darkSecond text-lightPrimary cursor-pointer min-h-[150px] transition-colors hover:border-primary-dark">
                   <div class="flex items-center gap-2">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-12 h-12 mb-3 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                     </svg>
-                    <span class="text-sm font-medium">Arrastra y suelta tu archivo aquí o haz click para seleccionar</span>
+                    <span class="text-sm font-medium">Arrastra y suelta tu JSON aquí</span>
+                    <span class="text-xs text-lightSecond mt-1">o haz clic para seleccionar</span>
                   </div>
                 </div>
               </div>
@@ -302,12 +305,13 @@ const { data: pointsystemData } = await supabase
                   accept=".json"
                   class="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
                 />
-                <div class="flex items-center justify-between p-4 border-2 border-dashed border-primary rounded-lg bg-darkSecond text-lightPrimary">
+                <div class="flex flex-col items-center justify-center p-8 border-2 border-dashed border-primary rounded-lg bg-darkSecond text-lightPrimary cursor-pointer min-h-[150px] transition-colors hover:border-primary-dark">
                   <div class="flex items-center gap-2">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-12 h-12 mb-3 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                     </svg>
-                    <span class="text-sm font-medium">Arrastra y suelta tu archivo aquí o haz click para seleccionar</span>
+                    <span class="text-sm font-medium">Arrastra y suelta tu JSON aquí</span>
+                    <span class="text-xs text-lightSecond mt-1">o haz clic para seleccionar</span>
                   </div>
                 </div>
               </div>
@@ -330,6 +334,15 @@ const { data: pointsystemData } = await supabase
     </div>
   </div>
 </Layout>
+
+<style>
+  tbody tr:nth-child(odd) {
+    background-color: #0f0f0f;
+  }
+  tbody tr:nth-child(even) {
+    background-color: #19191c;
+  }
+</style>
 
 <script>
   import {
