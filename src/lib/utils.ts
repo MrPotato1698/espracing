@@ -1,6 +1,6 @@
 import type { RaceData, RaceResult, RaceLap, BestLap, RaceConfig } from "@/types/Results";
 import type { Points } from "@/types/Points";
-import type { ResultTableData, CarData, RaceFastestLap, CircuitDataFile, CircuitLayoutData } from "@/types/Utils"
+import type { ResultTableData, CarData, RaceFastestLap} from "@/types/Utils"
 
 export type ToastType = 'success' | 'error' | 'warning' | 'info';
 
@@ -415,63 +415,4 @@ export function formatTwoIntegersPlusThreeDecimals(num: number) {
 
 export function formatTwoIntegers(num: number): string {
   return Math.abs(num).toString().padStart(2, '0').slice(-2);
-}
-
-export async function processDirectoryCircuits(directory: FileSystemDirectoryEntry): Promise<CircuitData>{
-  const circuitData: CircuitDataFile = {
-    name: 'Unknown',
-    shortname: 'Unknown',
-    filename: directory.name,
-    location: 'Unknown',
-    layouts: []
-  }
-
-  const reader = directory.createReader();
-  const entries = await readEntries(reader);
-
-  for(const entry of entries) {
-    if (entry.isDirectory){
-      const layoutData = await processLayoutFolder (entry as FileSystemDirectoryEntry);
-      if (layoutData) circuitData.layouts.push(layoutData);
-    }
-  }
-  return circuitData;
-}
-
-async function processLayoutFolder(folder: FileSystemDirectoryEntry): Promise<CircuitLayoutData | null>{
-  const reader = folder.createReader();
-  const entries = await readEntries(reader);
-  const jsonFile = entries.find(entry => entry.name === 'ui_track.json');
-  if (!jsonFile) return null;
-  
-  const file = await getFile(jsonFile as FileSystemFileEntry);
-  const data = await readJsonFile(file);
-
-  return {
-    name: data.name,
-    filename: folder.name,
-    length: data.length,
-    capacity: data.capacity
-  }
-}
-
-async function readEntries(reader: FileSystemDirectoryReader): Promise<FileSystemEntry[]> {
-  return new Promise((resolve) => {
-    reader.readEntries(resolve);
-  });
-}
-
-async function getFile(fileEntry: FileSystemFileEntry): Promise<File> {
-  return new Promise((resolve) => {
-    fileEntry.file(resolve);
-  });
-}
-
-async function readJsonFile(file: File): Promise<any> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(JSON.parse(reader.result as string));
-    reader.onerror = reject;
-    reader.readAsText(file);
-  });
 }

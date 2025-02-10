@@ -56,6 +56,7 @@ if(circuitDataError) {
   console.error(circuitDataError);
 }
 
+circuitData?.sort((a, b) => a.circuit_name.localeCompare(b.circuit_name));
 ---
 
 <Layout title="ESP Racing: Administrar Circuitos">
@@ -81,18 +82,18 @@ if(circuitDataError) {
       <tbody>
         {
           circuitData?.map((circuit, index) => (
-            <tr class="bg-darkSecond">
+            <tr>
               <td class="font-semibold">{index + 1}</td>
               <td>{circuit.circuit_name}</td>
               <td>{circuit.circuit_location}</td>
               <td>{circuit.layouts_count}</td>
               <td>
-                <a href={`/admin/race/${circuit.circuit_id}`}>
+                <a href={`/admin/circuits/${circuit.circuit_id}`}>
                   <Edit moreClass="w-6 text-center mx-auto" />
                 </a>
               </td>
               <td>
-                <button class="align-middle delete-race" data-id={circuit.circuit_id}>
+                <button class="align-middle delete-circuit" data-id={circuit.circuit_id}>
                   <Trash moreClass="w-6 text-center mx-auto" />
                 </button>
               </td>
@@ -108,30 +109,22 @@ if(circuitDataError) {
       Añadir Nuevo Circuito
     </p>
 
-    <div
-      class="box-border p-5 m-auto bg-darkPrimary rounded-md max-w-screen-2xl border border-primary"
-    >
+    <div class="box-border p-5 m-auto bg-darkPrimary rounded-md max-w-screen-2xl border border-primary">
       <form id="uploadForm" data-astro-reload>
         <div class="mb-6 p-6 border-2 border-primary rounded-lg bg-darkSecond">
           <div class="mb-4">
-            <label for="fileInput" class="block text-lightPrimary text-lg font-semibold mb-3">
+            <label class="block text-lightPrimary text-lg font-semibold mb-3">
               Arrastra la carpeta del circuito aquí
             </label>
-            <div class="relative">
-              <input
-                type="file"
-                id="fileInput"
-                name="fileInput"
-                class="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
-              />
-              <div class="flex items-center justify-between p-4 border-2 border-dashed border-primary rounded-lg bg-darkSecond text-lightPrimary">
-                <div class="flex items-center gap-2">
-                  <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                  </svg>
-                  <span class="text-sm font-medium">Arrastra y suelta tu carpeta aquí</span>
-                </div>
-              </div>
+            <div
+              id="dropZone"
+              class="flex flex-col items-center justify-center p-8 border-2 border-dashed border-primary rounded-lg bg-darkSecond text-lightPrimary cursor-pointer min-h-[150px] transition-colors hover:border-primary-dark"
+              >
+              <svg class="w-12 h-12 mb-3 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+              </svg>
+              <span class="text-sm font-medium">Arrastra y suelta tu carpeta aquí</span>
+              <span class="text-xs text-lightSecond mt-1">o haz clic para seleccionar</span>
             </div>
           </div>
         </div>
@@ -169,15 +162,39 @@ if(circuitDataError) {
           type="submit"
           value="Añadir"
         />
-        <div id="fileInfo" class="mb-4 hidden">
-          <p class="text-sm text-lightPrimary bg-darkPrimary p-3 rounded-lg border border-primary">
-            Información del circuito:
-          </p>
-          <div id="fileName"></div>
+
+        <div id="fileInfo" class="my-4 hidden">
+          <div class="text-sm text-lightPrimary bg-darkPrimary p-3 rounded-lg border border-primary">
+            <h3 class="text-lg font-bold mb-2">Información detectada:</h3>
+            <div id="preview">
+              <div class="grid grid-cols-2 gap-4 text-left">
+                <div>
+                  <p><span class="font-semibold">Nombre del circuito:</span> <span id="previewName"></span></p>
+                  <p><span class="font-semibold">Ubicación:</span> <span id="previewLocation"></span></p>
+                  <p><span class="font-semibold">Carpeta:</span> <span id="previewFolder"></span></p>
+                </div>
+                <div>
+                  <p class="font-semibold mb-2">Variantes detectadas:</p>
+                  <ul id="previewVariants" class="list-disc pl-4"></ul>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
+
       </form>
     </div>
   </div>
+
+  <style>
+    tbody tr:nth-child(odd) {
+      background-color: #0f0f0f;
+    }
+    tbody tr:nth-child(even) {
+      background-color: #19191c;
+    }
+  </style>
+
 </Layout>
 
 <script>

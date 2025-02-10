@@ -1,72 +1,265 @@
 import { supabase } from '@/db/supabase';
-import { showToast, processDirectoryCircuits } from "@/lib/utils";
+import { showToast } from "@/lib/utils";
+
+interface CircuitLayoutData {
+  name: string;
+  filename: string;
+  length: number;
+  capacity: number;
+}
+
+interface CircuitDataFile {
+  name: string;
+  shortname: string;
+  filename: string;
+  location: string;
+  layouts: CircuitLayoutData[];
+}
+
+interface ProcessedCircuitData extends CircuitDataFile {
+  shortname: string;
+  cleanInstall: boolean;
+}
+
+interface TrackJson {
+  name: string;
+  city: string;
+  country: string;
+  length?: number;
+  pitboxes?: number;
+}
 
 export function initCircuitManagement() {
   const form = document.getElementById("uploadForm") as HTMLFormElement;
   const switchCleanInstall = document.getElementById("switch-clean_install") as HTMLInputElement | null;
 
   const shortNameCircuit = document.getElementById("circuitshotname") as HTMLInputElement;
-  const fileInput = document.getElementById("fileInput") as HTMLInputElement;
-  const fileInfo = document.getElementById("fileInfo") as HTMLDivElement;
-  const fileName = document.getElementById("fileName") as HTMLSpanElement;
+  const dropZone = document.getElementById("dropZone") as HTMLInputElement;
+  const fileInfo = document.getElementById('fileInfo') as HTMLElement;
+  const previewName = document.getElementById('previewName') as HTMLElement;
+  const previewLocation = document.getElementById('previewLocation') as HTMLElement;
+  const previewFolder = document.getElementById('previewFolder') as HTMLElement;
+  const previewLayouts = document.getElementById('previewVariants') as HTMLElement;
 
+  let circuitData: ProcessedCircuitData | null = null;
 
-  fileInput.addEventListener("change", () => {
-    const file = fileInput.files?.[0];
-    if (file) {
-      if (file.type === "application/json") {
-        fileName.textContent = file.name;
-        fileInfo.classList.remove("hidden");
-      } else {
-        showToast("Por favor, selecciona un archivo JSON válido.", "error")
-        fileInput.value = ""; // Limpiar la selección
-        fileInfo.classList.add("hidden");
-      }
-    } else {
-      fileInfo.classList.add("hidden");
+  dropZone.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    dropZone.classList.add('border-darkPrimary', 'bg-darkSecond');
+  });
+
+  dropZone.addEventListener("dragleave", () => {
+    dropZone.classList.remove('border-darkPrimary', 'bg-darkSecond');
+  });
+
+  dropZone.addEventListener('drop', async (e) => {
+    e.preventDefault();
+    dropZone.classList.remove('border-darkPrimary', 'bg-darkSecond');
+
+    if (!e.dataTransfer?.items.length) return;
+    const entry = e.dataTransfer.items[0].webkitGetAsEntry();
+    if(entry?.isDirectory){
+      circuitData = await processDroppedFolder(entry);
+      updatePreview(circuitData);
+      fileInfo.classList.remove('hidden');
     }
   });
 
+  async function processDroppedFolder(rootEntry: any): Promise<ProcessedCircuitData> {
+    const result: ProcessedCircuitData = {
+      filename: rootEntry.name,
+      name: "",
+      shortname: "",
+      location: "",
+      layouts: [],
+      cleanInstall: switchCleanInstall?.checked || false,
+    };
+
+    const uiDir = await getDirectoryEntry(rootEntry, 'ui');
+
+    const baseData = await getCircuitBaseData(uiDir);
+    Object.assign(result, baseData);
+
+    result.layouts = await processLayouts(uiDir);
+
+    return result;
+  }
+
+  async function getDirectoryEntry(parent: any, name: string) {
+    return new Promise((resolve) => {
+      parent.getDirectory(name, { create: false }, resolve, () => resolve(null));
+    });
+  }
+
+  async function getCircuitBaseData(uiDir: any){
+    let baseData = {
+      name: '',
+      location: ''
+    };
+
+    if(uiDir){
+      try{
+        const baseJson = await getJsonFile(uiDir, 'ui_track.json');
+        baseData= {
+          name: (baseJson as TrackJson).name,
+          location: (baseJson as TrackJson).city + ', ' + (baseJson as TrackJson).country
+        };
+      } catch {
+        const firstLayout = await getFirstLayout(uiDir);
+        if (firstLayout?.json){
+          baseData = {
+            name: firstLayout.json.name,
+            location: firstLayout.json.city + ', ' + firstLayout.json.country
+          };
+        }
+      }
+    }
+    return baseData;
+  }
+
+  async function processLayouts(uiDir: any) {
+    const layouts: CircuitLayoutData[] = [];
+
+    // Procesar variante base, si existe
+    try {
+      const baseJson = await getJsonFile(uiDir, 'ui_track.json');
+      layouts.push(await createLayout(baseJson, ''));
+    } catch {}
+
+    // Procesar subcarpetas, si existen
+    const subDirs = await getLayoutsDirectories(uiDir);
+    for (const dir of subDirs) {
+      try {
+        const variantJson = await getJsonFile(dir, 'ui_track.json');
+        layouts.push(await createLayout(variantJson, dir.name));
+      } catch {}
+    }
+    return layouts;
+  }
+
+  async function createLayout(json: any, filename: string): Promise<CircuitLayoutData> {
+    return {
+      name: json.name,
+      filename,
+      length: json.length,
+      capacity: json.pitboxes
+    };
+  }
+
+  async function getJsonFile(dir: any, filename: string) {
+    return new Promise((resolve, reject) => {
+      dir.getFile(filename, { create: false }, (fileEntry: any) => {
+        fileEntry.file((file: File) => {
+          const reader = new FileReader();
+          reader.onload = () => {
+            const json = JSON.parse(reader.result as string);
+            if (typeof json === 'object' && json !== null) {
+              resolve(json as TrackJson);
+            } else {
+              reject(new Error('Invalid JSON format'));
+            }
+          };
+          reader.onerror = reject;
+          reader.readAsText(file);
+        }, reject);
+      }, reject);
+    });
+  }
+
+  async function getLayoutsDirectories(uiDir: any) {
+    if (!uiDir) return [];
+    const reader = uiDir.createReader();
+    const entries = await new Promise<FileSystemEntry[]>((resolve) => reader.readEntries(resolve));
+    return entries.filter(entry => entry.isDirectory && entry.name !== 'ui') as FileSystemDirectoryEntry[];
+  }
+
+  async function getFirstLayout(uiDir: any){
+    const subDirs = await getLayoutsDirectories(uiDir);
+    for (const dir of subDirs) {
+      try {
+        const json = await getJsonFile(dir, 'ui_track.json') as TrackJson;
+        return { name: json.name, json };
+      } catch {}
+    }
+    return null;
+  }
+
+  function updatePreview(data: ProcessedCircuitData){
+    previewName.textContent = data.name;
+    previewLocation.textContent = data.location;
+    previewFolder.textContent = data.filename;
+
+    previewLayouts.innerHTML = data.layouts.map(l => `<li>${l.name} (${l.filename || 'base'}): ${l.length}m, ${l.capacity} boxes</li>`).join('');
+  }
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const fileS1R1 = fileInput.files?.[0];
-    if (!fileS1R1) {
-      showToast("Por favor, selecciona un archivo JSON para la Carrera 1 del Split 1.", "error");
-      return;
-    }
+    if(!circuitData) return;
 
+    circuitData.shortname = shortNameCircuit.value;
+    circuitData.cleanInstall = switchCleanInstall?.checked || false;
     try {
-      const contentS1R1 = await fileS1R1.text();
-      let circuitname = "";
-      let circuitfilename = "";
-      let circuitlocation = "";
+      let lastRaceID = -1;
+      if(circuitData.cleanInstall){
+        const { data: cleanInstallData } = await supabase
+          .from('circuit')
+          .delete()
+          .eq('filename', circuitData.filename)
+          .select('id')
+          .single();
+        lastRaceID = cleanInstallData?.id ?? -1;
+        }
 
-      const { data: getLastRace } = await supabase
-        .from('race')
-        .select('id')
-        .order('id', { ascending: false })
-        .limit(1)
-        .single();
-
-      const lastRaceID = getLastRace ? (getLastRace.id + 1) : 1;
+      if(!circuitData.cleanInstall || lastRaceID === -1){
+        const { data: getLastRace } = await supabase
+          .from('circuit')
+          .select('id')
+          .order('id', { ascending: false })
+          .limit(1)
+          .single();
+        lastRaceID= getLastRace ? (getLastRace.id + 1) : 1;
+      }
 
       const { data: insertData, error: insertError } = await supabase
         .from('circuit')
         .insert({
           id: lastRaceID,
-          name: circuitname,
-          shortname: shortNameCircuit.value,
-          filename: circuitfilename,
-          location: circuitlocation,
+          name: circuitData.name,
+          shortname: circuitData.shortname,
+          filename: circuitData.filename,
+          location: circuitData.location,
         });
 
       if (insertError) throw insertError;
 
+      const {data: getLastLayout} = await supabase
+        .from('circuitLayout')
+        .select('id')
+        .order('id', {ascending: false})
+        .limit(1)
+        .single();
 
-      showToast("Circuito creado con éxito", "success");
+      const lastLayoutID = getLastLayout ? (getLastLayout.id + 1) : 1;
+
+      circuitData.layouts.forEach(async (layout, index) =>{
+
+        const {data: insertLayoutData, error: insertLayoutError} = await supabase
+          .from('circuitLayout')
+          .insert({
+            id: Number(lastLayoutID + index),
+            name: layout.name,
+            filename: layout.filename,
+            circuit: lastRaceID,
+            length: Number(String(layout.length).replace(/\D/g, '')),
+            capacity: Number(String(layout.capacity).replace(/\D/g, ''))
+          });
+
+        if(insertLayoutError) throw insertLayoutError;
+      })
+
+
+      showToast("Circuito creado con éxito, junto a sus variantes", "success");
       form.reset();
-      fileInfo.classList.add("hidden");
       window.location.reload();
     } catch (error) {
       console.error("Error al procesar el archivo:", error);
@@ -76,16 +269,16 @@ export function initCircuitManagement() {
 }
 
 export function initDeleteCircuitButtons() {
-  const deleteRaceButtons = document.querySelectorAll(".delete-race");
+  const deleteRaceButtons = document.querySelectorAll(".delete-circuit");
 
   deleteRaceButtons.forEach((button) => {
     button.addEventListener("click", async (e) => {
       e.preventDefault();
       const id = button.getAttribute("data-id");
 
-      if (confirm("¿Estás seguro de que quieres eliminar esta carrera?")) {
+      if (confirm("¿Estás seguro de que quieres eliminar este circuito y sus variantes?")) {
         try {
-          const response = await fetch("/api/admin/race/deleterace", {
+          const response = await fetch("/api/admin/circuit/deletecircuit", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -98,14 +291,14 @@ export function initDeleteCircuitButtons() {
             if (closestTr) {
               closestTr.remove();
             }
-            showToast("Carrera eliminada con éxito", "success");
+            showToast("Circuito y variantes eliminados con éxito", "success");
             setTimeout(() => {window.location.reload();}, 100);
           } else {
-            showToast("Error eliminando carrera", "error");
+            showToast("Error eliminando circuito", "error");
             console.error("Error eliminando carrera");
           }
         } catch (error) {
-          showToast("Error eliminando carrera", "error");
+          showToast("Error eliminando circuito", "error");
           console.error("Error:", error);
         }
       }
@@ -113,138 +306,16 @@ export function initDeleteCircuitButtons() {
   });
 }
 
-export function initEditRace() {
+export function initEditCircuit() {
 
-  const form = document.getElementById('editRaceForm') as HTMLFormElement;
-
-  const switchRacesElement = document.getElementById("switch-Races") as HTMLInputElement;
-  const switchS2Element = document.getElementById("switch-S2") as HTMLInputElement;
-  const switchR2Element = document.getElementById("switch-R2") as HTMLInputElement;
-
-
-  const switchS2divElement = document.getElementById("switch-S2-DIV") as HTMLInputElement;
-  const switchR2divElement = document.getElementById("switch-R2-DIV") as HTMLInputElement;
-
-  const fileInputS1R1 = document.getElementById("fileInputS1R1") as HTMLInputElement;
-  const fileInfoS1R1 = document.getElementById("fileInfoS1R1") as HTMLDivElement;
-  const fileNameS1R1 = document.getElementById("fileNameS1R1") as HTMLSpanElement;
-
-  const splitS1R1File = document.getElementById("split1R1File");
-  const splitS2R1File = document.getElementById("split2R1File");
-  const fileInputS2R1 = document.getElementById("fileInputS2R1") as HTMLInputElement;
-  const fileInfoS2R1 = document.getElementById("fileInfoS2R1") as HTMLDivElement;
-  const fileNameS2R1 = document.getElementById("fileNameS2R1") as HTMLSpanElement;
-
-  const containerRace2 = document.getElementById("race2Files");
-  const fileInputS1R2 = document.getElementById("fileInputS1R2") as HTMLInputElement;
-  const fileInfoS1R2 = document.getElementById("fileInfoS1R2") as HTMLDivElement;
-  const fileNameS1R2 = document.getElementById("fileNameS1R2") as HTMLSpanElement;
-
-  const splitS2R2File = document.getElementById("split2R2File");
-  const fileInputS2R2 = document.getElementById("fileInputS2R2") as HTMLInputElement;
-  const fileInfoS2R2 = document.getElementById("fileInfoS2R2") as HTMLDivElement;
-  const fileNameS2R2 = document.getElementById("fileNameS2R2") as HTMLSpanElement;
-
-  function toggleInputsRaces(){
-    if (switchRacesElement && switchS2divElement && switchR2divElement && splitS1R1File) {
-      const isChecked = switchRacesElement.checked;
-      splitS1R1File.style.display = isChecked ? "block" : "none";
-      switchS2divElement.style.display = isChecked ? "block" : "none";
-      switchR2divElement.style.display = isChecked ? "block" : "none";
-    }
-  }
-
-  function toggleInputsS2() {
-    if (splitS2R1File && splitS2R2File && switchS2Element) {
-      splitS2R1File.style.display = !switchS2Element.checked ? "none" : "block";
-      splitS2R2File.style.display = !switchS2Element.checked ? "none" : "block";
-    }
-  }
-
-  function toggleInputR2() {
-    if (containerRace2 && switchR2Element) {
-      containerRace2.style.display = !switchR2Element.checked ? "none" : "block";
-    }
-  }
-
-  switchRacesElement ? switchRacesElement.addEventListener("change", toggleInputsRaces) : null;
-  switchS2Element ? switchS2Element.addEventListener("change", toggleInputsS2) : null;
-  switchR2Element ? switchR2Element.addEventListener("change", toggleInputR2) : null;
-
-  fileInputS1R1.addEventListener("change", () => {
-    const file = fileInputS1R1.files?.[0];
-    if (file) {
-      if (file.type === "application/json") {
-        fileNameS1R1.textContent = file.name;
-        fileInfoS1R1.classList.remove("hidden");
-      } else {
-        alert("Por favor, selecciona un archivo JSON válido.");
-        fileInputS1R1.value = ""; // Limpiar la selección
-        fileInfoS1R1.classList.add("hidden");
-      }
-    } else {
-      fileInfoS1R1.classList.add("hidden");
-    }
-  });
-
-  fileInputS2R1.addEventListener("change", () => {
-    const file = fileInputS2R1.files?.[0];
-    if (file) {
-      if (file.type === "application/json") {
-        fileNameS2R1.textContent = file.name;
-        fileInfoS2R1.classList.remove("hidden");
-      } else {
-        showToast("Por favor, selecciona un archivo JSON válido.", "error");
-        fileInputS2R1.value = ""; // Limpiar la selección
-        fileInfoS2R1.classList.add("hidden");
-      }
-    } else {
-      fileInfoS2R1.classList.add("hidden");
-    }
-  });
-
-  fileInputS1R2.addEventListener("change", () => {
-    const file = fileInputS1R2.files?.[0];
-    if (file) {
-      if (file.type === "application/json") {
-        fileNameS1R2.textContent = file.name;
-        fileInfoS1R2.classList.remove("hidden");
-      } else {
-        showToast("Por favor, selecciona un archivo JSON válido.", "error");
-        fileInputS1R2.value = ""; // Limpiar la selección
-        fileInfoS1R2.classList.add("hidden");
-      }
-    } else {
-      fileInfoS1R2.classList.add("hidden");
-    }
-  });
-
-  fileInputS2R2.addEventListener("change", () => {
-    const file = fileInputS2R2.files?.[0];
-    if (file) {
-      if (file.type === "application/json") {
-        fileNameS2R2.textContent = file.name;
-        fileInfoS2R2.classList.remove("hidden");
-      } else {
-        showToast("Por favor, selecciona un archivo JSON válido.", "error");
-        fileInputS2R2.value = ""; // Limpiar la selección
-        fileInfoS2R2.classList.add("hidden");
-      }
-    } else {
-      fileInfoS2R2.classList.add("hidden");
-    }
-  });
+  const form = document.getElementById('editCircuitForm') as HTMLFormElement;
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const formData = new FormData(form);
 
-    formData.set('switch-Races', switchRacesElement?.checked.toString());
-    formData.set('switch-S2', switchS2Element?.checked.toString());
-    formData.set('switch-R2', switchR2Element?.checked.toString());
-
     try {
-      const response = await fetch('/api/admin/race/editrace', {
+      const response = await fetch('/api/admin/circuit/editcircuit', {
         method: 'POST',
         body: formData,
       });
@@ -256,17 +327,14 @@ export function initEditRace() {
       const result = await response.json();
 
       if (result.success) {
-        showToast('Carrera actualizada con éxito', 'success');
-        window.location.href = '/admin/adminraces';
+        showToast('Circuito actualizado con éxito', 'success');
+        window.location.href = '/admin/admincircuits';
       } else {
         throw new Error(result.error || 'Error desconocido');
       }
     } catch (error) {
-      showToast('Error al actualizar la carrera: ' + error, 'error');
+      showToast('Error al actualizar el circuito: ' + error, 'error');
       console.error('Error:', error);
     }
   });
-  switchRacesElement?.addEventListener("change", toggleInputsRaces);
-  switchS2Element?.addEventListener("change", toggleInputsS2);
-  switchR2Element?.addEventListener("change", toggleInputR2);
 }
