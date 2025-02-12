@@ -1,3 +1,5 @@
+import type { RaceData } from '@/types/Results';
+import type { Points } from '@/types/Points';
 export interface ResultTableData {
     gridPositionClass: string;
     gainsAbs: string;
@@ -48,4 +50,16 @@ export interface RaceFastestLap{
   lap:string;
   avgspeed: string;
   points: string;
+}
+
+export interface ChampResults{
+  champID: number;
+  champName: string;
+  races: ChampRacesData[];
+}
+
+export interface ChampRacesData{
+  points: Points;
+  raceData1: RaceData | null
+  raceData2: RaceData | null;
 }

@@ -1,146 +1,84 @@
 ---
-import type { Championship } from "@/lib/tursotypes";
 import { supabase } from "@/db/supabase";
-
-interface Props {
-  actualchamp: string;
-}
-
-const { actualchamp } = Astro.props;
-
-interface Race {
-  pointsystem: string;
-  orderinchamp: number;
-  championship: {
-    id: string;
-    name: string;
-    season: string;
-  }
-}
-
-type RaceDetail = {
-  RaceOrder: number;
-  RacePoints: string;
-};
 
 interface GroupedChamp {
   ChampID: string;
   ChampName: string;
   ChampSeason: string;
-  RacePointsList: string[];
-  RaceDetails: RaceDetail[];
 }
 
-let resultSet;
+// SELECT c.id, c.name, c.season, (c.number_of_races_total > COUNT(r.id) AND c.isfinished = TRUE) AS champCancel
+// FROM championship c LEFT JOIN race r ON c.id = r.championship
+// WHERE c.ischampionship = TRUE
+// GROUP BY c.id, c.name, c.season, c.number_of_races_total
+// ORDER BY c.id;
+const { data: dataChamp, error: dataChampError } = await supabase
+  .rpc('get_championship_list');
 
-if (actualchamp === "true") {
-  const { data: lastchamp, error: errorlastchamp } = await supabase
-    .from("championship")
-    .select("*")
-    .eq('ischampionship', true)
-    .eq('isfinished', false)
-    .order('id', { ascending: false });
-
-  if(!lastchamp) {
-    throw new Error('No hay campeonatos activos: ' + errorlastchamp.message);
-  }
-
-  const { data: champResultSet } = await supabase
-    .from ('race')
-    .select('orderinchamp, pointsystem, championship!inner(id, name, season)')
-    .eq('id', lastchamp[0].id);
-  resultSet = champResultSet;
-
-} else {
-  const { data: champResultSet } = await supabase
-    .from ('race')
-    .select('orderinchamp, pointsystem, championship!inner(id, name, season)')
-    .eq('ischampionship', true);
-  resultSet = champResultSet;
-}
-const ChampionshipData: Championship[] = resultSet as unknown as Championship[];
-
-const groupedChampionships = ChampionshipData.reduce(
-  (acc, champ) => {
-    if (!acc[champ.season]) {
-      acc[champ.season] = [];
-    }
-    acc[champ.season].push(champ);
-    return acc;
-  },
-  {} as Record<string, Championship[]>
-);
-
-const ChampData: Race[] = resultSet as unknown as Race[];
-
-function groupByChamp(resultSet: Race[]): GroupedChamp[] {
-  const grouped: {
-    [key: string]: GroupedChamp & { RacePointsList: string[] };
-  } = {};
-
-  resultSet.forEach((race) => {
-    const champId = race.championship.id;
-    if (!grouped[champId]) {
-      grouped[champId] = {
-        ChampID: champId,
-        ChampName: race.championship.name,
-        ChampSeason: race.championship.season,
-        RacePointsList: [],
-        RaceDetails: [],
-      };
-    }
-
-    grouped[champId].RaceDetails.push({
-      RaceOrder: race.orderinchamp, // Ajusta según tus datos
-      RacePoints: race.pointsystem,
-    });
-  });
-
-  return Object.values(grouped);
+if(dataChampError || !dataChamp) {
+  console.error(dataChampError);
 }
 
-const finalResult: GroupedChamp[] = groupByChamp(ChampData);
+// Get unique seasons and sort them
+const seasons = [...new Set(dataChamp?.map(champ => champ.season))].sort();
 
-let dataChamp: GroupedChamp[] = [];
-for (let i = 0; i < finalResult.length; i++) {
-  dataChamp.push(finalResult[i]);
-  for (let j = 0; j < finalResult[i].RaceDetails.length; j++) {
-    dataChamp[i].ChampID +=
-      "@" + finalResult[i].RaceDetails[j].RacePoints.toString();
-  }
-}
+// Group championships by season
+const champsBySeason = seasons.reduce((acc, season) => {
+  acc[season] = dataChamp?.filter(champ => champ.season === season).map(champ => ({
+    ChampID: champ.championship_id.toString(),
+    ChampName: champ.champcancel ? champ.name+' - CANCELADO' : champ.name,
+    ChampSeason: champ.season
+  })) || [];
+  return acc;
+}, {} as { [key: string]: GroupedChamp[] });
+
 ---
 
-{actualchamp === "true" ? (
-  <p class="py-4 text-4xl font-bold text-center">
-    Carga los datos del progreso actual de los campeonatos
-  </p>
-) : (
-  <p class="py-4 text-4xl font-bold text-center">
-    Selecciona el campeonato pasado a revisar
-  </p>
-)}
+<div class="grid grid-cols-1 gap-4 w-11/12 mx-auto mt-2 md:grid-cols-2">
+<div>
+  <p class = "font-semibold text-xl pl-2 pb-2">Temporada</p>
+    <select
+      id="select-season"
+      class="block m-auto w-full px-4 py-3 text-lg font-medium rounded-xl pe-9 focus:border-primary disabled:opacity-50 disabled:pointer-events-none bg-darkSecond border-neutral-700 text-lightPrimary placeholder-neutral-500"
+    >
+      {
+        [
+          ...new Set(
+            Object.values(champsBySeason).flatMap((champs) => champs.map(champ => champ.ChampSeason))
+          ),
+        ].map((season) => (
+          <option value={season} class="text-lightSecond">
+            {season}
+          </option>
+        ))
+      }
+    </select>
+  </div>
 
-<select
-  id="select-champs"
-  class="block m-auto w-4/5 px-4 py-3 text-lg font-medium rounded-xl pe-9 focus:border-primary disabled:opacity-50 disabled:pointer-events-none bg-darkSecond border-neutral-700 text-lightPrimary placeholder-neutral-500"
->
-  {
-    dataChamp.map((champ) => (
-      <optgroup
-        label={`Temporada ${champ.ChampSeason}`}
-        class="text-lightSecond font-semibold"
-      >
-        <option value={champ.ChampID} class="text-lightSecond">
-          {champ.ChampName}
-        </option>
-      </optgroup>
-    ))
-  }
-</select>
-
+  <div>
+    <p class = "font-semibold text-xl pl-2 pb-2">Campeonato</p>
+    <select
+      id="select-champ"
+      class="block m-auto w-full px-4 py-3 text-lg font-medium rounded-xl pe-9 focus:border-primary disabled:opacity-50 disabled:pointer-events-none bg-darkSecond border-neutral-700 text-lightPrimary placeholder-neutral-500"
+    >
+      {
+        Object.values(champsBySeason).flatMap((champs) =>
+          champs.map((champ) => (
+            <option
+              value={champ.ChampID}
+              class="text-lightSecond"
+              data-season={champ.ChampSeason}
+            >
+              {champ.ChampName}
+            </option>
+          ))
+        )
+      }
+    </select>
+  </div>
+</div>
 <!-- Tabla de resultados -->
-<div class="container mx-auto">
+<div class="container">
   <div class="section">
     <button
       id="loadButtonChamp"
@@ -151,9 +89,9 @@ for (let i = 0; i < finalResult.length; i++) {
   </div>
 
   <div id="resultsIndyChampsTable"></div>
-  <div class="w-11/12 mx-auto mt-4 tablecharts"><div id="chartProgressiónIndyChamp" class = "border-2 border-primary"></div></div>
+  <div class="mx-auto mt-4 tablecharts"><div id="chartProgressiónIndyChamp" class = "border-2 border-primary"></div></div>
   <div id="resultsTeamsChampsTable"></div>
-  <div class="w-11/12 mx-auto mt-4 tablecharts"><div id="chartProgressiónTeamsChamp" class = "border-2 border-primary"></div></div>
+  <div class="mx-auto mt-4 tablecharts"><div id="chartProgressiónTeamsChamp" class = "border-2 border-primary"></div></div>
   <div id="resultTableOtherPrizes"></div>
 </div>
 
@@ -164,6 +102,55 @@ for (let i = 0; i < finalResult.length; i++) {
 
 <style>
   .container {
-    width: 99%;
+    margin: 0 auto;
+    width: auto;
   }
 </style>
+
+<script is:inline data-astro-rerun>
+  function initializeSelects() {
+    const seasonSelect = document.getElementById('select-season');
+    const champSelect = document.getElementById('select-champ'); // Corregido el ID
+
+    if (!(seasonSelect instanceof HTMLSelectElement) ||
+        !(champSelect instanceof HTMLSelectElement)) {
+      return;
+    }
+
+    if (!seasonSelect || !champSelect) {
+      console.error("No se pudieron encontrar todos los elementos necesarios");
+      return;
+    }
+
+    function filterChampionships() {
+      const selectedSeason = seasonSelect.value;
+
+      Array.from(champSelect.options).forEach(option => {
+        const season = option.getAttribute('data-season');
+        option.hidden = season !== selectedSeason;
+      });
+
+      const visibleOptions = Array.from(champSelect.options).filter(opt => !opt.hidden);
+      if (visibleOptions.length > 0) {
+        champSelect.value = visibleOptions[0].value;
+      }
+    }
+
+    // Limpiar event listeners anteriores
+    seasonSelect.removeEventListener('change', filterChampionships);
+
+    // Añadir nuevos event listeners
+    seasonSelect.addEventListener('change', filterChampionships);
+
+    // Inicializar filtros
+    filterChampionships();
+  }
+
+  // Inicializar al cargar
+  initializeSelects();
+
+  // Reinicializar en navegación
+  document.addEventListener('astro:page-load', initializeSelects);
+</script>
+
+
