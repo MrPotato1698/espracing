@@ -165,7 +165,7 @@ function initializeScript() {
         <tbody class="font-normal">`;
 
       const createResultRow = (result: any, index: number) => `
-      <tr class="bg-[${index % 2 === 0 ? '#0f0f0f' : '#19191c'}]">
+      <tr class="bg-${index % 2 === 0 ? 'darkPrimary' : 'darkSecond'}">
         <td class="text-center">${result.gridPositionClass}</td>                                                        <!-- Gan/Per (Flechas)-->
         <td class="text-center">${result.gainsAbs}</td>                                                                 <!-- Gan/Per (Número)-->
         <td class="font-medium text-center">${result.posicionFinal}</td>                                                <!-- Posicion -->

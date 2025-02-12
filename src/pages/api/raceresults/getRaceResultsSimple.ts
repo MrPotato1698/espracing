@@ -119,7 +119,7 @@ function initializeScript() {
 			const resultFastestLap = getResultFastestLap(datos, points, carData, layoutLength);
 
 			const createResultRow = (result: any, index: number) => `
-				<tr class="bg-[${index % 2 === 0 ? '#0f0f0f' : '#19191c'}]">
+				<tr class="bg-${index % 2 === 0 ? 'darkPrimary' : 'darkSecond'}">
 					<td class="text-center">${result.gridPositionClass}</td>                                                        <!-- Gan/Per (Flechas)-->
 					<td class="text-center">${result.gainsAbs}</td>                                                                 <!-- Gan/Per (Número)-->
 					<td class="font-medium text-center">${result.posicionFinal}</td>                                                <!-- Posicion -->
@@ -225,7 +225,7 @@ function initializeScript() {
 						</tr>
 					</thead>
 					<tbody class="font-normal">
-						<tr class="bg-['#0f0f0f']">
+						<tr class="bg-darkPrimary">
 							<td class="text-center">${resultFastestLap.driverName}</td>                                                                <!-- Nombre -->
 							<td class="text-center"><span ${resultFastestLap.carColorClass}>${resultFastestLap.carClass}</span></td>                   <!-- Clase del Coche -->
 							<td class="text-end"><img class='w-4' src='${resultFastestLap.carBrand}' alt=''></img></td>                <!-- Logo Coche -->

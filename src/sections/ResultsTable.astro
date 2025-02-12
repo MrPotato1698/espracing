@@ -15,41 +15,13 @@ interface Championship {
   season: string;
 }
 
-interface Props {
-  actualchamp: string;
-}
+const { data: resultSetData } = await supabase
+  .from("race")
+  .select("name, filename, championship!inner(id, name, season)")
+  .order("orderinchamp", { ascending: true });
 
-const { actualchamp } = Astro.props;
+const resultSet = resultSetData;
 
-let resultSet;
-
-if (actualchamp === "true") {
-  const { data: lastChampData } = await supabase
-    .from("race")
-    .select("name, championship!inner(id, name, season)")
-    .order("id", { ascending: false })
-    .single();
-
-  console.log('Ultimo Campeonato: '+lastChampData?.championship.name);
-
-  if (!lastChampData) {
-    console.log("No hay datos");
-  } else {
-    const { data: resultSetData } = await supabase
-      .from("race")
-      .select("name, filename, championship!inner(id, name, season)")
-      .eq("championship", lastChampData.championship.id);
-
-    resultSet = resultSetData;
-  }
-} else {
-  const { data: resultSetData } = await supabase
-    .from("race")
-    .select("name, filename, championship!inner(id, name, season)")
-    .order("id", { ascending: true });
-
-  resultSet = resultSetData;
-}
 
 const RacesData: Race[] = (resultSet ?? []).map((race) => ({
   RaceName: race.name ?? "",
@@ -81,18 +53,6 @@ if (RacesData.length == 0) {
   );
 }
 ---
-
-{
-  actualchamp === "true" ? (
-    <p class="py-4 text-4xl font-bold text-center">
-      Selecciona la carrera a revisar
-    </p>
-  ) : (
-    <p class="py-4 text-4xl font-bold text-center">
-      Selecciona el campeonato y carrera pasada a revisar
-    </p>
-  )
-}
 
 <div class="grid grid-cols-1 gap-4 mx-2 md:grid-cols-2 lg:grid-cols-3">
   <div>
@@ -160,7 +120,7 @@ if (RacesData.length == 0) {
 </div>
 
 <!-- Tabla de resultados -->
-<div class="container mx-auto">
+<div class="container mx-auto w-auto">
   <section>
     <div class="mt-8 grid grid-cols-1 gap-4 mx-2 md:grid-cols-2 lg:grid-cols-3">
     <button
