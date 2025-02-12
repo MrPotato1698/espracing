@@ -535,6 +535,28 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_championship_data: {
+        Args: {
+          champ_id: number
+        }
+        Returns: {
+          championship_id: number
+          name: string
+          year: number
+          season: string
+          isfinished: boolean
+          champcancel: boolean
+        }[]
+      }
+      get_championship_list: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          championship_id: number
+          name: string
+          season: string
+          champcancel: boolean
+        }[]
+      }
       get_circuit_layouts_count: {
         Args: Record<PropertyKey, never>
         Returns: {
