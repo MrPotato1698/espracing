@@ -6,7 +6,7 @@ export const POST: APIRoute = async ({ request }) => {
   const formData = await request.formData()
 
   const race_id = formData.get("race_id")
-  const name = formData.get("name")
+  const name = formData.get("name") as string;
   const orderChamp = formData.get("orderChamp")
   const champID = formData.get("champID")
   const pointsystem = formData.get("pointsystem")
@@ -110,9 +110,11 @@ export const POST: APIRoute = async ({ request }) => {
           }
         }
 
+        const racenameFile = name.replace(/\s/g, '');
+
         const { data: uploadRace1, error: uploadErrorR1 } = await supabase.storage
           .from("results")
-          .upload(`${champID}/${orderChamp}_Race1`, transformedJsonR1, {
+          .upload(`${champID}/${orderChamp}_${racenameFile}Race1`, transformedJsonR1, {
             upsert: true,
           })
 
@@ -122,7 +124,7 @@ export const POST: APIRoute = async ({ request }) => {
         if (switchR2Element) {
           const { data: uploadRace2, error: uploadErrorR2 } = await supabase.storage
             .from("results")
-            .upload(`${champID}/${orderChamp}_${name}Race2`, transformedJsonR2, {
+            .upload(`${champID}/${orderChamp}_${racenameFile}Race2`, transformedJsonR2, {
               upsert: true,
             })
 

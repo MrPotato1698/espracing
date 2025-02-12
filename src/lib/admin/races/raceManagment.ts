@@ -152,6 +152,8 @@ export function initRaceManagement() {
       const numrace = formData.get('numrace') as string;
       const pointsystem = formData.get('pointsystem') as string;
 
+      const racenameFile = racename.replace(/\s/g, '');
+
       const jsonS1R1 = JSON.parse(contentS1R1);
       let jsonS1R2;
       let transformedJsonR1: string;
@@ -184,7 +186,7 @@ export function initRaceManagement() {
       const { data: uploadRace1, error: uploadErrorR1 } = await supabase
         .storage
         .from('results')
-        .upload(`${champID}/${numrace}_${racename}Race1`, transformedJsonR1, {
+        .upload(`${champID}/${numrace}_${racenameFile}Race1`, transformedJsonR1, {
           upsert: true
         });
 
@@ -195,7 +197,7 @@ export function initRaceManagement() {
         const { data: uploadRace2, error: uploadErrorR2 } = await supabase
         .storage
         .from('results')
-        .upload(`${champID}/${numrace}_${racename}Race2`, transformedJsonR2, {
+        .upload(`${champID}/${numrace}_${racenameFile}Race2`, transformedJsonR2, {
           upsert: true
         });
 
