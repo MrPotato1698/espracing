@@ -2,6 +2,7 @@
 import Layout from "@/layouts/NormalLayout.astro";
 import OpenEye from "@/icons/OpenEye.astro";
 import CloseEye from "@/icons/CloseEye.astro";
+import GoogleColor from "@/icons/GoogleColor.astro";
 
 const { cookies, redirect } = Astro;
 
@@ -105,7 +106,8 @@ if (accessToken && refreshToken) {
               type="submit"
               class="flex items-center justify-center w-full p-3 mb-6 text-sm font-medium tracking-wide text-gray-500 transition duration-300 ease-in border border-gray-300 rounded-lg cursor-pointer md:mb-0 hover:border-lightPrimary hover:bg-[#EA4335] hover:text-lightPrimary"
             >
-              <span>Google</span>
+            <GoogleColor />
+              <span class = "ml-2">Google</span>
             </button>
           </div>
         </div>
