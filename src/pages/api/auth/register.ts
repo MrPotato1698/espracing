@@ -29,7 +29,8 @@ export const POST: APIRoute = async ({ request, redirect }) => {
         full_name: name,
         email: email,
         avatar: 'img/user/default.webp',
-        steam_id: steamId
+        steam_id: steamId,
+        races: -1
       }
     }
   });

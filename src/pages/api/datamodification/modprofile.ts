@@ -16,15 +16,17 @@ export const POST: APIRoute = async ({ request, redirect }) => {
     return new Response("Todos los campos tienen que estar rellenos", { status: 400 });
   }
 
+  const date = new Date();
+
 
   const {data: updateData, error: errorUpdateData} = await supabase
   .from('profiles')
-  .update({full_name: name, steam_id: steam_id})
+  .update({full_name: name, steam_id: steam_id, last_modified: date.toISOString()})
   .eq('id', id);
 
   if(errorUpdateData) {
     return new Response(
-      JSON.stringify({ error: "Error al actualizar el piloto" }),
+      JSON.stringify({ error: "Error al actualizar el piloto: "+errorUpdateData.message }),
       { status: 500 }
     );
   }
