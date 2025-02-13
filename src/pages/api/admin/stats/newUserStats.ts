@@ -63,7 +63,6 @@ export const POST: APIRoute = async ({ request }) => {
       .from("profiles")
       .update({
         ...stats,
-        needs_stats_update: false,
       })
       .eq("id", userId)
 
