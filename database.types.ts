@@ -334,6 +334,7 @@ export type Database = {
           full_name: string | null
           id: string
           is_team_manager: boolean | null
+          last_modified: string | null
           number_plate: number | null
           podiums: number
           poles: number
@@ -353,6 +354,7 @@ export type Database = {
           full_name?: string | null
           id: string
           is_team_manager?: boolean | null
+          last_modified?: string | null
           number_plate?: number | null
           podiums?: number
           poles?: number
@@ -372,6 +374,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           is_team_manager?: boolean | null
+          last_modified?: string | null
           number_plate?: number | null
           podiums?: number
           poles?: number
@@ -447,6 +450,35 @@ export type Database = {
             columns: ["pointsystem"]
             isOneToOne: false
             referencedRelation: "pointsystem"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      racenotes: {
+        Row: {
+          code: number
+          description: string | null
+          id: number
+          race: number
+        }
+        Insert: {
+          code?: number
+          description?: string | null
+          id?: number
+          race: number
+        }
+        Update: {
+          code?: number
+          description?: string | null
+          id?: number
+          race?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "racenotes_race_fkey"
+            columns: ["race"]
+            isOneToOne: false
+            referencedRelation: "race"
             referencedColumns: ["id"]
           },
         ]
