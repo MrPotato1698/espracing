@@ -1,0 +1,168 @@
+---
+import { parse } from "node-html-parser";
+import { TimingData } from "@/mock/TimingData"
+import { supabase } from "@/db/supabase";
+
+import type { CarData } from "@/types/Utils";
+
+async function getLapStats() {
+  try {
+    let html;
+    if (import.meta.env.DEV) {
+      // Usar datos mock en desarrollo
+      html = TimingData;
+      console.log('Modo Dev activo');
+    } else {
+      // En producción, obtener datos reales
+      const response = await fetch('https://es2.assettohosting.com:10018/stracker/lapstat');
+      html = await response.text();
+    }
+
+    const root = parse(html);
+
+    // Encuentra la tabla con la clase 'table.table-striped'
+    const table = root.querySelector("table.table-striped");
+    if (!table) {
+      throw new Error("No se encontró la tabla de estadísticas de vueltas");
+    }
+
+    // Obtén todas las filas de la tabla, excluyendo la fila de encabezado
+    const rows = table.querySelectorAll("tr:not(.row_header)");
+
+    // Mapea las filas a objetos
+    let lapStats = rows.map((row) => {
+      const cells = row.querySelectorAll("td");
+      return {
+        position: cells[0]?.textContent.trim(),
+        driver: cells[1]?.textContent.trim(),
+        car: cells[2]?.textContent.trim(),
+        bestLap: cells[3]?.textContent.trim(),
+        gapToFirst: cells[4]?.textContent.trim(),
+        sector1: cells[5]?.textContent.trim(),
+        sector2: cells[6]?.textContent.trim(),
+        sector3: cells[7]?.textContent.trim(),
+        valid: cells[8]?.textContent.trim(),
+        tyres: cells[9]?.textContent.trim(),
+        vMax: cells[10]?.textContent.trim(),
+        laps: cells[11]?.textContent.trim(),
+        date: cells[13]?.textContent.trim(),
+      };
+    });
+
+    let carData: CarData[] = [];
+
+    // Remove entries with all undefined fields or the first element
+    lapStats = lapStats.filter((stat, index) => {
+      const allFieldsUndefined = Object.values(stat).every(value => value === undefined);
+      return !allFieldsUndefined && index !== 0;
+    });
+
+    for (const stat of lapStats) {
+      if (!carData.find((car) => car.filename === stat.car)) {
+      const { data: carDataSupabase, error: errorCarData } = await supabase
+            .from('car')
+            .select('filename, carbrand!inner(name, imgbrand), model, carclass!inner(short_name, class_design)')
+            .eq('filename', stat.car)
+            .single();
+
+      if(errorCarData){
+        carData.push({
+        filename: stat.car,
+        brand: "",
+        model: "",
+        classShortName: "",
+        classColor: "",
+        imgbrand: ""
+        });
+      }else{
+        carData.push({
+        filename: carDataSupabase.filename,
+        brand: carDataSupabase.carbrand?.name ?? "",
+        model: carDataSupabase.model ?? "",
+        classShortName: carDataSupabase.carclass.short_name ?? "",
+        classColor: carDataSupabase.carclass.class_design ?? "",
+        imgbrand: carDataSupabase.carbrand?.imgbrand ?? ""
+        });
+      }
+      }
+      const nameCar = carData.find((car) => car.filename === stat.car);
+      stat.car = nameCar?.brand != "" ? `${nameCar?.brand} ${nameCar?.model}` : stat.car;
+    }
+
+    return lapStats;
+  } catch (error) {
+    console.error("Error al obtener los datos:", error);
+    return [];
+  }
+}
+
+// Obtén los datos
+const lapStats = await getLapStats();
+function parseTime(time: string): number {
+  if (!time) return Infinity;
+  const cleanTime = time.trim();
+  if (cleanTime === '-' || cleanTime === '') return Infinity;
+
+  // Convertir el tiempo a milisegundos para comparación precisa
+  const [minutes, seconds] = cleanTime.split(':').map(Number);
+  return (minutes * 60 + seconds) * 1000;
+}
+
+const bestSectors = {
+  s1: Math.min(...lapStats.map(stat => parseTime(stat.sector1))),
+  s2: Math.min(...lapStats.map(stat => parseTime(stat.sector2))),
+  s3: Math.min(...lapStats.map(stat => parseTime(stat.sector3)))
+};
+
+---
+
+<div class=" mt-6 overflow-x-auto border-primary border-2 rounded-lg">
+  <table class="w-full bg-darkSecond overflow-hidden">
+    <thead class="bg-primary text-center table-auto">
+      <tr>
+        <th class="py-2 px-4 ">Pos</th>
+        <th class="py-2 px-4 ">Piloto</th>
+        <th class="py-2 px-4 ">Coche</th>
+        <th class="py-2 px-4 ">Mejor Vuelta</th>
+        <th class="py-2 px-4 ">v. MAX</th>
+        <th class="py-2 px-4 ">Diferencia</th>
+        <th class="py-2 px-4 ">S1</th>
+        <th class="py-2 px-4 ">S2</th>
+        <th class="py-2 px-4 ">S3</th>
+        <th class="py-2 px-4 ">Vueltas Completadas</th>
+        <th class="py-2 px-4 ">Fecha</th>
+      </tr>
+    </thead>
+    <tbody>
+      {
+        lapStats.map((stat) => (
+          <tr class={Number(stat.position) % 2 === 0 ? "bg-darkPrimary" : "bg-darkSecond"}>
+            <td class="py-2 px-4">{stat.position}</td>
+            <td class="py-2 px-4">{stat.driver}</td>
+            <td class="py-2 px-4">{stat.car}</td>
+            <td class={`py-2 px-4 ${Number(stat.position) === 1 ? "text-purple-400 font-bold" : ""}`}>{stat.bestLap}</td>
+            <td class="py-2 px-4">{stat.vMax}</td>
+            <td class="py-2 px-4">{stat.gapToFirst}</td>
+            <td class={`py-2 px-4 ${
+              parseTime(stat.sector1) === bestSectors.s1 && bestSectors.s1 !== Infinity
+                ? 'text-purple-400 font-bold'
+                : ''
+            }`}>{stat.sector1}</td>
+            <td class={`py-2 px-4 ${
+              parseTime(stat.sector2) === bestSectors.s2 && bestSectors.s2 !== Infinity
+                ? 'text-purple-400 font-bold'
+                : ''
+            }`}>{stat.sector2}</td>
+            <td class={`py-2 px-4 ${
+              parseTime(stat.sector3) === bestSectors.s3 && bestSectors.s3 !== Infinity
+                ? 'text-purple-400 font-bold'
+                : ''
+          }`}>{stat.sector3}</td>
+            <td class={`py-2 px-4 ${Number(stat.laps) > 10 ? "text-green-400" : ""}`}>{stat.laps}</td>
+            <td class="py-2 px-4">{stat.date}</td>
+          </tr>
+        ))
+      }
+    </tbody>
+  </table>
+</div>

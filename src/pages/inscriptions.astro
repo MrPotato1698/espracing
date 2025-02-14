@@ -1,0 +1,55 @@
+---
+import Layout from "@/layouts/NormalLayout.astro";
+import STracker from "@/sections/sTrackerTable.astro";
+---
+
+<Layout title="ESP Racing: Inscripciones">
+  <div class="py-4 mx-auto text-center" style="width: 99%">
+    <p class="text-5xl font-bold border-b border-primary w-fit mx-auto">
+      Tabla de Vueltas Válidas
+    </p>
+    <STracker />
+
+    <form method="POST" class="mt-8 bg-darkPrimary border-primary border-2 rounded-lg px-8 pt-6 pb-8 mb-4">
+      <h2 class="text-2xl font-bold mb-6">Formulario de Inscripción</h2>
+      <div class = "grid grid-cols-1 gap-6 md:grid-cols-2">
+        <div>
+          <label
+            for="position"
+            class="text-lightPrimary text-lg font-medium">
+            Posición
+          </label>
+          <input
+            id="position"
+            name="position"
+            type="number"
+            placeholder="Tu posición en la tabla"
+            class="w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkSecond hover:border-primary">
+        </div>
+        <div>
+          <label
+            for="validLaps"
+            class="text-lightPrimary text-lg font-medium">
+            Vueltas Válidas
+          </label>
+          <input
+            id="validLaps"
+            name="validLaps"
+            type="number"
+            placeholder="Número de vueltas válidas"
+            class="w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkSecond hover:border-primary"
+            >
+        </div>
+        <div class="flex items-center justify-between">
+        </div>
+      </div>
+      <button
+        type="submit"
+        class="bg-primary text-white font-bold py-3 px-5 border-solid border-primary border-2 rounded-md hover:bg-darkSecond hover:text-lightPrimary"
+        >
+        Enviar
+      </button>
+    </form>
+
+  </div>
+</Layout>
