@@ -1,6 +1,7 @@
 ---
 import Layout from "@/layouts/ProfileLayout.astro";
 import { supabase } from "@/db/supabase";
+import ApexCharts from 'apexcharts';
 
 // ****************************************************************************
 
@@ -66,7 +67,6 @@ const diffHours = Math.ceil(diffTime / (1000 * 60 * 60));
 
 const canUpdateFlag: boolean = diffHours > 48;
 
-
 ---
 
 <Layout title="ESP Racing: Mi Perfil">
@@ -119,54 +119,66 @@ const canUpdateFlag: boolean = diffHours > 48;
       <h2 class="text-5xl font-extrabold border-b-2 border-primary w-full mt-12">
         Estadisticas de Carrera
       </h2>
-      <div class="grid w-11/12 grid-cols-1 my-5 lg:grid-cols-2 xl:grid-cols-3">
-        <div class="blockdata">
-          <h3 class="text-4xl font-semibold border-b-2 border-primary w-3/4">
-            Carreras
-          </h3>
-          <p class="pl-2 text-2xl font-medium">{userData.races}</p>
-        </div>
 
-        <div class="blockdata">
-          <h3 class="text-4xl font-semibold border-b-2 border-primary w-3/4">
-            Victorias
-          </h3>
-          <p class="pl-2 text-2xl font-medium">{userData.wins}</p>
+      <div class = 'grid grid-cols-1 gap-1 lg:grid-cols-2'>
+        <div
+          id="chartStatsDriver"
+          data-driverraces={userData.races}
+          data-driverwins={userData.wins}
+          data-driverpodiums={userData.podiums}
+          data-drivertop5={userData.top5}
+          data-drivertop10={userData.top10}
+          data-driverdnf={userData.dnf}>
         </div>
+        <div class="grid w-11/12 grid-cols-1 my-5 lg:grid-cols-2">
+          <div class="blockdata">
+            <h3 class="text-4xl font-semibold border-b-2 border-primary w-3/4">
+              Carreras
+            </h3>
+            <p class="pl-2 text-2xl font-medium">{userData.races}</p>
+          </div>
 
-        <div class="blockdata">
-          <h3 class="text-4xl font-semibold border-b-2 border-primary w-3/4">
-            Podios
-          </h3>
-          <p class="pl-2 text-2xl font-medium">{userData.podiums}</p>
-        </div>
+          <div class="blockdata">
+            <h3 class="text-4xl font-semibold border-b-2 border-primary w-3/4">
+              Victorias
+            </h3>
+            <p class="pl-2 text-2xl font-medium">{userData.wins}</p>
+          </div>
 
-        <div class="blockdata">
-          <h3 class="text-4xl font-semibold border-b-2 border-primary w-3/4">
-            Top 5
-          </h3>
-          <p class="pl-2 text-2xl font-medium">{userData.top5}</p>
-        </div>
+          <div class="blockdata">
+            <h3 class="text-4xl font-semibold border-b-2 border-primary w-3/4">
+              Podios
+            </h3>
+            <p class="pl-2 text-2xl font-medium">{userData.podiums}</p>
+          </div>
 
-        <div class="blockdata">
-          <h3 class="text-4xl font-semibold border-b-2 border-primary w-3/4">
-            Top 10
-          </h3>
-          <p class="pl-2 text-2xl font-medium">{userData.top10}</p>
-        </div>
+          <div class="blockdata">
+            <h3 class="text-4xl font-semibold border-b-2 border-primary w-3/4">
+              Top 5
+            </h3>
+            <p class="pl-2 text-2xl font-medium">{userData.top5}</p>
+          </div>
 
-        <div class="blockdata">
-          <h3 class="text-4xl font-semibold border-b-2 border-primary w-3/4">
-            Vueltas Rápidas
-          </h3>
-          <p class="pl-2 text-2xl font-medium">{userData.flaps}</p>
-        </div>
+          <div class="blockdata">
+            <h3 class="text-4xl font-semibold border-b-2 border-primary w-3/4">
+              Top 10
+            </h3>
+            <p class="pl-2 text-2xl font-medium">{userData.top10}</p>
+          </div>
 
-        <div class="blockdata">
-          <h3 class="text-4xl font-semibold border-b-2 border-primary w-3/4">
-            DNF
-          </h3>
-          <p class="pl-2 text-2xl font-medium">{userData.dnf}</p>
+          <div class="blockdata">
+            <h3 class="text-4xl font-semibold border-b-2 border-primary w-3/4">
+              V. Rápidas
+            </h3>
+            <p class="pl-2 text-2xl font-medium">{userData.flaps}</p>
+          </div>
+
+          <div class="blockdata">
+            <h3 class="text-4xl font-semibold border-b-2 border-primary w-3/4">
+              DNF
+            </h3>
+            <p class="pl-2 text-2xl font-medium">{userData.dnf}</p>
+          </div>
         </div>
       </div>
 
@@ -208,6 +220,18 @@ const canUpdateFlag: boolean = diffHours > 48;
   }
 
   <script>
+    interface userDataRaces{
+      races: number;
+      wins: number;
+      podiums: number;
+      top5: number;
+      top10: number;
+      dnf: number;
+    }
+
+    import { showToast } from '@/lib/utils';
+    import ApexCharts from 'apexcharts';
+
     function initializeProfileButton() {
         const disabledButton = document.getElementById('disabledProfileButton');
         if (disabledButton) {
@@ -244,6 +268,99 @@ const canUpdateFlag: boolean = diffHours > 48;
         }
       });
     }
+    const userData: userDataRaces = {
+      races: Number(document.getElementById('chartStatsDriver')?.getAttribute('data-driverraces')) ?? 0,
+      wins: Number(document.getElementById('chartStatsDriver')?.getAttribute('data-driverwins')) ?? 0,
+      podiums: Number(document.getElementById('chartStatsDriver')?.getAttribute('data-driverpodiums')) ?? 0,
+      top5: Number(document.getElementById('chartStatsDriver')?.getAttribute('data-drivertop5')) ?? 0,
+      top10: Number(document.getElementById('chartStatsDriver')?.getAttribute('data-drivertop10')) ?? 0,
+      dnf: Number(document.getElementById('chartStatsDriver')?.getAttribute('data-driverdnf')) ?? 0
+    }
+    if(!userData){
+      showToast('No se ha podido cargar la información del usuario', 'warning');
+    }
+    var optionchartStats = {
+      chart: {
+        height: 500,
+        type: "radialBar",
+      },
+      series: [
+        userData.wins/userData.races*100,
+        userData.podiums/userData.races*100,
+        userData.top5/userData.races*100,
+        userData.top10/userData.races*100,
+        userData.dnf/userData.races*100],
+      plotOptions: {
+        radialBar: {
+            inverseOrder: false,
+            startAngle: -90,
+            endAngle: 90,
+            offsetX: 0,
+            offsetY: 0,
+            hollow:{
+                margin: 7,
+                size: '25%',
+                background: "transparent",
+                position: 'back',
+            },
+            track: {
+                show: true,
+                startAngle: -90,
+                endAngle: 90,
+                background: "#f7f7f7",
+                strokeWidth: '65%',
+                opacity: 0.15,
+                margin: 7,
+            },
+            dataLabels: {
+                show: true,
+                name: {
+                    show: true,
+                    fontSize: '24px',
+                    fontWeight: 600,
+                    offsetY: -5
+                  },
+                  value: {
+                    show: true,
+                    fontSize: '24px',
+                    color: '#f9f9f9',
+                    offsetY: 5,
+                    formatter: function (val: any) {
+                      return Math.round((Number(val)/100)*userData.races);
+                    }
+                  },
+                  total: {
+                    show: true,
+                    label: 'Carreras',
+                    color: '#f9f9f9',
+                    fontSize: '24px',
+                    fontWeight: 600,
+                    formatter: function () {
+                      return  userData.races
+                    }
+                }
+            },
+            barLabels: {
+                enabled: false,
+                offsetX: 0,
+                offsetY: 5,
+                useSeriesColors: true,
+                fontWeight: 600,
+                fontSize: '15px'
+            },
+        }
+    },
+      labels: ['Victorias', 'Podios', 'Top 5', 'Top 10', 'DNF'],
+      colors: [
+          "#ffec00",
+          "#37ffed",
+          "#ff0b90",
+          "#00ff1b",
+          "#ff2300",
+        ],
+    };
+
+    new ApexCharts(document.querySelector("#chartStatsDriver"), optionchartStats).render();
 
     initializeProfileButton();
     document.addEventListener('astro:page-load', initializeProfileButton);
