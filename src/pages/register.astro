@@ -13,7 +13,7 @@ if (accessToken && refreshToken) {
 }
 ---
 
-<Layout title="Registrarse">
+<Layout title="ESP Racing: Registrarse">
   <div
     class="absolute bottom-0 left-0 w-full h-full overflow-hidden leading-5 bg-[#f0f0f0] top-72 -z-10 bg-gradient-to-b from-primary via-primary to-darkPrimary"
   >
@@ -69,22 +69,6 @@ if (accessToken && refreshToken) {
             placeholder="Email"
           />
 
-          <div class="relative" x-data="{ show: true }">
-            <input
-              :type="show ? 'password' : 'text'"
-              name="password"
-              id="password"
-              class="w-full px-4 py-3 text-sm text-darkPrimary bg-gray-200 border border-gray-200 rounded-lg focus:bg-gray-100 focus:outline-none focus:border-darkPrimary focus:text-darkSecond"
-              placeholder="Contraseña"
-            />
-            <div
-              class="absolute inset-y-0 right-0 flex items-center mr-3 text-sm leading-5"
-            >
-              <OpenEye />
-              <CloseEye />
-            </div>
-          </div>
-
           <input
             class="w-full px-4 py-3 text-sm text-darkPrimary bg-gray-200 border border-gray-200 rounded-lg focus:bg-gray-100 focus:outline-none focus:border-darkPrimary focus:text-darkSecond"
             type="text"
@@ -92,25 +76,92 @@ if (accessToken && refreshToken) {
             id="steam_id"
             placeholder="Steam ID"
           />
-          <a href="https://www.steamidfinder.com/"
-            target="_blank"
-            title="AYUDA: si no sabes como mirar tu SteamID, pincha aqui"
-            class = "text-black flex-grow">
-            Donde sacar tu SteamID:
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="black"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              class="w-4 h-4 justify-end no-underline">
-              <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-              <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" />
-              <path d="M12 16v.01" />
-              <path d="M12 13a2 2 0 0 0 .914 -3.782a1.98 1.98 0 0 0 -2.414 .483" />
-            </svg>
-          </a>
+
+          <div class="space-y-3">
+            <div class="relative" x-data="{ show: true }">
+              <input
+                :type="show ? 'password' : 'text'"
+                name="password"
+                id="password"
+                class="w-full px-4 py-3 text-sm text-darkPrimary bg-gray-200 border border-gray-200 rounded-lg focus:bg-gray-100 focus:outline-none focus:border-darkPrimary focus:text-darkSecond"
+                placeholder="Contraseña"
+              />
+              <div
+                class="absolute inset-y-0 right-0 flex items-center mr-3 text-sm leading-5"
+              >
+                  <OpenEye/>
+                  <CloseEye/>
+              </div>
+            </div>
+
+            <!-- Barra Seguridad Contraseña -->
+            <div class="h-1.5 rounded-full bg-gray-200 overflow-hidden">
+              <div id="strengthBar" class="h-full w-0 transition-all duration-300 bg-gradient-to-r from-primary to-[#fcba02] "></div>
+            </div>
+
+            <!-- Texto Seguridad Contraseña -->
+            <div id="strengthLevel" class="text-sm text-gray-600">Nivel: Muy Débil</div>
+
+            <!-- Requisitos -->
+            <div class="space-y-2 text-sm">
+              <div class="text-gray-600 mb-1">Tu contraseña debería contener:</div>
+              <div id="lengthCheck" class="flex items-center gap-2 text-gray-400">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                  <path class="check-icon hidden" stroke-width="2" d="M9 12l2 2 4-4"/>
+                </svg>
+                <span>Mínimo 8 caracteres</span>
+              </div>
+              <div id="lowercaseCheck" class="flex items-center gap-2 text-gray-400">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                  <path class="check-icon hidden" stroke-width="2" d="M9 12l2 2 4-4"/>
+                </svg>
+                <span>Debe contener minúsculas</span>
+              </div>
+              <div id="uppercaseCheck" class="flex items-center gap-2 text-gray-400">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                  <path class="check-icon hidden" stroke-width="2" d="M9 12l2 2 4-4"/>
+                </svg>
+                <span>Debe contener mayúsculas</span>
+              </div>
+              <div id="numberCheck" class="flex items-center gap-2 text-gray-400">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                  <path class="check-icon hidden" stroke-width="2" d="M9 12l2 2 4-4"/>
+                </svg>
+                <span>Debe contener números</span>
+              </div>
+              <div id="specialCheck" class="flex items-center gap-2 text-gray-400">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                  <path class="check-icon hidden" stroke-width="2" d="M9 12l2 2 4-4"/>
+                </svg>
+                <span>Debe contener caracteres especiales</span>
+              </div>
+            </div>
+          </div>
+
+            <a href="https://www.steamidfinder.com/"
+              target="_blank"
+              title="AYUDA: si no sabes como mirar tu SteamID, pincha aqui"
+              class="text-gray-600 text-sm flex items-center gap-1">
+              Donde sacar tu SteamID:
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="black"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="w-4 h-4">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" />
+                <path d="M12 16v.01" />
+                <path d="M12 13a2 2 0 0 0 .914 -3.782a1.98 1.98 0 0 0 -2.414 .483" />
+              </svg>
+            </a>
 
 
           <button
@@ -124,6 +175,81 @@ if (accessToken && refreshToken) {
     </form>
   </div>
 </Layout>
+
+<style>
+  .check-icon {
+    display: none;
+  }
+
+  .requirement-met {
+    color: rgb(34 197 94); /* text-green-500 */
+  }
+
+  .requirement-met .check-icon {
+    display: block;
+  }
+</style>
+
+<script is:inline>
+  document.addEventListener('astro:page-load', () => {
+    const passwordInput = document.getElementById('password');
+    const strengthBar = document.getElementById('strengthBar');
+    const strengthLevel = document.getElementById('strengthLevel');
+    const requirements = {
+      lengthCheck: document.getElementById('lengthCheck'),
+      lowercaseCheck: document.getElementById('lowercaseCheck'),
+      uppercaseCheck: document.getElementById('uppercaseCheck'),
+      numberCheck: document.getElementById('numberCheck'),
+      specialCheck: document.getElementById('specialCheck'),
+    };
+
+    const checkPassword = (password) => {
+      return {
+        length: password.length >= 8,
+        lowercase: /[a-z]/.test(password),
+        uppercase: /[A-Z]/.test(password),
+        number: /[0-9]/.test(password),
+        special: /[^A-Za-z0-9]/.test(password),
+      };
+    };
+
+    const updateUI = (checks) => {
+      const passedChecks = Object.values(checks).filter(Boolean).length;
+      const strength = (passedChecks / 5) * 100;
+
+      if (strengthBar) {
+        strengthBar.style.width = `${strength}%`;
+      }
+
+      if (strengthLevel) {
+        const levels = ['Muy Débil', 'Débil', 'Media', 'Fuerte', 'Muy Fuerte'];
+        const levelIndex = Math.floor((passedChecks / 5) * 4);
+        strengthLevel.textContent = `Nivel: ${levels[levelIndex]}`;
+      }
+
+      Object.entries(requirements).forEach(([key, element]) => {
+        if (checks[key.replace('Check', '')]) {
+          element?.classList.add('requirement-met');
+        } else {
+          element?.classList.remove('requirement-met');
+        }
+      });
+    };
+
+    const handlePasswordInput = (e) => {
+      const password = e.target.value;
+      const checks = checkPassword(password);
+      updateUI(checks);
+    };
+
+    passwordInput?.addEventListener('input', handlePasswordInput);
+
+    // Ejecutar la validación inicial si hay un valor en el campo de contraseña
+    if (passwordInput?.value) {
+      handlePasswordInput({ target: passwordInput });
+    }
+  });
+</script>
 
 <script
   is:inline
