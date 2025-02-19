@@ -1,7 +1,6 @@
 ---
 import Layout from "@/layouts/ProfileLayout.astro";
 import { supabase } from "@/db/supabase";
-import ApexCharts from 'apexcharts';
 
 // ****************************************************************************
 
@@ -243,128 +242,145 @@ const canUpdateFlag: boolean = diffHours > 48;
         }
       }
 
-    const updateStatsBtn = document.getElementById('updateStats');
-    if (updateStatsBtn) {
-      updateStatsBtn.addEventListener('click', async () => {
-        try {
-          const userId = updateStatsBtn.getAttribute('data-id');
-          const response = await fetch('/api/admin/stats/newUserStats', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ userId })
-          });
+    function showStats(){
+      const chartElement = document.getElementById('chartStatsDriver');
 
-          const data = await response.json();
+      if (!chartElement || chartElement.hasChildNodes()) {
+        return;
+      }
 
-          if (!response.ok) {
-            throw new Error(data.error);
+      const userData: userDataRaces = {
+        races: Number(document.getElementById('chartStatsDriver')?.getAttribute('data-driverraces')) ?? 0,
+        wins: Number(document.getElementById('chartStatsDriver')?.getAttribute('data-driverwins')) ?? 0,
+        podiums: Number(document.getElementById('chartStatsDriver')?.getAttribute('data-driverpodiums')) ?? 0,
+        top5: Number(document.getElementById('chartStatsDriver')?.getAttribute('data-drivertop5')) ?? 0,
+        top10: Number(document.getElementById('chartStatsDriver')?.getAttribute('data-drivertop10')) ?? 0,
+        dnf: Number(document.getElementById('chartStatsDriver')?.getAttribute('data-driverdnf')) ?? 0
+      }
+      if(!userData.races){
+        showToast('No se ha podido cargar la información del usuario', 'warning');
+        return;
+      }
+      var optionchartStats = {
+        chart: {
+          height: 500,
+          type: "radialBar",
+        },
+        series: [
+          userData.wins/userData.races*100,
+          userData.podiums/userData.races*100,
+          userData.top5/userData.races*100,
+          userData.top10/userData.races*100,
+          userData.dnf/userData.races*100],
+        plotOptions: {
+          radialBar: {
+              inverseOrder: false,
+              startAngle: -90,
+              endAngle: 90,
+              offsetX: 0,
+              offsetY: 0,
+              hollow:{
+                  margin: 7,
+                  size: '25%',
+                  background: "transparent",
+                  position: 'back',
+              },
+              track: {
+                  show: true,
+                  startAngle: -90,
+                  endAngle: 90,
+                  background: "#f7f7f7",
+                  strokeWidth: '65%',
+                  opacity: 0.15,
+                  margin: 7,
+              },
+              dataLabels: {
+                  show: true,
+                  name: {
+                      show: true,
+                      fontSize: '24px',
+                      fontWeight: 600,
+                      offsetY: -5
+                    },
+                    value: {
+                      show: true,
+                      fontSize: '24px',
+                      color: '#f9f9f9',
+                      offsetY: 5,
+                      formatter: function (val: any) {
+                        return Math.round((Number(val)/100)*userData.races);
+                      }
+                    },
+                    total: {
+                      show: true,
+                      label: 'Carreras',
+                      color: '#f9f9f9',
+                      fontSize: '24px',
+                      fontWeight: 600,
+                      formatter: function () {
+                        return  userData.races
+                      }
+                  }
+              },
+              barLabels: {
+                  enabled: false,
+                  offsetX: 0,
+                  offsetY: 5,
+                  useSeriesColors: true,
+                  fontWeight: 600,
+                  fontSize: '15px'
+              },
           }
+      },
+        labels: ['Victorias', 'Podios', 'Top 5', 'Top 10', 'DNF'],
+        colors: [
+            "#ffec00",
+            "#37ffed",
+            "#ff0b90",
+            "#00ff1b",
+            "#ff2300",
+          ],
+      };
 
-          window.location.reload();
-        } catch (error: any) {
-          alert(error.message || 'Error al actualizar las estadísticas');
+      new ApexCharts(document.querySelector("#chartStatsDriver"), optionchartStats).render();
+    }
+
+    const updateStatsBtn = document.getElementById('updateStats');
+      if (updateStatsBtn) {
+        updateStatsBtn.addEventListener('click', async () => {
+          try {
+            const userId = updateStatsBtn.getAttribute('data-id');
+            const response = await fetch('/api/admin/stats/newUserStats', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ userId })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+              throw new Error(data.error);
+            }
+
+            window.location.reload();
+          } catch (error: any) {
+            alert(error.message || 'Error al actualizar las estadísticas');
+          }
+        });
+      }
+
+      initializeProfileButton();
+      showStats();
+      document.addEventListener('astro:page-load', initializeProfileButton);
+      document.addEventListener('astro:page-load', () => {
+        const chartElement = document.getElementById('chartStatsDriver');
+        if (chartElement) {
+          chartElement.innerHTML = '';
+          showStats();
         }
       });
-    }
-    const userData: userDataRaces = {
-      races: Number(document.getElementById('chartStatsDriver')?.getAttribute('data-driverraces')) ?? 0,
-      wins: Number(document.getElementById('chartStatsDriver')?.getAttribute('data-driverwins')) ?? 0,
-      podiums: Number(document.getElementById('chartStatsDriver')?.getAttribute('data-driverpodiums')) ?? 0,
-      top5: Number(document.getElementById('chartStatsDriver')?.getAttribute('data-drivertop5')) ?? 0,
-      top10: Number(document.getElementById('chartStatsDriver')?.getAttribute('data-drivertop10')) ?? 0,
-      dnf: Number(document.getElementById('chartStatsDriver')?.getAttribute('data-driverdnf')) ?? 0
-    }
-    if(!userData){
-      showToast('No se ha podido cargar la información del usuario', 'warning');
-    }
-    var optionchartStats = {
-      chart: {
-        height: 500,
-        type: "radialBar",
-      },
-      series: [
-        userData.wins/userData.races*100,
-        userData.podiums/userData.races*100,
-        userData.top5/userData.races*100,
-        userData.top10/userData.races*100,
-        userData.dnf/userData.races*100],
-      plotOptions: {
-        radialBar: {
-            inverseOrder: false,
-            startAngle: -90,
-            endAngle: 90,
-            offsetX: 0,
-            offsetY: 0,
-            hollow:{
-                margin: 7,
-                size: '25%',
-                background: "transparent",
-                position: 'back',
-            },
-            track: {
-                show: true,
-                startAngle: -90,
-                endAngle: 90,
-                background: "#f7f7f7",
-                strokeWidth: '65%',
-                opacity: 0.15,
-                margin: 7,
-            },
-            dataLabels: {
-                show: true,
-                name: {
-                    show: true,
-                    fontSize: '24px',
-                    fontWeight: 600,
-                    offsetY: -5
-                  },
-                  value: {
-                    show: true,
-                    fontSize: '24px',
-                    color: '#f9f9f9',
-                    offsetY: 5,
-                    formatter: function (val: any) {
-                      return Math.round((Number(val)/100)*userData.races);
-                    }
-                  },
-                  total: {
-                    show: true,
-                    label: 'Carreras',
-                    color: '#f9f9f9',
-                    fontSize: '24px',
-                    fontWeight: 600,
-                    formatter: function () {
-                      return  userData.races
-                    }
-                }
-            },
-            barLabels: {
-                enabled: false,
-                offsetX: 0,
-                offsetY: 5,
-                useSeriesColors: true,
-                fontWeight: 600,
-                fontSize: '15px'
-            },
-        }
-    },
-      labels: ['Victorias', 'Podios', 'Top 5', 'Top 10', 'DNF'],
-      colors: [
-          "#ffec00",
-          "#37ffed",
-          "#ff0b90",
-          "#00ff1b",
-          "#ff2300",
-        ],
-    };
-
-    new ApexCharts(document.querySelector("#chartStatsDriver"), optionchartStats).render();
-
-    initializeProfileButton();
-    document.addEventListener('astro:page-load', initializeProfileButton);
-
   </script>
 
 </Layout>
