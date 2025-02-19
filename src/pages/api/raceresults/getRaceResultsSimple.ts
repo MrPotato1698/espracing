@@ -8,6 +8,12 @@ import type { CarData } from "@/types/Utils";
 /* *************************** */
 
 function initializeScript() {
+	const isResultsPage = document.getElementById('tablaResultados') !== null;
+
+	if (!isResultsPage) {
+	  return; // Salir si no estamos en la página de resultados
+	}
+
 	const loadButton = document.getElementById('loadButtonSimpleResults');
 	const opcionesTabla = document.getElementById('select-race') as HTMLSelectElement;
 	const tablaResultados = document.getElementById('tablaResultados');
@@ -43,7 +49,7 @@ function initializeScript() {
 				FastestLap: resultSetData.pointsystem.fastestlap
 			};
 
-			console.log('Datos a usar: ', datos);
+			//console.log('Datos a usar: ', datos);
 
 			let carData: CarData[] = [];
 			for (let carResume of datos.RaceCarResume) {

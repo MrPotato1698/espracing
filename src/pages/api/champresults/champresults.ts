@@ -1,10 +1,10 @@
 import ApexCharts from 'apexcharts';
 import { supabase } from "@/db/supabase";
-import { getResultTableData, showToast, formatTwoIntegersPlusThreeDecimals, formatTwoIntegers } from "@/lib/utils";
+import { showToast } from "@/lib/utils";
 
 import type { Points } from "@/types/Points";
-import type { RaceData, RaceResult, RaceLap, BestLap, Consistency, BestSector, Incident, RaceConfig, RaceDriversResume, RaceCarResume } from "@/types/Results";
-import type { CarData, CircuitData, ChampResults, ChampRacesData } from "@/types/Utils";
+import type { RaceResult,RaceCarResume } from "@/types/Results";
+import type { CarData, ChampRacesData } from "@/types/Utils";
 
 /* *************************** */
 interface DriverDataChamp {
@@ -40,6 +40,11 @@ interface TeamDataChamp {
 /* *************************** */
 
 async function initializeScript() {
+  const isResultsPage = document.getElementById('resultsIndyChampsTable') !== null;
+
+	if (!isResultsPage) {
+	  return; // Salir si no estamos en la página de resultados
+	}
   const loadButton = document.getElementById('loadButtonChamp');
 
   const opcionesChamps = document.getElementById('select-champ') as HTMLSelectElement;
@@ -62,7 +67,7 @@ async function initializeScript() {
 
       const dataRAW = await response.json();
       const championshipData: ChampRacesData[] = dataRAW.champRacesData;
-      console.log('Championship Data:', championshipData);
+      //console.log('Championship Data:', championshipData);
 
 
       const numRaces = championshipData.length;
@@ -428,8 +433,6 @@ async function initializeScript() {
         const Driver2GUID = itemTeam.guidDriver2;
         const totalPoints = itemTeam.points;
 
-        //console.log('Equipo: ' + TeamName + ' - Piloto 1: ' + Driver1GUID + ' - Piloto 2: ' + Driver2GUID);
-
         if (posTeam % 2 === 0) {
           tablaTeamChampsHTML += `<tr class="bg-darkPrimary">`;
         } else {
@@ -561,10 +564,8 @@ async function initializeScript() {
                 <span ${fastestLapDriver2Class}>${driver2Points}</span> + <span ${fastestLapDriver1Class}>${driver1Points}</span> ( ${posicionFinalDriver2} / ${posicionFinalDriver1} )
               </td>`;
           }
-
         }
         tablaTeamChampsHTML += `</tr>`;
-
       }
 
       // *** Cambios de posiciones de equipos ***
@@ -766,6 +767,7 @@ async function initializeScript() {
       }
 
     } catch (error) {
+      showToast('Error al cargar los datos del campeonato.' + error, 'error');
       console.error('Error al cargar los datos del campeonato: ' + error);
     }
 
@@ -774,6 +776,7 @@ async function initializeScript() {
   if (loadButton) {
     loadButton.addEventListener('click', loadData);
   } else {
+    showToast('Elemento con id "loadButton" no encontrado.', 'error');
     console.error('Elemento con id "loadButton" no encontrado.');
   }
 }

@@ -9,8 +9,14 @@ import type { CarData, CircuitData } from "@/types/Utils";
 /* *************************** */
 
 function initializeScript() {
+  
   async function loadData() {
     try {
+      const isResultsPage = document.getElementById('chartChangePosition') !== null;
+
+      if (!isResultsPage) {
+        return; // Salir si no estamos en la página de resultados
+      }
       const filenameRace = window.location.pathname.split('/').pop(); // Obtiene el ID de la URL
       if (!filenameRace) return;
 
@@ -37,7 +43,7 @@ function initializeScript() {
       }
 
       // *** Datos de la carrera (JSON Completo) ***
-      console.log('Filename: ', filenameRace);
+      //console.log('Filename: ', filenameRace);
       const { data: resultSetData, error } = await supabase
         .from("race")
         .select("pointsystem!inner(name, points, fastestlap), race_data_1")
@@ -75,7 +81,7 @@ function initializeScript() {
         FastestLap: resultSetData.pointsystem.fastestlap,
       };
 
-      console.log("Datos a usar: ", datos);
+      //console.log("Datos a usar: ", datos);
 
       // Datos de los coches involucrados en la carrera
       let carData: CarData[] = [];
@@ -98,7 +104,7 @@ function initializeScript() {
             imgbrand: carDataSupabase.carbrand?.imgbrand ?? "",
           });
         } else {
-          console.log("Error al obtener los datos del coche: ", errorCarData);
+          console.error("Error al obtener los datos del coche: ", errorCarData);
         }
       }
 
