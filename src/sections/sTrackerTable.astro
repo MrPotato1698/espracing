@@ -2,6 +2,7 @@
 import { parse } from "node-html-parser";
 import { TimingData } from "@/mock/TimingData"
 import { supabase } from "@/db/supabase";
+import { showToast } from "@/lib/utils";
 
 import type { CarData } from "@/types/Utils";
 
@@ -15,7 +16,12 @@ async function getLapStats() {
     } else {
       // En producción, obtener datos reales
       const response = await fetch('https://es2.assettohosting.com:10018/stracker/lapstat');
+      if(response.status !== 200){
+        showToast("Error al obtener los datos de la tabla de vueltas: "+ response.statusText, "warning");
+        throw new Error("No se pudo obtener los datos de la tabla de vueltas");
+      }
       html = await response.text();
+
     }
 
     const root = parse(html);
