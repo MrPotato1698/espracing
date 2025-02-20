@@ -22,12 +22,22 @@ export interface ResultTableData {
 }
 
 export interface CarData{
-    filename: string;
-    brand: string;
-    model: string;
-    classShortName: string;
-    classColor: string;
-    imgbrand: string;
+  id: number
+  filename: string
+  model: string
+  year: number
+  location: string
+  power: number
+  torque: number
+  weight: number
+  description: string
+  tyreTimeChange: number
+  fuelLiterTime: number
+  maxLiter: number
+  brandID: number
+  brandName: string
+  classID: number
+  className: string
 }
 
 export interface CircuitData{
