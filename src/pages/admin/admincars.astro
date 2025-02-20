@@ -126,326 +126,257 @@ const carDataOrderer = carsData?.sort((a, b) => {
       class="box-border p-5 m-auto bg-darkPrimary rounded-md max-w-screen-2xl border border-primary"
     >
       <form id="uploadForm" data-astro-reload>
-        <label class="text-lightPrimary text-lg font-medium" for="filenameCarName">
-          Nombre de la carpeta del coche
-        </label>
-        <input
-          class="w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkSecond hover:border-primary"
-          type="text"
-          id="filenameCarName"
-          name="filenameCarName"
-          placeholder="ks_generic_car"
-        />
-
-        <label class="text-lightPrimary text-lg font-medium" for="carbrand">
-          Marca del coche
-        </label>
-        <select
-          class="w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkSecond hover:border-primary"
-          id="carbrand"
-          name="carbrand"
-        >
-          {
-            carBrandsData?.map((carBrand) => (
-              <option value={carBrand.id}>{carBrand.name}</option>
-            ))
-          }
-          <option value="new">Añadir nueva marca</option>
-        </select>
-
-        <!-- Nueva Marca de Coche -->
-        <div id="newBrandContainer" class="hidden">
-          <div
-            class="grid grid-cols-1 gap-4 bg-darkSecond px-2 pt-2 border border-primary rounded-xl sm:grid-cols-2"
-          >
-            <div>
-              <label
-                class="text-lightPrimary text-lg font-medium"
-                for="newBrandCar"
+        <div class="mb-6 p-6 border-2 border-primary rounded-lg bg-darkSecond">
+          <div class="mb-4">
+            <label class="block text-lightPrimary text-lg font-semibold mb-3">
+              Arrastra la carpeta del coche aquí
+            </label>
+            <div
+              id="dropZone"
+              class="flex flex-col items-center justify-center p-8 border-2 border-dashed border-primary rounded-lg bg-darkSecond text-lightPrimary cursor-pointer min-h-[150px] transition-colors hover:border-primary-dark"
               >
-                Marca
-              </label>
-              <input
-                class="w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkPrimary hover:border-primary"
-                type="text"
-                id="newBrandCar"
-                name="newBrandCar"
-                placeholder="Datsun"
-              />
-            </div>
-
-            <div>
-              <label
-                class="text-lightPrimary text-lg font-medium"
-                for="newImgBrandCar"
-              >
-                Imagen
-              </label>
-              <input
-                class="w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkPrimary hover:border-primary"
-                type="text"
-                id="newImgBrandCar"
-                name="newImgBrandCar"
-                placeholder="Datsun Logo"
-              />
-            </div>
-            <div>
-              <label
-                class="text-lightPrimary text-lg font-medium"
-                for="newCountryCar"
-              >
-                País
-              </label>
-              <input
-                class="w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkPrimary hover:border-primary"
-                type="text"
-                id="newCountryCar"
-                name="newCountryCar"
-                placeholder="Reino Unido"
-              />
-            </div>
-
-            <div>
-              <label
-                class="text-lightPrimary text-lg font-medium"
-                for="newFoundationCar"
-              >
-                Fundado en...
-              </label>
-              <input
-                class="w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkPrimary hover:border-primary"
-                type="number"
-                id="newFoundationCar"
-                name="newFoundationCar"
-                step="1"
-                min="1550"
-                placeholder="1935"
-              />
+              <svg class="w-12 h-12 mb-3 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+              </svg>
+              <span class="text-sm font-medium">Arrastra y suelta tu carpeta aquí</span>
+              <span class="text-xs text-lightSecond mt-1">o haz clic para seleccionar</span>
             </div>
           </div>
         </div>
 
-        <label class="text-lightPrimary text-lg font-medium" for="modelCar">
-          Modelo del coche
-        </label>
-        <input
-          class="w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkSecond hover:border-primary"
-          type="text"
-          id="modelCar"
-          name="modelCar"
-          placeholder="Model X V8"
-        />
-
-        <label class="text-lightPrimary text-lg font-medium" for="yearCar">
-          Año del coche
-        </label>
-        <input
-          class="w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkSecond hover:border-primary"
-          type="number"
-          id="yearCar"
-          name="yearCar"
-          step="1"
-          min="0"
-          placeholder="1998"
-        />
-
-        <label class="text-lightPrimary text-lg font-medium" for="carClasses">
-          Clase del coche
-        </label>
-        <select
-          class="w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkSecond hover:border-primary"
-          id="carClasses"
-          name="carClasses"
-        >
-          {
-            carClassesData?.map((carClass) => (
-              <option value={carClass.id}>{carClass.name}</option>
-            ))
-          }
-          <option value="new">Añadir nueva clase</option>
-        </select>
-
-        <!-- Nueva Clase -->
-        <div
-          id="newClassContainer"
-          class="hidden px-2 pt-2 bg-darkSecond border border-primary rounded-xl"
-        >
-          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-              <label
-                class="text-lightPrimary text-lg font-medium"
-                for="newClassName"
-              >
-                Nombre de Clase
-              </label>
-              <input
-                class="w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkPrimary hover:border-primary"
-                type="text"
-                id="newClassName"
-                name="newClassName"
-                placeholder="Gran Turismos X"
-              />
-            </div>
-
-            <div>
-              <label
-                class="text-lightPrimary text-lg font-medium"
-                for="newClassShortName"
-              >
-                Nombre de Clase Corto
-              </label>
-              <input
-                class="w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkPrimary hover:border-primary"
-                type="text"
-                id="newClassShortName"
-                name="newClassShortName"
-                placeholder="GTX"
-              />
-            </div>
-
-            <div>
-              <label
-                class="text-lightPrimary text-lg font-medium"
-                for="newClassBackgroundColor"
-              >
-                Color Fondo de Clase
-              </label>
-              <input
-                class="p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 text-white bg-darkPrimary hover:border-primary"
-                type="color"
-                id="newClassBackgroundColor"
-                name="newClassBackgroundColor"
-                value="#006fba"
-              />
-            </div>
-
-            <div>
-              <label
-                class="text-lightPrimary text-lg font-medium"
-                for="newClassTextColor"
-              >
-                Color Texto de Clase
-              </label>
-              <input
-                class="p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 text-white bg-darkPrimary hover:border-primary"
-                type="color"
-                id="newClassTextColor"
-                name="newClassTextColor"
-                value="#f9f9f9"
-              />
-            </div>
-
-            <div class="col-span-2">
+          <div class = "flex items-center gap-2">
+            <label class = "relative inline-flex cursor-pointer">
+              <input id = "switch-clean_install" type = "checkbox" class="peer sr-only" />
+              <label for = "switch-clean_install" class = "hidden"></label>
               <div
-                id="classPreview"
-                class="mb-2 p-4 rounded-md text-center font-bold w-2/4 mx-auto"
+                class = "peer h-4 w-11 rounded-full border bg-slate-200 after:absolute after:-top-1 after:left-0 after:h-6 after:w-6 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-full peer-focus:ring-primary"
               >
-                GTX
+              </div>
+            </label>
+            <label class = "text-lightPrimary text-lg font-medium" for="switch-clean_install">
+              Instalación limpia
+            </label>
+            <lable class = "text-lightSecond text-sm from-thin">
+            *(Recomendado activar para actualización de coches ya en el sistema)
+          </lable>
+          </div>
+        <div id = "fileData" class = "my-4 hidden">
+          <div id = "fileInfo" class = "my-4">
+            <div class = "text-sm text-lightPrimary bg-darkPrimary p-3 rounded-lg border border-primary">
+              <h3 class = "text-lg font-bold mb-2">Información detectada:</h3>
+              <div id = "preview">
+                <div class = "grid grid-cols-2 gap-4 text-left">
+                  <div>
+                    <p><span class = "font-semibold">Nombre del coche:</span> <span id = "previewName"></span></p>
+                    <p><span class = "font-semibold">Año:</span> <span id = "previewYear"></span></p>
+                    <p><span class = "font-semibold">País de Origen:</span> <span id = "previewLocation"></span></p>
+                    <p><span class = "font-semibold">Nombre de Carpeta:</span> <span id = "previewFolder"></span></p>
+                  </div>
+                  <div>
+                    <p><span class = "font-semibold">Clase:</span> <span id = "previewClass"></span></p>
+                    <p><span class = "font-semibold">Potencia:</span> <span id = "previewPower"></span></p>
+                    <p><span class = "font-semibold">Par:</span> <span id = "previewTorque"></span></p>
+                    <p><span class = "font-semibold">Peso:</span> <span id = "previewWeight"></span></p>
+                  </div>
+                  <div>
+                    <p><span class = "font-semibold">Tiempo Cambio Gomas:</span> <span id = "previewTyreTime"></span></p>
+                    <p><span class = "font-semibold">Combustible MAX:</span> <span id = "previewMaxLiter"></span></p>
+                    <p><span class = "font-semibold">Tiempo de Respostaje:</span> <span id = "previewFuelLiterTime"></span></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <p>Si hay algún dato erroneo del coche, cambielo abajo:</p>
+
+          <label class = "text-lightPrimary text-lg font-medium" for="carbrand">
+            Marca del coche
+          </label>
+          <select
+            class = "w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkSecond hover:border-primary"
+            id = "carbrand"
+            name = "carbrand"
+          >
+          <option value = -1 > -- No variar -- </option>
+            {
+              carBrandsData?.map((carBrand) => (
+                <option value={carBrand.id}>{carBrand.name}</option>
+              ))
+            }
+            <option value = -2>Añadir nueva marca</option>
+          </select>
+
+          <!-- Nueva Marca de Coche -->
+          <div id="newBrandContainer" class="hidden">
+            <div
+              class="grid grid-cols-1 gap-4 bg-darkSecond px-2 pt-2 border border-primary rounded-xl sm:grid-cols-2"
+            >
+              <div>
+                <label
+                  class="text-lightPrimary text-lg font-medium"
+                  for="newBrandCar"
+                >
+                  Marca
+                </label>
+                <input
+                  class="w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkPrimary hover:border-primary"
+                  type="text"
+                  id="newBrandCar"
+                  name="newBrandCar"
+                  placeholder="Datsun"
+                />
+              </div>
+
+              <div>
+                <label
+                  class="text-lightPrimary text-lg font-medium"
+                  for="newImgBrandCar"
+                >
+                  Imagen
+                </label>
+                <input
+                  class="w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkPrimary hover:border-primary"
+                  type="text"
+                  id="newImgBrandCar"
+                  name="newImgBrandCar"
+                  placeholder="Datsun Logo"
+                />
+              </div>
+              <div>
+                <label
+                  class="text-lightPrimary text-lg font-medium"
+                  for="newCountryCar"
+                >
+                  País
+                </label>
+                <input
+                  class="w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkPrimary hover:border-primary"
+                  type="text"
+                  id="newCountryCar"
+                  name="newCountryCar"
+                  placeholder="Reino Unido"
+                />
+              </div>
+
+              <div>
+                <label
+                  class="text-lightPrimary text-lg font-medium"
+                  for="newFoundationCar"
+                >
+                  Fundado en...
+                </label>
+                <input
+                  class="w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkPrimary hover:border-primary"
+                  type="number"
+                  id="newFoundationCar"
+                  name="newFoundationCar"
+                  step="1"
+                  min="1550"
+                  placeholder="1935"
+                />
+              </div>
+            </div>
+          </div>
+
+          <label class = "text-lightPrimary text-lg font-medium" for = "carClasses">
+            Clase del coche
+          </label>
+          <select
+            class="w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkSecond hover:border-primary"
+            id="carClasses"
+            name="carClasses"
+          >
+            <option value = -1 > -- No variar -- </option>
+            {
+              carClassesData?.map((carClass) => (
+                <option value={carClass.id}>{carClass.name}</option>
+              ))
+            }
+            <option value = -2>Añadir nueva clase</option>
+          </select>
+
+          <!-- Nueva Clase -->
+          <div
+            id="newClassContainer"
+            class="hidden px-2 pt-2 bg-darkSecond border border-primary rounded-xl"
+          >
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div>
+                <label
+                  class="text-lightPrimary text-lg font-medium"
+                  for="newClassName"
+                >
+                  Nombre de Clase
+                </label>
+                <input
+                  class="w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkPrimary hover:border-primary"
+                  type="text"
+                  id="newClassName"
+                  name="newClassName"
+                  placeholder="Gran Turismos X"
+                />
+              </div>
+
+              <div>
+                <label
+                  class="text-lightPrimary text-lg font-medium"
+                  for="newClassShortName"
+                >
+                  Nombre de Clase Corto
+                </label>
+                <input
+                  class="w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkPrimary hover:border-primary"
+                  type="text"
+                  id="newClassShortName"
+                  name="newClassShortName"
+                  placeholder="GTX"
+                />
+              </div>
+
+              <div>
+                <label
+                  class="text-lightPrimary text-lg font-medium"
+                  for="newClassBackgroundColor"
+                >
+                  Color Fondo de Clase
+                </label>
+                <input
+                  class="p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 text-white bg-darkPrimary hover:border-primary"
+                  type="color"
+                  id="newClassBackgroundColor"
+                  name="newClassBackgroundColor"
+                  value="#006fba"
+                />
+              </div>
+
+              <div>
+                <label
+                  class="text-lightPrimary text-lg font-medium"
+                  for="newClassTextColor"
+                >
+                  Color Texto de Clase
+                </label>
+                <input
+                  class="p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 text-white bg-darkPrimary hover:border-primary"
+                  type="color"
+                  id="newClassTextColor"
+                  name="newClassTextColor"
+                  value="#f9f9f9"
+                />
+              </div>
+
+              <div class="col-span-2">
+                <div
+                  id="classPreview"
+                  class="mb-2 p-4 rounded-md text-center font-bold w-2/4 mx-auto"
+                >
+                  GTX
+                </div>
               </div>
             </div>
           </div>
         </div>
-
-        <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-          <div>
-            <label class="text-lightPrimary text-lg font-medium" for="powerCar">
-              Potencia (en CV)
-            </label>
-            <input
-              class="w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkSecond hover:border-primary"
-              type="number"
-              id="powerCar"
-              name="powerCar"
-              step="1"
-              min="1"
-              placeholder="215"
-            />
-          </div>
-          <div>
-            <label class="text-lightPrimary text-lg font-medium" for="torqueCar">
-              Par (en N/m)
-            </label>
-            <input
-              class="w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkSecond hover:border-primary"
-              type="number"
-              id="torqueCar"
-              name="torqueCar"
-              step="1"
-              min="1"
-              placeholder="150"
-            />
-          </div>
-          <div>
-            <label class="text-lightPrimary text-lg font-medium" for="weightCar">
-              Peso (en Kg)
-            </label>
-            <input
-              class="w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkSecond hover:border-primary"
-              type="number"
-              id="weightCar"
-              name="weightCar"
-              step="1"
-              min="1"
-              placeholder="1250"
-            />
-          </div>
-          <div>
-            <label
-              class="text-lightPrimary text-lg font-medium"
-              for="tyreTimeChange"
-            >
-              Cambio de gomas (en segundos)
-            </label>
-            <input
-              class="w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkSecond hover:border-primary"
-              type="number"
-              id="tyreTimeChange"
-              name="tyreTimeChange"
-              step="0.01"
-              min="0.01"
-              placeholder="0.20"
-            />
-          </div>
-          <div>
-            <label
-              class="text-lightPrimary text-lg font-medium"
-              for="fuelLiterTime"
-            >
-              Refuel (seg/litros de combustible)
-            </label>
-            <input
-              class="w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkSecond hover:border-primary"
-              type="number"
-              id="fuelLiterTime"
-              name="fuelLiterTime"
-              step="0.01"
-              min="0.01"
-              placeholder="1.15"
-            />
-          </div>
-          <div>
-            <label class="text-lightPrimary text-lg font-medium" for="maxFuel">
-              Combustible MAX. (en litros)
-            </label>
-            <input
-              class="w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkSecond hover:border-primary"
-              type="number"
-              id="maxFuel"
-              name="maxFuel"
-              step="0.1"
-              min="0.1"
-              placeholder="100"
-            />
-          </div>
-        </div>
-        <label class="text-lightPrimary text-lg font-medium" for="descriptionCar">
-          Descripción breve del coche
-        </label>
-        <textarea
-          class="w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 text-white bg-darkSecond hover:border-primary max-h-96 min-h-28 resize-y"
-          id="descriptionCar"
-          name="descriptionCar"
-          placeholder="Cualquier descripción adicional del coche"></textarea>
 
         <input
           class="bg-primary text-white font-bold py-3 px-5 border-solid border-primary border-2 rounded-md hover:bg-darkSecond hover:text-lightPrimary mt-4"

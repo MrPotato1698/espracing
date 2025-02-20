@@ -1,82 +1,290 @@
 import { supabase } from '@/db/supabase';
+import { showToast } from '@/lib/utils';
+import { getDataACD } from '@/lib/ACDFile';
+
+import * as fs from 'fs';
+import * as path from 'path';
+import { gunzip, unzip } from 'fflate';
+
+import type { Database } from "database.types";
+import type { CarData } from '@/types/Utils';
+
+
+interface ProcessedCarData extends CarData {
+  cleanInstall: boolean;
+}
+
+interface CarJson {
+  name: string;
+  brand: string;
+  description: string;
+  class: string;
+  specs:{
+    bhp: string;
+    torque: string;
+    weight: string;
+  }
+  country: string;
+  year: number;
+}
 
 export function initCarManagement() {
   const form = document.getElementById("uploadForm") as HTMLFormElement;
+  const switchCleanInstall = document.getElementById("switch-clean_install") as HTMLInputElement | null;
+
+  const dropZone = document.getElementById("dropZone") as HTMLInputElement;
+  const fileData = document.getElementById('fileData') as HTMLElement;
+  const fileInfo = document.getElementById('fileInfo') as HTMLElement;
+
+  const previewName = document.getElementById('previewName') as HTMLElement;
+  const previewYear = document.getElementById('previewYear') as HTMLElement;
+  const previewLocation = document.getElementById('previewLocation') as HTMLElement;
+  const previewFolder = document.getElementById('previewFolder') as HTMLElement;
+  const previewClass = document.getElementById('previewClass') as HTMLElement;
+  const previewPower = document.getElementById('previewPower') as HTMLElement;
+  const previewTorque = document.getElementById('previewTorque') as HTMLElement;
+  const previewWeight = document.getElementById('previewWeight') as HTMLElement;
+  const previewTyreTime = document.getElementById('previewTyreTime') as HTMLElement;
+  const previewMaxLiter = document.getElementById('previewMaxLiter') as HTMLElement;
+  const previewFuelLiterTime = document.getElementById('previewFuelLiterTime') as HTMLElement;
+
+  const carBrandSelect = document.getElementById("carbrand") as HTMLSelectElement;
+
+  const newBrandCar = document.getElementById("newBrandCar") as HTMLSelectElement;
+  const newImgBrandCar = document.getElementById("newImgBrandCar") as HTMLSelectElement;
+  const newCountryCar = document.getElementById("newCountryCar") as HTMLSelectElement;
+  const newFoundationCar = document.getElementById("newFoundationCar") as HTMLSelectElement;
+
+  const carClassSelect = document.getElementById("carClasses") as HTMLSelectElement;
+
+  const newClassName = document.getElementById("newClassName") as HTMLSelectElement;
+  const newClassShortName = document.getElementById("newClassShortName") as HTMLSelectElement;
+  const newClassBackgroundColor = document.getElementById("newClassBackgroundColor") as HTMLSelectElement;
+  const newClassTextColor = document.getElementById("newClassTextColor") as HTMLSelectElement;
+
+  let carData: ProcessedCarData | null = null;
+
+  dropZone.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    dropZone.classList.add('border-darkPrimary', 'bg-darkSecond');
+  });
+
+  dropZone.addEventListener("dragleave", () => {
+    dropZone.classList.remove('border-darkPrimary', 'bg-darkSecond');
+  });
+
+  dropZone.addEventListener('drop', async (e) => {
+    e.preventDefault();
+    dropZone.classList.remove('border-darkPrimary', 'bg-darkSecond');
+
+    if (!e.dataTransfer?.items.length) return;
+    const entry = e.dataTransfer.items[0].webkitGetAsEntry();
+    if(entry?.isDirectory){
+      carData = await processDroppedFolder(entry);
+      updatePreview(carData);
+      fileData.classList.remove('hidden');
+    }
+  });
+
+  async function processDroppedFolder(rootEntry: any): Promise<ProcessedCarData> {
+    const result: ProcessedCarData = {
+      id: 0,
+      filename: rootEntry.name,
+      model: "",
+      year: 0,
+      location: "",
+      power: 0,
+      torque: 0,
+      weight: 0,
+      description: "",
+      tyreTimeChange: 0,
+      fuelLiterTime: 0,
+      maxLiter: 0,
+      brandID: 0,
+      brandName: "",
+      classID: 0,
+      className: "",
+
+      cleanInstall: switchCleanInstall?.checked || false,
+    };
+
+    const uiDir = await getDirectoryEntry(rootEntry, 'ui');
+
+    const baseData = await getCarBaseData(uiDir);
+    const extraCarData = await getDataACD(rootEntry, rootEntry.name);
+    Object.assign(result, baseData, extraCarData);
+
+    return result;
+  }
+
+  async function getDirectoryEntry(parent: any, name: string) {
+    return new Promise((resolve) => {
+      parent.getDirectory(name, { create: false }, resolve, () => resolve(null));
+    });
+  }
+
+  async function getCarBaseData(uiDir: any){
+    let baseData = {
+      model: '',
+      year: 0,
+      location: '',
+      power: 0,
+      torque: 0,
+      weight: 0,
+      description: '',
+      brandID: 0,
+      brandName: '',
+      classID: 0,
+      className: ''
+    };
+
+    if(uiDir){
+      try{
+        const baseJson = await getJsonFile(uiDir, 'ui_car.json');
+        let classData ={ id: -1, name: '', shortname: '' }
+        let brandData ={ id: -1, name: '' }
+        const { data: carClassCoincidence, error: carClassCoincidenceError } = await supabase
+          .from('carclass')
+          .select("id, name, short_name")
+          .like('name', '%'+(baseJson as CarJson).class+'%')
+          .single();
+
+        if(!carClassCoincidenceError) classData = { id: carClassCoincidence?.id || -1, name: carClassCoincidence?.name || 'No class', shortname: carClassCoincidence?.short_name || 'XXX'};
+
+        const { data: carBrandCoincidence, error: carBrandCoincidenceError } = await supabase
+          .from('carbrand')
+          .select("id, name")
+          .like('name', '%'+(baseJson as CarJson).brand+'%')
+          .single();
+
+        if(!carBrandCoincidenceError) brandData = { id: carBrandCoincidence?.id || -1, name: carBrandCoincidence?.name || 'No brand name'};
+
+        baseData= {
+          model: (baseJson as CarJson).name || 'No model name',
+          year: Number((baseJson as CarJson).name.split(' ')[0]) ?? 0,
+          location: (baseJson as CarJson).country || 'No location',
+          description: (baseJson as CarJson).description || 'No description',
+          power: Number((baseJson as CarJson).specs.bhp.replace(/\D/g, '')) || 0,
+          torque: Number((baseJson as CarJson).specs.torque.replace(/\D/g, '')) || 0,
+          weight: Number((baseJson as CarJson).specs.weight.replace(/\D/g, '')) || 0,
+          brandID: brandData.id,
+          brandName: brandData.name,
+          classID: classData.id,
+          className: classData.name + ' (' + classData.shortname + ')'
+
+        };
+      } catch {
+        baseData= {
+          model: "No model name",
+          year: 0,
+          location: "No location",
+          description: "No description",
+          power: 0,
+          torque: 0,
+          weight: 0,
+          brandID: -1,
+          brandName: "No brand name",
+          classID: -1,
+          className: "No class"
+        };
+
+      }
+    }
+    return baseData;
+  }
+
+  async function getJsonFile(dir: any, filename: string) {
+    return new Promise((resolve, reject) => {
+      dir.getFile(filename, { create: false }, (fileEntry: any) => {
+        fileEntry.file((file: File) => {
+          const reader = new FileReader();
+          reader.onload = () => {
+            const json = JSON.parse(reader.result as string);
+            if (typeof json === 'object' && json !== null) {
+              resolve(json as CarJson);
+            } else {
+              reject(new Error('Invalid JSON format'));
+            }
+          };
+          reader.onerror = reject;
+          reader.readAsText(file);
+        }, reject);
+      }, reject);
+    });
+  }
+
+  function updatePreview(data: ProcessedCarData){
+    previewName.textContent = data.brandName + ' ' + data.model;
+    previewYear.textContent = data.year?.toString();
+    previewLocation.textContent = data.location;
+    previewFolder.textContent = data.filename;
+
+    previewClass.textContent = data.className;
+    previewPower.textContent = data.power?.toString();
+    previewTorque.textContent = data.torque?.toString();
+    previewWeight.textContent = data.weight?.toString();
+
+    previewTyreTime.textContent = data.tyreTimeChange?.toString();
+    previewMaxLiter.textContent = data.maxLiter?.toString();
+    previewFuelLiterTime.textContent = data.fuelLiterTime?.toString();
+  }
 
   form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if(!carData) return;
+    const carClassValue = carClassSelect?.value;
+    const carBrandValue = carBrandSelect?.value;
+
     try {
-      const formData = new FormData(form);
-      const carfilename = formData.get('filenameCarName') as string;
+      let lastBrandID: Number = 0;
+      let lastClassID: Number = 0;
 
-      const carBrandSelect = formData.get("carbrand") as string;
+      switch (carBrandValue) {
+        case "-1": // No variar
+          lastBrandID = carData.brandID;
+          break;
 
-      const newBrandCar = formData.get("newBrandCar") as string;
-      const newImgBrandCar = formData.get("newImgBrandCar") as string;
-      const newCountryCar = formData.get("newCountryCar") as string;
-      const newFoundationCar = formData.get("newFoundationCar") as string;
+        case "-2": // Crear nueva marca
+          try {
+            const { data: getLastCarBrand } = await supabase
+              .from('carbrand')
+              .select('id')
+              .order('id', { ascending: false })
+              .limit(1)
+              .single();
 
-      const modelCar = formData.get("modelCar") as string;
-      const yearCar = formData.get("yearCar") as string;
+            lastBrandID = getLastCarBrand ? (getLastCarBrand.id + 1) : 1;
 
-      const carClassSelect = formData.get("carClasses") as string;
+            const { data: insertBrandData, error: insertBrandError } = await supabase
+              .from('carbrand')
+              .insert({
+                id: Number(lastBrandID),
+                name: String(newBrandCar),
+                imgbrand: String(newImgBrandCar),
+                location: String(newCountryCar),
+                foundation: Number(newFoundationCar.value)
+              });
+            if (insertBrandError) throw insertBrandError;
 
-      const newClassName = formData.get("newClassName") as string;
-      const newClassShortName = formData.get("newClassShortName") as string;
-      const newClassBackgroundColor = formData.get("newClassBackgroundColor") as string;
-      const newClassTextColor = formData.get("newClassTextColor") as string;
+          } catch (error) {
+            showToast("Error al crear la marca del coche: "+ error, "error");
+            console.log("Error al crear la marca del coche: "+ error);
+          }
+          break;
 
-      const powerCar = formData.get("powerCar") as string;
-      const torqueCar = formData.get("torqueCar") as string;
-      const weightCar = formData.get("weightCar") as string;
-      const tyreTimeChange = formData.get("tyreTimeChange") as string;
-      const fuelLiterTime = formData.get("fuelLiterTime") as string;
-      const maxFuel = formData.get("maxFuel") as string;
-      const descriptionCar = formData.get("descriptionCar") as string;
-
-      const { data: getLastCar } = await supabase
-        .from('car')
-        .select('id')
-        .order('id', { ascending: false })
-        .limit(1)
-        .single();
-
-      const lastCarID = getLastCar ? (getLastCar.id + 1) : 1;
-      let lastBrandID = 0;
-      let lastClassID = 0;
-
-      if (carBrandSelect === 'new') {
-        try {
-          const { data: getLastCarBrand } = await supabase
-            .from('carbrand')
-            .select('id')
-            .order('id', { ascending: false })
-            .limit(1)
-            .single();
-
-          lastBrandID = getLastCarBrand ? (getLastCarBrand.id + 1) : 1;
-
-          const { data: insertBrandData, error: insertBrandError } = await supabase
-            .from('carbrand')
-            .insert({
-              id: lastBrandID,
-              name: newBrandCar,
-              imgbrand: newImgBrandCar,
-              location: newCountryCar,
-              foundation: Number(newFoundationCar),
-            });
-          if (insertBrandError) throw insertBrandError;
-
-        } catch (error) {
-          console.error("Error al crear la marca del coche:", error);
-          alert("Hubo un error al crear la marca del coche. Por favor, inténtalo de nuevo.");
-        }
-      } else {
-        lastBrandID = Number(carBrandSelect);
+        default:
+          lastBrandID = Number(carBrandValue);
+          break;
       }
 
-      if (carClassSelect === 'new') {
-        try {
-          const { data: getLastClass } = await supabase
+      switch (carClassValue) {
+        case "-1": // No variar
+          lastClassID = carData.classID;
+          break;
+
+        case "-2": // Crear nueva clase
+          try {
+            const { data: getLastClass } = await supabase
             .from('carclass')
             .select('id')
             .order('id', { ascending: false })
@@ -90,51 +298,63 @@ export function initCarManagement() {
           const { data: insertBrandData, error: insertClassError } = await supabase
             .from('carclass')
             .insert({
-              id: lastClassID,
-              name: newClassName,
-              short_name: newClassShortName,
-              class_design: newClassDesign,
+              id: Number(lastClassID),
+              name: String(newClassName),
+              short_name: String(newClassShortName),
+              class_design: String(newClassDesign),
             });
 
           if (insertClassError) throw insertClassError;
 
-        } catch (error) {
-          console.error("Error al crear la clase del coche:", error);
-          alert("Hubo un error al crear la clase del coche. Por favor, inténtalo de nuevo.");
-        }
-      } else {
-        lastClassID = Number(carClassSelect);
+          } catch (error) {
+            showToast("Error al crear la clase: "+ error, "error");
+            console.log("Error al crear la clase: "+ error);
+          }
+          break;
+
+        default:
+          lastClassID = Number(carClassValue);
+          break;
       }
 
       console.log('BrandID' + lastBrandID);
       console.log('ClassID' + lastClassID);
 
+      const { data: getLastCar } = await supabase
+        .from('car')
+        .select('id')
+        .order('id', { ascending: false })
+        .limit(1)
+        .single();
+
+      const lastCarID = getLastCar ? (getLastCar.id + 1) : 1;
+
       const { data: insertData, error: insertError } = await supabase
         .from('car')
         .insert({
-          id: lastCarID,
-          filename: carfilename,
-          brand: lastBrandID,
-          model: modelCar,
-          year: Number(yearCar),
-          class: lastClassID,
-          power: Number(powerCar),
-          torque: Number(torqueCar),
-          weight: Number(weightCar),
-          description: descriptionCar,
-          tyreTimeChange: Number(tyreTimeChange),
-          fuelLiterTime: Number(fuelLiterTime),
-          maxLiter: Number(maxFuel),
+          id: Number(lastCarID),
+          filename: carData.filename,
+          brand: Number(lastBrandID),
+          model: carData.model,
+          year: carData.year,
+          class: Number(lastClassID),
+          power: carData.power,
+          torque: carData.torque,
+          weight: carData.weight,
+          description: carData.description,
+          tyreTimeChange: carData.tyreTimeChange,
+          fuelLiterTime: carData.fuelLiterTime,
+          maxLiter: carData.maxLiter,
         });
 
       if (insertError) throw insertError;
-      alert("Coche creado con éxito");
+      showToast("Coche creado con éxito", "success");
 
       form.reset();
       window.location.reload();
     } catch (error) {
       console.error("Error al crear el coche:", error);
-      alert("Hubo un error al crear el coche. Por favor, inténtalo de nuevo.");
+      showToast("Error al crear el coche: "+ error, "error");
     }
   });
 }
