@@ -25,18 +25,38 @@ const {data: raceData} = await supabase
       Estadistica completas de {raceData?.championship.name}: {raceData?.name}
     </p>
 
-    <div id="datosCircuito"></div>
-    <div id="tablaResultados"></div>
-    <div id="chartChangePosition" class="w-11/12 mx-auto mt-4 border-2 rounded-lg border-primary"></div>
-    <div id="chartGaps" class="w-11/12 mx-auto mt-4 border-2 rounded-lg border-primary"></div>
-    <div class="grid gap-2 mx-auto mt-4 sectorTables">
-      <div id="tablaS1"></div>
-      <div id="tablaS2"></div>
-      <div id="tablaS3"></div>
-      <div id="tablaS4"></div>
-      <div id="tablaS5"></div>
+    <div id = "datosCircuito"></div>
+    <div id = "tablaResultados"></div>
+    <div class = "w-11/12 mx-auto mt-4 border-2 rounded-lg border-primary hidden" id="chartChangePosition">
+      <div id = "chartChangePosition1"></div>
+      <div id = "chartChangePosition2"></div>
     </div>
-    <div id="tableIndividualLaps"></div>
+    <div class = "w-11/12 mx-auto mt-4 border-2 rounded-lg border-primary hidden" id="chartGaps">
+      <div id = "chartGaps1" ></div>
+      <div id = "chartGaps2"></div>
+    </div>
+    <div id = "sectorTableR1">
+      <div id = "titleSectorR1"></div>
+      <div class="grid gap-2 mx-auto sectorTables">
+        <div id="tablaS1R1"></div>
+        <div id="tablaS2R1"></div>
+        <div id="tablaS3R1"></div>
+        <div id="tablaS4R1"></div>
+        <div id="tablaS5R1"></div>
+      </div>
+    </div>
+    <div id = "sectorTableR2" class="mt-4 hidden">
+      <div id = "titleSectorR2"></div>
+      <div class="grid gap-2 mx-auto sectorTables">
+        <div id="tablaS1R2"></div>
+        <div id="tablaS2R2"></div>
+        <div id="tablaS3R2"></div>
+        <div id="tablaS4R2"></div>
+        <div id="tablaS5R2"></div>
+      </div>
+    </div>
+    <div id="tableIndividualLaps1"></div>
+    <div id="tableIndividualLaps2" class = "hidden mt-4"></div>
   </div>
 </Layout>
 

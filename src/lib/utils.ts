@@ -276,7 +276,7 @@ export function getResultTableData(datos: RaceData, pointsystemName: String, poi
     let flapClass = "";
     if (bestlapDriverID === itemResult.SteamID) {
       if (pos >= -1) {
-        flapClass = ' bg-[#c100ff] text-white font-bold rounded-full w-content px-5';
+        flapClass = ' bg-[#c100ff] text-white font-bold rounded-full w-content px-2';
       } else {
         flapClass = '';
       }

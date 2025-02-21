@@ -71,16 +71,44 @@ async function initializeScript() {
 
 
       const numRaces = championshipData.length;
+      let numRaceProccesed = 0;
+      let flagRace2 = false;
 
-      const RacesChamp: RaceDataChamp[] = championshipData.map((raceData, index) => {
-        return {
-          raceNumber: index + 1,
-          name: raceData.raceData1?.RaceConfig.Track+'@'+raceData.raceData1?.RaceConfig.TrackLayout || '',
-          results: raceData.raceData1?.RaceResult || [],
-          pointSystem: raceData.points,
-          driverFastestLapGuid: raceData.raceData1?.BestLap[0].SteamID || ''
-        };
-      });
+      let RacesChamp: RaceDataChamp[] = [];
+
+      for(let i = 0; i < numRaces; i++){
+        numRaceProccesed++;
+        if(championshipData[i].raceData2){
+          !flagRace2 ? flagRace2 = true : null;
+
+          const auxRacesChamps ={
+            raceNumber: 0,
+            name: championshipData[i].raceData1?.RaceConfig.Track+'@'+championshipData[i].raceData1?.RaceConfig.TrackLayout || '',
+            results: championshipData[i].raceData1?.RaceResult || [],
+            pointSystem: championshipData[i].points,
+            driverFastestLapGuid: championshipData[i].raceData1?.BestLap[0].SteamID || ''
+          } as RaceDataChamp;
+          RacesChamp.push(auxRacesChamps);
+
+          numRaceProccesed++;
+          const auxRacesChamps2 ={
+            raceNumber: 0,
+            name: championshipData[i].raceData2?.RaceConfig.Track+'@'+championshipData[i].raceData2?.RaceConfig.TrackLayout || '',
+            results: championshipData[i].raceData2?.RaceResult || [],
+            pointSystem: championshipData[i].points,
+            driverFastestLapGuid: championshipData[i].raceData1?.BestLap[0].SteamID || ''} as RaceDataChamp;
+            RacesChamp.push(auxRacesChamps2);
+        }else{
+          const auxRacesChamps ={
+            raceNumber: 0,
+            name: championshipData[i].raceData1?.RaceConfig.Track+'@'+championshipData[i].raceData1?.RaceConfig.TrackLayout || '',
+            results: championshipData[i].raceData1?.RaceResult || [],
+            pointSystem: championshipData[i].points,
+            driverFastestLapGuid: championshipData[i].raceData1?.BestLap[0].SteamID || ''
+          } as RaceDataChamp;
+          RacesChamp.push(auxRacesChamps);
+        }
+      }
 
       let DriversChamp: DriverDataChamp[] = getDriverDataChamp(RacesChamp);
       const DriversPointsPerRace: DriverPointsPerRace[] = getDriverPointsPerRace(RacesChamp, DriversChamp);
@@ -107,17 +135,26 @@ async function initializeScript() {
             <th>Total</th>
           `;
 
-      for (const raceData of RacesChamp) {
+      for (let i = 0; i<RacesChamp.length; i++){
+        const raceData = RacesChamp[i];
         const {data: trackData } = await supabase
         .from('circuit')
         .select('*')
         .eq('filename', raceData.name.split('@')[0])
         .single();
 
-        if (!trackData) {
-          tablaIndyChampsHTML += `<th>${raceData.name}</th>`;
-        } else {
-          tablaIndyChampsHTML += `<th>${trackData?.shortname}</th>`;
+        if(flagRace2){
+          if (!trackData) {
+            tablaIndyChampsHTML += `<th>${raceData.name} R${((i%2) + 1)}</th>`;
+          } else {
+            tablaIndyChampsHTML += `<th>${trackData?.shortname} R${((i%2) + 1)}</th>`;
+          }
+        }else{
+          if (!trackData) {
+            tablaIndyChampsHTML += `<th>${raceData.name}</th>`;
+          } else {
+            tablaIndyChampsHTML += `<th>${trackData?.shortname}</th>`;
+          }
         }
       }
       tablaIndyChampsHTML += `</tr></thead><tbody>`;
@@ -166,7 +203,7 @@ async function initializeScript() {
         for (let raceData of RacesChamp) {
           const driverPosition = raceData.results.find((driver) => driver.SteamID === DriverGUID);
           const fastestLap = raceData.driverFastestLapGuid === DriverGUID ? raceData.pointSystem.FastestLap : 0;
-          const fastestLapClass = fastestLap !== 0 ? ` class = "bg-[#c100ff] text-white font-bold rounded-full w-content px-5"` : ``;
+          const fastestLapClass = fastestLap !== 0 ? ` class = "bg-[#c100ff] text-white font-bold rounded-full w-content px-3"` : ``;
           let driverPoints = driverPosition ? raceData.pointSystem.Puntuation[driverPosition.Pos - 1] + fastestLap : 0;
 
           let posicionFinal = 'NP';
@@ -254,14 +291,29 @@ async function initializeScript() {
         };
       });
 
-      const categoriesChart = await Promise.all(RacesChamp.map(async (raceData) => {
+      let categoriesChart: string[] = [];
+      for (let i = 0; i<RacesChamp.length; i++){
+        const raceData = RacesChamp[i];
         const {data: trackData } = await supabase
         .from('circuit')
         .select('*')
         .eq('filename', raceData.name.split('@')[0])
         .single();
-        return trackData ? trackData.shortname : raceData.name;
-      }));
+
+        if(flagRace2){
+          if (!trackData) {
+            categoriesChart.push(`${raceData.name} R${((i%2) + 1)}`);
+          } else {
+            categoriesChart.push(`${trackData?.shortname} R${((i%2) + 1)}`);
+          }
+        }else{
+          if (!trackData) {
+            categoriesChart.push(`${raceData.name}`);
+          } else {
+            categoriesChart.push(`${trackData?.shortname}`);
+          }
+        }
+      }
 
       let stepChartIndy: number = 20;
       let MaxStepChartIndy: number = 0;
@@ -382,8 +434,18 @@ async function initializeScript() {
 
         tooltip: {
           theme: 'dark',
+          shared: false,
+          intersect: true,
           onDatasetHover: {
-            highlightDataSeries: true,
+            highlightDataSeries: false,
+          },
+          x:{
+            show: true,
+          },
+          y:{
+            formatter: function(value: number) {
+              return value.toFixed(1);
+            }
           },
         },
 
@@ -408,16 +470,27 @@ async function initializeScript() {
             <th>Equipo</th>
             <th>Total</th>
           `;
-      for (const raceData of RacesChamp){
+
+      for (let i = 0; i<RacesChamp.length; i++){
+        const raceData = RacesChamp[i];
         const {data: trackData } = await supabase
         .from('circuit')
         .select('*')
         .eq('filename', raceData.name.split('@')[0])
         .single();
-        if (!trackData) {
-          tablaTeamChampsHTML += `<th>${raceData.name}</th>`;
-        } else {
-          tablaTeamChampsHTML += `<th>${trackData?.shortname}</th>`;
+
+        if(flagRace2){
+          if (!trackData) {
+            tablaTeamChampsHTML += `<th>${raceData.name} R${((i%2) + 1)}</th>`;
+          } else {
+            tablaTeamChampsHTML += `<th>${trackData?.shortname} R${((i%2) + 1)}</th>`;
+          }
+        }else{
+          if (!trackData) {
+            tablaTeamChampsHTML += `<th>${raceData.name}</th>`;
+          } else {
+            tablaTeamChampsHTML += `<th>${trackData?.shortname}</th>`;
+          }
         }
       }
 
@@ -452,8 +525,8 @@ async function initializeScript() {
           const fastestLapDriver1 = raceData.driverFastestLapGuid === Driver1GUID ? raceData.pointSystem.FastestLap : 0;
           const fastestLapDriver2 = raceData.driverFastestLapGuid === Driver2GUID ? raceData.pointSystem.FastestLap : 0;
 
-          const fastestLapDriver1Class = fastestLapDriver1 !== 0 ? ` class = "bg-[#c100ff] text-white font-bold rounded-full w-content px-5"` : ``;
-          const fastestLapDriver2Class = fastestLapDriver2 !== 0 ? ` class = "bg-[#c100ff] text-white font-bold rounded-full w-content px-5"` : ``;
+          const fastestLapDriver1Class = fastestLapDriver1 !== 0 ? ` class = "bg-[#c100ff] text-white font-bold rounded-full w-content px-3"` : ``;
+          const fastestLapDriver2Class = fastestLapDriver2 !== 0 ? ` class = "bg-[#c100ff] text-white font-bold rounded-full w-content px-3"` : ``;
 
           let driver1Points = driverPosition1  ? raceData.pointSystem.Puntuation[driverPosition1.Pos - 1] + fastestLapDriver1 : 0;
           let driver2Points = driverPosition2  ? raceData.pointSystem.Puntuation[driverPosition2.Pos - 1] + fastestLapDriver2 : 0;
@@ -742,8 +815,18 @@ async function initializeScript() {
 
         tooltip: {
           theme: 'dark',
+          shared: false,
+          intersect: true,
           onDatasetHover: {
-            highlightDataSeries: true,
+            highlightDataSeries: false,
+          },
+          x:{
+            show: true,
+          },
+          y:{
+            formatter: function(value: number) {
+              return value.toFixed(1);
+            }
           },
         },
 
@@ -787,6 +870,7 @@ else initializeScript();
 
 // Maneja las transiciones de página de Astro
 document.addEventListener('astro:page-load', initializeScript);
+
 
 
 // Obtener los datos globales de los pilotos
