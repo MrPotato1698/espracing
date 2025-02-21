@@ -1,5 +1,6 @@
 import type { RaceData } from '@/types/Results';
 import type { Points } from '@/types/Points';
+
 export interface ResultTableData {
     gridPositionClass: string;
     gainsAbs: string;
@@ -21,7 +22,7 @@ export interface ResultTableData {
     splitNumber: number;
 }
 
-export interface CarData{
+export interface CarDataBase{
   id: number
   filename: string
   model: string
@@ -38,6 +39,15 @@ export interface CarData{
   brandName: string
   classID: number
   className: string
+}
+
+export interface CarData{
+  filename: string;
+  brand: string;
+  model: string;
+  classShortName: string;
+  classColor: string;
+  imgbrand: string;
 }
 
 export interface CircuitData{
