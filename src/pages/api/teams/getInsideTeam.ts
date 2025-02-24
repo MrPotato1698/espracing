@@ -8,9 +8,8 @@ export const POST: APIRoute = async ({ request, redirect }) => {
   const team_id = form.get('select_team')?.toString();
   const user_id = form.get("user_id");
 
-  if (!team_id || !user_id) {
-    return new Response("Error en la asignación de equipo, hay algún campo nulo.", { status: 400 });
-  }
+  if (!team_id || !user_id) return new Response("Error en la asignación de equipo, hay algún campo nulo.", { status: 400 });
+
 try{
   const {data: teamManager} = await supabase
     .from('profiles')
@@ -35,15 +34,13 @@ try{
       user_application: String(user_id),
       team_manager: teamManager?.id,
       team_requesting: Number(team_id),
+      type: 'join'
     });
     if (insertError) throw insertError;
 
     return redirect("/myteam");
   } catch (error) {
     console.error("Error al procesar la petición:", error);
-    return new Response(
-      "Hubo un error al procesar la petición. Por favor, inténtalo de nuevo.",
-      { status: 500 }
-    );
+    return new Response("Hubo un error al procesar la petición. Por favor, inténtalo de nuevo.", { status: 500 });
   }
 };

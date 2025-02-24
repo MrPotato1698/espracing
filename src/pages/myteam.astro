@@ -37,6 +37,7 @@ const {data: roleData} = await supabase
   .eq("id", id)
   .single();
 
+  console.log('roleData', roleData);
 
 const {data: TeamData} = await supabase
   .from("team")
@@ -54,7 +55,7 @@ if (TeamData === null || TeamData === undefined) {
 
 const {data: TeamUsersData} = await supabase
   .from("profiles")
-  .select("full_name, races, wins, top5, top10, avatar, number_plate, poles, podiums")
+  .select("id, full_name, races, wins, top5, top10, avatar, number_plate, poles, podiums, is_team_manager")
   .eq("team", idTeam);
 
 ---
@@ -92,6 +93,7 @@ const {data: TeamUsersData} = await supabase
           <tr>
             <th>Nº</th>
             <th>Nombre</th>
+            {roleData?.roleesp === 1 || roleData?.roleesp === 2 ? <th>Jefe de Equipo</th> : null}
             <th>Carreras</th>
             <th>Victorias</th>
             <th>Podios</th>
@@ -103,7 +105,7 @@ const {data: TeamUsersData} = await supabase
         <tbody>
           {
             TeamUsersData?.map((user, index) => (
-              <tr class="bg-darkSecond">
+              <tr class="bg-darkSecond align-middle">
                 <td class="font-semibold">{index + 1}</td>
                 {user.number_plate === null || user.number_plate === 0 ? (
                   <td>#0 - {user.full_name}</td>
@@ -112,6 +114,19 @@ const {data: TeamUsersData} = await supabase
                     #{user.number_plate} - {user.full_name}
                   </td>
                 )}
+                {roleData?.roleesp === 1 || roleData?.roleesp === 2 ? (
+                  <td class = "align-middle pt-1">
+                    <input
+                      type="checkbox"
+                      checked={user.is_team_manager}
+                      class="accent-primary bg-darkPrimary cursor-pointer size-4"
+                      data-userid={user.id}
+                      data-usermodifcator={id}
+                      disabled={roleData?.roleesp !== 1 && roleData?.roleesp !== 2}
+                      id={`teamManager-${user.id}`}
+                    />
+                  </td>
+                ) : null}
                 <td>{user.races}</td>
                 <td>{user.wins}</td>
                 <td>{user.podiums}</td>
@@ -139,43 +154,95 @@ const {data: TeamUsersData} = await supabase
       <button
         class="exitTeam py-1.5 px-2 w-fit bg-darkPrimary text-lightPrimary border-primary border-2 rounded-md font-medium text-lg hover:bg-darkSecond"
         data-id={id}
+        data-teamid = {idTeam}
       >
         Salir del equipo
     </button>
     </div>
   </div>
-</Layout>
 
-<script is:inline data-astro-rerun>
-  document.addEventListener('astro:page-load', () => {
-    const exitTeam = document.querySelectorAll('.exitTeam');
+  <style>
+    tbody tr:nth-child(odd) {
+      background-color: #0f0f0f;
+    }
 
-    exitTeam.forEach(button => {
-      button.addEventListener('click', async (e) => {
-        e.preventDefault();
-        const id = button.getAttribute('data-id');
+    tbody tr:nth-child(even) {
+      background-color: #19191c;
+    }
+  </style>
 
-        if (confirm('¿Estás seguro de que quieres salir de este equipo?')) {
+  <script>
+    import { showToast } from "@/lib/utils";
+    window.showToast = showToast;
+  </script>
+
+  <script is:inline data-astro-rerun>
+    document.addEventListener('astro:page-load', () => {
+      const exitTeam = document.querySelectorAll('.exitTeam');
+
+      exitTeam.forEach(button => {
+        button.addEventListener('click', async (e) => {
+          e.preventDefault();
+          const id = button.getAttribute('data-id');
+          const teamid = button.getAttribute('data-teamid');
+
+          if (confirm('¿Estás seguro de que quieres salir de este equipo?')) {
+            try {
+              const response = await fetch('/api/teams/exitFromTeam', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ id, teamid }),
+              });
+
+              if (response.ok) {
+                // Actualizar UI
+                window.location.reload();
+              } else {
+                window.showToast('Error saliendo de equipo: ' + response.error, 'error');
+                console.error('Error saliendo de equipo: ', response);
+              }
+            } catch (error) {
+              window.showToast('Error: ' + error, 'error');
+              console.error('Error:', error);
+            }
+          }
+        });
+      });
+
+      const teamManagerCheckboxes = document.querySelectorAll('input[type="checkbox"][id^="teamManager-"]');
+      teamManagerCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', async (e) => {
+          const userId = checkbox.getAttribute('data-userid');
+          const userModificator = checkbox.getAttribute('data-usermodifcator');
+          const isChecked = checkbox.checked;
+
+          if(userModificator === userId) {
+            checkbox.checked = !isChecked;
+            return window.showToast('No puedes cambiar tu propio estado de jefe de equipo', 'info');
+          }
           try {
-            const response = await fetch('/api/teams/exitFromTeam', {
+            const response = await fetch('/api/teams/updateTeamManager', {
               method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({ id }),
+              headers: {'Content-Type': 'application/json',},
+              body: JSON.stringify({ userId, isTeamManager: isChecked }),
             });
 
-            if (response.ok) {
-              // Actualizar UI
-              window.location.reload();
-            } else {
-              console.error('Error saliendo de equipo: ', response);
+            if (!response.ok) {
+              checkbox.checked = !isChecked;
+              throw new Error('Error actualizando el estado del manager');
             }
+            window.showToast(`${isChecked ? 'Asignado' : 'Removido'} como jefe de equipo correctamente`,'success');
+
           } catch (error) {
             console.error('Error:', error);
+            window.showToast(`Error: ${error.message || 'No se pudo actualizar el estado'}`,'error');
           }
-        }
+        });
       });
     });
-  });
-</script>
+  </script>
+</Layout>
+
+
