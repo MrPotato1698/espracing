@@ -1,14 +1,6 @@
 import { supabase } from '@/db/supabase';
 import { showToast } from '@/lib/utils';
-import { findFileInAcd, parseAcd, parseIniContent} from '@/lib/ACDFiles/acdParser';
 
-import { AcdDecoder } from '@/lib/ACDFiles/acdDecoder';
-
-import * as fs from 'fs';
-import * as path from 'path';
-import { gunzip, unzip } from 'fflate';
-
-import type { Database } from "database.types";
 import type { CarDataBase } from '@/types/Utils';
 
 
@@ -216,64 +208,46 @@ export function initCarManagement() {
   }
 
   async function getDataACD(dir: any): Promise<Partial<CarDataBase>> {
-    return new Promise((resolve, reject) => {dir.getFile("data.acd", { create: false }, async (fileEntry: any) => {
+    return new Promise((resolve, reject) => {
+      console.log("Iniciando getDataACD para directorio:", dir.name)
+      dir.getFile("data.acd",{ create: false }, async (fileEntry: any) => {
           try {
+            console.log("Archivo data.acd encontrado, obteniendo File object")
             const file = await new Promise<File>((resolveFile) => {
               fileEntry.file(resolveFile)
             })
-
-            const arrayBuffer = await file.arrayBuffer()
-            const data = new Uint8Array(arrayBuffer)
-
-            console.log(`Tamaño del archivo data.acd: ${data.length} bytes`)
-            console.log(`Primeros 32 bytes: ${Array.from(data.slice(0, 32))
-                .map((b) => b.toString(16).padStart(2, "0"))
-                .join(" ")}`,
-            )
-
-            const folderName = dir.name
-            console.log(`Nombre de la carpeta: ${folderName}`)
-
-            let files
-            try {
-              files = parseAcd(data, folderName)
-              console.log(
-                "Archivos encontrados:",
-                files.map((f) => `${f.name} (${f.content.length} bytes)`),
-              )
-            } catch (parseError) {
-              console.error("Error al parsear el archivo ACD:", parseError)
-              throw new Error("No se pudo decodificar el archivo data.acd")
+            console.log("File object obtenido:", file.name, "Tamaño:", file.size, "bytes")
+  
+            const formData = new FormData()
+            formData.append("file", file)
+            console.log("FormData creado con el archivo adjunto")
+  
+            console.log("Iniciando solicitud POST a /api/admin/cars/process-data-acd")
+            const response = await fetch("/api/admin/cars/process-data-acd", {
+              method: "POST",
+              body: formData,
+            })
+            console.log("Respuesta recibida. Status:", response.status, "OK:", response.ok)
+  
+            if (!response.ok) {
+              const errorText = await response.text()
+              console.error("Respuesta del servidor no OK. Texto de error:", errorText)
+              throw new Error(`Error en la respuesta del servidor: ${response.status} ${response.statusText}`)
             }
-
-            const carIniFile = findFileInAcd(files, "car.ini")
-            if (!carIniFile) {
-              console.error(
-                "Archivos disponibles:",
-                files.map((f) => f.name),
-              )
-              throw new Error("No se encontró car.ini en el archivo data.acd")
-            }
-
-            const iniContent = parseIniContent(carIniFile.content)
-            console.log("Secciones encontradas en car.ini:", Object.keys(iniContent))
-
-            const carData: Partial<CarDataBase> = {
-              tyreTimeChange: Number.parseFloat(iniContent["PIT_STOP"]?.["TYRE_CHANGE_TIME_SEC"] || "0"),
-              fuelLiterTime: Number.parseFloat(iniContent["PIT_STOP"]?.["FUEL_LITER_TIME_SEC"] || "0"),
-              maxLiter: Number.parseFloat(iniContent["FUEL"]?.["MAX_FUEL"] || "0"),
-            }
-
-            console.log("Datos extraídos:", carData)
+  
+            const carData = await response.json()
+            console.log("Datos extraídos del servidor:", JSON.stringify(carData, null, 2))
             resolve(carData)
           } catch (error) {
-            console.error("Error en getDataACD:", error)
-            reject(new Error("Error al procesar el archivo data.acd"))
+            console.error("Error detallado en getDataACD:", error)
+            console.error("Stack trace:", (error as Error).stack)
+            reject(new Error("Error al procesar el archivo data.acd: " + (error as Error).message))
           }
         },
         (fileError: any) => {
           console.error("Error al obtener el archivo data.acd:", fileError)
-          reject(new Error("No se pudo acceder al archivo data.acd"))
+          console.error("Detalles del error:", JSON.stringify(fileError, null, 2))
+          reject(new Error("No se pudo acceder al archivo data.acd: " + fileError.message))
         },
       )
     })
