@@ -17,7 +17,16 @@ export default defineConfig({
   }),
 
   vite: {
+    build:{
+      rollupOptions: {
+        external: ['child_process', 'fs', 'path']
+      }
+    },
     plugins: [tailwindcss()],
+  },
+
+  build: {
+    exclude: ['tools/**/*']
   },
 
   // Server proxy local, para pruebas en desarrollo
