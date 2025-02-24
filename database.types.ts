@@ -500,18 +500,21 @@ export type Database = {
       }
       team: {
         Row: {
+          active: boolean | null
           description: string | null
           id: number
           image: string | null
           name: string
         }
         Insert: {
+          active?: boolean | null
           description?: string | null
           id: number
           image?: string | null
           name?: string
         }
         Update: {
+          active?: boolean | null
           description?: string | null
           id?: number
           image?: string | null
@@ -524,18 +527,21 @@ export type Database = {
           id: number
           team_manager: string
           team_requesting: number
+          type: string | null
           user_application: string
         }
         Insert: {
           id?: number
           team_manager?: string
           team_requesting: number
+          type?: string | null
           user_application?: string
         }
         Update: {
           id?: number
           team_manager?: string
           team_requesting?: number
+          type?: string | null
           user_application?: string
         }
         Relationships: [
