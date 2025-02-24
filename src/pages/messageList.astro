@@ -56,7 +56,7 @@ const {data: MessageListData} = await supabase
 // Obtener las solicitudes de equipo del usuario
 const {data: TeamRequestData} = await supabase
   .from("teamsapplication")
-  .select("id, user_application")
+  .select("id, user_application, type")
   .eq("team_manager", idAuth);
 
 let users: { full_name: string }[] = [];
@@ -134,6 +134,7 @@ if (TeamRequestData) {
       <tr>
         <th>Nº</th>
         <th>Nombre Solicitante</th>
+        <th>Tipo</th>
         <th>Aceptar</th>
         <th>Rechazar</th>
       </tr>
@@ -146,6 +147,7 @@ if (TeamRequestData) {
               {index + 1}
             </td>
             <td>{users[index].full_name}</td>
+            <td>{msg.type == 'join' ? 'Unirse a equipo':'Crear equipo'}</td>
             <td>
               <button class = "align-middle accept-invitation" data-id={msg.id}>
                 <Check moreClass="w-6 text-center mx-auto" />
@@ -175,6 +177,11 @@ if (TeamRequestData) {
     background-color: #19191c;
   }
 </style>
+
+<script>
+    import { showToast } from "@/lib/utils";
+    window.showToast = showToast;
+</script>
 
 <script is:inline data-astro-rerun>
   document.addEventListener('astro:page-load', () => {
@@ -219,9 +226,11 @@ if (TeamRequestData) {
             }
             window.location.reload();
           } else {
-            console.error('Error updating message status');
+            window.showToast('Error actualizando el estado del mensaje: '+ response.error, 'error');
+            console.error('Error actualizando el estado del mensajes');
           }
         } catch (error) {
+          window.showToast('Error: '+ error, 'error');
           console.error('Error:', error);
         }
       });
@@ -250,9 +259,11 @@ if (TeamRequestData) {
               }
               window.location.reload();
             } else {
+              window.showToast('Error eliminando el mensaje: '+ response.error, 'error');
               console.error('Error eliminando el mensaje');
             }
           } catch (error) {
+            window.showToast('Error: '+ error, 'error');
             console.error('Error:', error);
           }
         }
@@ -281,9 +292,11 @@ if (TeamRequestData) {
             }
             window.location.reload();
           } else {
+            window.showToast('Error aceptando la petición: '+ response.error, 'error');
             console.error('Error aceptando la petición');
           }
         } catch (error) {
+          window.showToast('Error: '+ error, 'error');
           console.error('Error:', error);
         }
       })
@@ -312,9 +325,11 @@ if (TeamRequestData) {
               }
               window.location.reload();
             } else {
+              window.showToast('Error eliminando la petición: '+ response.error, 'error');
               console.error('Error eliminando la petición');
             }
           } catch (error) {
+            window.showToast('Error: '+ error, 'error');
             console.error('Error:', error);
           }
         }
