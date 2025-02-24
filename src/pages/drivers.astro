@@ -4,8 +4,17 @@ import { supabase } from "@/db/supabase";
 
 const { data: UsersData, error: errorUsers } = await supabase
   .from("profiles")
-  .select('full_name, number_plate, avatar, races, wins, podiums, flaps, poles, top5, top10, dnf, team!inner(name)')
+  .select('full_name, number_plate, avatar, races, wins, podiums, flaps, poles, top5, top10, dnf, team(name)')
   .order('full_name', { ascending: true });
+
+if(errorUsers) {
+  console.error(errorUsers);
+}
+
+console.log(UsersData);
+
+const {data: example} = await supabase.from('profiles').select('*').eq('full_name', 'Alvaro Rico');
+console.log(example?.[0]);
 ---
 
 <Layout title="ESP Racing: Pilotos">
