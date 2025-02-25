@@ -266,6 +266,44 @@ export type Database = {
           },
         ]
       }
+      inscriptionscalendar: {
+        Row: {
+          championship: number | null
+          id: number
+          inscriptions_close: string
+          inscriptions_open: string
+          inscriptions_times_register: string | null
+          name: string
+          order: number
+        }
+        Insert: {
+          championship?: number | null
+          id?: number
+          inscriptions_close?: string
+          inscriptions_open?: string
+          inscriptions_times_register?: string | null
+          name: string
+          order?: number
+        }
+        Update: {
+          championship?: number | null
+          id?: number
+          inscriptions_close?: string
+          inscriptions_open?: string
+          inscriptions_times_register?: string | null
+          name?: string
+          order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inscriptionscalendar_championship_fkey"
+            columns: ["championship"]
+            isOneToOne: false
+            referencedRelation: "championship"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       message: {
         Row: {
           description: string | null
@@ -573,6 +611,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      fetch_inscriptions_table: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       get_championship_data: {
         Args: {
           champ_id: number
@@ -603,6 +645,10 @@ export type Database = {
           circuit_location: string
           layouts_count: number
         }[]
+      }
+      schedule_fetch_inscriptions: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
     }
     Enums: {
