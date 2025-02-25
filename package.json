@@ -28,7 +28,7 @@
     "fflate": "^0.8.2",
     "firebase": "11.2.0",
     "firebase-admin": "13.0.2",
-    "jszip": "^3.10.1",
+    "jszip": "3.10.1",
     "node-html-parser": "7.0.1",
     "postgres": "3.4.5",
     "promisify": "0.0.3",
