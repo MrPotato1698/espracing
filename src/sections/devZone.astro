@@ -9,7 +9,7 @@
     </button>
 
     <button
-      class="bg-primary text-ligth-primary font-bold py-3 px-2 w-72 mt-4 mx-auto border-solid border-primary border-2 rounded-md hover:bg-darkSecond hover:text-lightPrimary"
+      class="bg-primary text-lightPrimary font-bold py-3 px-2 w-72 mt-4 mx-auto border-solid border-primary border-2 rounded-md hover:bg-darkSecond hover:text-lightPrimary"
       onclick="window.showToast('Ha ocurrido un error', 'error')"
     >
       Mostrar notificación de error
@@ -27,6 +27,87 @@
       onclick="window.showToast('Información importante', 'info')"
     >
       Mostrar notificación de información
+    </button>
+  </div>
+  <div class = "grid grid-cols-2 gap-2 mt-4 mx-4">
+    <div class="mb-2 py-2 px-6 border-2 border-primary rounded-lg bg-darkSecond">
+      <div class="mb-4">
+        <label for="fileInputS1R1" class="block text-lightPrimary text-lg font-semibold mb-3">
+          JSON 1
+        </label>
+        <div class="relative">
+          <input
+            type="file"
+            id="fileInputS1R1"
+            name="fileInputS1R1"
+            accept=".json"
+            class="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
+          />
+          <div class="flex flex-col items-center justify-center p-4 border-2 border-dashed border-primary rounded-lg bg-darkSecond text-lightPrimary cursor-pointer min-h-[150px] transition-colors hover:border-primary-dark">
+            <div class="flex items-center gap-2">
+              <svg class="w-12 h-12 mb-3 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+              </svg>
+              <span class="text-sm font-medium">Arrastra y suelta tu JSON aquí</span>
+              <span class="text-xs text-lightSecond mt-1">o haz clic para seleccionar</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="fileInfoS1R1" class="mb-4 hidden">
+        <p class="text-sm text-lightPrimary bg-darkPrimary p-3 rounded-lg border border-primary">
+          Archivo seleccionado:
+          <span id="fileNameS1R1" class="font-medium"></span>
+        </p>
+      </div>
+    </div>
+
+    <div class="mb-2 py-2 px-6 border-2 border-primary rounded-lg bg-darkSecond" id="split2R1File">
+      <div class="mb-4">
+        <label for="split2R1File" class="block text-lightPrimary text-lg font-semibold mb-3">
+          JSON 2
+        </label>
+        <div class="relative">
+          <input
+            type="file"
+            id="fileInputS2R1"
+            name="fileInputS2R1"
+            accept=".json"
+            class="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
+          />
+          <div class="flex flex-col items-center justify-center p-4 border-2 border-dashed border-primary rounded-lg bg-darkSecond text-lightPrimary cursor-pointer min-h-[150px] transition-colors hover:border-primary-dark">
+            <div class="flex items-center gap-2">
+              <svg class="w-12 h-12 mb-3 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+              </svg>
+              <span class="text-sm font-medium">Arrastra y suelta tu JSON aquí</span>
+              <span class="text-xs text-lightSecond mt-1">o haz clic para seleccionar</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="fileInfoS2R1" class="mb-4 hidden">
+        <p class="text-sm text-lightPrimary bg-darkPrimary p-3 rounded-lg border border-primary">
+          Archivo seleccionado:
+          <span id="fileNameS2R1" class="font-medium"></span>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-2">
+    <button
+      class="bg-primary text-lightPrimary font-bold py-3 px-2 w-72 mt-4 mx-auto border-solid border-primary border-2 rounded-md hover:bg-darkSecond hover:text-lightPrimary"
+      onclick="window.showToast('Operación exitosa', 'success')"
+    >
+      Probar 1 JSON
+    </button>
+
+    <button
+      class="bg-primary text-lightPrimary font-bold py-3 px-2 w-72 mt-4 mx-auto border-solid border-primary border-2 rounded-md hover:bg-darkSecond hover:text-lightPrimary"
+      onclick="window.showToast('Ha ocurrido un error', 'error')"
+    >
+      Probar 2 JSON
     </button>
   </div>
 </div>
