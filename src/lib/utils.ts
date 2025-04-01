@@ -1,8 +1,14 @@
+import { clsx, type ClassValue } from "clsx"
+import { twMerge } from "tailwind-merge"
+
 import type { RaceData, RaceResult, RaceLap, BestLap, RaceConfig } from "@/types/Results";
 import type { Points } from "@/types/Points";
 import type { ResultTableData, CarData, RaceFastestLap} from "@/types/Utils"
 
 export type ToastType = 'success' | 'error' | 'warning' | 'info';
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
+}
 
 export function getResultTableData(datos: RaceData, pointsystemName: String, pointArray: Points, cars: CarData[]): ResultTableData[] {
   let resultTableData: ResultTableData[] = [];
@@ -415,8 +421,4 @@ export function formatTwoIntegersPlusThreeDecimals(num: number) {
 
 export function formatTwoIntegers(num: number): string {
   return Math.abs(num).toString().padStart(2, '0').slice(-2);
-}
-
-export function cn(...classes: (string | boolean | null | undefined)[]): string {
-  return classes.filter(Boolean).join(' ');
 }
