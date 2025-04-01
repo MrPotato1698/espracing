@@ -1,4 +1,6 @@
 @import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
 @plugin "tailwind-corner-smoothing";
 
 @theme{
@@ -8,37 +10,37 @@
   --color-darkSecond: #19191c; /*black19*/
   --color-lightPrimary: #f9f9f9; /*whitef9*/
   --color-lightSecond: #f7f7f7; /*whitef7*/
-  
+
   /* Variables para shadcn/ui */
   --color-background: var(--color-darkPrimary);
   --color-foreground: var(--color-lightPrimary);
-  
+
   --color-card: var(--color-darkSecond);
   --color-card-foreground: var(--color-lightPrimary);
-  
+
   --color-popover: var(--color-darkSecond);
   --color-popover-foreground: var(--color-lightPrimary);
-  
+
   --color-primary-foreground: white;
-  
+
   --color-secondary: var(--color-darkSecond);
   --color-secondary-foreground: var(--color-lightPrimary);
-  
+
   --color-muted: var(--color-darkSecond);
   --color-muted-foreground: var(--color-lightSecond);
-  
+
   --color-accent: var(--color-darkSecond);
   --color-accent-foreground: var(--color-lightPrimary);
-  
+
   --color-destructive: #ff4d4f;
   --color-destructive-foreground: white;
-  
+
   --color-border: var(--color-primary);
   --color-input: var(--color-lightSecond);
   --color-ring: var(--color-primary);
-  
+
   --radius: 0.5rem;
-  
+
   /* Animaciones para componentes */
   --animation-accordion-down: accordion-down 0.2s ease-out;
   --animation-accordion-up: accordion-up 0.2s ease-out;
