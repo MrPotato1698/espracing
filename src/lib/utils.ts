@@ -416,3 +416,7 @@ export function formatTwoIntegersPlusThreeDecimals(num: number) {
 export function formatTwoIntegers(num: number): string {
   return Math.abs(num).toString().padStart(2, '0').slice(-2);
 }
+
+export function cn(...classes: (string | boolean | null | undefined)[]): string {
+  return classes.filter(Boolean).join(' ');
+}
