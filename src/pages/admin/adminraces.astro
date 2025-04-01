@@ -59,9 +59,8 @@ const { data: pointsystemData } = await supabase
   .select("id, name")
   .order("id", { ascending: true });
 
-  const { data: raceNotesData } = await supabase
-  .from("racenotes")
-  .select("*");
+  const serializedRaceData = raceData ? JSON.parse(JSON.stringify(raceData)) : [];
+  const serializedChampsData = champsData ? champsData.map(champ => champ.name || '').filter(Boolean) as string[] : [];
 ---
 
 <Layout title="ESP Racing: Administrar Carreras">
@@ -74,32 +73,19 @@ const { data: pointsystemData } = await supabase
       Lista de Carreras del Sistema
     </p>
 
-    <div class="mt-6">
-      <DataTable
-        client:load
-        data={raceData || []}
-        columns={[
-          { header: "Nº", accessor: null, cell: (row: any, index: number) => index + 1 },
-          { header: "Nombre", accessor: "name" },
-          { header: "Campeonato", accessor: "championship.name" },
-          { header: "Sistema de Puntuación", accessor: "pointsystem.name" }
-        ]}
-        onEdit={(id: number) => {}}
-        onDelete={(id: number) => {
-          // Esta función se manejará con JavaScript
-        }}
-        notesData={raceNotesData ? raceNotesData.map(note => ({
-          id: note.id,
-          raceId: note.race,
-          type: note.code.toString(),
-          description: note.description || ""
-        })) : []}
-        onAddNote={(raceId: number, type: string, description: string) => {
-          // Esta función se manejará con JavaScript
-        }}
-        pageSize={10}
-        filterOptions={champsData?.map(champ => champ.name) || []}
-      />
+    <DataTable
+      client:only="react"
+      data={serializedRaceData}
+      columns={[
+        { header: "Nombre", accessor: "name" },
+        { header: "Campeonato", accessor: "championship.name" },
+        { header: "Sistema de Puntuación", accessor: "pointsystem.name" }
+      ]}
+      onEdit={true}
+      onDelete={true}
+      pageSize={10}
+      filterOptions={serializedChampsData}
+    />
     </div>
   </div>
 
@@ -344,52 +330,70 @@ const { data: pointsystemData } = await supabase
 </style>
 
 <script>
-  // Declare the addRaceNote function on the Window interface
+  // Declare the functions on the Window interface
   declare global {
     interface Window {
-      addRaceNote: (raceId: number, type: string, description: string) => Promise<void>;
+      handleDeleteRace: (id: number) => Promise<void>;
     }
   }
 
-  import {
-    initRaceManagement,
-    initDeleteRaceButtons,
-  } from "@/lib/admin/races/raceManagment";
-import { showToast } from "@/lib/utils";
+  import { initRaceManagement, initDeleteRaceButtons } from "@/lib/admin/races/raceManagment";
+  import { showToast } from "@/lib/utils";
 
   // Inicializar la gestión de carreras
   initRaceManagement();
 
-  // Inicializar los botones de eliminar
-  document.addEventListener("astro:page-load", initRaceManagement);
-  document.addEventListener("astro:page-load", initDeleteRaceButtons);
-
-  // Manejar la adición de notas
-  document.addEventListener("astro:page-load", () => {
-    window.addRaceNote = async (raceId, type, description) => {
+  // Función para eliminar carreras
+  const handleDeleteRace = async (id: number) => {
+    if (confirm("¿Estás seguro de que quieres eliminar esta carrera?")) {
       try {
-        const response = await fetch("/api/admin/race/addnote", {
+        const response = await fetch("/api/admin/race/deleterace", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            race_id: raceId,
-            type,
-            description
-          }),
+          body: JSON.stringify({ id }),
         });
 
         if (response.ok) {
-          window.location.reload();
+          // Mostrar mensaje de éxito
+          showToast("Carrera eliminada con éxito", "success");
+
+          // Recargar la página después de un breve retraso
+          setTimeout(() => { window.location.reload(); }, 500);
         } else {
-          console.error("Error al añadir nota");
-          showToast("Error al añadir nota", "error");
+          showToast("Error eliminando carrera", "error");
+          console.error("Error eliminando carrera");
         }
       } catch (error) {
+        showToast("Error eliminando carrera", "error");
         console.error("Error:", error);
-        showToast("Error: "+ error, "error");
       }
-    };
+    }
+  };
+
+  // Exponer la función al ámbito global para que DataTable pueda acceder a ella
+  window.handleDeleteRace = handleDeleteRace;
+
+  // Inicializar los botones de eliminar
+  document.addEventListener("astro:page-load", initRaceManagement);
+  document.addEventListener("astro:page-load", initDeleteRaceButtons);
+  document.addEventListener("astro:page-load", () => {
+    window.handleDeleteRace = handleDeleteRace;
+  });
+
+  // Asegurarse de que el componente DataTable pueda acceder a las funciones
+  document.addEventListener("DOMContentLoaded", () => {
+    // Esperar a que React monte el componente
+    setTimeout(() => {
+      const deleteButtons = document.querySelectorAll(".delete-race");
+      deleteButtons.forEach(button => {
+        button.addEventListener("click", (e) => {
+          e.preventDefault();
+          const id = button.getAttribute("data-id");
+          if (id) window.handleDeleteRace(parseInt(id));
+        });
+      });
+    }, 500);
   });
 </script>
