@@ -1,8 +1,7 @@
 ---
 import Layout from "@/layouts/ProfileLayout.astro";
 import { supabase } from "@/db/supabase";
-import Trash from "@/icons/Trash.astro";
-import Edit from "@/icons/Edit.astro";
+import { DataTable } from "@/components/data-table";
 
 const { cookies, redirect } = Astro;
 
@@ -46,7 +45,7 @@ if (userData?.roleesp !== 1) {
 const { data: carsData } = await supabase
   .from("car")
   .select(
-    "id, carbrand!inner(name), model, year, carclass!inner(short_name, class_design)"
+    "id, carbrand!inner(name), model, year, carclass!inner(name, class_design)"
   )
   .order("id", { ascending: true });
 
@@ -67,6 +66,49 @@ const carDataOrderer = carsData?.sort((a, b) => {
   }
   return brandComparison;
 });
+
+// Definición de columnas para coches
+const carColumns = [
+  { header: "Nombre", accessor: "fullName" },
+  { header: "Año", accessor: "year" },
+  { header: "Clase", accessor: "className" }
+];
+
+// Preparar datos para coches
+const carTableData = carsData?.map((car) => ({
+  id: car.id,
+  fullName: `${car.carbrand?.name} ${car.model}`,
+  year: car.year,
+  className: car.carclass.name,
+  decade: `${Math.floor(car.year ? car.year / 10 : 0) * 10}s`, // Añadir década para filtrado
+  classId: car.carclass.name // Añadir ID de clase para filtrado
+})) || [];
+
+// Obtener décadas únicas
+const decades = [...new Set(carTableData.map(car => car.decade))].sort();
+
+// Función para manejar la eliminación
+const handleDeleteCar = async (id: number) => {
+  if (confirm("¿Estás seguro de que quieres eliminar este coche?")) {
+    try {
+      const response = await fetch("/api/admin/car/deletecar", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id }),
+      });
+
+      if (response.ok) {
+        window.location.reload();
+      } else {
+        console.error("Error eliminando coche");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  }
+};
 ---
 
 <Layout title="ESP Racing:  Administrar Carreras">
@@ -78,43 +120,22 @@ const carDataOrderer = carsData?.sort((a, b) => {
     <p class="text-5xl font-bold border-b border-primary w-fit mx-auto">
       Lista de Coches del Sistema
     </p>
-    <table class="mt-6 w-full border-collapse border border-lightPrimary">
-      <thead class="font-medium bg-primary">
-        <tr>
-          <th>Nº</th>
-          <th>Nombre</th>
-          <th>Año</th>
-          <th>Clase</th>
-          <th>Editar</th>
-          <th>Eliminar</th>
-        </tr>
-      </thead>
-      <tbody>
-        {
-          carDataOrderer?.map((car, index) => (
-            <tr>
-              <td class="font-semibold">{index + 1}</td>
-              <td>
-                {car.carbrand?.name} {car.model}
-              </td>
-              <td>{car.year}</td>
-              <td class = 'text-sm font-bold'>{car.carclass.short_name}
-              </td>
-              <td>
-                <a href={`/admin/cars/${car.id}`}>
-                  <Edit moreClass="w-6 text-center mx-auto" />
-                </a>
-              </td>
-              <td>
-                <button class="align-middle delete-car" data-id={car.id}>
-                  <Trash moreClass="w-6 text-center mx-auto" />
-                </button>
-              </td>
-            </tr>
-          ))
-        }
-      </tbody>
-    </table>
+
+    <div class="mt-6 relative z-10"> <!-- Añadir z-index para asegurar que los filtros estén visibles -->
+      <div id="cars-table-container">
+        <DataTable
+          client:only="react"
+          data={carTableData}
+          columns={carColumns}
+          onEdit={{ path: "cars" }}
+          onDelete={{ handler: handleDeleteCar }}
+          pageSize={10}
+          filterOptions={decades}
+          filterAccessor={"decade"}
+          initialSortConfig={{ key: "fullName", direction: "asc" }}
+        />
+      </div>
+    </div>
   </div>
 
   <div class="py-4 mx-auto text-center" style="width: 99%">
@@ -156,9 +177,9 @@ const carDataOrderer = carsData?.sort((a, b) => {
             <label class = "text-lightPrimary text-lg font-medium" for="switch-clean_install">
               Instalación limpia
             </label>
-            <lable class = "text-lightSecond text-sm from-thin">
+            <label class = "text-lightSecond text-sm font-thin">
             *(Recomendado activar para actualización de coches ya en el sistema)
-          </lable>
+            </label>
           </div>
         <div id = "fileData" class = "my-4 hidden">
           <div id = "fileInfo" class = "my-4">
@@ -388,28 +409,97 @@ const carDataOrderer = carsData?.sort((a, b) => {
   </div>
 </Layout>
 
-<style>
-  tbody tr:nth-child(odd) {
-    background-color: #0f0f0f;
-  }
-
-  tbody tr:nth-child(even) {
-    background-color: #19191c;
-  }
-</style>
-
 <script>
-  import {
+import {
     initCarManagement,
     initDeleteCarButtons,
   } from "@/lib/admin/cars/carManagment";
+import { showToast } from "@/lib/utils";
 
+  // Inicializar el manejador de eliminación en el cliente
   document.addEventListener("astro:page-load", () => {
+    const deleteButtons = document.querySelectorAll(".delete-item");
+
+    deleteButtons.forEach((button) => {
+      button.addEventListener("click", async (e) => {
+        e.preventDefault();
+        const id = button.getAttribute("data-id");
+
+        if (confirm("¿Estás seguro de que quieres eliminar este coche?")) {
+          try {
+            const response = await fetch("/api/admin/car/deletecar", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ id }),
+            });
+
+            if (response.ok) {
+              window.location.reload();
+              showToast("Coche eliminado correctamente", "success");
+            } else {
+              showToast("Error eliminando coche", "error");
+              console.error("Error eliminando coche");
+            }
+          } catch (error) {
+            showToast("Error: " + error, "error");
+            console.error("Error:", error);
+          }
+        }
+      });
+    });
+
+    // Inicializar otros manejadores
     initCarManagement();
     initDeleteCarButtons();
     initCarForm();
     initColorPickers();
+    initFilters();
   });
+
+  function initFilters() {
+    const decadeFilter = document.getElementById('decade-filter') as HTMLSelectElement;
+    const tableContainer = document.getElementById('cars-table-container');
+
+    if (!decadeFilter || !tableContainer) return;
+
+    // Función para aplicar filtros
+    function applyFilters() {
+      const selectedDecade = decadeFilter?.value;
+
+      // Obtener todas las filas de la tabla
+      const rows = tableContainer?.querySelectorAll('tbody tr');
+
+      rows?.forEach(row => {
+        const yearCell = row.querySelector('td:nth-child(3)'); // Columna de año
+        if (!yearCell) return;
+
+        const year = parseInt(yearCell.textContent || '0');
+        const decade = `${Math.floor(year / 10) * 10}s`;
+        const classId = row.getAttribute('data-class-id');
+
+        const decadeMatch = !selectedDecade || decade === selectedDecade;
+
+        // Mostrar u ocultar la fila según los filtros
+        if (decadeMatch) {
+          (row as HTMLElement).style.display = '';
+        } else {
+          (row as HTMLElement).style.display = 'none';
+        }
+      });
+
+      // Actualizar la paginación si es necesario
+      const paginationEvent = new CustomEvent('pagination-update');
+      document.dispatchEvent(paginationEvent);
+    }
+
+    // Añadir event listeners
+    decadeFilter.addEventListener('change', applyFilters);
+
+    // Aplicar filtros iniciales
+    applyFilters();
+  }
 
   function initCarForm() {
     const CarForm = document.getElementById("uploadForm");

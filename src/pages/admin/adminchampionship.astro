@@ -1,8 +1,7 @@
 ---
 import Layout from "@/layouts/ProfileLayout.astro";
 import { supabase } from "@/db/supabase";
-import Trash from "@/icons/Trash.astro";
-import Edit from "@/icons/Edit.astro";
+import { DataTable } from "@/components/data-table";
 
 const { cookies, redirect } = Astro;
 
@@ -54,6 +53,84 @@ const { data: eventsData } = await supabase
   .select(`id, name, season, race:race(id)`)
   .eq("ischampionship", false)
   .order("id", { ascending: true });
+
+  // Definición de columnas para eventos
+const eventColumns = [
+  { header: "Nombre", accessor: "name" },
+  { header: "Nº Carreras", accessor: "raceCount" },
+  { header: "Temporada", accessor: "season" }
+];
+
+// Definición de columnas para campeonatos
+const champColumns = [
+  { header: "Nombre", accessor: "displayName" },
+  { header: "Nº Carreras", accessor: "raceStatus" },
+  { header: "Temporada", accessor: "season" }
+];
+
+// Función para formatear la temporada
+const formatSeason = (season: string) => {
+  if (season === "0") return "Sin Temporada / Otra";
+  if (season.length === 4 && !isNaN(Number(season))) {
+    const firstPart = parseInt(season.substring(0, 2));
+    const secondPart = parseInt(season.substring(2, 4));
+    const startYear = 2000 + firstPart;
+    const endYear = 2000 + secondPart;
+    return `${startYear}/${endYear}`;
+  }
+  return season;
+};
+
+// Obtener temporadas únicas
+const seasons = [...new Set([...eventsData || [], ...champsData || []]
+  .map(item => item.season))]
+  .filter(Boolean)
+  .sort();
+
+// Temporadas formateadas para filtro
+const seasonOptions = seasons.map(season => formatSeason(season ? season : "0"));
+
+// Preparar datos para eventos
+const eventTableData = eventsData?.map((event) => ({
+  id: event.id,
+  name: event.name,
+  raceCount: event.race.length,
+  season: event.season,
+  seasonDisplay: formatSeason(event.season ? event.season : "0")
+})) || [];
+
+// Preparar datos para campeonatos
+const champTableData = champsData?.map((champ) => ({
+  id: champ.id,
+  displayName: (champ.race.length < champ.number_of_races_total) && champ.isfinished ?
+    champ.name + ' - CANCELADO' : champ.name,
+  raceStatus: `${champ.race.length}/${champ.number_of_races_total}`,
+  season: champ.season,
+  seasonDisplay: formatSeason(champ.season ? champ.season : "0"),
+})) || [];
+
+// Función para manejar la eliminación
+const handleDeleteChamp = async (id: number) => {
+  if (confirm("¿Estás seguro de que quieres eliminar este campeonato/evento?")) {
+    try {
+      const response = await fetch("/api/admin/championship/deletechamp", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id }),
+      });
+
+      if (response.ok) {
+        window.location.reload();
+      } else {
+        console.error("Error eliminando campeonato/evento");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  }
+};
 ---
 
 <Layout title="ESP Racing: Administrar Campeonatos">
@@ -65,80 +142,40 @@ const { data: eventsData } = await supabase
     <p class="text-5xl font-bold border-b border-primary w-fit mx-auto">
       Lista de Eventos del Sistema
     </p>
-    <table class="mt-6 w-full border-collapse border border-lightPrimary">
-      <thead class="font-medium bg-primary">
-        <tr>
-          <th>Nº</th>
-          <th>Nombre</th>
-          <th>Nº Carreras</th>
-          <th>Temporada</th>
-          <th>Editar</th>
-          <th>Eliminar</th>
-        </tr>
-      </thead>
-      <tbody>
-        {
-          eventsData?.map((event, index) => (
-            <tr class="bg-darkSecond">
-              <td class="font-semibold">{index + 1}</td>
-              <td>{event.name}</td>
-              <td>{event.race.length}</td>
-              <td>{event.season}</td>
-              <td>
-                <a href={`/admin/championship/${event.id}`}>
-                  <Edit moreClass="w-6 text-center mx-auto" />
-                </a>
-              </td>
-              <td>
-                <button class="align-middle delete-champ" data-id={event.id}>
-                  <Trash moreClass="w-6 text-center mx-auto" />
-                </button>
-              </td>
-            </tr>
-          ))
-        }
-      </tbody>
-    </table>
+
+    <div class="mt-6">
+      <DataTable
+        client:only="react"
+        data={eventTableData}
+        columns={eventColumns}
+        onEdit={{ path: "championship" }}
+        onDelete={{ handler: handleDeleteChamp }}
+        pageSize={10}
+        filterOptions={seasonOptions}
+        filterAccessor="Temporada"
+        initialSortConfig={{ key: "name", direction: "asc" }}
+      />
+    </div>
   </div>
-  
+
   <div class="py-4 mx-auto text-center" style="width: 99%">
     <p class="text-5xl font-bold border-b border-primary w-fit mx-auto">
       Lista de Campeonatos del Sistema
     </p>
-    <table class="mt-6 w-full border-collapse border border-lightPrimary">
-      <thead class="font-medium bg-primary">
-        <tr>
-          <th>Nº</th>
-          <th>Nombre</th>
-          <th>Nº Carreras</th>
-          <th>Temporada</th>
-          <th>Editar</th>
-          <th>Eliminar</th>
-        </tr>
-      </thead>
-      <tbody>
-        {
-          champsData?.map((champ, index) => (
-            <tr class="bg-darkSecond">
-              <td class="font-semibold">{index + 1}</td>
-              <td>{(champ.race.length < champ.number_of_races_total) && champ.isfinished ? champ.name + ' - CANCELADO': champ.name}</td>
-              <td>{champ.race.length}/{champ.number_of_races_total}</td>
-              <td>{champ.season}</td>
-              <td>
-                <a href={`/admin/championship/${champ.id}`}>
-                  <Edit moreClass="w-6 text-center mx-auto" />
-                </a>
-              </td>
-              <td>
-                <button class="align-middle delete-champ" data-id={champ.id}>
-                  <Trash moreClass="w-6 text-center mx-auto" />
-                </button>
-              </td>
-            </tr>
-          ))
-        }
-      </tbody>
-    </table>
+
+    <div class="mt-6">
+      <DataTable
+        client:only="react"
+        data={champTableData}
+        columns={champColumns}
+        onEdit={{ path: "championship" }}
+        onDelete={{ handler: handleDeleteChamp }}
+        pageSize={10}
+        filterOptions={seasonOptions}
+        filterAccessor="seasonDisplay"
+        initialSortConfig={{ key: "displayName", direction: "asc" }}
+      />
+    </div>
   </div>
 
   <div class="py-4 mx-auto text-center" style="width: 99%">
@@ -247,8 +284,43 @@ const { data: eventsData } = await supabase
     initRaceManagement,
     initDeleteChampButtons,
   } from "@/lib/admin/champs/champManagment";
+  import { showToast } from "@/lib/utils";
 
+  // Inicializar el manejador de eliminación en el cliente
   document.addEventListener("astro:page-load", () => {
+    const deleteButtons = document.querySelectorAll(".delete-item");
+
+    deleteButtons.forEach((button) => {
+      button.addEventListener("click", async (e) => {
+        e.preventDefault();
+        const id = button.getAttribute("data-id");
+
+        if (confirm("¿Estás seguro de que quieres eliminar este campeonato/evento?")) {
+          try {
+            const response = await fetch("/api/admin/championship/deletechamp", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ id }),
+            });
+
+            if (response.ok) {
+              window.location.reload();
+              showToast("Campeonato/evento eliminado correctamente", "success");
+            } else {
+              showToast("Error eliminando campeonato/evento", "error");
+              console.error("Error eliminando campeonato/evento");
+            }
+          } catch (error) {
+            showToast("Error: " + error, "error");
+            console.error("Error:", error);
+          }
+        }
+      });
+    });
+
+    // Inicializar otros manejadores
     initRaceManagement();
     initDeleteChampButtons();
 

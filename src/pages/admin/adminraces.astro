@@ -59,8 +59,14 @@ const { data: pointsystemData } = await supabase
   .select("id, name")
   .order("id", { ascending: true });
 
-  const serializedRaceData = raceData ? JSON.parse(JSON.stringify(raceData)) : [];
-  const serializedChampsData = champsData ? champsData.map(champ => champ.name || '').filter(Boolean) as string[] : [];
+const serializedRaceData = raceData ? JSON.parse(JSON.stringify(raceData)) : [];
+const serializedChampsData = champsData ? champsData.map(champ => champ.name || '').filter(Boolean) as string[] : [];
+
+const columns = [
+  { header: "Nombre", accessor: "name" },
+  { header: "Campeonato", accessor: "championship.name" },
+  { header: "Sistema de Puntuación", accessor: "pointsystem.name" }
+];
 ---
 
 <Layout title="ESP Racing: Administrar Carreras">
@@ -76,15 +82,12 @@ const { data: pointsystemData } = await supabase
     <DataTable
       client:only="react"
       data={serializedRaceData}
-      columns={[
-        { header: "Nombre", accessor: "name" },
-        { header: "Campeonato", accessor: "championship.name" },
-        { header: "Sistema de Puntuación", accessor: "pointsystem.name" }
-      ]}
+      columns={columns}
       onEdit={true}
       onDelete={true}
       pageSize={10}
       filterOptions={serializedChampsData}
+      filterAccessor={"championship.name"}
     />
     </div>
   </div>
@@ -319,15 +322,6 @@ const { data: pointsystemData } = await supabase
     </div>
   </div>
 </Layout>
-
-<style>
-  tbody tr:nth-child(odd) {
-    background-color: #0f0f0f;
-  }
-  tbody tr:nth-child(even) {
-    background-color: #19191c;
-  }
-</style>
 
 <script>
   // Declare the functions on the Window interface
