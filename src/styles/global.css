@@ -237,3 +237,23 @@
     max-width: 24rem;
   }
 }
+
+.pagination-link {
+  @apply bg-darkSecond text-lightPrimary border-lightSecond;
+}
+
+.pagination-link:hover {
+  @apply bg-darkPrimary border-primary;
+}
+
+.pagination-link-active {
+  @apply bg-primary text-white border-primary;
+}
+
+.pagination-link-active:hover {
+  @apply bg-primary/90 text-white;
+}
+
+.pagination-ellipsis {
+  @apply text-lightSecond;
+}
