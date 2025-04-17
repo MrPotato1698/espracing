@@ -60,6 +60,13 @@
           <span id="fileNameS1R1" class="font-medium"></span>
         </p>
       </div>
+      <button
+        class="bg-red-500 text-lightPrimary font-bold py-2 px-4 w-full mt-2 rounded-md hover:bg-red-700"
+        id="clearFileS1R1Btn"
+        type="button"
+      >
+        Limpiar
+      </button>
     </div>
 
     <div class="mb-2 py-2 px-6 border-2 border-primary rounded-lg bg-darkSecond" id="split2R1File">
@@ -92,22 +99,120 @@
           <span id="fileNameS2R1" class="font-medium"></span>
         </p>
       </div>
+      <button
+        class="bg-red-500 text-lightPrimary font-bold py-2 px-4 w-full mt-2 rounded-md hover:bg-red-700"
+        id="clearFileS2R1Btn"
+        type="button"
+      >
+        Limpiar
+      </button>
     </div>
   </div>
 
   <div class="grid grid-cols-2">
     <button
       class="bg-primary text-lightPrimary font-bold py-3 px-2 w-72 mt-4 mx-auto border-solid border-primary border-2 rounded-md hover:bg-darkSecond hover:text-lightPrimary"
-      onclick="window.showToast('Operación exitosa', 'success')"
+      id="test1jsonBtn"
+      type="button"
     >
       Probar 1 JSON
     </button>
 
     <button
       class="bg-primary text-lightPrimary font-bold py-3 px-2 w-72 mt-4 mx-auto border-solid border-primary border-2 rounded-md hover:bg-darkSecond hover:text-lightPrimary"
-      onclick="window.showToast('Ha ocurrido un error', 'error')"
+      id="test2jsonBtn"
+      type="button"
     >
       Probar 2 JSON
     </button>
   </div>
 </div>
+
+<script>
+  import { createRaceData, createRaceDataMultipleSplits } from '@/lib/results/resultConverter'
+
+  const btn1 = document.getElementById('test1jsonBtn');
+  const btn2 = document.getElementById('test2jsonBtn');
+  const input1 = document.getElementById('fileInputS1R1') as HTMLInputElement | null;
+  const input2 = document.getElementById('fileInputS2R1') as HTMLInputElement | null;
+  const fileNameS1R1 = document.getElementById('fileNameS1R1');
+  const fileNameS2R1 = document.getElementById('fileNameS2R1');
+  const clearBtn1 = document.getElementById('clearFileS1R1Btn');
+  const clearBtn2 = document.getElementById('clearFileS2R1Btn');
+
+  input1?.addEventListener('change', () => {
+    const file = input1.files?.[0];
+    if (file) {
+      if (fileNameS1R1) {
+        fileNameS1R1.textContent = file.name;
+      }
+      document.getElementById('fileInfoS1R1')?.classList.remove('hidden');
+      window.showToast?.(`Archivo seleccionado: ${file.name}`, 'info');
+    } else {
+      document.getElementById('fileInfoS1R1')?.classList.add('hidden');
+    }
+  });
+  input2?.addEventListener('change', () => {
+    const file = input2.files?.[0];
+    if (file) {
+      if (fileNameS2R1) {
+        fileNameS2R1.textContent = file.name;
+      }
+      document.getElementById('fileInfoS2R1')?.classList.remove('hidden');
+      window.showToast?.(`Archivo seleccionado: ${file.name}`, 'info');
+    } else {
+      document.getElementById('fileInfoS2R1')?.classList.add('hidden');
+    }
+  });
+
+  clearBtn1?.addEventListener('click', () => {
+    if (input1) input1.value = '';
+    document.getElementById('fileInfoS1R1')?.classList.add('hidden');
+    if (fileNameS1R1) fileNameS1R1.textContent = '';
+  });
+  clearBtn2?.addEventListener('click', () => {
+    if (input2) input2.value = '';
+    document.getElementById('fileInfoS2R1')?.classList.add('hidden');
+    if (fileNameS2R1) fileNameS2R1.textContent = '';
+  });
+
+  btn1?.addEventListener('click', async () => {
+    const file = input1?.files?.[0];
+    if (!file) {
+      window.showToast?.('Selecciona un archivo JSON para probar.', 'error');
+      return;
+    }
+    window.showToast?.('Procesando archivo...','info');
+    try {
+      const text = await file.text();
+      const json = JSON.parse(text);
+      const result = createRaceData(json);
+      console.log('Resultado 1 JSON:', result);
+      window.showToast?.('Conversión exitosa. Revisa la consola.', 'success');
+    } catch (e) {
+      window.showToast?.('Error procesando el JSON.', 'error');
+      console.error(e);
+    }
+  });
+
+  btn2?.addEventListener('click', async () => {
+    const fileA = input1?.files?.[0];
+    const fileB = input2?.files?.[0];
+    if (!fileA || !fileB) {
+      window.showToast?.('Selecciona ambos archivos JSON para probar.', 'error');
+      return;
+    }
+    window.showToast?.('Procesando archivos...','info');
+    try {
+      const [textA, textB] = await Promise.all([fileA.text(), fileB.text()]);
+      const jsonA = JSON.parse(textA);
+      const jsonB = JSON.parse(textB);
+      const result = createRaceDataMultipleSplits(jsonA, jsonB);
+      console.log('Resultado 2 JSON:', result);
+      window.showToast?.('Conversión exitosa. Revisa la consola.', 'success');
+    } catch (e) {
+      window.showToast?.('Error procesando los JSON.', 'error');
+      console.error(e);
+    }
+  });
+</script>
