@@ -9,8 +9,31 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from './ui/pagination';
-import { ChevronUp, ChevronDown } from 'lucide-react';
+import { ChevronUp, ChevronDown, Search } from 'lucide-react';
 import { MultiSelect } from './multi-select';
+import { Input } from './ui/input';
+
+export interface DataTableColumn {
+  header: string;
+  accessor: string;
+}
+
+export interface DataTableProps {
+  readonly data: readonly any[];
+  readonly columns: readonly DataTableColumn[];
+  readonly onEdit?: { readonly path: string } | false;
+  readonly onDelete?: { readonly handler: (id: string | number) => void } | false;
+  readonly pageSize?: number;
+  readonly filterOptions?: readonly string[];
+  readonly filterAccessor?: string | null;
+  readonly customActions?: ((row: any) => React.ReactNode) | null;
+  readonly customRowClass?: ((row: any, index: number) => string) | null;
+  readonly customCellRenderer?: { readonly [accessor: string]: (row: any) => React.ReactNode } | null;
+  readonly initialSortConfig?: { readonly key: string | null; readonly direction: 'asc' | 'desc' };
+  readonly searchable?: boolean;
+  readonly searchPlaceholder?: string;
+  readonly searchableColumns?: readonly { readonly accessor: string }[] | null;
+}
 
 export function DataTable({
   data,
@@ -23,45 +46,50 @@ export function DataTable({
   customActions = null,
   customRowClass = null,
   customCellRenderer = null,
-  initialSortConfig = { key: null, direction: 'asc' }
-}) {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [activeFilters, setActiveFilters] = useState([...filterOptions]);
-  const [sortConfig, setSortConfig] = useState(initialSortConfig);
-  const [filteredData, setFilteredData] = useState([...data]);
+  initialSortConfig = { key: null, direction: 'asc' },
+  searchable = true,
+  searchPlaceholder = 'Buscar en la tabla...',
+  searchableColumns = null,
+}: Readonly<DataTableProps>) {
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [activeFilters, setActiveFilters] = useState<string[]>([...filterOptions]);
+  const [sortConfig, setSortConfig] = useState<{ key: string | null; direction: 'asc' | 'desc' }>(initialSortConfig);
+  const [filteredData, setFilteredData] = useState<any[]>([...data]);
+  const [searchTerm, setSearchTerm] = useState<string>('');
 
-  // Efecto para actualizar activeFilters cuando cambian las opciones
   useEffect(() => {
     if (filterOptions.length > 0 && activeFilters.length === 0) {
       setActiveFilters([...filterOptions]);
     }
   }, [filterOptions]);
 
-  // Efecto para resetear la página cuando cambian los datos o filtros
   useEffect(() => {
     setCurrentPage(1);
     applyFiltersAndSort();
-  }, [data, activeFilters, sortConfig]);
+  }, [data, activeFilters, sortConfig, searchTerm]);
 
-  // Función para aplicar filtros y ordenamiento
   const applyFiltersAndSort = () => {
     let processedData = [...data];
-
-    // Aplicar filtros solo si hay filtros activos y no son todos
+    if (searchTerm.trim() !== "") {
+      const searchLower = searchTerm.toLowerCase()
+      processedData = processedData.filter((row) => {
+        const columnsToSearch = searchableColumns || columns;
+        return columnsToSearch.some((column) => {
+          const value = getNestedValue(row, column.accessor)
+          return value && String(value).toLowerCase().includes(searchLower)
+        })
+      })
+    }
     if (filterAccessor && activeFilters.length > 0 && activeFilters.length !== filterOptions.length) {
       processedData = processedData.filter(row => {
         const filterValue = getNestedValue(row, filterAccessor);
         return filterValue && activeFilters.includes(filterValue);
       });
     }
-
-    // Aplicar ordenamiento
     if (sortConfig.key) {
       processedData.sort((a, b) => {
-        const aValue = getNestedValue(a, sortConfig.key) || '';
-        const bValue = getNestedValue(b, sortConfig.key) || '';
-
-        // Comparar valores
+        const aValue = getNestedValue(a, sortConfig.key) ?? '';
+        const bValue = getNestedValue(b, sortConfig.key) ?? '';
         if (aValue < bValue) {
           return sortConfig.direction === 'asc' ? -1 : 1;
         }
@@ -71,21 +99,18 @@ export function DataTable({
         return 0;
       });
     }
-
     setFilteredData(processedData);
   };
 
-  // Función para manejar el ordenamiento
-  const requestSort = (key) => {
-    let direction = 'asc';
+  const requestSort = (key: string) => {
+    let direction: 'asc' | 'desc' = 'asc';
     if (sortConfig.key === key && sortConfig.direction === 'asc') {
       direction = 'desc';
     }
     setSortConfig({ key, direction });
   };
 
-  // Función para obtener el valor de una propiedad anidada
-  const getNestedValue = (obj, path) => {
+  const getNestedValue = (obj: any, path: string | null) => {
     if (!path) return obj;
     const parts = path.split('.');
     let value = obj;
@@ -96,34 +121,27 @@ export function DataTable({
     return value;
   };
 
-  // Función para manejar los filtros
-  const handleFilterChange = (selectedOptions) => {
+  const handleFilterChange = (selectedOptions: string[]) => {
     setActiveFilters(selectedOptions);
   };
 
-  // Calcular paginación
   const totalPages = Math.ceil(filteredData.length / pageSize);
   const paginatedData = filteredData.slice(
     (currentPage - 1) * pageSize,
     currentPage * pageSize
   );
 
-  // Función para cambiar de página
-  const handlePageChange = (page) => {
+  const handlePageChange = (page: number) => {
     setCurrentPage(page);
-    // Opcional: Scroll al inicio de la tabla
     const tableElement = document.querySelector('.data-table-container');
     if (tableElement) {
       tableElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   };
 
-  // Función para generar los elementos de paginación
   const generatePaginationItems = () => {
-    const items = [];
-    const maxPagesToShow = 5; // Número máximo de páginas a mostrar (sin contar elipsis)
-
-    // Siempre mostrar la primera página
+    const items = [] as React.ReactNode[];
+    const maxPagesToShow = 5;
     items.push(
       <PaginationItem key="page-1">
         <PaginationLink
@@ -137,17 +155,11 @@ export function DataTable({
         </PaginationLink>
       </PaginationItem>
     );
-
-    // Calcular el rango de páginas a mostrar
     let startPage = Math.max(2, currentPage - Math.floor(maxPagesToShow / 2));
     let endPage = Math.min(totalPages - 1, startPage + maxPagesToShow - 2);
-
-    // Ajustar el rango si estamos cerca del final
     if (endPage - startPage < maxPagesToShow - 2) {
       startPage = Math.max(2, endPage - (maxPagesToShow - 2));
     }
-
-    // Mostrar elipsis al principio si es necesario
     if (startPage > 2) {
       items.push(
         <PaginationItem key="ellipsis-1">
@@ -155,8 +167,6 @@ export function DataTable({
         </PaginationItem>
       );
     }
-
-    // Mostrar páginas intermedias
     for (let i = startPage; i <= endPage; i++) {
       items.push(
         <PaginationItem key={`page-${i}`}>
@@ -172,8 +182,6 @@ export function DataTable({
         </PaginationItem>
       );
     }
-
-    // Mostrar elipsis al final si es necesario
     if (endPage < totalPages - 1) {
       items.push(
         <PaginationItem key="ellipsis-2">
@@ -181,7 +189,6 @@ export function DataTable({
         </PaginationItem>
       );
     }
-    // Siempre mostrar la última página si hay más de una página
     if (totalPages > 1) {
       items.push(
         <PaginationItem key={`page-${totalPages}`}>
@@ -197,34 +204,47 @@ export function DataTable({
         </PaginationItem>
       );
     }
-
     return items;
   };
 
-  // Determinar la clase de fila (alternando colores o personalizada)
-  const getRowClass = (row, index) => {
+  const getRowClass = (row: any, index: number) => {
     if (customRowClass) {
       return customRowClass(row, index);
     }
     return index % 2 === 0 ? "bg-darkPrimary" : "bg-darkSecond";
   };
 
-  // Renderizar celda con posible renderizador personalizado
-  const renderCell = (row, column, colIndex) => {
-    if (customCellRenderer && customCellRenderer[column.accessor]) {
+  const highlightMatch = (text: string, searchTerm: string) => {
+    if (!searchTerm.trim() || !text) return text
+    const regex = new RegExp(`(${searchTerm.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "gi")
+    const parts = String(text).split(regex)
+    return parts.map((part, i) =>
+      regex.test(part) ? (
+        <span key={`${part}-${i}`} className="bg-primary text-white font-medium">
+          {part}
+        </span>
+      ) : (
+        part
+      ),
+    )
+  }
+
+  const renderCell = (row: any, column: DataTableColumn, colIndex: number) => {
+    if (customCellRenderer?.[column.accessor]) {
       return customCellRenderer[column.accessor](row);
     }
-    return getNestedValue(row, column.accessor);
+    const value = getNestedValue(row, column.accessor)
+    if (searchTerm.trim() && value) {
+      return highlightMatch(value, searchTerm)
+    }
+    return value
   };
 
-  // Escuchar eventos de actualización de paginación
   useEffect(() => {
     const handlePaginationUpdate = () => {
       setCurrentPage(1);
     };
-
     document.addEventListener('pagination-update', handlePaginationUpdate);
-
     return () => {
       document.removeEventListener('pagination-update', handlePaginationUpdate);
     };
@@ -232,28 +252,49 @@ export function DataTable({
 
   return (
     <div className="w-full data-table-container">
-      {/* Filtro si hay opciones de filtro */}
+      <div className="flex flex-col md:flex-row gap-4 my-4">
+        {searchable && (
+          <div className="relative flex-grow h-full my-auto">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-lightSecond" />
+          <Input
+            type="text"
+            placeholder={searchPlaceholder}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-9 bg-darkPrimary border-lightSecond text-white w-full"
+          />
+        </div>
+        )}
       {filterOptions.length > 0 && filterAccessor && (
-        <div className="mb-4">
+        <div className="md:w-64">
           <MultiSelect
-            options={filterOptions}
+            options={[...filterOptions]}
             selectedValues={activeFilters}
             onChange={handleFilterChange}
             placeholder="Filtrar"
-            className="md:w-64"
             selectAllByDefault={true}
             label={`Filtrar por ${filterAccessor}`}
           />
+          </div>
+        )}
+      </div>
+      {searchTerm.trim() !== "" && (
+        <div className="text-sm text-lightSecond mb-2">
+          Mostrando {filteredData.length} resultados para "{searchTerm}"
+          {filteredData.length === 0 && (
+            <button onClick={() => setSearchTerm("")} className="ml-2 text-primary hover:underline">
+              Limpiar búsqueda
+            </button>
+          )}
         </div>
       )}
-
       <Table>
         <TableHeader className="font-medium bg-primary">
           <TableRow>
             <TableHead className="text-white justify-center">Nº</TableHead>
-            {columns.map((column, index) => (
+            {columns.map((column) => (
               <TableHead
-                key={index}
+                key={column.accessor}
                 className="text-white cursor-pointer justify-center"
                 onClick={() => requestSort(column.accessor)}
               >
@@ -276,27 +317,25 @@ export function DataTable({
           {paginatedData.length > 0 ? (
             paginatedData.map((row, rowIndex) => (
               <TableRow
-                key={rowIndex}
+                key={row.id ?? rowIndex}
                 className={getRowClass(row, rowIndex)}
-                data-class-id={row.classId} // Para filtrado de clases
-                data-decade={row.decade} // Para filtrado de décadas
+                data-class-id={row.classId}
+                data-decade={row.decade}
               >
                 <TableCell>{(currentPage - 1) * pageSize + rowIndex + 1}</TableCell>
-                {columns.map((column, colIndex) => (
-                  <TableCell key={colIndex}>
-                    {renderCell(row, column, colIndex)}
+                {columns.map((column) => (
+                  <TableCell key={column.accessor}>
+                    {renderCell(row, column, columns.findIndex(col => col.accessor === column.accessor))}
                   </TableCell>
                 ))}
-
                 {customActions && (
                   <TableCell>
                     {customActions(row)}
                   </TableCell>
                 )}
-
                 {onEdit && (
                   <TableCell>
-                    <a href={`/admin/${onEdit.path}/${row.id}`} className="flex justify-center">
+                    <a href={`/admin/${(onEdit as { path: string }).path}/${row.id}`} className="flex justify-center">
                       <svg xmlns="http://www.w3.org/2000/svg" className="w-6 text-center mx-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
                         <path d="m15 5 4 4"/>
@@ -304,13 +343,12 @@ export function DataTable({
                     </a>
                   </TableCell>
                 )}
-
                 {onDelete && (
                   <TableCell>
                     <button
                       className="align-middle delete-item flex justify-center w-full"
                       data-id={row.id}
-                      onClick={() => onDelete.handler(row.id)}
+                      onClick={() => (onDelete as { handler: (id: string | number) => void }).handler(row.id)}
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" className="w-6 text-center mx-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M3 6h18"/>
@@ -331,8 +369,6 @@ export function DataTable({
           )}
         </TableBody>
       </Table>
-
-      {/* Paginación mejorada con shadcn/ui */}
       {totalPages > 1 && (
         <div className="mt-4">
           <Pagination>
@@ -346,9 +382,7 @@ export function DataTable({
                   className={currentPage === 1 ? "opacity-50 pointer-events-none" : ""}
                 />
               </PaginationItem>
-
               {generatePaginationItems()}
-
               <PaginationItem>
                 <PaginationNext
                   onClick={(e) => {

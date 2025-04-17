@@ -3,7 +3,10 @@ import { ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react'
 
 import { cn } from "@/lib/utils"
 
-const Pagination = ({ className, ...props }) => (
+export interface PaginationProps extends React.HTMLAttributes<HTMLElement> {
+  className?: string;
+}
+const Pagination: React.FC<PaginationProps> = ({ className, ...props }) => (
   <nav
     role="navigation"
     aria-label="pagination"
@@ -13,7 +16,10 @@ const Pagination = ({ className, ...props }) => (
 )
 Pagination.displayName = "Pagination"
 
-const PaginationContent = React.forwardRef(({ className, ...props }, ref) => (
+export interface PaginationContentProps extends React.HTMLAttributes<HTMLUListElement> {
+  className?: string;
+}
+const PaginationContent = React.forwardRef<HTMLUListElement, PaginationContentProps>(({ className, ...props }, ref) => (
   <ul
     ref={ref}
     className={cn("flex flex-row items-center gap-1", className)}
@@ -22,12 +28,21 @@ const PaginationContent = React.forwardRef(({ className, ...props }, ref) => (
 ))
 PaginationContent.displayName = "PaginationContent"
 
-const PaginationItem = React.forwardRef(({ className, ...props }, ref) => (
+export interface PaginationItemProps extends React.LiHTMLAttributes<HTMLLIElement> {
+  className?: string;
+}
+const PaginationItem = React.forwardRef<HTMLLIElement, PaginationItemProps>(({ className, ...props }, ref) => (
   <li ref={ref} className={cn("", className)} {...props} />
 ))
 PaginationItem.displayName = "PaginationItem"
 
-const PaginationLink = ({
+export interface PaginationLinkProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
+  className?: string;
+  isActive?: boolean;
+  size?: string;
+  children?: React.ReactNode;
+}
+const PaginationLink: React.FC<PaginationLinkProps> = ({
   className,
   isActive,
   size = "icon",
@@ -50,10 +65,10 @@ const PaginationLink = ({
 )
 PaginationLink.displayName = "PaginationLink"
 
-const PaginationPrevious = ({
-  className,
-  ...props
-}) => (
+export interface PaginationPreviousProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
+  className?: string;
+}
+const PaginationPrevious: React.FC<PaginationPreviousProps> = ({ className, ...props }) => (
   <PaginationLink
     aria-label="Go to previous page"
     size="default"
@@ -65,10 +80,10 @@ const PaginationPrevious = ({
 )
 PaginationPrevious.displayName = "PaginationPrevious"
 
-const PaginationNext = ({
-  className,
-  ...props
-}) => (
+export interface PaginationNextProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
+  className?: string;
+}
+const PaginationNext: React.FC<PaginationNextProps> = ({ className, ...props }) => (
   <PaginationLink
     aria-label="Go to next page"
     size="default"
@@ -80,10 +95,10 @@ const PaginationNext = ({
 )
 PaginationNext.displayName = "PaginationNext"
 
-const PaginationEllipsis = ({
-  className,
-  ...props
-}) => (
+export interface PaginationEllipsisProps extends React.HTMLAttributes<HTMLSpanElement> {
+  className?: string;
+}
+const PaginationEllipsis: React.FC<PaginationEllipsisProps> = ({ className, ...props }) => (
   <span
     aria-hidden
     className={cn("flex h-9 w-9 items-center justify-center", className)}
