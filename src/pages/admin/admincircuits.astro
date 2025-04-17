@@ -2,7 +2,7 @@
 import Layout from "@/layouts/ProfileLayout.astro";
 import { supabase } from "@/db/supabase";
 import { DataTable } from "@/components/data-table";
-import { dir } from "console";
+import { showToast } from "@/lib/utils";
 
 const { cookies, redirect } = Astro;
 
@@ -84,25 +84,29 @@ const columns = [
 ];
 
 // Función para manejar la eliminación
-const handleDeleteCircuit = async (id: number) => {
+const handleDeleteCircuit = (id: string | number) => {
+  const circuitId = typeof id === "string" ? parseInt(id, 10) : id;
   if (confirm("¿Estás seguro de que quieres eliminar este circuito?")) {
-    try {
-      const response = await fetch("/api/admin/circuit/deletecircuit", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ id }),
+    fetch("/api/admin/circuit/deletecircuit", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ id: circuitId }),
+    })
+      .then((response) => {
+        if (response.ok) {
+          window.location.reload();
+          showToast("Circuito eliminado correctamente", "success");
+        } else {
+          showToast("Error eliminando circuito", "error");
+          console.error("Error eliminando circuito");
+        }
+      })
+      .catch((error) => {
+        showToast("Error: " + error, "error");
+        console.error("Error:", error);
       });
-
-      if (response.ok) {
-        window.location.reload();
-      } else {
-        console.error("Error eliminando circuito");
-      }
-    } catch (error) {
-      console.error("Error:", error);
-    }
   }
 };
 ---
@@ -128,6 +132,12 @@ const handleDeleteCircuit = async (id: number) => {
         filterOptions={countries}
         filterAccessor="country"
         initialSortConfig={{key: "circuit_name", direction: "asc"}}
+        searchable={true}
+        searchPlaceholder="Buscar por nombre del circuito o localización"
+        searchableColumns={[
+          {accessor: "circuit_name"},
+          {accessor: "circuit_location"}
+        ]}
       />
     </div>
   </div>

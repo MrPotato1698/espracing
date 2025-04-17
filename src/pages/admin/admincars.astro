@@ -2,6 +2,7 @@
 import Layout from "@/layouts/ProfileLayout.astro";
 import { supabase } from "@/db/supabase";
 import { DataTable } from "@/components/data-table";
+import { showToast } from "@/lib/utils";
 
 const { cookies, redirect } = Astro;
 
@@ -88,25 +89,29 @@ const carTableData = carsData?.map((car) => ({
 const decades = [...new Set(carTableData.map(car => car.decade))].sort();
 
 // Función para manejar la eliminación
-const handleDeleteCar = async (id: number) => {
+const handleDeleteCar = (id: string | number): void => {
+  const carId = typeof id === "string" ? parseInt(id, 10) : id;
   if (confirm("¿Estás seguro de que quieres eliminar este coche?")) {
-    try {
-      const response = await fetch("/api/admin/car/deletecar", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ id }),
+    fetch("/api/admin/car/deletecar", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ id: carId }),
+    })
+      .then((response) => {
+        if (response.ok) {
+          window.location.reload();
+          showToast("Coche eliminado correctamente", "success");
+        } else {
+          showToast("Error eliminando coche", "error");
+          console.error("Error eliminando coche");
+        }
+      })
+      .catch((error) => {
+        showToast("Error: " + error, "error");
+        console.error("Error:", error);
       });
-
-      if (response.ok) {
-        window.location.reload();
-      } else {
-        console.error("Error eliminando coche");
-      }
-    } catch (error) {
-      console.error("Error:", error);
-    }
   }
 };
 ---
@@ -133,6 +138,13 @@ const handleDeleteCar = async (id: number) => {
           filterOptions={decades}
           filterAccessor={"decade"}
           initialSortConfig={{ key: "fullName", direction: "asc" }}
+          searchable={true}
+          searchPlaceholder="Buscar por nombre, año o clase"
+          searchableColumns={[
+            {accessor: "fullName"},
+            {accessor: "year"},
+            {accessor: "className"}
+          ]}
         />
       </div>
     </div>

@@ -2,6 +2,7 @@
 import Layout from "@/layouts/ProfileLayout.astro";
 import { supabase } from "@/db/supabase";
 import { DataTable } from "@/components/data-table";
+import { showToast } from "@/lib/utils";
 
 const { cookies, redirect } = Astro;
 
@@ -71,26 +72,32 @@ const tableData = teamData?.map((team, index) => ({
 })) || [];
 
 // Función para manejar la eliminación
-const handleDeleteTeam = async (id: number) => {
-  if (confirm("¿Estás seguro de que quieres eliminar este equipo?")) {
-    try {
-      const response = await fetch("/api/admin/team/deleteteam", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ id }),
-      });
+const handleDeleteTeam = (id: string | number) => {
+  const teamId = typeof id === "string" ? parseInt(id, 10) : id;
+  (async () => {
+    if (confirm("¿Estás seguro de que quieres eliminar este equipo?")) {
+      try {
+        const response = await fetch("/api/admin/team/deleteteam", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ id: teamId }),
+        });
 
-      if (response.ok) {
-        window.location.reload();
-      } else {
-        console.error("Error eliminando equipo");
+        if (response.ok) {
+          window.location.reload();
+          showToast("Equipo eliminado correctamente", "success");
+        } else {
+          showToast("Error eliminando equipo", "error");
+          console.error("Error eliminando equipo");
+        }
+      } catch (error) {
+        showToast("Error: " + error, "error");
+        console.error("Error:", error);
       }
-    } catch (error) {
-      console.error("Error:", error);
     }
-  }
+  })();
 };
 ---
 
@@ -108,10 +115,14 @@ const handleDeleteTeam = async (id: number) => {
         client:only="react"
         data={tableData}
         columns={columns}
-        caption="Lista de Equipos"
         onEdit={{ path: "teams" }}
         onDelete={{ handler: handleDeleteTeam }}
         pageSize={10}
+        searchable={true}
+        searchPlaceholder="Buscar por nombre de equipo"
+        searchableColumns={[
+          {accessor: "name"}
+        ]}
       />
     </div>
   </div>

@@ -2,6 +2,7 @@
 import Layout from "@/layouts/ProfileLayout.astro";
 import { supabase } from "@/db/supabase";
 import { DataTable } from "@/components/data-table";
+import { showToast } from "@/lib/utils";
 
 const { cookies, redirect } = Astro;
 
@@ -110,26 +111,32 @@ const champTableData = champsData?.map((champ) => ({
 })) || [];
 
 // Función para manejar la eliminación
-const handleDeleteChamp = async (id: number) => {
-  if (confirm("¿Estás seguro de que quieres eliminar este campeonato/evento?")) {
-    try {
-      const response = await fetch("/api/admin/championship/deletechamp", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ id }),
-      });
+const handleDeleteChamp = (id: string | number) => {
+  const champId = typeof id === "string" ? parseInt(id, 10) : id;
+  (async () => {
+    if (confirm("¿Estás seguro de que quieres eliminar este campeonato/evento?")) {
+      try {
+        const response = await fetch("/api/admin/championship/deletechamp", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ id: champId }),
+        });
 
-      if (response.ok) {
-        window.location.reload();
-      } else {
-        console.error("Error eliminando campeonato/evento");
+        if (response.ok) {
+          window.location.reload();
+          showToast("Campeonato/evento eliminado correctamente", "success");
+        } else {
+          showToast("Error eliminando campeonato/evento", "error");
+          console.error("Error eliminando campeonato/evento");
+        }
+      } catch (error) {
+        showToast("Error: " + error, "error");
+        console.error("Error:", error);
       }
-    } catch (error) {
-      console.error("Error:", error);
     }
-  }
+  })();
 };
 ---
 
@@ -154,6 +161,12 @@ const handleDeleteChamp = async (id: number) => {
         filterOptions={seasonOptions}
         filterAccessor="Temporada"
         initialSortConfig={{ key: "name", direction: "asc" }}
+        searchable={true}
+        searchPlaceholder="Buscar por nombre de evento o temporada"
+        searchableColumns={[
+          {accessor: "name"},
+          {accessor: "season"}
+        ]}
       />
     </div>
   </div>
@@ -174,6 +187,12 @@ const handleDeleteChamp = async (id: number) => {
         filterOptions={seasonOptions}
         filterAccessor="seasonDisplay"
         initialSortConfig={{ key: "displayName", direction: "asc" }}
+        searchable={true}
+        searchPlaceholder="Buscar por nombre del campeonato o temporada"
+        searchableColumns={[
+          {accessor: "displayName"},
+          {accessor: "season"}
+        ]}
       />
     </div>
   </div>
