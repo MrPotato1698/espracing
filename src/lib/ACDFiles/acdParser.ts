@@ -1,54 +1,68 @@
-import { AcdDecoder } from "./acdDecoder"
+import { AcdReader } from "./acdReader"
 
-interface AcdFile {
-  name: string
-  content: Uint8Array
-}
+/**
+ * Extrae y parsea archivos de un archivo data.acd
+ * @param data Datos del archivo data.acd
+ * @param folderName Nombre de la carpeta padre (importante para el descifrado)
+ * @returns Lista de archivos extraídos
+ */
+export function parseAcd(data: Uint8Array, folderName: string): { name: string; content: Uint8Array }[] {
+  console.log(`Iniciando parseAcd para carpeta: ${folderName}`)
+  console.log(`Tamaño del archivo ACD: ${data.length} bytes`)
 
-export function parseAcd(data: Uint8Array, folderName: string): AcdFile[] {
-  console.log(`=== Iniciando parseAcd ===`)
-  console.log(`Carpeta: ${folderName}`)
-  console.log(`Tamaño del archivo: ${data.length} bytes`)
-  console.log(
-    `Primeros 32 bytes: ${Array.from(data.slice(0, 32))
-      .map((b) => b.toString(16).padStart(2, "0"))
-      .join(" ")}`,
-  )
+  // Crear el lector ACD directamente desde el buffer
+  const reader = new AcdReader(data, folderName)
+  console.log(`Archivos encontrados: ${reader.files.length}`)
 
-  const decoder = new AcdDecoder(data, folderName)
+  // Extraer todos los archivos
+  const files: { name: string; content: Uint8Array }[] = []
 
-  // Primero mostramos la estructura para debugging
-  decoder.dumpFileStructure()
+  for (const file of reader.files) {
+    console.log(`Procesando archivo: ${file.name} (longitud: ${file.length})`)
+    try {
+      const content = file.bytes()
+      files.push({ name: file.name, content })
 
-  // Luego decodificamos los archivos
-  const decodedFiles = decoder.decode()
-
-  const files: AcdFile[] = []
-  for (const [name, content] of decodedFiles.entries()) {
-    console.log(`Procesado: ${name} (${content.length} bytes)`)
-
-    // Mostrar una vista previa del contenido si es texto
-    if (content.length > 0) {
-      try {
-        const preview = new TextDecoder().decode(content.slice(0, 100))
-        console.log(`Vista previa: ${preview.replace(/\n/g, "\\n").replace(/\r/g, "\\r")}`)
-      } catch (e) {
-        console.log("El contenido no es texto válido")
+      // Intentar mostrar una vista previa del contenido
+      if (file.name.endsWith(".ini") || file.name.endsWith(".txt") || file.name.endsWith(".json")) {
+        try {
+          const text = new TextDecoder().decode(content)
+          const preview = text.length > 200 ? text.substring(0, 200) + "..." : text
+          console.log(`Vista previa de ${file.name}:\n${preview}`)
+        } catch (e) {
+          console.log(`No se pudo mostrar vista previa de ${file.name}: ${e}`)
+        }
+      } else {
+        console.log(`Archivo binario: ${file.name} (${content.length} bytes)`)
       }
+    } catch (error) {
+      console.error(`Error al procesar ${file.name}: ${error}`)
     }
-
-    files.push({ name, content })
   }
 
   return files
 }
 
-export function findFileInAcd(files: AcdFile[], fileName: string): AcdFile | undefined {
+/**
+ * Busca un archivo específico en la lista de archivos extraídos
+ * @param files Lista de archivos extraídos
+ * @param fileName Nombre del archivo a buscar
+ */
+export function findFileInAcd(
+  files: { name: string; content: Uint8Array }[],
+  fileName: string,
+): { name: string; content: Uint8Array } | undefined {
   return files.find((file) => file.name.toLowerCase() === fileName.toLowerCase())
 }
 
+/**
+ * Parsea el contenido de un archivo INI
+ * @param content Contenido del archivo INI
+ */
 export function parseIniContent(content: Uint8Array): { [section: string]: { [key: string]: string } } {
   const text = new TextDecoder().decode(content)
+  console.log(`Parseando contenido INI (${content.length} bytes):\n${text.substring(0, 500)}...`)
+
   const lines = text.split(/\r?\n/)
   const result: { [section: string]: { [key: string]: string } } = {}
   let currentSection = ""
@@ -70,3 +84,23 @@ export function parseIniContent(content: Uint8Array): { [section: string]: { [ke
   return result
 }
 
+/**
+ * Exporta todos los archivos a JSON para inspección
+ * @param files Lista de archivos extraídos
+ */
+export function exportFilesToJson(files: { name: string; content: Uint8Array }[]): string {
+  const result: { [filename: string]: string } = {}
+
+  for (const file of files) {
+    try {
+      // Intentar convertir a texto
+      const text = new TextDecoder().decode(file.content)
+      result[file.name] = text
+    } catch (e) {
+      // Si falla, indicar que es contenido binario
+      result[file.name] = `[Contenido binario - ${file.content.length} bytes]`
+    }
+  }
+
+  return JSON.stringify(result, null, 2)
+}
