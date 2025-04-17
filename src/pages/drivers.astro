@@ -1,6 +1,7 @@
 ---
 import Layout from "@/layouts/NormalLayout.astro";
 import { supabase } from "@/db/supabase";
+import { DataTable } from "@/components/data-table";
 
 const { data: UsersData, error: errorUsers } = await supabase
   .from("profiles")
@@ -10,11 +11,19 @@ const { data: UsersData, error: errorUsers } = await supabase
 if(errorUsers) {
   console.error(errorUsers);
 }
-
-console.log(UsersData);
-
-const {data: example} = await supabase.from('profiles').select('*').eq('full_name', 'Alvaro Rico');
-console.log(example?.[0]);
+// Definición de columnas para coches
+const userColumns = [
+  { header: "Nombre", accessor: "full_name" },
+  { header: "Equipo", accessor: "team.name" },
+  { header: "Carreras", accessor: "races" },
+  { header: "Victorias", accessor: "wins" },
+  { header: "Podios", accessor: "podiums" },
+  { header: "V. Rápidas", accessor: "flaps" },
+  { header: "Poles", accessor: "poles" },
+  { header: "Top5", accessor: "top5" },
+  { header: "Top10", accessor: "top10" },
+  { header: "DNF", accessor: "dnf" }
+];
 ---
 
 <Layout title="ESP Racing: Pilotos">
@@ -22,58 +31,29 @@ console.log(example?.[0]);
     <h2 class="text-5xl font-bold border-b border-primary w-fit mx-auto">
       Tabla de Pilotos
     </h2>
-    <table class="mt-6 w-full border-collapse border border-lightPrimary">
-      <thead class="font-medium bg-primary">
-        <tr>
-          <th>Nº</th>
-          <th colspan="2">Nombre</th>
-          <th>Equipo</th>
-          <th>Carreras</th>
-          <th>Victorias</th>
-          <th>Podios</th>
-          <th>V. Rápidas</th>
-          <th>Poles</th>
-          <th>Top 5</th>
-          <th>Top 10</th>
-          <th>DNF</th>
-        </tr>
-      </thead>
-      <tbody>
-        {
-          (UsersData ?? []).map((user, index) => (
-            <tr class="bg-darkSecond">
-              <td class="font-semibold">{index + 1}</td>
-              <td><img src={String(user.avatar)} alt="Avatar" class="w-8 py-1 rounded-full justify-end"/></td>
-              {user.number_plate === null || user.number_plate === 0 ? (
-                <td>#0 - {user.full_name}</td>
-              ) : (
-                <td>
-                  #{user.number_plate} - {user.full_name}
-                </td>
-              )}
-              <td>{user.team?.name}</td>
-              <td>{user.races}</td>
-              <td>{user.wins}</td>
-              <td>{user.podiums}</td>
-              <td>{user.flaps}</td>
-              <td>{user.poles}</td>
-              <td>{user.top5}</td>
-              <td>{user.top10}</td>
-              <td>{user.dnf}</td>
-            </tr>
-          ))
-        }
-      </tbody>
-    </table>
+    <div class="px-3 mt-6">
+      <DataTable
+        client:only="react"
+        data={UsersData ?? []}
+        columns={userColumns}
+        onEdit={false}
+        onDelete={false}
+        pageSize={10}
+        searchable={true}
+        searchPlaceholder="Buscar por nombre, equipo, carreras, ..."
+        searchableColumns={[
+          {accessor: "full_name"},
+          {accessor: "team.name"},
+          {accessor: "races"},
+          {accessor: "wins"},
+          {accessor: "podiums"},
+          {accessor: "flaps"},
+          {accessor: "poles"},
+          {accessor: "top5"},
+          {accessor: "top10"},
+          {accessor: "dnf"}
+        ]}
+      />
+    </div>
   </div>
 </Layout>
-
-<style>
-  tbody tr:nth-child(odd) {
-    background-color: #0f0f0f;
-  }
-
-  tbody tr:nth-child(even) {
-    background-color: #19191c;
-  }
-</style>
