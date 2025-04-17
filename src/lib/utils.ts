@@ -1,7 +1,7 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 
-import type { RaceData, RaceResult, RaceLap, BestLap, RaceConfig } from "@/types/Results";
+import type { RaceData, RaceResult, RaceLap, BestLap } from "@/types/Results";
 import type { Points } from "@/types/Points";
 import type { ResultTableData, CarData, RaceFastestLap} from "@/types/Utils"
 
@@ -10,14 +10,12 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function getResultTableData(datos: RaceData, pointsystemName: String, pointArray: Points, cars: CarData[]): ResultTableData[] {
+export function getResultTableData(datos: RaceData, pointsystemName: string, pointArray: Points, cars: CarData[]): ResultTableData[] {
   let resultTableData: ResultTableData[] = [];
   const dresult: RaceResult[] = datos.RaceResult;
   const dlaps: RaceLap[] = datos.RaceLaps;
   const dbestlaps: BestLap[] = datos.BestLap;
 
-
-  // Para calcular la disposición de puntos de una manera correcta cuando hay 2 splits
   let driversQualifiedSplit1 = 0;
   if (datos.RaceConfig.NumberofSplits > 1) {
     driversQualifiedSplit1 = dresult.filter(driver => driver.Split === 1 && driver.Pos > 0).length;
@@ -27,7 +25,6 @@ export function getResultTableData(datos: RaceData, pointsystemName: String, poi
   let postabla: number = 0;
   let vueltasLider: number = 0;
 
-  // Obtener el número de pilotos por split, que hayan terminado la carrera
   const driversPerSplitQualified = dresult.reduce((acc: number[], driver) => {
     if (driver.Pos > 0) {
       const splitIndex = driver.Split - 1;
@@ -37,272 +34,55 @@ export function getResultTableData(datos: RaceData, pointsystemName: String, poi
     return acc;
   }, []);
 
-  // *** Mejor vuelta de carrera ***
   const bestlapDriverID = dbestlaps[0].SteamID;
 
   for (let itemResult of dresult) {
-    let item: ResultTableData;
     postabla++;
     pos = itemResult.Pos;
-    let gridPositionClass = "";
 
-    // Obtener ganancias/perdidas de posición
     const positionsOtherSplits = driversPerSplitQualified.slice(0, itemResult.Split - 1).reduce((sum, current) => sum + current, 0);
     let gains = itemResult.GridPosition - postabla + positionsOtherSplits;
-    let gainsAbs: string = Math.abs(gains).toString();
-    if ((gains > 0) && (pos > -2)) {
-      gridPositionClass = '<svg viewBox="0 0 24 24" fill="#00f000" class="w-6 float mx-auto"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M11.375 6.22l-5 4a1 1 0 0 0 -.375 .78v6l.006 .112a1 1 0 0 0 1.619 .669l4.375 -3.501l4.375 3.5a1 1 0 0 0 1.625 -.78v-6a1 1 0 0 0 -.375 -.78l-5 -4a1 1 0 0 0 -1.25 0z" /></svg>';
-    } else if ((gains < 0) && (pos > -2)) {
-      gridPositionClass = '<svg viewBox="0 0 24 24" fill="#ff0000" class="w-6 float mx-auto rotate-180"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M11.375 6.22l-5 4a1 1 0 0 0 -.375 .78v6l.006 .112a1 1 0 0 0 1.619 .669l4.375 -3.501l4.375 3.5a1 1 0 0 0 1.625 -.78v-6a1 1 0 0 0 -.375 -.78l-5 -4a1 1 0 0 0 -1.25 0z" /></svg>';
-    } else if (gains === 0 || pos <= -2) {
-      gridPositionClass = '<svg viewBox="0 0 24 24" fill="#ffc800" class="w-6 float mx-auto rotate-90"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M11.375 6.22l-5 4a1 1 0 0 0 -.375 .78v6l.006 .112a1 1 0 0 0 1.619 .669l4.375 -3.501l4.375 3.5a1 1 0 0 0 1.625 -.78v-6a1 1 0 0 0 -.375 -.78l-5 -4a1 1 0 0 0 -1.25 0z" /></svg>';
-      gainsAbs = "0";
-    }
-    if (pos <= -3) {
-      gridPositionClass = "";
-      gainsAbs = "";
-    }
+    const { gridPositionClass, gainsAbs } = getGridPositionClass(gains, pos);
 
-    // Obtener nombre de equipo + Ping Min-Max
-    let equipo = itemResult.Team;
+    const equipo = itemResult.Team;
 
+    const carInfo = getCarInfo(itemResult.CarFileName, cars);
 
-    // Obtener el nombre real del coche
-    const isCarExists = cars.find((car) => car.filename === itemResult.CarFileName);
-    let carName: string;
-    let carBrand: string;
-    let carClass: string;
-    let carColorClass: string;
-    if (isCarExists) {
-      carName = isCarExists.brand + " " + isCarExists.model;
-      carBrand = isCarExists.imgbrand;
-      carClass = isCarExists.classShortName;
-      carColorClass = `style="background-color: ${isCarExists.classColor.split(' ')[0].replace('bg-[', '').replace(']', '')}; color: ${isCarExists.classColor.split(' ')[1].replace('text-[', '').replace(']', '')}"`;
-      carColorClass += ' class = "rounded text-xs font-bold px-1 py-0.5 ml-1"';
-    } else {
-      carName = itemResult.CarFileName;
-      carBrand = "";
-      carClass = "";
-      carColorClass = "";
-    }
+    const timeadjust = getTimeAdjust(itemResult);
 
-    // Obtener tiempo total de carrera
-    let timeadjust;
-    if (itemResult.Pos !== -2) {
-      if (itemResult.TotalTime >= 0) {
-        timeadjust = itemResult.TotalTime + itemResult.Penalties;
-        const seconds = formatTwoIntegersPlusThreeDecimals(timeadjust % 60);
-        const minutes = formatTwoIntegers(Math.trunc((timeadjust / 60) % 60));
-        const hours = formatTwoIntegers(Math.trunc(timeadjust / 3600));
+    const vueltastotales = getTotalLaps(itemResult, dlaps);
 
-        if (Number(hours) > 0) {
-          if (itemResult.Penalties !== 0) {
-            timeadjust = hours + ":" + minutes + ":" + seconds + " <span class='rounded bg-[#da392b] text-xs px-1 py-0.5 ml-1'> + " + (itemResult.Penalties) + "s</span>";
-          } else {
-            timeadjust = hours + ":" + minutes + ":" + seconds;
-          }
-        } else {
-          if (itemResult.Penalties !== 0) {
-            timeadjust = minutes + ":" + seconds + " <span class='rounded bg-primary text-xs px-1 py-0.5 ml-1'> + " + (itemResult.Penalties) + "s";
-          } else {
-            timeadjust = minutes + ":" + seconds;
-          }
-        }
-      } else {
-        timeadjust = "No Time";
-      }
-    } else {
-      timeadjust = "DQ";
-    }
+    const tyreAndCuts = getTyreAndCuts(itemResult, dlaps);
+    let tyre = tyreAndCuts.tyre;
 
-    if (itemResult.Pos <= -3) {
-      timeadjust = "";
-    }
+    let { posicionFinal, vueltasLider: newVueltaLider } = getPosicionFinal(itemResult, pos, vueltastotales, vueltasLider);
+    if (pos === 1) vueltasLider = newVueltaLider;
 
-    // Obtener numero de vueltas totales / vuelta rapida / neumatico
-    let vueltastotales = 0;
-    if (itemResult.Laps === undefined || itemResult.Laps === null || itemResult.Laps === 0) {
-      for (let itemLap of dlaps) {
-        if (itemLap.SteamID === itemResult.SteamID) {
-          vueltastotales = itemLap.Laps.length;
-        }
-      }
-    } else {
-      vueltastotales = itemResult.Laps;
-    }
+    let { bestlapToString, tyre: tyreOverride } = getBestLapString(itemResult, pos);
+    if (typeof tyreOverride !== "undefined") tyre = tyreOverride;
 
-    let tyre;
-    let cuts = 0;
+    const gap = getGap(pos, postabla, vueltasLider, vueltastotales, dresult, itemResult);
 
-    for (let itemLap of dlaps) {
-      if (itemLap.SteamID === itemResult.SteamID) {
-        for (let itemLap2 of itemLap.Laps) {
-          if (itemLap2.LapTime === itemResult.BestLap) {
-            tyre = "(" + itemLap2.Tyre + ")";
-          }
-        }
-      }
-    }
+    const interval = getInterval(pos, postabla, dresult, dlaps, itemResult, vueltastotales);
 
-    for (let itemLap of dlaps) {
-      if (itemLap.SteamID === itemResult.SteamID) {
-        cuts += itemLap.Laps.filter((lap) => lap.Cut > 0).length;
-      }
-    }
+    const puntosString = getPointsString(pointsystemName, pos, itemResult, driversQualifiedSplit1, pointArray, bestlapDriverID);
 
-    if (tyre === undefined || tyre === null || tyre === "") {
-      tyre = "(ND)";
-    }
-
-    let posicionFinal: string = "";
-
-    if (pos === 1) {
-      vueltasLider = vueltastotales;
-      posicionFinal = '1';
-    } else {
-      switch (itemResult.Pos) {
-        case -1: posicionFinal = 'DNF'; break;
-        case -2: posicionFinal = 'DQ'; break;
-        case -3: posicionFinal = 'DNS'; break;
-        case -4:
-          switch (itemResult.Team) {
-            case "STREAMING":
-              posicionFinal = 'TV';
-              break;
-            case "ESP Racing Staff":
-              posicionFinal = 'STAFF';
-              break;
-            case "Safety Car":
-              posicionFinal = 'SC';
-              break;
-            default:
-              posicionFinal = 'DNS';
-              break;
-          }
-          break;
-        default:
-          posicionFinal = pos.toString();
-      }
-      if (itemResult.Pos === -4 && itemResult.DriverName === "STREAMING") {
-        posicionFinal = 'TV';
-      }
-    }
-
-    let bestlap = itemResult.BestLap;
-    let secondsbl = formatTwoIntegersPlusThreeDecimals(bestlap % 60);
-    let minutesbl = formatTwoIntegers(Math.trunc((bestlap / 60) % 60));
-
-    let bestlapToString = "";
-    if (pos >= -1) {
-      bestlapToString = minutesbl.toString() + ":" + secondsbl.toString();
-    } else {
-      tyre = "";
-    }
-
-    if (itemResult.BestLap >= 999999.999) {
-      bestlapToString = "No Time";
-      tyre = "";
-    }
-
-    // *** Intervalo de tiempo con el lider ***
-    let gap: string = "";
-    if (pos <= -2) {
-      gap = "";
-    } else if (postabla > 1 && vueltasLider === vueltastotales) {
-      const splitLeaderTime = dresult.find(driver => driver.Split === itemResult.Split)?.TotalTime ?? 0;
-      const splitLeaderPenalties = dresult.find(driver => driver.Split === itemResult.Split)?.Penalties ?? 0;
-
-      const gapTime = ((itemResult.TotalTime + itemResult.Penalties) - (splitLeaderTime + splitLeaderPenalties));
-      let secondsgap = formatTwoIntegersPlusThreeDecimals(gapTime % 60);
-      let minutesgap = formatTwoIntegers(Math.trunc((gapTime / 60) % 60));
-
-      if (minutesgap === "00") {
-        gap = "+ " + secondsgap;
-      } else {
-        gap = "+ " + minutesgap + ":" + secondsgap;
-      }
-      if (gapTime === 0) {
-        gap = "";
-      }
-    } else if (postabla > 1 && vueltasLider !== vueltastotales) {
-      gap = "+ " + (vueltasLider - vueltastotales) + "L";
-    } else if (postabla === 1) {
-      gap = "";
-    }
-
-    // *** Intervalo con el anterior piloto ***
-    let interval: string = "";
-    let vueltasPrevio: number = 0;
-    if (postabla > 1) {
-      for (let itemLap of dlaps) {
-        if (itemLap.SteamID === dresult[postabla - 2].SteamID) {
-          vueltasPrevio = itemLap.Laps.length;
-        }
-      }
-      if (pos <= -2) {
-        interval = "";
-      } else if (postabla > 1 && vueltasPrevio === vueltastotales) {
-        const intervalTime = (itemResult.TotalTime + itemResult.Penalties) - (dresult[postabla - 2].TotalTime + dresult[postabla - 2].Penalties);
-        let secondsInterval = formatTwoIntegersPlusThreeDecimals(intervalTime % 60);
-        let minutesInterval = formatTwoIntegers(Math.trunc((intervalTime / 60) % 60));
-
-        if (minutesInterval === "00") {
-          interval = "+ " + secondsInterval;
-        } else {
-          interval = "+ " + minutesInterval + ":" + secondsInterval;
-        }
-      } else if (postabla > 1 && vueltasPrevio !== vueltastotales) {
-        interval = "+ " + (vueltasPrevio - vueltastotales) + "L";
-      }
-    } else {
-      interval = "";
-    }
-
-    // *** Añadir puntuaciones a la tabla ***
-    let puntos: number = 0;
-    let puntosString: string = "";
-    if (pointsystemName !== "NoPoints") {
-      if (pos > 0) {
-        let posAux = pos;
-        if (itemResult.Split === 2) {
-          posAux += driversQualifiedSplit1;
-        }
-        puntos = pointArray?.Puntuation[posAux - 1] || 0;
-        if (bestlapDriverID === itemResult.SteamID) {
-          puntos += pointArray?.FastestLap || 0;
-        }
-        puntosString = '+ ' + puntos.toString();
-      } else if (pos === -1) {
-        puntosString = "+ 0";
-      }
-    } else {
-      puntosString = "";
-    }
-
-    let flapClass = "";
-    if (bestlapDriverID === itemResult.SteamID) {
-      if (pos >= -1) {
-        flapClass = ' bg-[#c100ff] text-white font-bold rounded-full w-content px-2';
-      } else {
-        flapClass = '';
-      }
-    }
+    const flapClass = getFlapClass(bestlapDriverID, itemResult, pos);
 
     let vueltasTotalesString: string = "";
     if (pos > -2) {
       vueltasTotalesString = vueltastotales.toString();
-    } else {
-      vueltasTotalesString = "";
     }
-    item = {
+
+    resultTableData.push({
       gridPositionClass: gridPositionClass,
       gainsAbs: gainsAbs,
       posicionFinal: posicionFinal,
       driverName: itemResult.DriverName,
-      carColorClass: carColorClass,
-      carClass: carClass,
-      carBrand: carBrand,
-      carName: carName,
+      carColorClass: carInfo.carColorClass,
+      carClass: carInfo.carClass,
+      carBrand: carInfo.carBrand,
+      carName: carInfo.carName,
       team: equipo,
       totalLaps: vueltasTotalesString,
       timeadjust: timeadjust,
@@ -313,8 +93,7 @@ export function getResultTableData(datos: RaceData, pointsystemName: String, poi
       tyre: tyre,
       points: puntosString,
       splitNumber: itemResult.Split
-    }
-    resultTableData.push(item);
+    });
   }
   return resultTableData;
 }
@@ -329,7 +108,9 @@ export function getResultFastestLap(datos: RaceData, pointArray: Points, cars: C
   const minutes = formatTwoIntegers(Math.trunc((bestLap.BestLap / 60) % 60));
   const seconds = formatTwoIntegersPlusThreeDecimals(bestLap.BestLap % 60);
   let avgSpeed = "";
-  layoutLength !== null && layoutLength > 0 ? avgSpeed = ((layoutLength / (bestLap.BestLap / 3600))/1000).toFixed(3) : avgSpeed = "";
+  if (layoutLength !== null && layoutLength > 0) {
+    avgSpeed = ((layoutLength / (bestLap.BestLap / 3600)) / 1000).toFixed(3);
+  }
 
   return {
     driverName: bestLap.DriverName,
@@ -421,4 +202,182 @@ export function formatTwoIntegersPlusThreeDecimals(num: number) {
 
 export function formatTwoIntegers(num: number): string {
   return Math.abs(num).toString().padStart(2, '0').slice(-2);
+}
+
+// Funciones de apoyo for getResultTableData
+function getCarInfo(carFileName: string, cars: CarData[]) {
+  const car = cars.find((c) => c.filename === carFileName);
+  if (car) {
+    return {
+      carName: `${car.brand} ${car.model}`,
+      carBrand: car.imgbrand,
+      carClass: car.classShortName,
+      carColorClass: `style="background-color: ${car.classColor.split(' ')[0].replace('bg-[', '').replace(']', '')}; color: ${car.classColor.split(' ')[1].replace('text-[', '').replace(']', '')}" class = "rounded text-xs font-bold px-1 py-0.5 ml-1"`
+    };
+  }
+  return {
+    carName: carFileName,
+    carBrand: "",
+    carClass: "",
+    carColorClass: ""
+  };
+}
+
+function getTimeAdjust(itemResult: RaceResult) {
+  if (itemResult.Pos === -2) return "DQ";
+  if (itemResult.Pos <= -3) return "";
+  if (itemResult.TotalTime < 0) return "No Time";
+  let timeadjust = itemResult.TotalTime + itemResult.Penalties;
+  const seconds = formatTwoIntegersPlusThreeDecimals(timeadjust % 60);
+  const minutes = formatTwoIntegers(Math.trunc((timeadjust / 60) % 60));
+  const hours = formatTwoIntegers(Math.trunc(timeadjust / 3600));
+  if (Number(hours) > 0) {
+    return itemResult.Penalties !== 0
+      ? `${hours}:${minutes}:${seconds} <span class='rounded bg-[#da392b] text-xs px-1 py-0.5 ml-1'> + ${itemResult.Penalties}s</span>`
+      : `${hours}:${minutes}:${seconds}`;
+  } else {
+    return itemResult.Penalties !== 0
+      ? `${minutes}:${seconds} <span class='rounded bg-primary text-xs px-1 py-0.5 ml-1'> + ${itemResult.Penalties}s`
+      : `${minutes}:${seconds}`;
+  }
+}
+
+function getTotalLaps(itemResult: RaceResult, dlaps: RaceLap[]) {
+  if (itemResult.Laps) return itemResult.Laps;
+  const lap = dlaps.find(l => l.SteamID === itemResult.SteamID);
+  return lap ? lap.Laps.length : 0;
+}
+
+function getTyreAndCuts(itemResult: RaceResult, dlaps: RaceLap[]) {
+  let tyre = "";
+  let cuts = 0;
+  for (const itemLap of dlaps) {
+    if (itemLap.SteamID === itemResult.SteamID) {
+      for (const itemLap2 of itemLap.Laps) {
+        if (itemLap2.LapTime === itemResult.BestLap) {
+          tyre = `(${itemLap2.Tyre})`;
+        }
+      }
+      cuts += itemLap.Laps.filter((lap) => lap.Cut > 0).length;
+    }
+  }
+  if (!tyre) tyre = "(ND)";
+  return { tyre, cuts };
+}
+
+function getPosicionFinal(itemResult: RaceResult, pos: number, vueltastotales: number, vueltasLider: number) {
+  if (pos === 1) {
+    return { posicionFinal: '1', vueltasLider: vueltastotales };
+  }
+  let posicionFinal = "";
+  switch (itemResult.Pos) {
+    case -1: posicionFinal = 'DNF'; break;
+    case -2: posicionFinal = 'DQ'; break;
+    case -3: posicionFinal = 'DNS'; break;
+    case -4:
+      switch (itemResult.Team) {
+        case "STREAMING": posicionFinal = 'TV'; break;
+        case "ESP Racing Staff": posicionFinal = 'STAFF'; break;
+        case "Safety Car": posicionFinal = 'SC'; break;
+        default: posicionFinal = 'DNS'; break;
+      }
+      break;
+    default: posicionFinal = pos.toString();
+  }
+  if (itemResult.Pos === -4 && itemResult.DriverName === "STREAMING") {
+    posicionFinal = 'TV';
+  }
+  return { posicionFinal, vueltasLider };
+}
+
+function getBestLapString(itemResult: RaceResult, pos: number) {
+  if (itemResult.BestLap >= 999999.999) return { bestlapToString: "No Time", tyre: "" };
+  const secondsbl = formatTwoIntegersPlusThreeDecimals(itemResult.BestLap % 60);
+  const minutesbl = formatTwoIntegers(Math.trunc((itemResult.BestLap / 60) % 60));
+  if (pos >= -1) {
+    return { bestlapToString: `${minutesbl}:${secondsbl}`, tyre: undefined };
+  }
+  return { bestlapToString: "", tyre: "" };
+}
+
+function getGridPositionClass(gains: number, pos: number) {
+  if (pos <= -3) return { gridPositionClass: "", gainsAbs: "" };
+  if (gains > 0 && pos > -2) {
+    return {
+      gridPositionClass: '<svg viewBox="0 0 24 24" fill="#00f000" class="w-6 float mx-auto"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M11.375 6.22l-5 4a1 1 0 0 0 -.375 .78v6l.006 .112a1 1 0 0 0 1.619 .669l4.375 -3.501l4.375 3.5a1 1 0 0 0 1.625 -.78v-6a1 1 0 0 0 -.375 -.78l-5 -4a1 1 0 0 0 -1.25 0z" /></svg>',
+      gainsAbs: Math.abs(gains).toString()
+    };
+  } else if (gains < 0 && pos > -2) {
+    return {
+      gridPositionClass: '<svg viewBox="0 0 24 24" fill="#ff0000" class="w-6 float mx-auto rotate-180"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M11.375 6.22l-5 4a1 1 0 0 0 -.375 .78v6l.006 .112a1 1 0 0 0 1.619 .669l4.375 -3.501l4.375 3.5a1 1 0 0 0 1.625 -.78v-6a1 1 0 0 0 -.375 -.78l-5 -4a1 1 0 0 0 -1.25 0z" /></svg>',
+      gainsAbs: Math.abs(gains).toString()
+    };
+  } else if (gains === 0 || pos <= -2) {
+    return {
+      gridPositionClass: '<svg viewBox="0 0 24 24" fill="#ffc800" class="w-6 float mx-auto rotate-90"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M11.375 6.22l-5 4a1 1 0 0 0 -.375 .78v6l.006 .112a1 1 0 0 0 1.619 .669l4.375 -3.501l4.375 3.5a1 1 0 0 0 1.625 -.78v-6a1 1 0 0 0 -.375 -.78l-5 -4a1 1 0 0 0 -1.25 0z" /></svg>',
+      gainsAbs: "0"
+    };
+  }
+  return { gridPositionClass: "", gainsAbs: "" };
+}
+
+function getGap(pos: number, postabla: number, vueltasLider: number, vueltastotales: number, dresult: RaceResult[], itemResult: RaceResult) {
+  if (pos <= -2) return "";
+  if (postabla <= 1) return "";
+  if (vueltasLider === vueltastotales) {
+    const splitLeader = dresult.find(driver => driver.Split === itemResult.Split);
+    const splitLeaderTime = splitLeader?.TotalTime ?? 0;
+    const splitLeaderPenalties = splitLeader?.Penalties ?? 0;
+    const gapTime = (itemResult.TotalTime + itemResult.Penalties) - (splitLeaderTime + splitLeaderPenalties);
+    const secondsgap = formatTwoIntegersPlusThreeDecimals(gapTime % 60);
+    const minutesgap = formatTwoIntegers(Math.trunc((gapTime / 60) % 60));
+    return minutesgap === "00" ? `+ ${secondsgap}` : `+ ${minutesgap}:${secondsgap}`;
+  } else {
+    return `+ ${vueltasLider - vueltastotales}L`;
+  }
+}
+
+function getInterval(pos: number, postabla: number, dresult: RaceResult[], dlaps: RaceLap[], itemResult: RaceResult, vueltastotales: number) {
+  if (postabla <= 1) return "";
+  const prevDriver = dresult[postabla - 2];
+  const prevLapData = dlaps.find(lap => lap.SteamID === prevDriver.SteamID);
+  const vueltasPrevio = prevLapData ? prevLapData.Laps.length : 0;
+  if (pos > -2) {
+    if (vueltasPrevio === vueltastotales) {
+      const intervalTime = (itemResult.TotalTime + itemResult.Penalties) - (prevDriver.TotalTime + prevDriver.Penalties);
+      const secondsInterval = formatTwoIntegersPlusThreeDecimals(intervalTime % 60);
+      const minutesInterval = formatTwoIntegers(Math.trunc((intervalTime / 60) % 60));
+      return minutesInterval === "00"
+        ? `+ ${secondsInterval}`
+        : `+ ${minutesInterval}:${secondsInterval}`;
+    } else {
+      return `+ ${vueltasPrevio - vueltastotales}L`;
+    }
+  }
+  return "";
+}
+
+function getPointsString(pointsystemName: string, pos: number, itemResult: RaceResult, driversQualifiedSplit1: number, pointArray: Points, bestlapDriverID: string) {
+  if (pointsystemName === "NoPoints") return "";
+  if (pos > 0) {
+    let posAux = pos;
+    if (itemResult.Split === 2) {
+      posAux += driversQualifiedSplit1;
+    }
+    let puntos = pointArray?.Puntuation[posAux - 1] || 0;
+    if (bestlapDriverID === itemResult.SteamID) {
+      puntos += pointArray?.FastestLap || 0;
+    }
+    return '+ ' + puntos.toString();
+  } else if (pos === -1) {
+    return "+ 0";
+  }
+  return "";
+}
+
+function getFlapClass(bestlapDriverID: string, itemResult: RaceResult, pos: number) {
+  if (bestlapDriverID === itemResult.SteamID && pos >= -1) {
+    return ' bg-[#c100ff] text-white font-bold rounded-full w-content px-2';
+  }
+  return '';
 }
