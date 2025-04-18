@@ -66,33 +66,6 @@ const columns = [
   { header: "Campeonato", accessor: "championship.name" },
   { header: "Sistema de Puntuación", accessor: "pointsystem.name" }
 ];
-
-// Función para manejar la eliminación
-const handleDeleteRace = (id: string | number) => {
-  const circuitId = typeof id === "string" ? parseInt(id, 10) : id;
-  if (confirm("¿Estás seguro de que quieres eliminar esta carrera?")) {
-    fetch("/api/admin/circuit/deleterace", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ id: circuitId }),
-    })
-      .then((response) => {
-        if (response.ok) {
-          window.location.reload();
-          showToast("Carrera eliminada correctamente", "success");
-        } else {
-          showToast("Error eliminando carrera", "error");
-          console.error("Error eliminando carrera");
-        }
-      })
-      .catch((error) => {
-        showToast("Error: " + error, "error");
-        console.error("Error:", error);
-      });
-  }
-};
 ---
 
 <Layout title="ESP Racing: Administrar Carreras">
@@ -110,7 +83,7 @@ const handleDeleteRace = (id: string | number) => {
       data={serializedRaceData}
       columns={columns}
       onEdit={{ path: "race" }}
-      onDelete={{ handler: handleDeleteRace }}
+      onDelete={{ path: "race" }}
       pageSize={10}
       filterOptions={serializedChampsData}
       filterAccessor={"championship.name"}
@@ -369,44 +342,9 @@ const handleDeleteRace = (id: string | number) => {
   // Inicializar la gestión de carreras
   initRaceManagement();
 
-  // Función para eliminar carreras
-  const handleDeleteRace = async (id: number) => {
-    if (confirm("¿Estás seguro de que quieres eliminar esta carrera?")) {
-      try {
-        const response = await fetch("/api/admin/race/deleterace", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ id }),
-        });
-
-        if (response.ok) {
-          // Mostrar mensaje de éxito
-          showToast("Carrera eliminada con éxito", "success");
-
-          // Recargar la página después de un breve retraso
-          setTimeout(() => { window.location.reload(); }, 500);
-        } else {
-          showToast("Error eliminando carrera", "error");
-          console.error("Error eliminando carrera");
-        }
-      } catch (error) {
-        showToast("Error eliminando carrera", "error");
-        console.error("Error:", error);
-      }
-    }
-  };
-
-  // Exponer la función al ámbito global para que DataTable pueda acceder a ella
-  window.handleDeleteRace = handleDeleteRace;
-
   // Inicializar los botones de eliminar
   document.addEventListener("astro:page-load", initRaceManagement);
   document.addEventListener("astro:page-load", initDeleteRaceButtons);
-  document.addEventListener("astro:page-load", () => {
-    window.handleDeleteRace = handleDeleteRace;
-  });
 
   // Asegurarse de que el componente DataTable pueda acceder a las funciones
   document.addEventListener("DOMContentLoaded", () => {

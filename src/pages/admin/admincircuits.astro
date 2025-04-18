@@ -82,33 +82,6 @@ const columns = [
   { header: "Lugar", accessor: "circuit_location" },
   { header: "Nº Layouts", accessor: "layouts_count" }
 ];
-
-// Función para manejar la eliminación
-const handleDeleteCircuit = (id: string | number) => {
-  const circuitId = typeof id === "string" ? parseInt(id, 10) : id;
-  if (confirm("¿Estás seguro de que quieres eliminar este circuito?")) {
-    fetch("/api/admin/circuit/deletecircuit", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ id: circuitId }),
-    })
-      .then((response) => {
-        if (response.ok) {
-          window.location.reload();
-          showToast("Circuito eliminado correctamente", "success");
-        } else {
-          showToast("Error eliminando circuito", "error");
-          console.error("Error eliminando circuito");
-        }
-      })
-      .catch((error) => {
-        showToast("Error: " + error, "error");
-        console.error("Error:", error);
-      });
-  }
-};
 ---
 
 <Layout title="ESP Racing: Administrar Circuitos">
@@ -127,7 +100,7 @@ const handleDeleteCircuit = (id: string | number) => {
         data={circuitDataWithCountry || []}
         columns={columns}
         onEdit={{ path: "circuits" }}
-        onDelete={{ handler: handleDeleteCircuit }}
+        onDelete={{ path: "circuit" }}
         pageSize={10}
         filterOptions={countries}
         filterAccessor="country"
@@ -223,61 +196,11 @@ const handleDeleteCircuit = (id: string | number) => {
       </form>
     </div>
   </div>
-
-  <style>
-    tbody tr:nth-child(odd) {
-      background-color: #0f0f0f;
-    }
-    tbody tr:nth-child(even) {
-      background-color: #19191c;
-    }
-  </style>
-
 </Layout>
 
 <script>
-  import {
-    initCircuitManagement,
-    initDeleteCircuitButtons,
-  } from "@/lib/admin/circuits/circuitManagment";
-import { showToast } from "@/lib/utils";
-
-  // Inicializar el manejador de eliminación en el cliente
-  document.addEventListener("astro:page-load", () => {
-    const deleteButtons = document.querySelectorAll(".delete-item");
-
-    deleteButtons.forEach((button) => {
-      button.addEventListener("click", async (e) => {
-        e.preventDefault();
-        const id = button.getAttribute("data-id");
-
-        if (confirm("¿Estás seguro de que quieres eliminar este circuito?")) {
-          try {
-            const response = await fetch("/api/admin/circuit/deletecircuit", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ id }),
-            });
-
-            if (response.ok) {
-              window.location.reload();
-              showToast("Circuito eliminado correctamente", "success");
-            } else {
-              showToast("Error eliminando circuito", "error");
-              console.error("Error eliminando circuito");
-            }
-          } catch (error) {
-            showToast("Error: "+ error, "error");
-            console.error("Error:", error);
-          }
-        }
-      });
-    });
-  });
+  import { initCircuitManagement } from "@/lib/admin/circuits/circuitManagment";
 
   initCircuitManagement();
   document.addEventListener("astro:page-load", initCircuitManagement);
-  document.addEventListener("astro:page-load", initDeleteCircuitButtons);
 </script>

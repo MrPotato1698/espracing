@@ -109,35 +109,6 @@ const champTableData = champsData?.map((champ) => ({
   season: champ.season,
   seasonDisplay: formatSeason(champ.season ? champ.season : "0"),
 })) || [];
-
-// Función para manejar la eliminación
-const handleDeleteChamp = (id: string | number) => {
-  const champId = typeof id === "string" ? parseInt(id, 10) : id;
-  (async () => {
-    if (confirm("¿Estás seguro de que quieres eliminar este campeonato/evento?")) {
-      try {
-        const response = await fetch("/api/admin/championship/deletechamp", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ id: champId }),
-        });
-
-        if (response.ok) {
-          window.location.reload();
-          showToast("Campeonato/evento eliminado correctamente", "success");
-        } else {
-          showToast("Error eliminando campeonato/evento", "error");
-          console.error("Error eliminando campeonato/evento");
-        }
-      } catch (error) {
-        showToast("Error: " + error, "error");
-        console.error("Error:", error);
-      }
-    }
-  })();
-};
 ---
 
 <Layout title="ESP Racing: Administrar Campeonatos">
@@ -156,7 +127,7 @@ const handleDeleteChamp = (id: string | number) => {
         data={eventTableData}
         columns={eventColumns}
         onEdit={{ path: "championship" }}
-        onDelete={{ handler: handleDeleteChamp }}
+        onDelete={{ path: "championship" }}
         pageSize={10}
         filterOptions={seasonOptions}
         filterAccessor="Temporada"
@@ -182,7 +153,7 @@ const handleDeleteChamp = (id: string | number) => {
         data={champTableData}
         columns={champColumns}
         onEdit={{ path: "championship" }}
-        onDelete={{ handler: handleDeleteChamp }}
+        onDelete={{ path: "championship" }}
         pageSize={10}
         filterOptions={seasonOptions}
         filterAccessor="seasonDisplay"
@@ -305,41 +276,8 @@ const handleDeleteChamp = (id: string | number) => {
   } from "@/lib/admin/champs/champManagment";
   import { showToast } from "@/lib/utils";
 
-  // Inicializar el manejador de eliminación en el cliente
+  // Inicializar otros manejadores
   document.addEventListener("astro:page-load", () => {
-    const deleteButtons = document.querySelectorAll(".delete-item");
-
-    deleteButtons.forEach((button) => {
-      button.addEventListener("click", async (e) => {
-        e.preventDefault();
-        const id = button.getAttribute("data-id");
-
-        if (confirm("¿Estás seguro de que quieres eliminar este campeonato/evento?")) {
-          try {
-            const response = await fetch("/api/admin/championship/deletechamp", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ id }),
-            });
-
-            if (response.ok) {
-              window.location.reload();
-              showToast("Campeonato/evento eliminado correctamente", "success");
-            } else {
-              showToast("Error eliminando campeonato/evento", "error");
-              console.error("Error eliminando campeonato/evento");
-            }
-          } catch (error) {
-            showToast("Error: " + error, "error");
-            console.error("Error:", error);
-          }
-        }
-      });
-    });
-
-    // Inicializar otros manejadores
     initRaceManagement();
     initDeleteChampButtons();
 
