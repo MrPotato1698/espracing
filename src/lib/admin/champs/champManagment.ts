@@ -20,15 +20,29 @@ export function initRaceManagement() {
       const { data: getLastChamp } = await supabase
         .from('championship')
         .select('id')
-        .order('id', { ascending: false })
-        .limit(1)
-        .single();
+        .order('id', { ascending: true });
 
-      const lastChampID = getLastChamp ? (getLastChamp.id + 1) : 1;
+      if(!getLastChamp) throw new Error("Error al obtener el último ID de campeonato");
+      const length = getLastChamp.length;
+      let i = 1;
+
+      let findID = false;
+      console.log(getLastChamp);
+      while (!findID && i < length) {
+        if (getLastChamp[i-1].id === i) {
+          i++;
+        } else {
+          findID = true;
+        }
+      }
+      if (!findID) i++;
+
+      const lastChampID = getLastChamp ? i : 1;
+
 
       if(keysearchAPI === '') {keysearchAPI=null}
 
-      const { data: insertData, error: insertError } = await supabase
+      const { error: insertError } = await supabase
         .from('championship')
         .insert({
           id: lastChampID,

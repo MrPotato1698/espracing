@@ -31,17 +31,21 @@ export function initRaceManagement() {
     if (splitS2R1File && splitS2R2File && switchS2Element) {
       splitS2R1File.style.display = !switchS2Element.checked ? "none" : "block";
       splitS2R2File.style.display = !switchS2Element.checked ? "none" : "block";
+      // Add a distinguishing behavior: toggle a class for edit mode
+      splitS2R1File.classList.toggle("edit-mode", true);
+      splitS2R2File.classList.toggle("edit-mode", true);
     }
   }
 
   function toggleInputR2() {
     if (containerRace2 && switchR2Element) {
-      containerRace2.style.display = !switchR2Element.checked ? "none" : "block";
+      containerRace2.style.display = switchR2Element.checked ? "flex" : "none";
+      containerRace2.classList.toggle("edit-mode", true);
     }
   }
 
-  switchS2Element ? switchS2Element.addEventListener("change", toggleInputsS2) : null;
-  switchR2Element ? switchR2Element.addEventListener("change", toggleInputR2) : null;
+  if (switchS2Element) switchS2Element.addEventListener("change", toggleInputsS2);
+  if (switchR2Element) switchR2Element.addEventListener("change", toggleInputR2);
 
   fileInputS1R1.addEventListener("change", () => {
     const file = fileInputS1R1.files?.[0];
@@ -109,153 +113,36 @@ export function initRaceManagement() {
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const fileS1R1 = fileInputS1R1.files?.[0];
-    let fileS2R1;
-    let fileS1R2;
-    let fileS2R2;
-    let numSplits: number = 1;
-    if (!fileS1R1) {
-      showToast("Por favor, selecciona un archivo JSON para la Carrera 1 del Split 1.", "error");
-      return;
-    }
 
-    if (switchR2Element?.checked) {
-      fileS1R2 = fileInputS1R2.files?.[0];
-      if (!fileS1R2) {
-        showToast("Por favor, selecciona un archivo JSON para la Carrera 2 del Split 1.", "error");
-        return;
-      }
-    }
-
-    if (switchS2Element?.checked) {
-      fileS2R1 = fileInputS2R1.files?.[0];
-      if (!fileS2R1) {
-        showToast("Por favor, selecciona un archivo JSON para la Carrera 1 del Split 2.", "error");
-        return;
-      }
-      if (switchR2Element?.checked) {
-        fileS2R2 = fileInputS2R2.files?.[0];
-        if (!fileS2R2) {
-          showToast("Por favor, selecciona un archivo JSON para la Carrera 2 del Split 2.", "error");
-          return;
-        }
-      }
-      numSplits = 2;
-    }
-
+    // Validate files and switches
+    const { valid, files, numSplits } = validateRaceFiles();
+    if (!valid) return;
 
     try {
-      const contentS1R1 = await fileS1R1.text();
+      // Read and parse files
+      const fileContents = await readRaceFiles(files);
       const formData = new FormData(form);
-      const racename = formData.get('racename') as string;
-      const champID = formData.get('champID') as string;
-      const numrace = formData.get('numrace') as string;
-      const pointsystem = formData.get('pointsystem') as string;
+      const raceMeta = extractRaceMeta(formData);
 
-      const racenameFile = racename.replace(/\s/g, '');
+      // Transform JSONs
+      const { transformedJsonR1, transformedJsonR2 } = transformRaceJsons(
+        fileContents, raceMeta, !!switchS2Element?.checked, !!switchR2Element?.checked
+      );
 
-      const jsonS1R1 = JSON.parse(contentS1R1);
-      let jsonS1R2;
-      let transformedJsonR1: string;
-      let transformedJsonR2: string = "{}";
-      let URLBucketsResults = new Array<string>(2).fill("");
-
-      if (switchR2Element?.checked) {
-        const contentS1R2 = await fileS1R2?.text();
-        if (!contentS1R2) throw new Error("Sin contenido en el archivo de Carrera 2 Split 1");
-        jsonS1R2 = JSON.parse(contentS1R2);
+      // Upload results to storage
+      if (!files?.fileS1R1) {
+        showToast("Error interno: archivos de carrera no definidos.", "error");
+        return;
       }
-      if (switchS2Element?.checked) {
-        if (switchR2Element?.checked) {
-          const contentS2R2 = await fileS1R2?.text();
-          if (!contentS2R2) throw new Error("Sin contenido en el archivo de Carrera 2 Split 2");
-          const jsonS2R2 = JSON.parse(contentS2R2);
-          transformedJsonR2 = JSON.stringify(createRaceDataMultipleSplits(jsonS1R2, jsonS2R2));
-        }
-        const contentS2R1 = await fileS2R1?.text();
-        if (!contentS2R1) throw new Error("Sin contenido en el archivo de Carrera 2 Split 2");
-        const jsonS2R1 = JSON.parse(contentS2R1);
-        transformedJsonR1 = JSON.stringify(createRaceDataMultipleSplits(jsonS1R1, jsonS2R1));
-      } else {
-        transformedJsonR1 = JSON.stringify(createRaceData(jsonS1R1));
-        if (switchR2Element?.checked) {
-          transformedJsonR2 = JSON.stringify(createRaceData(jsonS1R2));
-        }
-      }
+      const URLBucketsResults = await uploadRaceResults(
+        raceMeta, transformedJsonR1, transformedJsonR2, files.fileS1R1.name, switchR2Element?.checked ?? false
+      );
 
-      const { data: uploadRace1, error: uploadErrorR1 } = await supabase
-        .storage
-        .from('results')
-        .upload(`${champID}/${numrace}_${racenameFile}Race1`, transformedJsonR1, {
-          upsert: true
-        });
+      // Insert race into DB
+      await insertRaceToDB(raceMeta, files.fileS1R1.name, numSplits, URLBucketsResults);
 
-      if (uploadErrorR1 || !uploadRace1) throw uploadErrorR1;
-      URLBucketsResults[0] = uploadRace1.path;
-
-      if(switchR2Element?.checked) {
-        const { data: uploadRace2, error: uploadErrorR2 } = await supabase
-        .storage
-        .from('results')
-        .upload(`${champID}/${numrace}_${racenameFile}Race2`, transformedJsonR2, {
-          upsert: true
-        });
-
-        if (uploadErrorR2 || !uploadRace2) throw uploadErrorR2;
-        URLBucketsResults[1] = uploadRace2.path;
-      }
-
-      const { data: getLastRace } = await supabase
-        .from('race')
-        .select('id')
-        .order('id', { ascending: false })
-        .limit(1)
-        .single();
-
-      const lastRaceID = getLastRace ? (getLastRace.id + 1) : 1;
-
-      const { data: insertData, error: insertError } = await supabase
-        .from('race')
-        .insert({
-          id: lastRaceID,
-          name: racename,
-          filename: fileS1R1.name,
-          championship: Number(champID),
-          orderinchamp: Number(numrace),
-          pointsystem: Number(pointsystem),
-          splits: numSplits,
-          race_data_1: URLBucketsResults[0],
-          race_data_2: URLBucketsResults[1],
-        });
-
-      if (insertError) throw insertError;
-
-      const raceData = JSON.parse(transformedJsonR1);
-      const response = await fetch('/api/admin/stats/newRaceStats', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ resume: raceData.RaceDriversResume })
-      });
-
-      if (!response.ok) {
-        throw new Error('Error actualizando estadísticas');
-      }
-      if (URLBucketsResults[1] !== "") {
-        const raceData2 = JSON.parse(transformedJsonR2);
-        const response2 = await fetch('/api/admin/stats/newRaceStats', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ resume: raceData2.RaceDriversResume })
-        });
-
-        if (!response2.ok) {
-          throw new Error('Error actualizando estadísticas de carrera 2');
-        }
-      }
+      // Update stats
+      await updateRaceStats(transformedJsonR1, transformedJsonR2, URLBucketsResults);
 
       showToast("Carrera creada con éxito", "success");
       form.reset();
@@ -266,6 +153,202 @@ export function initRaceManagement() {
       showToast("Hubo un error al procesar el archivo. Por favor, inténtalo de nuevo.", "error");
     }
   });
+
+  function validateRaceFiles() {
+    const fileS1R1 = fileInputS1R1.files?.[0];
+    let fileS2R1, fileS1R2, fileS2R2;
+    let numSplits: number = 1;
+    if (!fileS1R1) {
+      showToast("Por favor, selecciona un archivo JSON para la Carrera 1 del Split 1.", "error");
+      return { valid: false };
+    }
+    if (switchR2Element?.checked) {
+      fileS1R2 = fileInputS1R2.files?.[0];
+      if (!fileS1R2) {
+        showToast("Por favor, selecciona un archivo JSON para la Carrera 2 del Split 1.", "error");
+        return { valid: false };
+      }
+    }
+    if (switchS2Element?.checked) {
+      fileS2R1 = fileInputS2R1.files?.[0];
+      if (!fileS2R1) {
+        showToast("Por favor, selecciona un archivo JSON para la Carrera 1 del Split 2.", "error");
+        return { valid: false };
+      }
+      if (switchR2Element?.checked) {
+        fileS2R2 = fileInputS2R2.files?.[0];
+        if (!fileS2R2) {
+          showToast("Por favor, selecciona un archivo JSON para la Carrera 2 del Split 2.", "error");
+          return { valid: false };
+        }
+      }
+      numSplits = 2;
+    }
+    return {
+      valid: true,
+      files: { fileS1R1, fileS2R1, fileS1R2, fileS2R2 },
+      numSplits
+    };
+  }
+
+  async function readRaceFiles(files: any) {
+    const contentS1R1 = await files.fileS1R1.text();
+    let contentS2R1, contentS1R2, contentS2R2;
+    if (files.fileS2R1) contentS2R1 = await files.fileS2R1.text();
+    if (files.fileS1R2) contentS1R2 = await files.fileS1R2.text();
+    if (files.fileS2R2) contentS2R2 = await files.fileS2R2.text();
+    return {
+      contentS1R1,
+      contentS2R1,
+      contentS1R2,
+      contentS2R2
+    };
+  }
+
+  function extractRaceMeta(formData: FormData) {
+    const racename = formData.get('racename') as string;
+    const champID = formData.get('champID') as string;
+    const numrace = formData.get('numrace') as string;
+    const pointsystem = formData.get('pointsystem') as string;
+    const racenameFile = racename.replace(/\s/g, '');
+    return { racename, champID, numrace, pointsystem, racenameFile };
+  }
+
+  function transformRaceJsons(
+    fileContents: any,
+    raceMeta: any,
+    isSplit2: boolean,
+    isRace2: boolean
+  ) {
+    const jsonS1R1 = JSON.parse(fileContents.contentS1R1);
+    let jsonS1R2, jsonS2R1, jsonS2R2;
+    let transformedJsonR1: string;
+    let transformedJsonR2: string = "{}";
+    if (isRace2) {
+      if (!fileContents.contentS1R2) throw new Error("Sin contenido en el archivo de Carrera 2 Split 1");
+      jsonS1R2 = JSON.parse(fileContents.contentS1R2);
+    }
+    if (isSplit2) {
+      if (isRace2) {
+        if (!fileContents.contentS2R2) throw new Error("Sin contenido en el archivo de Carrera 2 Split 2");
+        jsonS2R2 = JSON.parse(fileContents.contentS2R2);
+        transformedJsonR2 = JSON.stringify(createRaceDataMultipleSplits(jsonS1R2, jsonS2R2));
+      }
+      if (!fileContents.contentS2R1) throw new Error("Sin contenido en el archivo de Carrera 2 Split 2");
+      jsonS2R1 = JSON.parse(fileContents.contentS2R1);
+      transformedJsonR1 = JSON.stringify(createRaceDataMultipleSplits(jsonS1R1, jsonS2R1));
+    } else {
+      transformedJsonR1 = JSON.stringify(createRaceData(jsonS1R1));
+      if (isRace2) {
+        transformedJsonR2 = JSON.stringify(createRaceData(jsonS1R2));
+      }
+    }
+    return { transformedJsonR1, transformedJsonR2 };
+  }
+
+  async function uploadRaceResults(
+    raceMeta: any,
+    transformedJsonR1: string,
+    transformedJsonR2: string,
+    fileName: string,
+    isRace2: boolean
+  ) {
+    let URLBucketsResults = new Array<string>(2).fill("");
+    const { data: uploadRace1, error: uploadErrorR1 } = await supabase
+      .storage
+      .from('results')
+      .upload(`${raceMeta.champID}/${raceMeta.numrace}_${raceMeta.racenameFile}Race1`, transformedJsonR1, {
+        upsert: true
+      });
+    if (uploadErrorR1 || !uploadRace1) throw uploadErrorR1;
+    URLBucketsResults[0] = uploadRace1.path;
+
+    if (isRace2) {
+      const { data: uploadRace2, error: uploadErrorR2 } = await supabase
+        .storage
+        .from('results')
+        .upload(`${raceMeta.champID}/${raceMeta.numrace}_${raceMeta.racenameFile}Race2`, transformedJsonR2, {
+          upsert: true
+        });
+      if (uploadErrorR2 || !uploadRace2) throw uploadErrorR2;
+      URLBucketsResults[1] = uploadRace2.path;
+    }
+    return URLBucketsResults;
+  }
+
+  async function insertRaceToDB(
+    raceMeta: any,
+    fileName: string,
+    numSplits: number,
+    URLBucketsResults: string[]
+  ) {
+    const { data: getLastRace } = await supabase
+      .from('race')
+      .select('id')
+      .order('id', { ascending: true });
+
+    if (!getLastRace) throw new Error("Error al obtener el último ID de coche");
+    let findID = false;
+    let i = 1;
+    while (!findID && i < getLastRace.length) {
+      if (getLastRace[i - 1].id === i) {
+        i++;
+      } else {
+        findID = true;
+      }
+    }
+    if (!findID) i++;
+    const lastRaceID = getLastRace ? i : 1;
+
+    const { error: insertError } = await supabase
+      .from('race')
+      .insert({
+        id: lastRaceID,
+        name: raceMeta.racename,
+        filename: fileName,
+        championship: Number(raceMeta.champID),
+        orderinchamp: Number(raceMeta.numrace),
+        pointsystem: Number(raceMeta.pointsystem),
+        splits: numSplits,
+        race_data_1: URLBucketsResults[0],
+        race_data_2: URLBucketsResults[1],
+      });
+
+    if (insertError) throw insertError;
+  }
+
+  async function updateRaceStats(
+    transformedJsonR1: string,
+    transformedJsonR2: string,
+    URLBucketsResults: string[]
+  ) {
+    const raceData = JSON.parse(transformedJsonR1);
+    const response = await fetch('/api/admin/stats/newRaceStats', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ resume: raceData.RaceDriversResume })
+    });
+
+    if (!response.ok) {
+      throw new Error('Error actualizando estadísticas');
+    }
+    if (URLBucketsResults[1] !== "") {
+      const raceData2 = JSON.parse(transformedJsonR2);
+      const response2 = await fetch('/api/admin/stats/newRaceStats', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ resume: raceData2.RaceDriversResume })
+      });
+
+      if (!response2.ok) {
+        throw new Error('Error actualizando estadísticas de carrera 2');
+      }
+    }
+  }
 }
 
 export function initDeleteRaceButtons() {
@@ -360,9 +443,9 @@ export function initEditRace() {
     }
   }
 
-  switchRacesElement ? switchRacesElement.addEventListener("change", toggleInputsRaces) : null;
-  switchS2Element ? switchS2Element.addEventListener("change", toggleInputsS2) : null;
-  switchR2Element ? switchR2Element.addEventListener("change", toggleInputR2) : null;
+  if (switchRacesElement) switchRacesElement.addEventListener("change", toggleInputsRaces);
+  if (switchS2Element) switchS2Element.addEventListener("change", toggleInputsS2);
+  if (switchR2Element) switchR2Element.addEventListener("change", toggleInputR2);
 
   fileInputS1R1.addEventListener("change", () => {
     const file = fileInputS1R1.files?.[0];
@@ -452,7 +535,7 @@ export function initEditRace() {
         showToast('Carrera actualizada con éxito', 'success');
         window.location.href = '/admin/adminraces';
       } else {
-        throw new Error(result.error || 'Error desconocido');
+        throw new Error(result.error ?? 'Error desconocido');
       }
     } catch (error) {
       showToast('Error al actualizar la carrera: ' + error, 'error');
