@@ -6,17 +6,26 @@ interface DriverLapData {
   timestamp: number;
 }
 
-function createRaceResults(dcars: CarJSON[], devents: EventJSON[], dlaps: LapJSON[], dresult: ResultJSON[], raceTime: number, split: number): RaceResult[] {
+/**
+ * Función principal para crear los resultados de la carrera
+ * @param {CarJSON[]} dcars - Array de objetos CarJSON
+ * @param {EventJSON[]} devents - Array de objetos EventJSON
+ * @param {LapJSON[]} dlaps - Array de objetos LapJSON
+ * @param {ResultJSON[]} dresult - Array de objetos ResultJSON
+ * @param {number} raceTime - Tiempo de carrera
+ * @param {number} split - Número de división
+ * @returns {RaceResult[]} - Array de objetos RaceResult
+ */
+function createRaceResults( dcars: CarJSON[], devents: EventJSON[], dlaps: LapJSON[], dresult: ResultJSON[], raceTime: number, split: number): RaceResult[] {
   let rr: RaceResult[] = [];
-  let pos: number = 0; // Posición en la carrera:
-  //-1 = no clasificado
-  //-2 = descalificado
-  //-3 = no presentado
-  //-4 = SC o Staff ESP
-  //0 = no clasificado
-  //1 = primero
-  //2 = segundo, etc.
-  let vueltasLider = 0;
+  let pos: number = 0;
+    //-1 = no clasificado
+    //-2 = descalificado
+    //-3 = no presentado
+    //-4 = SC o Staff ESP
+    //0 = no clasificado
+    //1 = primero
+    //2 = segundo, etc.
 
   for (let itemR of dresult) {
     pos++;
@@ -27,161 +36,213 @@ function createRaceResults(dcars: CarJSON[], devents: EventJSON[], dlaps: LapJSO
     uniqueRR.DriverName = itemR.DriverName;
     uniqueRR.Team = dcars[itemR.CarId].Driver.Team;
     uniqueRR.CarFileName = itemR.CarModel;
-    uniqueRR.TotalTime = (itemR.TotalTime / 1000);
-    uniqueRR.Penalties = (itemR.PenaltyTime / 1000000000);
+    uniqueRR.TotalTime = itemR.TotalTime / 1000;
+    uniqueRR.Penalties = itemR.PenaltyTime / 1000000000;
     uniqueRR.Laps = itemR.NumLaps;
-    uniqueRR.BestLap = (itemR.BestLap / 1000);
+    uniqueRR.BestLap = itemR.BestLap / 1000;
     uniqueRR.LedLaps = 0;
     uniqueRR.Ballast = itemR.BallastKG;
     uniqueRR.Restrictor = itemR.Restrictor;
     uniqueRR.Split = split;
 
-    // Obtener posición de salida
-    if (itemR.GridPosition !== 0) {
-      uniqueRR.GridPosition = itemR.GridPosition;
-    } else {
-      uniqueRR.GridPosition = -1;
-    }
+    uniqueRR.GridPosition = getGridPosition(itemR.GridPosition);
+    uniqueRR.Pos = getFinalPosition(pos, itemR, uniqueRR, raceTime);
 
-    // Obtener posición final (uniqueRR.Pos)
-    if (pos === 1) {
-      uniqueRR.Pos = pos;
-      vueltasLider = uniqueRR.Laps;
-    } else {
-      if (itemR.Disqualified === true) {
-        uniqueRR.Pos = -2;
-      } else {
-        const timerace = (uniqueRR.TotalTime) + (uniqueRR.Penalties);
-        const timeCondition = (Math.trunc((timerace / 3600) % 60) + Math.trunc(timerace / 60));
-        if (timeCondition >= raceTime) {
-          uniqueRR.Pos = pos;
-          // } else if (uniqueRR.Laps <= Math.trunc(vueltasLider * 0.9)){
-          //   uniqueRR.Pos = -1;
-        } else {
-          uniqueRR.Pos = -1;
-        }
-      }
-    }
+    uniqueRR.AvgLap = calculateAvgLap(dlaps, uniqueRR.CarId);
+    uniqueRR.Collisions = countCollisions(devents, uniqueRR.CarId);
 
-    //Obtener tiempo medio
-    let avg = 0;
-    let lapsWithoutCuts = 0;
-    for (let itemL of dlaps) {
-      if (itemL.CarId === uniqueRR.CarId) {
-        if (itemL.Cuts < 1) {
-          const currentLap = itemL.LapTime;
-          lapsWithoutCuts++;
-          avg += currentLap;
-        }
-      }
-    }
-    uniqueRR.AvgLap = (avg / lapsWithoutCuts) / 1000;
-
-    // Obtener colisiones (uniqueRR.Collisions)
-    uniqueRR.Collisions = 0;
-    for (let item4 of devents) {
-      if (item4.CarId === uniqueRR.CarId) {
-        uniqueRR.Collisions += 1;
-      }
-    }
     rr.push(uniqueRR);
   }
 
   for (let itemdC of dcars) {
     const carID = itemdC.CarId;
     const driverFound = rr.some(result => result.CarId === carID);
-    if (!driverFound) {
-      if (itemdC.Driver.Name !== "") { //Si el piloto no tiene nombre, no se le añade a la lista
-        let uniqueRR: RaceResult = {} as RaceResult;
-        uniqueRR.SteamID = itemdC.Driver.Guid;
-        uniqueRR.CarId = itemdC.CarId;
-        uniqueRR.DriverName = itemdC.Driver.Name;
-        uniqueRR.Team = itemdC.Driver.Team;
-        uniqueRR.CarFileName = itemdC.Model;
-        uniqueRR.TotalTime = 0;
-        uniqueRR.Penalties = 0;
-        uniqueRR.Laps = 0;
-        uniqueRR.BestLap = 0;
-        uniqueRR.LedLaps = 0;
-        uniqueRR.Ballast = itemdC.BallastKG;
-        uniqueRR.Restrictor = itemdC.Restrictor;
+    if (!driverFound && itemdC.Driver.Name !== "") {
+      let uniqueRR: RaceResult = {} as RaceResult;
+      uniqueRR.SteamID = itemdC.Driver.Guid;
+      uniqueRR.CarId = itemdC.CarId;
+      uniqueRR.DriverName = itemdC.Driver.Name;
+      uniqueRR.Team = itemdC.Driver.Team;
+      uniqueRR.CarFileName = itemdC.Model;
+      uniqueRR.TotalTime = 0;
+      uniqueRR.Penalties = 0;
+      uniqueRR.Laps = 0;
+      uniqueRR.BestLap = 0;
+      uniqueRR.LedLaps = 0;
+      uniqueRR.Ballast = itemdC.BallastKG;
+      uniqueRR.Restrictor = itemdC.Restrictor;
 
-        //Diferenciar entre personal del staff y pilotos no presentados
-        if (itemdC.Driver.Team === "ESP Racing Staff" || itemdC.Driver.Team === "Safety Car" || itemdC.Driver.Team === "STREAMING" || itemdC.Driver.Name === "STREAMING") {
-          uniqueRR.Pos = -4;
-          uniqueRR.GridPosition = -4;
-
-        } else {
-          uniqueRR.GridPosition = -3;
-          uniqueRR.Pos = -3;
-        }
-        uniqueRR.AvgLap = 0;
-        uniqueRR.Collisions = 0;
-        uniqueRR.Ballast = itemdC.BallastKG;
-        uniqueRR.Restrictor = itemdC.Restrictor;
-        rr.push(uniqueRR);
+      if (
+        itemdC.Driver.Team === "ESP Racing Staff" ||
+        itemdC.Driver.Team === "Safety Car" ||
+        itemdC.Driver.Team === "STREAMING" ||
+        itemdC.Driver.Name === "STREAMING"
+      ) {
+        uniqueRR.Pos = -4;
+        uniqueRR.GridPosition = -4;
+      } else {
+        uniqueRR.GridPosition = -3;
+        uniqueRR.Pos = -3;
       }
+      uniqueRR.AvgLap = 0;
+      uniqueRR.Collisions = 0;
+      uniqueRR.Ballast = itemdC.BallastKG;
+      uniqueRR.Restrictor = itemdC.Restrictor;
+      rr.push(uniqueRR);
     }
   }
 
   return rr;
 }
 
+// Funciones Auxiliares para createRaceResults
+/**
+ * Función auxiliar de createRaceResults para obtener la posición de salida del piloto
+ * @param gridPosition - Posición de salida del piloto
+ * @returns {number} - Posición de salida ajustada
+ */
+function getGridPosition(gridPosition: number): number {
+  return gridPosition !== 0 ? gridPosition : -1;
+}
+
+/**
+ * Función auxiliar de createRaceResults para obtener la posición final del piloto
+ * @param pos - Posición del piloto
+ * @param itemR - Objeto ResultJSON del piloto
+ * @param uniqueRR - Objeto RaceResult del piloto
+ * @param raceTime - Tiempo de carrera
+ * @returns {number} - Posición final ajustada
+ */
+function getFinalPosition(pos: number, itemR: ResultJSON, uniqueRR: RaceResult, raceTime: number): number {
+  if (pos === 1) {
+    return pos;
+  } else if (itemR.Disqualified === true) {
+    return -2;
+  } else {
+    const timerace = uniqueRR.TotalTime + uniqueRR.Penalties;
+    const timeCondition =
+      Math.trunc((timerace / 3600) % 60) + Math.trunc(timerace / 60);
+    if (timeCondition >= raceTime) {
+      return pos;
+    } else {
+      return -1;
+    }
+  }
+}
+
+/**
+ * Función auxiliar de createRaceResults para calcular el tiempo medio por vuelta
+ * @param dlaps - Array de objetos LapJSON
+ * @param carId - ID del coche
+ * @returns {number} - Tiempo medio por vuelta en segundos
+ */
+function calculateAvgLap(dlaps: LapJSON[], carId: number): number {
+  let avg = 0;
+  let lapsWithoutCuts = 0;
+  for (let itemL of dlaps) {
+    if (itemL.CarId === carId && itemL.Cuts < 1) {
+      avg += itemL.LapTime;
+      lapsWithoutCuts++;
+    }
+  }
+  return lapsWithoutCuts > 0 ? (avg / lapsWithoutCuts) / 1000 : 0;
+}
+
+/**
+ * Función auxiliar de createRaceResults para contar el número de colisiones del coche
+ * @param devents - Array de eventos
+ * @param carId - ID del coche
+ * @returns {number} - Número de colisiones del coche
+ */
+function countCollisions(devents: EventJSON[], carId: number): number {
+  return devents.filter(event => event.CarId === carId).length;
+}
+
+/**
+ * Función para crear los resultados de la carrera con múltiples divisiones
+ * @param rrS1 - Array de resultados de la primera división
+ * @param rrS2 - Array de resultados de la segunda división
+ * @returns {RaceResult[]} - Array de resultados de la carrera combinados
+ */
 function sortingPositionsMultipleSplits(rrS1: RaceResult[], rrS2: RaceResult[]): RaceResult[] {
-  let rr: RaceResult[] = [];
+  const rr: RaceResult[] = [];
+
+  // Función Auxiliar para mezclar y ordenar por TotalTime + Penalties si es necesario
+  function mergeAndSort( arr1: RaceResult[], arr2: RaceResult[], sort: boolean = false): RaceResult[] {
+    if (arr1.length > 0 && arr2.length > 0) {
+      const merged = arr1.concat(arr2);
+      return sort
+        ? merged.sort((a, b) => (a.TotalTime + a.Penalties) - (b.TotalTime + b.Penalties))
+        : merged;
+    } else if (arr1.length > 0) {
+      return arr1;
+    } else if (arr2.length > 0) {
+      return arr2;
+    }
+    return [];
+  }
+
+  /**
+   * Función Auxiliar para mezclar el Staff (evitar duplicados por SteamID o Equipo)
+   * @param arr1 - Array de resultados de la primera división
+   * @param arr2 - Array de resultados de la segunda división
+   * @returns {RaceResult[]} - Array de resultados de la carrera combinados
+   */
+  function mergeStaff(arr1: RaceResult[], arr2: RaceResult[]): RaceResult[] {
+    if (arr1.length > 0 && arr2.length > 0) {
+      const filteredArr2 = arr2.filter(
+        item => !arr1.some(item2 => item2.SteamID === item.SteamID || item2.Team === item.Team)
+      );
+      return arr1.concat(filteredArr2);
+    } else if (arr1.length > 0) {
+      return arr1;
+    } else if (arr2.length > 0) {
+      return arr2;
+    }
+    return [];
+  }
 
   // Posiciones Normales, pilotos con carrera completa
-  const rrAux1 = rrS1.filter((item) => item.Pos > 0);
-  const rrAux2 = rrS2.filter((item) => item.Pos > 0);
-
-  if (rrAux1.length > 0) rr = rr.concat(rrAux1);
-  if (rrAux2.length > 0) rr = rr.concat(rrAux2);
+  rr.push(...mergeAndSort(
+    rrS1.filter(item => item.Pos > 0),
+    rrS2.filter(item => item.Pos > 0)
+  ));
 
   // Pilotos que no han completado la carrera
-  const rrAux3 = rrS1.filter((item) => item.Pos === -1);
-  const rrAux4 = rrS2.filter((item) => item.Pos === -1);
-
-  let rrAux5: RaceResult[] = [];
-  if (rrAux3.length > 0 && rrAux4.length > 0) rrAux5 = rrAux3.concat(rrAux4).sort((a, b) => (a.TotalTime + a.Penalties) - (b.TotalTime + b.Penalties));
-  else if (rrAux3.length > 0 && rrAux4.length <= 0) rrAux5 = rrAux5.concat(rrAux3);
-  else if (rrAux3.length <= 0 && rrAux4.length > 0) rrAux5 = rrAux5.concat(rrAux4);
-  if (rrAux5.length > 0) rr =  rr.concat(rrAux5);
+  rr.push(...mergeAndSort(
+    rrS1.filter(item => item.Pos === -1),
+    rrS2.filter(item => item.Pos === -1),
+    true
+  ));
 
   // Pilotos no presentados
-  const rrAux9 = rrS1.filter((item) => item.Pos === -3);
-  const rrAux10 = rrS2.filter((item) => item.Pos === -3);
-
-  let rrAux11: RaceResult[] = [];
-  if (rrAux9.length > 0 && rrAux10.length > 0) rrAux11 = rrAux9.concat(rrAux10);
-  else if (rrAux9.length > 0 && !(rrAux10.length > 0)) rrAux11 = rrAux11.concat(rrAux9);
-  else if (!(rrAux9.length > 0) && rrAux10.length > 0) rrAux11 = rrAux11.concat(rrAux10);
-  if (rrAux11.length > 0) rr = rr.concat(rrAux11);
+  rr.push(...mergeAndSort(
+    rrS1.filter(item => item.Pos === -3),
+    rrS2.filter(item => item.Pos === -3)
+  ));
 
   // Pilotos descalificados
-  const rrAux6 = rrS1.filter((item) => item.Pos === -2);
-  const rrAux7 = rrS2.filter((item) => item.Pos === -2);
-
-  let rrAux8: RaceResult[] = [];
-  if (rrAux6.length > 0 && rrAux7.length > 0) rrAux8 = rrAux6.concat(rrAux7).sort((a, b) => (a.TotalTime + a.Penalties) - (b.TotalTime + b.Penalties));
-  else if (rrAux6.length > 0 && !(rrAux7.length > 0)) rrAux8 = rrAux8.concat(rrAux6);
-  else if (!(rrAux6.length > 0) && rrAux7.length > 0) rrAux8 = rrAux8.concat(rrAux7);
-  if (rrAux8.length > 0) rr =  rr.concat(rrAux8);
+  rr.push(...mergeAndSort(
+    rrS1.filter(item => item.Pos === -2),
+    rrS2.filter(item => item.Pos === -2),
+    true
+  ));
 
   // Personal de Staff
-  const rrAux12: RaceResult[] = rrS1.filter((item) => item.Pos === -4);
-  const rrAux13: RaceResult[] = rrS2.filter((item) => item.Pos === -4);
-
-  let rrAux14: RaceResult[] = [];
-  if (rrAux12.length > 0 && rrAux13.length > 0) {
-    const rrAux15 = rrAux13.filter(item => !rrAux12.some(item2 => item2.SteamID === item.SteamID || item2.Team === item.Team));
-    rrAux14 = rrAux12.concat(rrAux15);
-  } else if (rrAux12.length > 0 && !(rrAux13.length > 0)) rrAux14 = rrAux14.concat(rrAux12);
-  else if (!(rrAux12.length > 0) && rrAux13.length > 0) rrAux14 = rrAux14.concat(rrAux13);
-  if (rrAux14.length > 0) rr = rr.concat(rrAux14);
+  rr.push(...mergeStaff(
+    rrS1.filter(item => item.Pos === -4),
+    rrS2.filter(item => item.Pos === -4)
+  ));
 
   return rr;
 }
 
+/**
+ * Función para crear los resultados de vueltas de carrera
+ * @param dlaps - Array de objetos LapJSON
+ * @param rr - Array de objetos RaceResult
+ * @returns {RaceLap[]} - Array de objetos RaceLap
+ */
 function createRaceLap(dlaps: LapJSON[], rr: RaceResult[]): RaceLap[] {
   let rl: RaceLap[] = [];
   let i = 0;
@@ -214,6 +275,13 @@ function createRaceLap(dlaps: LapJSON[], rr: RaceResult[]): RaceLap[] {
   return rlAdjust;
 }
 
+/**
+ * Función para crear los resultados de vueltas de carrera con múltiples splits
+ * @param dlapsS1 - Array de objetos LapJSON para el primer split
+ * @param dlapsS2 - Array de objetos LapJSON para el segundo split
+ * @param rr - Array de objetos RaceResult
+ * @returns {RaceLap[]} - Array de objetos RaceLap
+ */
 function createRaceLapMultipleSplits(dlapsS1: LapJSON[], dlapsS2: LapJSON[], rr: RaceResult[]): RaceLap[] {
   let rl: RaceLap[] = [];
   let i = 0;
@@ -251,6 +319,12 @@ function createRaceLapMultipleSplits(dlapsS1: LapJSON[], dlapsS2: LapJSON[], rr:
   return rlAdjust;
 }
 
+/**
+ * Función para crear los resultados de una vuelta de carrera
+ * @param dlaps - Array de objetos LapJSON
+ * @param rr - Objeto RaceResult
+ * @returns {Lap[]} - Array de objetos Lap
+ */
 function createLap(dlaps: LapJSON[], rr: RaceResult): Lap[] {
   return dlaps
     .filter(lapItem => rr.SteamID === lapItem.DriverGuid)
@@ -266,6 +340,11 @@ function createLap(dlaps: LapJSON[], rr: RaceResult): Lap[] {
     } as Lap));
 }
 
+/**
+ * Función para obtener el tiempo medio de las vueltas
+ * @param rl - Array de objetos Lap
+ * @returns {number[]} - Array de tiempos medios
+ */
 function getAvgLapTimes(rl: Lap[]): number[] {
   let avgTimes: number[] = [];
 
@@ -286,6 +365,11 @@ function getAvgLapTimes(rl: Lap[]): number[] {
   return avgTimes;
 }
 
+/**
+ * Función para obtener el mejor tiempo de vuelta
+ * @param rl - Array de objetos Lap
+ * @returns {number[]} - Array de mejores tiempos
+ */
 function getBestLapTime(rl: Lap[]): number[] {
   let BestTimes: number[] = [];
 
@@ -303,6 +387,11 @@ function getBestLapTime(rl: Lap[]): number[] {
   return BestTimes;
 }
 
+/**
+ * Función para obtener el mejor tiempo teórico
+ * @param rl - Array de objetos Lap
+ * @returns {number[]} - Array de mejores tiempos teóricos
+ */
 function getBestTheoricalTime(rl: Lap[]): number[] {
   const bestSectorTimes = rl[0].Sector.map(() => Number.MAX_VALUE);
 
@@ -325,78 +414,62 @@ function getBestTheoricalTime(rl: Lap[]): number[] {
   return bestTheoricalTime;
 }
 
+/**
+ * Función para obtener la posición de cada piloto en cada vuelta
+ * @param rlAux - Array de objetos RaceLap
+ * @returns {RaceLap[]} - Array de objetos RaceLap con posiciones actualizadas
+ */
 function getPositionInEveryLap(rlAux: RaceLap[]): RaceLap[] {
   let rl: RaceLap[] = rlAux;
   let rl1: RaceLap[] = rl.filter((item) => item.Split === 1);
   let rl2: RaceLap[] = rl.filter((item) => item.Split === 2);
 
-  for (let i = 0; i < rl1[0].Laps.length; i++) {
-    let driver: DriverLapData[] = [];
-    for (let racelap of rl1) {
-      if (racelap.Laps[i] !== undefined) {
-        driver.push({ SteamID: racelap.SteamID, timestamp: racelap.Laps[i].Timestamp });
-      }
-    }
+  //- Asignar posiciones a los pilotos en cada vuelta
+  function assignPositions(raceLaps: RaceLap[]) {
+    if (raceLaps.length === 0 || raceLaps[0].Laps.length === 0) return;
+    const numLaps = raceLaps[0].Laps.length;
+    for (let i = 0; i < numLaps; i++) {
+      const drivers: DriverLapData[] = raceLaps
+        .filter(racelap => racelap.Laps[i] !== undefined)
+        .map(racelap => ({ SteamID: racelap.SteamID, timestamp: racelap.Laps[i].Timestamp }));
 
-    driver.sort((a, b) => a.timestamp - b.timestamp);
+      drivers.sort((a, b) => a.timestamp - b.timestamp);
 
-    for (let j = 0; j < driver.length; j++) {
-      let encontrado: boolean = false;
-      let k: number = 0;
-
-      while (!encontrado && k < rl1.length) {
-        if (rl1[k].SteamID === driver[j].SteamID) {
-          rl1[k].Laps[i].Position = j + 1;
-          encontrado = true;
+      drivers.forEach((driver, j) => {
+        const found = raceLaps.find(racelap => racelap.SteamID === driver.SteamID);
+        if (found?.Laps[i]) {
+          found.Laps[i].Position = j + 1;
         }
-        k++;
+      });
+    }
+  }
+
+  //- Actualizar la lista principal con los datos de las vueltas
+  function updateMainList(raceLaps: RaceLap[], mainList: RaceLap[]) {
+    for (let item of raceLaps) {
+      const foundIndex = mainList.findIndex((item2) => item2.SteamID === item.SteamID);
+      if (foundIndex !== -1) {
+        mainList[foundIndex].Laps = item.Laps;
       }
     }
   }
 
-  for (let item of rl1) {
-    const foundIndex = rl.findIndex((item2) => item2.SteamID === item.SteamID);
-    if (foundIndex !== -1) {
-      rl[foundIndex].Laps = item.Laps;
-    }
-  }
+  assignPositions(rl1);
+  updateMainList(rl1, rl);
 
   if (rl2.length > 0) {
-    for (let i = 0; i < rl2[0].Laps.length; i++) {
-      let driver: DriverLapData[] = [];
-      for (let racelap of rl2) {
-        if (racelap.Laps[i] !== undefined) {
-          driver.push({ SteamID: racelap.SteamID, timestamp: racelap.Laps[i].Timestamp });
-        }
-      }
-
-      driver.sort((a, b) => a.timestamp - b.timestamp);
-
-      for (let j = 0; j < driver.length; j++) {
-        let encontrado: boolean = false;
-        let k: number = 0;
-
-        while (!encontrado && k < rl2.length) {
-          if (rl2[k].SteamID === driver[j].SteamID) {
-            rl2[k].Laps[i].Position = j + 1;
-            encontrado = true;
-          }
-          k++;
-        }
-      }
-    }
-
-    for (let item of rl2) {
-      const foundIndex = rl.findIndex((item2) => item2.SteamID === item.SteamID);
-      if (foundIndex !== -1) {
-        rl[foundIndex].Laps = item.Laps;
-      }
-    }
+    assignPositions(rl2);
+    updateMainList(rl2, rl);
   }
 
   return rl;
 }
 
+/**
+ * Función para crear los mejores tiempos de vueltas
+ * @param rl - Array de objetos RaceLap
+ * @returns {BestLap[]} - Array de objetos BestLap
+ */
 function createBestLap(rl: RaceLap[]): BestLap[] {
   let bl: BestLap[] = [];
 
@@ -413,12 +486,10 @@ function createBestLap(rl: RaceLap[]): BestLap[] {
         if (bl.length > 1) {
           bl.sort((a, b) => a.BestLap - b.BestLap);
         }
-      } else {
-        if (uniqueBL.BestLap < bl[bl.length - 1].BestLap) {
-          bl.pop();
-          bl.push(uniqueBL);
-          bl.sort((a, b) => a.BestLap - b.BestLap);
-        }
+      } else if (uniqueBL.BestLap < bl[bl.length - 1].BestLap) {
+        bl.pop();
+        bl.push(uniqueBL);
+        bl.sort((a, b) => a.BestLap - b.BestLap);
       }
     }
   }
@@ -431,109 +502,149 @@ function createBestLap(rl: RaceLap[]): BestLap[] {
   return bl;
 }
 
+/**
+ * Función para crear la consistencia de los pilotos
+ * @param rr - Array de objetos RaceResult
+ * @param rl - Array de objetos RaceLap
+ * @returns {Consistency[]} - Array de objetos Consistency
+ */
 function createConsistency(rr: RaceResult[], rl: RaceLap[]): Consistency[] {
-  let c: Consistency[] = [];
-  for (let driver of rl) {
-    let uniqueC: Consistency = {} as Consistency;
-    if (driver.Laps.length <= 1) { //Si el piloto ha dado 1 vuelta o menos
-      let driverFound = false;
-      let k = 0;
-      while (!driverFound && k < rr.length) {
-        if (rr[k].SteamID === driver.SteamID) {
-          uniqueC.DriverName = rr[k].DriverName;
-          uniqueC.SteamID = rr[k].SteamID;
-          uniqueC.CarFileName = rr[k].CarFileName;
-          uniqueC.Consistency = -1;
-          driverFound = true;
-        } else {
-          k++;
-        }
+  function findDriverResult(rr: RaceResult[], steamID: string) {
+    return rr.find(r => r.SteamID === steamID);
+  }
+
+  //- Obtener el mejor tiempo de vuelta del piloto
+  function getBestLap(driverResult: RaceResult | undefined, driverLaps: Lap[]): number {
+    if (!driverResult) return 0;
+    if (driverResult.BestLap === 999999.999 && driverLaps.length > 1) {
+      return driverLaps[1].LapTime;
+    }
+    return driverResult.BestLap;
+  }
+
+  //- Obtener los tiempos de vuelta de los demás pilotos
+  function getOtherLapTimes(driverLaps: Lap[], bestLap: number): number[] {
+    return driverLaps
+      .filter(lap => lap.LapTime !== bestLap || lap.LapTime > (bestLap + 21000) || lap.Cut > 0)
+      .map(lap => lap.LapTime);
+  }
+
+  //- Crear la entrada de consistencia para cada piloto
+  function createConsistencyEntry(driver: RaceLap, rr: RaceResult[]): Consistency {
+    const uniqueC: Consistency = {} as Consistency;
+    const driverResult = findDriverResult(rr, driver.SteamID);
+
+    if (driver.Laps.length <= 1) {
+      if (driverResult) {
+        uniqueC.DriverName = driverResult.DriverName;
+        uniqueC.SteamID = driverResult.SteamID;
+        uniqueC.CarFileName = driverResult.CarFileName;
+        uniqueC.Consistency = -1;
       }
-
-    } else { //Si el piloto ha dado más de 1 vuelta
-      let bestLap = 0;
-
-      // Obtener la mejor vuelta del piloto
-      let driverFound = false;
-      let k = 0;
-      while (!driverFound && k < rr.length) {
-        if (rr[k].SteamID === driver.SteamID) {
-          if (rr[k].BestLap === 999999.999) {
-            bestLap = driver.Laps[1].LapTime;
-          } else {
-            bestLap = rr[k].BestLap;
-          }
-          uniqueC.DriverName = rr[k].DriverName;
-          uniqueC.SteamID = rr[k].SteamID;
-          uniqueC.CarFileName = rr[k].CarFileName;
-          driverFound = true;
-        } else {
-          k++;
-        }
+    } else {
+      const bestLap = getBestLap(driverResult, driver.Laps);
+      if (driverResult) {
+        uniqueC.DriverName = driverResult.DriverName;
+        uniqueC.SteamID = driverResult.SteamID;
+        uniqueC.CarFileName = driverResult.CarFileName;
       }
-
-      //Obtener el resto de vueltas del piloto que no son la mejor
-      let otherLapTimes: number[] = [];
-      for (let lap of driver.Laps) {
-        // Si es la mejor vuelta o una vuelta 21 segundos más lenta que la mejor o hubo algún Cut en la vuelta, no se tiene en cuenta
-        if (lap.LapTime !== bestLap || lap.LapTime > (bestLap + 21000) || lap.Cut > 0) {
-          otherLapTimes.push(lap.LapTime);
-        }
-      }
-
+      const otherLapTimes = getOtherLapTimes(driver.Laps, bestLap);
       const totalTimes = otherLapTimes.reduce((acc, time) => acc + time, 0);
-      const averageTime = totalTimes / otherLapTimes.length;
+      const averageTime = otherLapTimes.length > 0 ? totalTimes / otherLapTimes.length : 0;
       const consistency = parseFloat((averageTime - bestLap).toFixed(2));
-
       uniqueC.Consistency = 100 - consistency;
     }
-    c.push(uniqueC);
-    c.sort((a, b) => b.Consistency - a.Consistency);
+    return uniqueC;
   }
+
+  const c: Consistency[] = rl.map(driver => createConsistencyEntry(driver, rr));
+  c.sort((a, b) => b.Consistency - a.Consistency);
   return c;
 }
 
+/**
+ * Función para crear los mejores sectores
+ * @param rl - Array de objetos RaceLap
+ * @returns {BestSector[]} - Array de objetos BestSector
+ */
 function createBestSector(rl: RaceLap[]): BestSector[] {
+  if (!rl.length || !rl[0].Laps.length || !rl[0].Laps[1]) return [];
+  const numSectors = rl[0].Laps[1].Sector.length;
   let bs: BestSector[] = [];
 
-  // Numero de sectores por vuelta (en la vuelta 2 por si acaso el juego no detecta bien la primera vuelta de salida)
-  const numSectors = rl[0].Laps[1].Sector.length;
-
   for (let s = 0; s < numSectors; s++) {
-    for (let itemRL of rl) {
-      if (itemRL.Laps.length > 0) {
-        let uniqueSector: BestSector = {} as BestSector;
-        uniqueSector.SectorNumber = s + 1;
-        uniqueSector.BestSector = Number.MAX_VALUE;
-        for (let itemL of itemRL.Laps) {
-          if (itemL.Cut <= 0) { //Si la vuelta fue sin CUTS, es decir, vuelta limpia
-            if (itemL.Sector[s] < uniqueSector.BestSector) {
-              uniqueSector.DriverName = itemRL.DriverName;
-              uniqueSector.SteamID = itemRL.SteamID;
-              uniqueSector.Split = itemRL.Split;
-              uniqueSector.CarFileName = itemL.CarFileName;
-              uniqueSector.BestSector = itemL.Sector[s];
-            }
-          }
-        }
-        if (uniqueSector.DriverName !== undefined) {
-          bs.push(uniqueSector);
-        }
-      }
-    }
+    bs.push(...findBestSectorsForSector(rl, s));
   }
 
-  bs.sort((a, b) => {
-    if (a.SectorNumber !== b.SectorNumber) {
-      return a.SectorNumber - b.SectorNumber;
-    }
-    return a.BestSector - b.BestSector;
-  });
-
-  //console.table(bs);
+  bs.sort(compareBestSectors);
   return bs;
 }
 
+/**
+ * Función auxiliar para encontrar los mejores sectores para un sector específico
+ * @param rl - Array de objetos RaceLap
+ * @param sectorIndex - Índice del sector, indicando el sector a buscar
+ * @returns {BestSector[]} - Array de objetos BestSector
+ */
+function findBestSectorsForSector(rl: RaceLap[], sectorIndex: number): BestSector[] {
+  const bestSectors: BestSector[] = [];
+  for (let itemRL of rl) {
+    if (itemRL.Laps.length > 0) {
+      const bestSector = getBestSectorForDriver(itemRL, sectorIndex);
+      if (bestSector) {
+        bestSectors.push(bestSector);
+      }
+    }
+  }
+  return bestSectors;
+}
+
+/**
+ * Función auxiliar para obtener el mejor sector para un piloto
+ * @param itemRL - Objeto RaceLap con las vueltas del piloto
+ * @param sectorIndex - Índice del sector a buscar
+ * @returns {BestSector | null} - Objeto BestSector o null si no se encuentra
+ */
+function getBestSectorForDriver(itemRL: RaceLap, sectorIndex: number): BestSector | null {
+  let bestTime = Number.MAX_VALUE;
+  let bestLap: Lap | null = null;
+  for (let itemL of itemRL.Laps) {
+    if (itemL.Cut <= 0 && itemL.Sector[sectorIndex] < bestTime) {
+      bestTime = itemL.Sector[sectorIndex];
+      bestLap = itemL;
+    }
+  }
+  if (bestLap) {
+    return {
+      SectorNumber: sectorIndex + 1,
+      BestSector: bestTime,
+      DriverName: itemRL.DriverName,
+      SteamID: itemRL.SteamID,
+      Split: itemRL.Split,
+      CarFileName: bestLap.CarFileName,
+    } as BestSector;
+  }
+  return null;
+}
+
+/**
+ * Función auxiliar para comparar dos mejores sectores
+ * @param a - Objeto BestSector
+ * @param b - Objeto BestSector
+ * @returns {number} - Resultado de la comparación
+ */
+function compareBestSectors(a: BestSector, b: BestSector): number {
+  if (a.SectorNumber !== b.SectorNumber) {
+    return a.SectorNumber - b.SectorNumber;
+  }
+  return a.BestSector - b.BestSector;
+}
+
+/**
+ * Función para crear los incidentes
+ * @param devents - Array de objetos EventJSON
+ * @returns {Incident[]} - Array de objetos Incident
+ */
 function createIncident(devents: EventJSON[]): Incident[] {
   let i: Incident[] = [];
 
@@ -544,9 +655,10 @@ function createIncident(devents: EventJSON[]): Incident[] {
     let driverName = itemE.Driver.Name;
     let impactSpeed = itemE.ImpactSpeed.toFixed(3);
 
+    let otherDriverName: string | undefined;
     switch (itemE.Type) {
       case "COLLISION_WITH_CAR":
-        let otherDriverName = itemE.OtherDriver.Name;
+        otherDriverName = itemE.OtherDriver.Name;
         uniqueI.Incident = `${driverName} colisionó contra el vehiculo de ${otherDriverName} a una velocidad de ${impactSpeed} km/h`;
         break;
       case "COLLISION_WITH_ENV":
@@ -561,6 +673,12 @@ function createIncident(devents: EventJSON[]): Incident[] {
   return i;
 }
 
+/**
+ * Función para crear los incidentes con múltiples divisiones
+ * @param deventsS1 - Array de objetos EventJSON para la primera división
+ * @param deventsS2 - Array de objetos EventJSON para la segunda división
+ * @returns {Incident[]} - Array de objetos Incident
+ */
 function createIncidentMultipleSplits(deventsS1: EventJSON[], deventsS2: EventJSON[]): Incident[] {
   let i: Incident[] = [];
 
@@ -571,9 +689,10 @@ function createIncidentMultipleSplits(deventsS1: EventJSON[], deventsS2: EventJS
     let driverName = itemE.Driver.Name;
     let impactSpeed = itemE.ImpactSpeed.toFixed(3);
 
+    let otherDriverName: string | undefined;
     switch (itemE.Type) {
       case "COLLISION_WITH_CAR":
-        let otherDriverName = itemE.OtherDriver.Name;
+        otherDriverName = itemE.OtherDriver.Name;
         uniqueI.Incident = `${driverName} colisionó contra el vehiculo de ${otherDriverName} a una velocidad de ${impactSpeed} km/h`;
         break;
       case "COLLISION_WITH_ENV":
@@ -591,10 +710,11 @@ function createIncidentMultipleSplits(deventsS1: EventJSON[], deventsS2: EventJS
     uniqueI.Date = timestamp.toString();
     let driverName = itemE.Driver.Name;
     let impactSpeed = itemE.ImpactSpeed.toFixed(3);
+    let otherDriverName: string | undefined;
 
     switch (itemE.Type) {
       case "COLLISION_WITH_CAR":
-        let otherDriverName = itemE.OtherDriver.Name;
+        otherDriverName = itemE.OtherDriver.Name;
         uniqueI.Incident = `${driverName} colisionó contra el vehiculo de ${otherDriverName} a una velocidad de ${impactSpeed} km/h`;
         break;
       case "COLLISION_WITH_ENV":
@@ -609,18 +729,29 @@ function createIncidentMultipleSplits(deventsS1: EventJSON[], deventsS2: EventJS
   return i;
 }
 
+/**
+ * Función para obtener las vueltas lideradas por cada piloto
+ * @param rrAux - Array de objetos RaceResult
+ * @param rl - Array de objetos RaceLap
+ * @returns {RaceResult[]} - Array de objetos RaceResult con las vueltas lideradas
+ */
 function getLeadLaps(rrAux: RaceResult[], rl: RaceLap[]): RaceResult[] {
   return rrAux.map(raceResult => {
     const driverLaps = rl.find(raceLap => raceLap.SteamID === raceResult.SteamID);
-    const lapsLed = driverLaps?.Laps.filter(lap => lap.Position === 1).length || 0;
+    const lapsLed = driverLaps?.Laps.filter(lap => lap.Position === 1).length ?? 0;
     return { ...raceResult, LedLaps: lapsLed };
   });
 }
 
+/**
+ * Función para crear la configuración de la carrera
+ * @param data - Objeto GeneralDataJSON
+ * @param rr - Array de objetos RaceResult
+ * @param bestLap - Array de objetos BestLap
+ * @returns {RaceConfig} - Objeto RaceConfig
+ */
 function createRaceConfig(data: GeneralDataJSON, rr: RaceResult[], bestLap: BestLap): RaceConfig {
-  const mostLapsLeader = rr.reduce((prev, curr) =>
-    curr.LedLaps > prev.LedLaps ? curr : prev
-  );
+  const mostLapsLeader = rr.reduce((prev, curr) => curr.LedLaps > prev.LedLaps ? curr : prev, rr.length > 0 ? rr[0] : {} as RaceResult);
 
   return {
     RaceID: data.SessionFile,
@@ -639,10 +770,16 @@ function createRaceConfig(data: GeneralDataJSON, rr: RaceResult[], bestLap: Best
   };
 }
 
+/**
+ * Función para crear la configuración de la carrera con múltiples splits
+ * @param dataS1 - Objeto GeneralDataJSON para el primer split
+ * @param dataS2 - Objeto GeneralDataJSON para el segundo split
+ * @param rr - Array de objetos RaceResult
+ * @param bestLap - Array de objetos BestLap
+ * @returns {RaceConfig} - Objeto RaceConfig
+ */
 function createRaceConfigMultipleSplits(dataS1: GeneralDataJSON, dataS2: GeneralDataJSON, rr: RaceResult[], bestLap: BestLap): RaceConfig {
-  const mostLapsLeader = rr.reduce((prev, curr) =>
-    curr.LedLaps > prev.LedLaps ? curr : prev
-  );
+  const mostLapsLeader = rr.reduce((prev, curr) => curr.LedLaps > prev.LedLaps ? curr : prev, rr.length > 0 ? rr[0] : {} as RaceResult);
 
   return {
     RaceID: `${dataS1.SessionFile}#${dataS2.SessionFile}`,
@@ -661,13 +798,25 @@ function createRaceConfigMultipleSplits(dataS1: GeneralDataJSON, dataS2: General
   };
 }
 
+/**
+ * Función para calcular el número de vueltas de cada piloto
+ * @param rr - Array de objetos RaceResult
+ * @param rl - Array de objetos RaceLap
+ * @returns {RaceResult[]} - Array de objetos RaceResult con el número de vueltas
+ */
 function calculateNumLaps(rr: RaceResult[], rl: RaceLap[]): RaceResult[] {
   return rr.map(itemRR => ({
     ...itemRR,
-    Laps: rl.find(itemRL => itemRR.SteamID === itemRL.SteamID)?.Laps.length || 0
+    Laps: rl.find(itemRL => itemRR.SteamID === itemRL.SteamID)?.Laps.length ?? 0
   }));
 }
 
+/**
+ * Función para calcular la posición de la parrilla de cada piloto
+ * @param rr - Array de objetos RaceResult
+ * @param rl - Array de objetos RaceLap
+ * @returns {RaceResult[]} - Array de objetos RaceResult con la posición de la parrilla
+ */
 function calculateGridPosition(rr: RaceResult[], rl: RaceLap[]): RaceResult[] {
   let rrAdjusted: RaceResult[] = rr;
   for (let itemRR of rrAdjusted) {
@@ -680,93 +829,178 @@ function calculateGridPosition(rr: RaceResult[], rl: RaceLap[]): RaceResult[] {
   return rrAdjusted;
 }
 
+/**
+ * Función para calcular el gap al primer piloto
+ * @param rr - Array de objetos RaceResult
+ * @param rl - Array de objetos RaceLap
+ * @param numberOfSplits - Número de splits
+ * @returns {RaceLap[]} - Array de objetos RaceLap con el gap al primer piloto
+ */
 function getGapToFirst(rr: RaceResult[], rl: RaceLap[], numberOfSplits: number): RaceLap[] {
   let raceLaps: RaceLap[] = rl;
 
-  // Encontrar el tiempo por vuelta del coche en primera posición para la vuelta actual
-  const numberOfLapsBySplit = Array.from({ length: numberOfSplits }, (_, splitIndex) => {
-    const splitNumber = splitIndex + 1;
-    const firstDriverInSplit = rr.find(driver => driver.Split === splitNumber);
-    if (!firstDriverInSplit) return 0;
-
-    const matchingLaps = raceLaps.find(item => item.SteamID === firstDriverInSplit.SteamID);
-    return matchingLaps ? matchingLaps.Laps.length : 0;
-  });
+  const numberOfLapsBySplit = getNumberOfLapsBySplit(rr, raceLaps, numberOfSplits);
 
   for (let splitIndex = 0; splitIndex < numberOfSplits; splitIndex++) {
     const currentSplit = splitIndex + 1;
     const numberOfLaps = numberOfLapsBySplit[splitIndex];
 
-    for (let lapIndex = 0; lapIndex < numberOfLaps; lapIndex++) { //Recorrer cada vuelta
-      let firstLapTime: number | null = null;
-
-      // Buscar el tiempo del líder en este split
-      for (let driverLap of raceLaps) {
-        if (driverLap.Laps[lapIndex] && driverLap.Laps[lapIndex].Position === 1 && driverLap.Split === currentSplit) {
-          firstLapTime = driverLap.Laps[lapIndex].LapTime;
-          break;
-        }
-      }
-
+    for (let lapIndex = 0; lapIndex < numberOfLaps; lapIndex++) {
+      const firstLapTime = findFirstLapTime(raceLaps, lapIndex, currentSplit);
       if (firstLapTime !== null) {
-        // Calcular gaps para cada piloto en este split
-        for (let driverLap of raceLaps) {
-          if (driverLap.Laps[lapIndex] && driverLap.Split === currentSplit) {
-            if (lapIndex > 0) {
-              const lastLapGap = driverLap.Laps[lapIndex - 1].GaptoFirst;
-              driverLap.Laps[lapIndex].GaptoFirst = parseFloat(
-                ((driverLap.Laps[lapIndex].LapTime - firstLapTime) + lastLapGap).toFixed(3));
-
-              if (driverLap.Laps[lapIndex].GaptoFirst <= 0 || driverLap.Laps[lapIndex].Position === 1) {
-                driverLap.Laps[lapIndex].GaptoFirst = 0;
-              }
-
-            } else {
-              driverLap.Laps[lapIndex].GaptoFirst = parseFloat(
-                (driverLap.Laps[lapIndex].LapTime - firstLapTime).toFixed(3));
-            }
-          }
-        }
+        updateGapsForSplit(raceLaps, lapIndex, currentSplit, firstLapTime);
       }
     }
   }
   return raceLaps;
 }
 
-function recalculatePositions(rr: RaceResult[], raceTime: number): RaceResult[] {
-  for (let item of rr) {
-    if (item.Split === 1) {
-      if (item.Pos === -2)
-        item.Pos = -2;
-      else {
-        const timerace = (item.TotalTime) + (item.Penalties);
-        const timeCondition = (Math.trunc((timerace / 3600) % 60) + Math.trunc(timerace / 60));
-        if (timeCondition >= raceTime) item.Pos = item.Pos;
-        else {
-          if (item.Team === 'ESP Racing Staff' || item.Team === 'STREAMING' || item.Team === 'Safety Car' || item.DriverName === 'STREAMING')
-            item.Pos = -4;    // Organización
-          else {
-            if (item.TotalTime <= 0) item.Pos = -3;  // DNS
-            else item.Pos = -1;  // DNF
-          }
-        }
-      }
-    } else { // Split diferente a 1
-      if (item.Pos === -2)
-        item.Pos = -2;
+/**
+ * Función auxiliar para obtener el número de vueltas por split
+ * @param rr - Array de objetos RaceResult
+ * @param raceLaps - Array de objetos RaceLap
+ * @param numberOfSplits - Número de splits
+ * @returns {number[]} - Array con el número de vueltas por split
+ */
+function getNumberOfLapsBySplit(rr: RaceResult[], raceLaps: RaceLap[], numberOfSplits: number): number[] {
+  return Array.from({ length: numberOfSplits }, (_, splitIndex) => {
+    const splitNumber = splitIndex + 1;
+    const firstDriverInSplit = rr.find(driver => driver.Split === splitNumber);
+    if (!firstDriverInSplit) return 0;
+    const matchingLaps = raceLaps.find(item => item.SteamID === firstDriverInSplit.SteamID);
+    return matchingLaps ? matchingLaps.Laps.length : 0;
+  });
+}
 
-      else {
-        const timerace = (item.TotalTime) + (item.Penalties);
-        const timeCondition = (Math.trunc((timerace / 3600) % 60) + Math.trunc(timerace / 60));
-        if (timeCondition >= raceTime) {
-          item.Pos = item.Pos;
+/**
+ * Función auxiliar para encontrar el primer tiempo de vuelta
+ * @param raceLaps - Array de objetos RaceLap
+ * @param lapIndex - Índice de la vuelta
+ * @param currentSplit - Número de la división actual
+ * @returns {number | null} - Tiempo de la vuelta o null si no se encuentra
+ */
+function findFirstLapTime(raceLaps: RaceLap[], lapIndex: number, currentSplit: number): number | null {
+  for (let driverLap of raceLaps) {
+    if (
+      driverLap.Laps[lapIndex] &&
+      driverLap.Laps[lapIndex].Position === 1 &&
+      driverLap.Split === currentSplit
+    ) {
+      return driverLap.Laps[lapIndex].LapTime;
+    }
+  }
+  return null;
+}
+
+/**
+ * Función auxiliar para actualizar los gaps al primer piloto
+ * @param raceLaps - Array de objetos RaceLap
+ * @param lapIndex - Índice de la vuelta
+ * @param currentSplit - Número de la división actual
+ * @param firstLapTime - Tiempo de la primera vuelta
+ */
+function updateGapsForSplit(raceLaps: RaceLap[], lapIndex: number, currentSplit: number, firstLapTime: number): void {
+  for (let driverLap of raceLaps) {
+    if (driverLap.Laps[lapIndex] && driverLap.Split === currentSplit) {
+      if (lapIndex > 0) {
+        const lastLapGap = driverLap.Laps[lapIndex - 1].GaptoFirst;
+        driverLap.Laps[lapIndex].GaptoFirst = parseFloat(
+          ((driverLap.Laps[lapIndex].LapTime - firstLapTime) + lastLapGap).toFixed(3)
+        );
+        if (
+          driverLap.Laps[lapIndex].GaptoFirst <= 0 ||
+          driverLap.Laps[lapIndex].Position === 1
+        ) {
+          driverLap.Laps[lapIndex].GaptoFirst = 0;
         }
+      } else {
+        driverLap.Laps[lapIndex].GaptoFirst = parseFloat(
+          (driverLap.Laps[lapIndex].LapTime - firstLapTime).toFixed(3)
+        );
       }
     }
   }
+}
+
+/**
+ * Función para recalcular las posiciones de los pilotos
+ * @param rr - Array de objetos RaceResult
+ * @param raceTime - Tiempo de la carrera
+ * @returns {RaceResult[]} - Array de objetos RaceResult con las posiciones recalculadas
+ */
+function recalculatePositions(rr: RaceResult[], raceTime: number): RaceResult[] {
+  rr.forEach(item => {
+    if (item.Split === 1) {
+      recalculateSplitOne(item, raceTime);
+    } else {
+      recalculateOtherSplits(item, raceTime);
+    }
+  });
   return rr;
 }
 
+/**
+ * Función para recalcular la posición de los pilotos en el primer split
+ * @param item - Objeto RaceResult
+ * @param raceTime - Tiempo de la carrera
+ */
+function recalculateSplitOne(item: RaceResult, raceTime: number): void {
+  if (item.Pos === -2) {
+    item.Pos = -2;
+    return;
+  }
+  const timerace = item.TotalTime + item.Penalties;
+  const timeCondition = Math.trunc((timerace / 3600) % 60) + Math.trunc(timerace / 60);
+  if (timeCondition < raceTime) {
+    if (isStaffOrStreaming(item)) {
+      item.Pos = -4; // Organización
+    } else if (item.TotalTime <= 0) {
+      item.Pos = -3; // DNS
+    } else {
+      item.Pos = -1; // DNF
+    }
+  }
+}
+
+// TODO: Revisar el porque de esta funcion
+/**
+ * Función para recalcular la posición de los pilotos en otros splits
+ * @param item - Objeto RaceResult
+ * @param raceTime - Tiempo de la carrera
+ */
+function recalculateOtherSplits(item: RaceResult, raceTime: number): void {
+  if (item.Pos === -2) {
+    item.Pos = -2;
+    return;
+  }
+  const timerace = item.TotalTime + item.Penalties;
+  const timeCondition = Math.trunc((timerace / 3600) % 60) + Math.trunc(timerace / 60);
+  if (timeCondition >= raceTime) {
+    // Position remains unchanged
+  }
+}
+
+/**
+ * Función para verificar si el piloto es parte del staff o está en streaming
+ * @param item - Objeto RaceResult
+ * @returns {boolean} - Verdadero si el piloto es parte del staff o está en streaming, falso en caso contrario
+ */
+function isStaffOrStreaming(item: RaceResult): boolean {
+  return (
+    item.Team === 'ESP Racing Staff' ||
+    item.Team === 'STREAMING' ||
+    item.Team === 'Safety Car' ||
+    item.DriverName === 'STREAMING'
+  );
+}
+
+/**
+ * Función para crear el resumen de los pilotos de la carrera
+ * @param rr - Array de objetos RaceResult
+ * @param bl - Array de objetos BestLap
+ * @param rl - Array de objetos RaceLap
+ * @returns {RaceDriversResume[]} - Array de objetos RaceDriversResume
+ */
 function createRaceDriversResume(rr: RaceResult[], bl: BestLap[], rl: RaceLap[]): RaceDriversResume[] {
   let rdr: RaceDriversResume[] = [];
 
@@ -786,6 +1020,11 @@ function createRaceDriversResume(rr: RaceResult[], bl: BestLap[], rl: RaceLap[])
   return rdr;
 }
 
+/**
+ * Función para crear el resumen de los coches de la carrera
+ * @param rr - Array de objetos RaceResult
+ * @returns {RaceCarResume[]} - Array de objetos RaceCarResume
+ */
 function createRaceCarResume(rr: RaceResult[]): RaceCarResume[] {
   const rcr = Array.from(
     rr.reduce((acc, { CarFileName }) =>
@@ -796,6 +1035,11 @@ function createRaceCarResume(rr: RaceResult[]): RaceCarResume[] {
 
 // FUNCIONES A EXPORTAR
 
+/**
+ * Función base para crear los datos de la carrera con 1 Split
+ * @param dataFile - Objeto GeneralDataJSON
+ * @returns {RaceData} - Objeto RaceData
+ */
 export function createRaceData(dataFile: any): RaceData{
   let rd: RaceData = {} as RaceData;
   const dcars = dataFile.Cars as CarJSON[];
@@ -826,7 +1070,7 @@ export function createRaceData(dataFile: any): RaceData{
 
   rd.RaceLaps = getGapToFirst(rd.RaceResult, rd.RaceLaps, rd.RaceConfig.NumberofSplits);
 
-  rd.RaceResult.map((itemRD) => {
+  rd.RaceResult.forEach((itemRD) => {
     if (itemRD.Laps === 0) {
       itemRD.Laps = rd.RaceLaps
         .filter((item1) => item1.SteamID === itemRD.SteamID)
@@ -842,6 +1086,12 @@ export function createRaceData(dataFile: any): RaceData{
   return rd;
 }
 
+/**
+ * Función base para crear los datos de la carrera con múltiples splits
+ * @param dataFileS1 - Objeto GeneralDataJSON para el primer split
+ * @param dataFileS2 - Objeto GeneralDataJSON para el segundo split
+ * @returns {RaceData} - Objeto RaceData
+ */
 export function createRaceDataMultipleSplits(dataFileS1: any, dataFileS2: any): RaceData {
   let rd: RaceData = {} as RaceData;
   const dcarsS1 = dataFileS1.Cars as CarJSON[];
@@ -884,7 +1134,7 @@ export function createRaceDataMultipleSplits(dataFileS1: any, dataFileS2: any): 
 
   rd.RaceLaps = getGapToFirst(rd.RaceResult, rd.RaceLaps, rd.RaceConfig.NumberofSplits);
 
-  rd.RaceResult.map((itemRD) => {
+  rd.RaceResult.forEach((itemRD) => {
     if (itemRD.Laps === 0) {
       itemRD.Laps = rd.RaceLaps
         .filter((item1) => item1.SteamID === itemRD.SteamID)
