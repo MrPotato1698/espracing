@@ -22,7 +22,7 @@ export interface DataTableProps {
   readonly data: readonly any[];
   readonly columns: readonly DataTableColumn[];
   readonly onEdit?: { readonly path: string } | false;
-  readonly onDelete?: { readonly handler: (id: string | number) => void } | false;
+  readonly onDelete?: { readonly path: string } | false;
   readonly pageSize?: number;
   readonly filterOptions?: readonly string[];
   readonly filterAccessor?: string | null;
@@ -346,9 +346,27 @@ export function DataTable({
                 {onDelete && (
                   <TableCell>
                     <button
-                      className="align-middle delete-item flex justify-center w-full"
-                      data-id={row.id}
-                      onClick={() => (onDelete as { handler: (id: string | number) => void }).handler(row.id)}
+                      className="justify-center text-red-500 hover:text-red-700"
+                      onClick={async (e) => {
+                        e.preventDefault();
+                        if (!row.id) return;
+                        if (!confirm("¿Estás seguro de que quieres eliminar este elemento?")) return;
+                        try {
+                          const response = await fetch(`/api/admin/${(onDelete as { path: string }).path}/delete${(onDelete as { path: string }).path}`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ id: row.id }),
+                          });
+                          if (response.ok) {
+                            window.location.reload();
+                          } else {
+                            alert("Error eliminando el elemento");
+                          }
+                        } catch (error) {
+                          alert("Error eliminando el elemento: " + error);
+                        }
+                      }}
+                      title="Eliminar"
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" className="w-6 text-center mx-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M3 6h18"/>
