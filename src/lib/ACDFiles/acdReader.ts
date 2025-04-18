@@ -20,7 +20,7 @@ export class AcdReader {
    */
   private init(): void {
     const key = this.cipherKey(this.parentFolderName)
-    console.log(`Clave generada para '${this.parentFolderName}': ${key}`)
+    //console.log(`Clave generada para '${this.parentFolderName}': ${key}`)
 
     while (this.offset < this.buffer.length) {
       const file = this.nextFileInfo()

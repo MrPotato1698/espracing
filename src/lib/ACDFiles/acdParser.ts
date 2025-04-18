@@ -7,18 +7,18 @@ import { AcdReader } from "./acdReader"
  * @returns Lista de archivos extraídos
  */
 export function parseAcd(data: Uint8Array, folderName: string): { name: string; content: Uint8Array }[] {
-  console.log(`Iniciando parseAcd para carpeta: ${folderName}`)
-  console.log(`Tamaño del archivo ACD: ${data.length} bytes`)
+  //console.log(`Iniciando parseAcd para carpeta: ${folderName}`)
+  //console.log(`Tamaño del archivo ACD: ${data.length} bytes`)
 
   // Crear el lector ACD directamente desde el buffer
   const reader = new AcdReader(data, folderName)
-  console.log(`Archivos encontrados: ${reader.files.length}`)
+  //console.log(`Archivos encontrados: ${reader.files.length}`)
 
   // Extraer todos los archivos
   const files: { name: string; content: Uint8Array }[] = []
 
   for (const file of reader.files) {
-    console.log(`Procesando archivo: ${file.name} (longitud: ${file.length})`)
+    //console.log(`Procesando archivo: ${file.name} (longitud: ${file.length})`)
     try {
       const content = file.bytes()
       files.push({ name: file.name, content })
@@ -28,12 +28,12 @@ export function parseAcd(data: Uint8Array, folderName: string): { name: string; 
         try {
           const text = new TextDecoder().decode(content)
           const preview = text.length > 200 ? text.substring(0, 200) + "..." : text
-          console.log(`Vista previa de ${file.name}:\n${preview}`)
+          //console.log(`Vista previa de ${file.name}:\n${preview}`)
         } catch (e) {
-          console.log(`No se pudo mostrar vista previa de ${file.name}: ${e}`)
+          console.error(`No se pudo mostrar vista previa de ${file.name}: ${e}`)
         }
       } else {
-        console.log(`Archivo binario: ${file.name} (${content.length} bytes)`)
+        //console.log(`Archivo binario: ${file.name} (${content.length} bytes)`)
       }
     } catch (error) {
       console.error(`Error al procesar ${file.name}: ${error}`)
@@ -61,7 +61,7 @@ export function findFileInAcd(
  */
 export function parseIniContent(content: Uint8Array): { [section: string]: { [key: string]: string } } {
   const text = new TextDecoder().decode(content)
-  console.log(`Parseando contenido INI (${content.length} bytes):\n${text.substring(0, 500)}...`)
+  //console.log(`Parseando contenido INI (${content.length} bytes):\n${text.substring(0, 500)}...`)
 
   const lines = text.split(/\r?\n/)
   const result: { [section: string]: { [key: string]: string } } = {}
