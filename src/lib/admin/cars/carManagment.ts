@@ -43,6 +43,23 @@ export function initCarManagement() {
   const previewMaxLiter = document.getElementById('previewMaxLiter') as HTMLElement;
   const previewFuelLiterTime = document.getElementById('previewFuelLiterTime') as HTMLElement;
 
+  // NUEVO: Referencias para el switch y contenedor de edición avanzada
+  const switchMoreData = document.getElementById("switch-moreData") as HTMLInputElement;
+  const moreDataContainer = document.getElementById("moreDataContainer") as HTMLElement;
+
+  // NUEVO: Referencias a switches y campos de edición avanzada
+  const editFields = [
+    { key: 'model', switchId: 'editModelSwitch', inputId: 'editModelInput' },
+    { key: 'year', switchId: 'editYearSwitch', inputId: 'editYearInput' },
+    { key: 'description', switchId: 'editDescriptionSwitch', inputId: 'editDescriptionInput' },
+    { key: 'power', switchId: 'editPowerSwitch', inputId: 'editPowerInput' },
+    { key: 'torque', switchId: 'editTorqueSwitch', inputId: 'editTorqueInput' },
+    { key: 'weight', switchId: 'editWeightSwitch', inputId: 'editWeightInput' },
+    { key: 'tyreTimeChange', switchId: 'editTyreTimeSwitch', inputId: 'editTyreTimeInput' },
+    { key: 'maxLiter', switchId: 'editMaxLiterSwitch', inputId: 'editMaxLiterInput' },
+    { key: 'fuelLiterTime', switchId: 'editFuelLiterTimeSwitch', inputId: 'editFuelLiterTimeInput' },
+  ];
+
   const carBrandSelect = document.getElementById("carbrand") as HTMLSelectElement;
 
   const newBrandCar = document.getElementById("newBrandCar") as HTMLSelectElement;
@@ -78,6 +95,68 @@ export function initCarManagement() {
       carData = await processDroppedFolder(entry);
       updatePreview(carData);
       fileData.classList.remove('hidden');
+      // NUEVO: Mostrar el switch de edición avanzada
+      if (switchMoreData) switchMoreData.closest('.flex')?.classList.remove('hidden');
+      if (moreDataContainer) moreDataContainer.classList.add('hidden'); // Ocultar campos avanzados por defecto
+      // Resetear switches e inputs de edición avanzada
+      editFields.forEach(({switchId, inputId}) => {
+        const sw = document.getElementById(switchId) as HTMLInputElement;
+        const inp = document.getElementById(inputId) as HTMLInputElement;
+        if (sw) sw.checked = false;
+        if (inp) {
+          inp.value = carData ? String(carData[inp.name as keyof ProcessedCarData] ?? '') : '';
+          inp.classList.add('hidden');
+        }
+        if (sw) sw.closest('.flex')?.classList.add('hidden');
+      });
+    }
+  });
+
+  // NUEVO: Mostrar/ocultar contenedor de switches de edición avanzada
+  if (switchMoreData) {
+    switchMoreData.addEventListener('change', () => {
+      if (switchMoreData.checked) {
+        moreDataContainer?.classList.remove('hidden');
+        // Mostrar switches de edición
+        editFields.forEach(({switchId}) => {
+          const sw = document.getElementById(switchId) as HTMLInputElement;
+          if (sw) sw.closest('.flex')?.classList.remove('hidden');
+        });
+      } else {
+        moreDataContainer?.classList.add('hidden');
+        editFields.forEach(({switchId, inputId}) => {
+          const sw = document.getElementById(switchId) as HTMLInputElement;
+          const inp = document.getElementById(inputId) as HTMLInputElement;
+          if (sw) sw.checked = false;
+          if (inp) inp.classList.add('hidden');
+        });
+      }
+    });
+  }
+
+  // NUEVO: Mostrar campo de edición si se activa el switch correspondiente
+  editFields.forEach(({switchId, inputId, key}) => {
+    const sw = document.getElementById(switchId) as HTMLInputElement;
+    const inp = document.getElementById(inputId) as HTMLInputElement;
+    if (sw && inp) {
+      sw.addEventListener('change', () => {
+        if (sw.checked) {
+          inp.classList.remove('hidden');
+          inp.value = carData ? String(carData[key as keyof ProcessedCarData] ?? '') : '';
+        } else {
+          inp.classList.add('hidden');
+        }
+      });
+      // Actualizar carData en tiempo real
+      inp.addEventListener('input', () => {
+        if (!carData) return;
+        let value: any = inp.value;
+        if (["year", "power", "torque", "weight", "tyreTimeChange", "maxLiter", "fuelLiterTime"].includes(key)) {
+          value = Number(value);
+        }
+        (carData as any)[key] = value;
+        updatePreview(carData);
+      });
     }
   });
 
@@ -156,7 +235,7 @@ export function initCarManagement() {
 
         baseData= {
           model: (baseJson as CarJson).name || 'No model name',
-          year: Number((baseJson as CarJson).name.split(' ')[0]) ?? 0,
+          year: (baseJson as CarJson).year ?? 0,
           location: (baseJson as CarJson).country || 'No location',
           description: (baseJson as CarJson).description || 'No description',
           power: Number((baseJson as CarJson).specs.bhp.replace(/\D/g, '')) || 0,
@@ -210,60 +289,60 @@ export function initCarManagement() {
 
   async function getDataACD(dir: any): Promise<Partial<CarDataBase>> {
     return new Promise((resolve, reject) => {
-      console.log("Iniciando getDataACD para directorio:", dir.name);
+      //console.log("Iniciando getDataACD para directorio:", dir.name);
       dir.getFile("data.acd",{ create: false }, async (fileEntry: any) => {
           try {
-            console.log("Archivo data.acd encontrado, obteniendo File object");
+            //console.log("Archivo data.acd encontrado, obteniendo File object");
             const file = await new Promise<File>((resolveFile) => {fileEntry.file(resolveFile)});
-            console.log("File object obtenido:", file.name, "Tamaño:", file.size, "bytes");
+            //console.log("File object obtenido:", file.name, "Tamaño:", file.size, "bytes");
 
             const arrayBuffer = await file.arrayBuffer()
-          const data = new Uint8Array(arrayBuffer)
-          console.log(`Tamaño del archivo data.acd: ${data.length} bytes`)
+            const data = new Uint8Array(arrayBuffer)
+            //console.log(`Tamaño del archivo data.acd: ${data.length} bytes`)
 
-          try {
-            // Usar nuestro parser ACD
-            const files = parseAcd(data, dir.name)
-            console.log("Archivos encontrados:",files.map((f) => `${f.name} (${f.content.length} bytes)`),)
+            try {
+              // Usar nuestro parser ACD
+              const files = parseAcd(data, dir.name)
+              //console.log("Archivos encontrados:",files.map((f) => `${f.name} (${f.content.length} bytes)`),)
 
-            // Exportar todos los archivos a JSON para inspección (opcional)
-            const jsonExport = exportFilesToJson(files)
-            console.log("Exportación JSON de archivos:", jsonExport)
+              // Exportar todos los archivos a JSON para inspección (opcional)
+              const jsonExport = exportFilesToJson(files)
+              //console.log("Exportación JSON de archivos:", jsonExport)
 
-            const carIniFile = findFileInAcd(files, "car.ini")
-            if (!carIniFile) {
-              console.error("Archivos disponibles:",files.map((f) => f.name),)
-              throw new Error("No se encontró car.ini en el archivo data.acd")
+              const carIniFile = findFileInAcd(files, "car.ini")
+              if (!carIniFile) {
+                //console.error("Archivos disponibles:",files.map((f) => f.name),)
+                throw new Error("No se encontró car.ini en el archivo data.acd")
+              }
+
+              const iniContent = parseIniContent(carIniFile.content)
+              //console.log("Secciones encontradas en car.ini:", Object.keys(iniContent))
+
+              // Mostrar contenido de secciones importantes
+              if (iniContent["PIT_STOP"]) {
+                //console.log("Sección PIT_STOP:", iniContent["PIT_STOP"])
+              }
+              if (iniContent["FUEL"]) {
+                //console.log("Sección FUEL:", iniContent["FUEL"])
+              }
+
+              const carData: Partial<CarDataBase> = {
+                tyreTimeChange: Number.parseFloat(iniContent["PIT_STOP"]?.["TYRE_CHANGE_TIME_SEC"] || "0"),
+                fuelLiterTime: Number.parseFloat(iniContent["PIT_STOP"]?.["FUEL_LITER_TIME_SEC"] || "0"),
+                maxLiter: Number.parseFloat(iniContent["FUEL"]?.["MAX_FUEL"] || "0"),
+              }
+
+              //console.log("Datos extraídos:", carData)
+              resolve(carData)
+            } catch (parseError) {
+              console.error("Error al parsear el archivo ACD:", parseError)
+              reject(
+                new Error(
+                  "Error al procesar el archivo data.acd: " +
+                    (parseError instanceof Error ? parseError.message : String(parseError)),
+                ),
+              )
             }
-
-            const iniContent = parseIniContent(carIniFile.content)
-            console.log("Secciones encontradas en car.ini:", Object.keys(iniContent))
-
-            // Mostrar contenido de secciones importantes
-            if (iniContent["PIT_STOP"]) {
-              console.log("Sección PIT_STOP:", iniContent["PIT_STOP"])
-            }
-            if (iniContent["FUEL"]) {
-              console.log("Sección FUEL:", iniContent["FUEL"])
-            }
-
-            const carData: Partial<CarDataBase> = {
-              tyreTimeChange: Number.parseFloat(iniContent["PIT_STOP"]?.["TYRE_CHANGE_TIME_SEC"] || "0"),
-              fuelLiterTime: Number.parseFloat(iniContent["PIT_STOP"]?.["FUEL_LITER_TIME_SEC"] || "0"),
-              maxLiter: Number.parseFloat(iniContent["FUEL"]?.["MAX_FUEL"] || "0"),
-            }
-
-            console.log("Datos extraídos:", carData)
-            resolve(carData)
-          } catch (parseError) {
-            console.error("Error al parsear el archivo ACD:", parseError)
-            reject(
-              new Error(
-                "Error al procesar el archivo data.acd: " +
-                  (parseError instanceof Error ? parseError.message : String(parseError)),
-              ),
-            )
-          }
           } catch (error) {
             console.error("Error en getDataACD:", error)
             reject(new Error("Error al procesar el archivo data.acd: " + (error as Error).message))
@@ -279,7 +358,13 @@ export function initCarManagement() {
 
 
   function updatePreview(data: ProcessedCarData){
-    previewName.textContent = data.brandName + ' ' + data.model;
+    // Elimina el nombre de la marca del modelo si ya está incluido (ignorando mayúsculas/minúsculas)
+    const brandName = data.brandName.trim();
+    let model = data.model.trim();
+    if (brandName && model.toLowerCase().startsWith(brandName.toLowerCase())) {
+      model = model.slice(brandName.length).trim();
+    }
+    previewName.textContent = brandName + (model ? ' ' + model : '');
     previewYear.textContent = data.year?.toString();
     previewLocation.textContent = data.location;
     previewFolder.textContent = data.filename;
@@ -299,6 +384,21 @@ export function initCarManagement() {
     if(!carData) return;
     const carClassValue = carClassSelect?.value;
     const carBrandValue = carBrandSelect?.value;
+
+    // NUEVO: Sobrescribir carData con los valores de los campos editados si su checkbox está activo
+    editFields.forEach(({switchId, inputId, key}) => {
+      const sw = document.getElementById(switchId);
+      const inp = document.getElementById(inputId) as HTMLInputElement;
+      // Radix Checkbox usa aria-checked en vez de checked
+      const isChecked = sw?.getAttribute('aria-checked') === 'true';
+      if (isChecked && inp && inp.value !== undefined && inp.value !== null && inp.value !== '') {
+        let value: any = inp.value;
+        if (["year", "power", "torque", "weight", "tyreTimeChange", "maxLiter", "fuelLiterTime"].includes(key)) {
+          value = Number(value);
+        }
+        (carData as any)[key] = value;
+      }
+    });
 
     try {
       let lastBrandID: Number = 0;
@@ -333,7 +433,7 @@ export function initCarManagement() {
 
           } catch (error) {
             showToast("Error al crear la marca del coche: "+ error, "error");
-            console.log("Error al crear la marca del coche: "+ error);
+            console.error("Error al crear la marca del coche: "+ error);
           }
           break;
 
@@ -360,7 +460,7 @@ export function initCarManagement() {
 
           const newClassDesign = ` bg-[${newClassBackgroundColor}] text-[${newClassTextColor}]`;
 
-          const { data: insertBrandData, error: insertClassError } = await supabase
+          const { data: insertClassData, error: insertClassError } = await supabase
             .from('carclass')
             .insert({
               id: Number(lastClassID),
@@ -373,7 +473,7 @@ export function initCarManagement() {
 
           } catch (error) {
             showToast("Error al crear la clase: "+ error, "error");
-            console.log("Error al crear la clase: "+ error);
+            console.error("Error al crear la clase: "+ error);
           }
           break;
 
@@ -382,8 +482,8 @@ export function initCarManagement() {
           break;
       }
 
-      console.log('BrandID' + lastBrandID);
-      console.log('ClassID' + lastClassID);
+      //console.log('BrandID' + lastBrandID);
+      //console.log('ClassID' + lastClassID);
 
       const { data: getLastCar } = await supabase
         .from('car')
