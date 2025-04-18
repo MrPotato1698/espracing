@@ -134,7 +134,7 @@ const handleDeleteCar = (id: string | number): void => {
           data={carTableData}
           columns={carColumns}
           onEdit={{ path: "cars" }}
-          onDelete={{ handler: handleDeleteCar }}
+          onDelete={{ path: "car"}}
           pageSize={10}
           filterOptions={decades}
           filterAccessor={"decade"}
@@ -155,7 +155,6 @@ const handleDeleteCar = (id: string | number): void => {
     <p class="text-5xl font-bold border-b border-primary w-fit mx-auto">
       Añadir nuevo Coche
     </p>
-
     <div
       class="box-border p-5 m-auto bg-darkPrimary rounded-md max-w-screen-2xl border border-primary"
     >
@@ -423,59 +422,58 @@ const handleDeleteCar = (id: string | number): void => {
         <!-- Contenedor switches y campos edición avanzada -->
         <div id="moreDataContainer" class="hidden mt-4">
           <!-- Modelo -->
-          <div class="flex items-center gap-2 mb-2 hidden">
-            <input id="editModelSwitch" type="checkbox" class="peer" />
+          <div class="flex items-center gap-2 mb-2 hidden" data-edit-field="model">
+            <Checkbox id="editModelSwitch" client:only="react"/>
             <label for="editModelSwitch" class="text-lightPrimary">Editar modelo</label>
-            <input id="editModelInput" name="model" type="text" class="hidden w-full p-2 rounded bg-darkSecond border border-primary text-white" placeholder="Nuevo modelo" />
+            <input id="editModelInput" name="model" type="text" class="hidden w-full p-2 rounded bg-darkSecond border border-primary text-white ml-2" placeholder="Nuevo modelo" />
           </div>
           <!-- Año -->
-          <div class="flex items-center gap-2 mb-2 hidden">
-            <input id="editYearSwitch" type="checkbox" class="peer" />
+          <div class="flex items-center gap-2 mb-2 hidden" data-edit-field="year">
+            <Checkbox id="editYearSwitch" client:only="react"/>
             <label for="editYearSwitch" class="text-lightPrimary">Editar año</label>
-            <input id="editYearInput" name="year" type="number" class="hidden w-full p-2 rounded bg-darkSecond border border-primary text-white" placeholder="Nuevo año" />
+            <input id="editYearInput" name="year" type="number" class="hidden w-full p-2 rounded bg-darkSecond border border-primary text-white ml-2" placeholder="Nuevo año" />
           </div>
           <!-- Descripción -->
-          <div class="flex items-center gap-2 mb-2 hidden">
-            <input id="editDescriptionSwitch" type="checkbox" class="peer" />
+          <div class="flex items-center gap-2 mb-2 hidden" data-edit-field="description">
+            <Checkbox id="editDescriptionSwitch" client:only="react"/>
             <label for="editDescriptionSwitch" class="text-lightPrimary">Editar descripción</label>
-            <input id="editDescriptionInput" name="description" type="text" class="hidden w-full p-2 rounded bg-darkSecond border border-primary text-white" placeholder="Nueva descripción" />
+            <input id="editDescriptionInput" name="description" type="text" class="hidden w-full p-2 rounded bg-darkSecond border border-primary text-white ml-2" placeholder="Nueva descripción" />
           </div>
           <!-- Potencia -->
-          <div class="flex items-center gap-2 mb-2 hidden">
-            <input id="editPowerSwitch" type="checkbox" class="peer" />
+          <div class="flex items-center gap-2 mb-2 hidden" data-edit-field="power">
+            <Checkbox id="editPowerSwitch" client:only="react" />
             <label for="editPowerSwitch" class="text-lightPrimary">Editar potencia</label>
-            <input id="editPowerInput" name="power" type="number" class="hidden w-full p-2 rounded bg-darkSecond border border-primary text-white" placeholder="Nueva potencia (cv)" />
+            <input id="editPowerInput" name="power" type="number" class="hidden w-full p-2 rounded bg-darkSecond border border-primary text-white ml-2" placeholder="Nueva potencia (cv)" />
           </div>
-
           <!-- Par -->
-          <div class="flex items-center gap-2 mb-2 hidden">
-            <input id="editTorqueSwitch" type="checkbox" class="peer" />
+          <div class="flex items-center gap-2 mb-2 hidden" data-edit-field="torque">
+            <Checkbox id="editTorqueSwitch" client:only="react" />
             <label for="editTorqueSwitch" class="text-lightPrimary">Editar par</label>
-            <input id="editTorqueInput" name="torque" type="number" class="hidden w-full p-2 rounded bg-darkSecond border border-primary text-white" placeholder="Nuevo par (Nm)" />
+            <input id="editTorqueInput" name="torque" type="number" class="hidden w-full p-2 rounded bg-darkSecond border border-primary text-white ml-2" placeholder="Nuevo par (Nm)" />
           </div>
           <!-- Peso -->
-          <div class="flex items-center gap-2 mb-2 hidden">
-            <input id="editWeightSwitch" type="checkbox" class="peer" />
+          <div class="flex items-center gap-2 mb-2 hidden" data-edit-field="weight">
+            <Checkbox id="editWeightSwitch" client:only="react" />
             <label for="editWeightSwitch" class="text-lightPrimary">Editar peso</label>
-            <input id="editWeightInput" name="weight" type="number" class="hidden w-full p-2 rounded bg-darkSecond border border-primary text-white" placeholder="Nuevo peso (kg)" />
+            <input id="editWeightInput" name="weight" type="number" class="hidden w-full p-2 rounded bg-darkSecond border border-primary text-white ml-2" placeholder="Nuevo peso (kg)" />
           </div>
           <!-- Tiempo cambio gomas -->
-          <div class="flex items-center gap-2 mb-2 hidden">
-            <input id="editTyreTimeSwitch" type="checkbox" class="peer" />
+          <div class="flex items-center gap-2 mb-2 hidden" data-edit-field="tyreTimeChange">
+            <Checkbox id="editTyreTimeSwitch" client:only="react" />
             <label for="editTyreTimeSwitch" class="text-lightPrimary">Editar tiempo cambio gomas</label>
-            <input id="editTyreTimeInput" name="tyreTimeChange" type="number" step="0.01" class="hidden w-full p-2 rounded bg-darkSecond border border-primary text-white" placeholder="Nuevo tiempo (s)" />
+            <input id="editTyreTimeInput" name="tyreTimeChange" type="number" step="0.01" class="hidden w-full p-2 rounded bg-darkSecond border border-primary text-white ml-2" placeholder="Nuevo tiempo (s)" />
           </div>
           <!-- Combustible máximo -->
-          <div class="flex items-center gap-2 mb-2 hidden">
-            <input id="editMaxLiterSwitch" type="checkbox" class="peer" />
+          <div class="flex items-center gap-2 mb-2 hidden" data-edit-field="maxLiter">
+            <Checkbox id="editMaxLiterSwitch" client:only="react" />
             <label for="editMaxLiterSwitch" class="text-lightPrimary">Editar combustible máximo</label>
-            <input id="editMaxLiterInput" name="maxLiter" type="number" step="0.01" class="hidden w-full p-2 rounded bg-darkSecond border border-primary text-white" placeholder="Nuevo máximo (L)" />
+            <input id="editMaxLiterInput" name="maxLiter" type="number" step="0.01" class="hidden w-full p-2 rounded bg-darkSecond border border-primary text-white ml-2" placeholder="Nuevo máximo (L)" />
           </div>
           <!-- Tiempo de repostaje -->
-          <div class="flex items-center gap-2 mb-2 hidden">
-            <input id="editFuelLiterTimeSwitch" type="checkbox" class="peer" />
+          <div class="flex items-center gap-2 mb-2 hidden" data-edit-field="fuelLiterTime">
+            <Checkbox id="editFuelLiterTimeSwitch" client:only="react" />
             <label for="editFuelLiterTimeSwitch" class="text-lightPrimary">Editar tiempo de repostaje</label>
-            <input id="editFuelLiterTimeInput" name="fuelLiterTime" type="number" step="0.01" class="hidden w-full p-2 rounded bg-darkSecond border border-primary text-white" placeholder="Nuevo tiempo (s)" />
+            <input id="editFuelLiterTimeInput" name="fuelLiterTime" type="number" step="0.01" class="hidden w-full p-2 rounded bg-darkSecond border border-primary text-white ml-2" placeholder="Nuevo tiempo (s)" />
           </div>
         </div>
 
@@ -531,6 +529,7 @@ import { showToast } from "@/lib/utils";
     });
 
     // Inicializar otros manejadores
+    toggleNewBrandClassFields();
     initCarManagement();
     initDeleteCarButtons();
     initCarForm();
@@ -639,4 +638,43 @@ import { showToast } from "@/lib/utils";
     // Inicializar la vista previa
     updatePreview();
   }
+
+  function toggleNewBrandClassFields() {
+    const carBrandSelect = document.getElementById("carbrand");
+    const newBrandContainer = document.getElementById("newBrandContainer");
+    const carClassSelect = document.getElementById("carClasses");
+    const newClassContainer = document.getElementById("newClassContainer");
+
+    function updateBrandVisibility() {
+      if (carBrandSelect && newBrandContainer) {
+        if ((carBrandSelect as HTMLSelectElement).value === "-2") {
+          newBrandContainer.classList.remove("hidden");
+        } else {
+          newBrandContainer.classList.add("hidden");
+        }
+      }
+    }
+    function updateClassVisibility() {
+      if (carClassSelect && newClassContainer) {
+        if ((carClassSelect as HTMLSelectElement).value === "-2") {
+          newClassContainer.classList.remove("hidden");
+        } else {
+          newClassContainer.classList.add("hidden");
+        }
+      }
+    }
+    if (carBrandSelect) {
+      carBrandSelect.addEventListener("change", updateBrandVisibility);
+      updateBrandVisibility(); // Comprobar al cargar
+    }
+    if (carClassSelect) {
+      carClassSelect.addEventListener("change", updateClassVisibility);
+      updateClassVisibility(); // Comprobar al cargar
+    }
+  }
+
+  document.addEventListener("astro:page-load", () => {
+    toggleNewBrandClassFields();
+    initCarManagement();
+  });
 </script>
