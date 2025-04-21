@@ -1,11 +1,16 @@
 ---
 import RulePenalties from "@/components/RulePenalties.astro";
 import RuleText from "@/components/RuleText.astro";
+
+import RulesViewer from "@/components/RulesViewer";
 ---
+
 <article class = "rounded-lg bg-lightPrimary m-3 p-6 text-darkPrimary">
   <h1 class = "font-bold text-primary text-center text-3xl">
     Normativa Campeonato Twingo Cup 2
   </h1>
+
+  <RulesViewer client:load />
 
   <li class = "pb-3 text-xl font-medium text-justify list-none">
     1.- Introducción

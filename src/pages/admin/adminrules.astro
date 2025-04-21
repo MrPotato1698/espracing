@@ -1,0 +1,67 @@
+---
+import Layout from "@/layouts/ProfileLayout.astro";
+import RulesEditor from "@/components/RulesEditor";
+import { supabase } from "@/db/supabase";
+import { DataTable } from "@/components/data-table";
+import { showToast } from "@/lib/utils";
+
+const { cookies, redirect } = Astro;
+
+const accessToken = cookies.get("sb-access-token");
+const refreshToken = cookies.get("sb-refresh-token");
+
+if (!accessToken || !refreshToken) {
+  return redirect("/login");
+}
+
+// Set the session with the cookies
+const { data: dataAuth, error: errorAuth } = await supabase.auth.setSession({
+  refresh_token: refreshToken.value,
+  access_token: accessToken.value,
+});
+
+// If there is an error, delete the cookies and redirect to login
+if (errorAuth) {
+  cookies.delete("sb-access-token", {
+    path: "/",
+  });
+  cookies.delete("sb-refresh-token", {
+    path: "/",
+  });
+
+  return redirect("/login");
+}
+
+const id = dataAuth?.user?.id || "";
+
+const { data: userData } = await supabase
+  .from("profiles")
+  .select("roleesp")
+  .eq("id", id)
+  .single();
+
+if (userData?.roleesp !== 1) {
+  return redirect("/index");
+}
+
+type Profile = {
+  id: string;
+  roleesp: number | null;
+};
+
+const profileData = {
+  id: id,
+  roleesp: userData?.roleesp || null,
+};
+---
+
+<Layout title="ESP Racing: Administrar Equipos">
+  <h2 class="text-5xl font-extrabold border-b-2 border-primary w-full">
+    Modificación de Normativa
+  </h2>
+
+    <div class="container py-8">
+      <RulesEditor id={profileData.id} roleesp={profileData.roleesp} client:load/>
+    </div>
+
+</Layout>
