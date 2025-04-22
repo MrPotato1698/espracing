@@ -144,6 +144,7 @@ export type Database = {
       }
       championship: {
         Row: {
+          champ_img: string | null
           id: number
           ischampionship: boolean | null
           isfinished: boolean
@@ -154,6 +155,7 @@ export type Database = {
           year: number
         }
         Insert: {
+          champ_img?: string | null
           id: number
           ischampionship?: boolean | null
           isfinished?: boolean
@@ -164,6 +166,7 @@ export type Database = {
           year?: number
         }
         Update: {
+          champ_img?: string | null
           id?: number
           ischampionship?: boolean | null
           isfinished?: boolean
@@ -174,6 +177,58 @@ export type Database = {
           year?: number
         }
         Relationships: []
+      }
+      champwinners: {
+        Row: {
+          car_name: number | null
+          category: number
+          championship: number
+          id: number
+          isTeam: boolean
+          winner: string
+          winner_id: string | null
+        }
+        Insert: {
+          car_name?: number | null
+          category?: number
+          championship: number
+          id?: number
+          isTeam?: boolean
+          winner: string
+          winner_id?: string | null
+        }
+        Update: {
+          car_name?: number | null
+          category?: number
+          championship?: number
+          id?: number
+          isTeam?: boolean
+          winner?: string
+          winner_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "champwinners_car_name_fkey"
+            columns: ["car_name"]
+            isOneToOne: false
+            referencedRelation: "car"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "champwinners_championship_fkey"
+            columns: ["championship"]
+            isOneToOne: false
+            referencedRelation: "championship"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "champwinners_winner_id_fkey"
+            columns: ["winner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       circuit: {
         Row: {
@@ -544,27 +599,48 @@ export type Database = {
       }
       racerules: {
         Row: {
+          championship: number
           content: string | null
           created_at: string | null
           id: number
+          isVisible: boolean
           updated_at: string | null
-          updated_by: string | null
+          updated_by: string
         }
         Insert: {
+          championship?: number
           content?: string | null
           created_at?: string | null
           id?: number
+          isVisible?: boolean
           updated_at?: string | null
-          updated_by?: string | null
+          updated_by: string
         }
         Update: {
+          championship?: number
           content?: string | null
           created_at?: string | null
           id?: number
+          isVisible?: boolean
           updated_at?: string | null
-          updated_by?: string | null
+          updated_by?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "racerules_championship_fkey"
+            columns: ["championship"]
+            isOneToOne: false
+            referencedRelation: "championship"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "racerules_updated_by_fkey1"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       role: {
         Row: {
@@ -584,26 +660,79 @@ export type Database = {
       team: {
         Row: {
           active: boolean | null
+          championships: number
           description: string | null
+          dnf: number
+          flaps: number
           id: number
           image: string | null
           name: string
+          podiums: number
+          poles: number
+          races: number
+          top10: number
+          top5: number
+          wins: number
         }
         Insert: {
           active?: boolean | null
+          championships?: number
           description?: string | null
+          dnf?: number
+          flaps?: number
           id: number
           image?: string | null
           name?: string
+          podiums?: number
+          poles?: number
+          races?: number
+          top10?: number
+          top5?: number
+          wins?: number
         }
         Update: {
           active?: boolean | null
+          championships?: number
           description?: string | null
+          dnf?: number
+          flaps?: number
           id?: number
           image?: string | null
           name?: string
+          podiums?: number
+          poles?: number
+          races?: number
+          top10?: number
+          top5?: number
+          wins?: number
         }
         Relationships: []
+      }
+      teamalias: {
+        Row: {
+          alias: string
+          id: number
+          team: number
+        }
+        Insert: {
+          alias: string
+          id?: number
+          team: number
+        }
+        Update: {
+          alias?: string
+          id?: number
+          team?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teamalias_team_fkey"
+            columns: ["team"]
+            isOneToOne: false
+            referencedRelation: "team"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       teamsapplication: {
         Row: {
