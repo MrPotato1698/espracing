@@ -42,30 +42,42 @@ const { data: roleData } = await supabase
   .eq("id", idAuth)
   .single();
 
-if (roleData?.roleesp !== 1) {
+if (roleData == null || roleData.roleesp == null || roleData.roleesp > 1) {
   return redirect("/index");
 }
 
 const { data: raceData, error: errorRaceData } = await supabase
   .from("race")
-  .select("name, orderinchamp, championship!inner(name), pointsystem!inner(name)")
+  .select("name, orderinchamp, championship!inner(id), pointsystem!inner(id)")
   .eq("id", parseInt(id))
   .single();
+
+if(!raceData) {
+  return redirect("/admin/adminraces");
+}
 
 const { data: champsData } = await supabase
   .from("championship")
   .select("id, name")
   .order("id", { ascending: true });
 
+if(!champsData) {
+  return redirect("/admin/adminraces");
+}
+
 const { data: pointsystemData } = await supabase
   .from("pointsystem")
   .select("id, name")
   .order("id", { ascending: true });
+
+if(!pointsystemData) {
+  return redirect("/admin/adminraces");
+}
 ---
 
 <Layout title="ESP Racing: Modificación datos de carrera">
   <h2 class="text-5xl font-bold border-b border-primary w-fit mx-auto">
-    Modificar Perfil de Equipo
+    Modificar Datos de Carrera
   </h2>
   <form id="editRaceForm" class="flex flex-col mt-5">
     <label class="mt-5 text-lg font-semibold" for="name">
@@ -89,7 +101,7 @@ const { data: pointsystemData } = await supabase
     />
 
     <label class="mt-5 text-lg font-semibold" for="champID">
-      Campeonato al que pertenece (antiguo: {raceData?.championship.name}):
+      Campeonato al que pertenece:
     </label>
     <select
       class="w-11/12 p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkSecond hover:border-primary"
@@ -98,13 +110,13 @@ const { data: pointsystemData } = await supabase
     >
       {
         champsData?.map((champ) => (
-          <option value={champ.id?.toString()}>{champ.name}</option>
+          <option value={champ.id?.toString()} selected={raceData.championship.id === champ.id}>{champ.name}</option>
         ))
       }
     </select>
 
     <label class="mt-5 text-lg font-semibold" for="pointsystem">
-      Sistema de Puntuación (antiguo: {raceData?.pointsystem.name}):
+      Sistema de Puntuación:
     </label>
     <select
       class="w-11/12 p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkSecond hover:border-primary"
@@ -113,7 +125,7 @@ const { data: pointsystemData } = await supabase
     >
       {
         pointsystemData?.map((ps) => (
-          <option value={ps.id?.toString()}>{ps.name}</option>
+          <option value={ps.id?.toString()} selected={raceData.pointsystem.id === ps.id}>{ps.name}</option>
         ))
       }
       <option value="0">Evento / Sin Puntuación</option>

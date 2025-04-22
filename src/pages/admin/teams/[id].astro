@@ -42,7 +42,7 @@ const { data: roleData } = await supabase
   .eq("id", idAuth)
   .single();
 
-if (roleData?.roleesp !== 1) {
+if (roleData == null || roleData.roleesp == null || roleData.roleesp > 1) {
   return redirect("/index");
 }
 

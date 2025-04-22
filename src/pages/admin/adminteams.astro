@@ -39,7 +39,7 @@ const { data: userData } = await supabase
   .eq("id", id)
   .single();
 
-if (userData?.roleesp !== 1) {
+if (userData == null || userData.roleesp == null || userData.roleesp > 1) {
   return redirect("/index");
 }
 
@@ -71,34 +71,6 @@ const tableData = teamData?.map((team, index) => ({
   driverCount: numberOFDrivers[index]
 })) || [];
 
-// Función para manejar la eliminación
-const handleDeleteTeam = (id: string | number) => {
-  const teamId = typeof id === "string" ? parseInt(id, 10) : id;
-  (async () => {
-    if (confirm("¿Estás seguro de que quieres eliminar este equipo?")) {
-      try {
-        const response = await fetch("/api/admin/team/deleteteam", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ id: teamId }),
-        });
-
-        if (response.ok) {
-          window.location.reload();
-          showToast("Equipo eliminado correctamente", "success");
-        } else {
-          showToast("Error eliminando equipo", "error");
-          console.error("Error eliminando equipo");
-        }
-      } catch (error) {
-        showToast("Error: " + error, "error");
-        console.error("Error:", error);
-      }
-    }
-  })();
-};
 ---
 
 <Layout title="ESP Racing: Administrar Equipos">
@@ -116,7 +88,7 @@ const handleDeleteTeam = (id: string | number) => {
         data={tableData}
         columns={columns}
         onEdit={{ path: "teams" }}
-        onDelete={{ handler: handleDeleteTeam }}
+        onDelete={{ path: "team" }}
         pageSize={10}
         searchable={true}
         searchPlaceholder="Buscar por nombre de equipo"

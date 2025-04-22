@@ -2,7 +2,7 @@
 import Layout from "@/layouts/ProfileLayout.astro";
 import { supabase } from "@/db/supabase";
 import { DataTable } from "@/components/data-table";
-import { showToast } from "@/lib/utils";
+import NewRace from "@/components/NewRace";
 
 const { cookies, redirect } = Astro;
 
@@ -39,27 +39,21 @@ const { data: userData } = await supabase
   .eq("id", id)
   .single();
 
-if (userData?.roleesp !== 1) {
+if (userData == null || userData.roleesp == null || userData.roleesp > 1) {
   return redirect("/index");
 }
 
 const { data: raceData } = await supabase
   .from("race")
-  .select("id, name, championship!inner(name), pointsystem!inner(name)")
+  .select("id, name, championship!inner(id, name), pointsystem!inner(name)")
   .order("championship, orderinchamp", { ascending: true });
 
-const { data: champsData } = await supabase
-  .from("championship")
-  .select("id, name")
-  .order("id", { ascending: true });
-
-const { data: pointsystemData } = await supabase
-  .from("pointsystem")
-  .select("id, name")
-  .order("id", { ascending: true });
+const uniqueChampionships = Array.from(
+  new Set((raceData || []).map(race => race.championship?.name).filter(Boolean))
+);
 
 const serializedRaceData = raceData ? JSON.parse(JSON.stringify(raceData)) : [];
-const serializedChampsData = champsData ? champsData.map(champ => champ.name || '').filter(Boolean) as string[] : [];
+const serializedChampsData = uniqueChampionships ? uniqueChampionships.map(champ => champ || '').filter(Boolean) as string[] : [];
 
 const columns = [
   { header: "Nombre", accessor: "name" },
@@ -98,266 +92,6 @@ const columns = [
   </div>
 
   <div class="py-4 mx-auto text-center" style="width: 99%">
-    <p class="text-5xl font-bold border-b border-primary w-fit mx-auto">
-      Añadir Carrera Nueva
-    </p>
-
-    <div
-      class="box-border p-5 m-auto bg-darkPrimary rounded-md max-w-screen-2xl border border-primary"
-    >
-      <form id="uploadForm" data-astro-reload>
-        <label class="text-lightPrimary text-lg font-medium" for="racename">
-          Nombre de la carrera
-        </label>
-        <input
-          class="w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkSecond hover:border-primary"
-          type="text"
-          id="racename"
-          name="racename"
-          placeholder="Carrera X en cualquier sitio..."
-        />
-
-        <label class="text-lightPrimary text-lg font-medium" for="champID">
-          Campeonato a la que pertenece la carrera
-        </label>
-        <select
-          class="w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkSecond hover:border-primary"
-          id="champID"
-          name="champID"
-        >
-          {
-            champsData?.map((champ) => (
-              <option value={champ.id?.toString()}>{champ.name}</option>
-            ))
-          }
-        </select>
-
-        <label class="text-lightPrimary text-lg font-medium" for="numrace">
-          Orden al que pertenece en el campeonato
-        </label>
-        <input
-          class="w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkSecond hover:border-primary"
-          type="number"
-          id="numrace"
-          name="numrace"
-          step="1"
-          min="1"
-          placeholder="1"
-        />
-
-        <label class="text-lightPrimary text-lg font-medium" for="pointsystem">
-          Sistema de Puntuación de la carrera
-        </label>
-        <select
-          class="w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkSecond hover:border-primary"
-          id="pointsystem"
-          name="pointsystem"
-        >
-          {
-            pointsystemData?.map((ps) => (
-              <option value={ps.id?.toString()}>{ps.name}</option>
-            ))
-          }
-        </select>
-
-        <div class="flex items-center gap-2">
-          <label class="relative inline-flex cursor-pointer">
-            <input id="switch-S2" type="checkbox" class="peer sr-only" />
-            <label for="switch-S2" class="hidden"></label>
-            <div
-              class="peer h-4 w-11 rounded-full border bg-slate-200 after:absolute after:-top-1 after:left-0 after:h-6 after:w-6 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-full peer-focus:ring-primary"
-            >
-            </div>
-          </label>
-          <label class="text-lightPrimary text-lg font-medium" for="switch-S2">
-            ¿1 o 2 splits?
-          </label>
-        </div>
-
-        <div class="flex items-center gap-2 mb-6">
-          <label class="relative inline-flex cursor-pointer">
-            <input id="switch-R2" type="checkbox" class="peer sr-only" />
-            <label for="switch-R2" class="hidden"></label>
-            <div
-              class="peer h-4 w-11 rounded-full border bg-slate-200 after:absolute after:-top-1 after:left-0 after:h-6 after:w-6 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-full peer-focus:ring-primary"
-            >
-            </div>
-          </label>
-          <label class="text-lightPrimary text-lg font-medium" for="switch-R2">
-            ¿1 o 2 carreras por GP?
-          </label>
-        </div>
-
-        <div class="mb-6 p-6 border-2 border-primary rounded-lg bg-darkSecond">
-          <div class="mb-4">
-            <label for="fileInputS1R1" class="block text-lightPrimary text-lg font-semibold mb-3">
-              Selecciona el archivo JSON de la carrera de Split 1 - Carrera 1
-            </label>
-            <div class="relative">
-              <input
-                type="file"
-                id="fileInputS1R1"
-                name="fileInputS1R1"
-                accept=".json"
-                class="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
-              />
-              <div class="flex flex-col items-center justify-center p-8 border-2 border-dashed border-primary rounded-lg bg-darkSecond text-lightPrimary cursor-pointer min-h-[150px] transition-colors hover:border-primary-dark">
-                <div class="flex items-center gap-2">
-                  <svg class="w-12 h-12 mb-3 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                  </svg>
-                  <span class="text-sm font-medium">Arrastra y suelta tu JSON aquí</span>
-                  <span class="text-xs text-lightSecond mt-1">o haz clic para seleccionar</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div id="fileInfoS1R1" class="mb-4 hidden">
-            <p class="text-sm text-lightPrimary bg-darkPrimary p-3 rounded-lg border border-primary">
-              Archivo seleccionado:
-              <span id="fileNameS1R1" class="font-medium"></span>
-            </p>
-          </div>
-        </div>
-
-        <div class="mb-6 p-6 border-2 border-primary rounded-lg bg-darkSecond" id="split2R1File" style="display: none;">
-          <div class="mb-4">
-            <label for="split2R1File" class="block text-lightPrimary text-lg font-semibold mb-3">
-              Selecciona el archivo JSON de la carrera de Split 2 - Carrera 1
-            </label>
-            <div class="relative">
-              <input
-                type="file"
-                id="fileInputS2R1"
-                name="fileInputS2R1"
-                accept=".json"
-                class="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
-              />
-              <div class="flex flex-col items-center justify-center p-8 border-2 border-dashed border-primary rounded-lg bg-darkSecond text-lightPrimary cursor-pointer min-h-[150px] transition-colors hover:border-primary-dark">
-                <div class="flex items-center gap-2">
-                  <svg class="w-12 h-12 mb-3 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                  </svg>
-                  <span class="text-sm font-medium">Arrastra y suelta tu JSON aquí</span>
-                  <span class="text-xs text-lightSecond mt-1">o haz clic para seleccionar</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div id="fileInfoS2R1" class="mb-4 hidden">
-            <p class="text-sm text-lightPrimary bg-darkPrimary p-3 rounded-lg border border-primary">
-              Archivo seleccionado:
-              <span id="fileNameS2R1" class="font-medium"></span>
-            </p>
-          </div>
-        </div>
-
-        <div id="race2Files" style="display: none;">
-          <div class="mb-6 p-6 border-2 border-primary rounded-lg bg-darkSecond">
-            <div class="mb-4">
-              <label for="fileInputS1R2" class="block text-lightPrimary text-lg font-semibold mb-3">
-                Selecciona el archivo JSON de la carrera de Split 1 - Carrera 2
-              </label>
-              <div class="relative">
-                <input
-                  type="file"
-                  id="fileInputS1R2"
-                  name="fileInputS1R2"
-                  accept=".json"
-                  class="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
-                />
-                <div class="flex flex-col items-center justify-center p-8 border-2 border-dashed border-primary rounded-lg bg-darkSecond text-lightPrimary cursor-pointer min-h-[150px] transition-colors hover:border-primary-dark">
-                  <div class="flex items-center gap-2">
-                    <svg class="w-12 h-12 mb-3 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                    </svg>
-                    <span class="text-sm font-medium">Arrastra y suelta tu JSON aquí</span>
-                    <span class="text-xs text-lightSecond mt-1">o haz clic para seleccionar</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div id="fileInfoS1R2" class="mb-4 hidden">
-              <p class="text-sm text-lightPrimary bg-darkPrimary p-3 rounded-lg border border-primary">
-                Archivo seleccionado:
-                <span id="fileNameS1R2" class="font-medium"></span>
-              </p>
-            </div>
-          </div>
-
-          <div class="mb-6 p-6 border-2 border-primary rounded-lg bg-darkSecond" id="split2R2File" style="display: none;">
-            <div class="mb-4">
-              <label for="split2R2File" class="block text-lightPrimary text-lg font-semibold mb-3">
-                Selecciona el archivo JSON de la carrera de Split 2 - Carrera 2
-              </label>
-              <div class="relative">
-                <input
-                  type="file"
-                  id="fileInputS2R2"
-                  name="fileInputS2R2"
-                  accept=".json"
-                  class="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
-                />
-                <div class="flex flex-col items-center justify-center p-8 border-2 border-dashed border-primary rounded-lg bg-darkSecond text-lightPrimary cursor-pointer min-h-[150px] transition-colors hover:border-primary-dark">
-                  <div class="flex items-center gap-2">
-                    <svg class="w-12 h-12 mb-3 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                    </svg>
-                    <span class="text-sm font-medium">Arrastra y suelta tu JSON aquí</span>
-                    <span class="text-xs text-lightSecond mt-1">o haz clic para seleccionar</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div id="fileInfoS2R2" class="mb-4 hidden">
-              <p class="text-sm text-lightPrimary bg-darkPrimary p-3 rounded-lg border border-primary">
-                Archivo seleccionado:
-                <span id="fileNameS2R2" class="font-medium"></span>
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <input
-          class="bg-primary text-white font-bold py-3 px-5 border-solid border-primary border-2 rounded-md hover:bg-darkSecond hover:text-lightPrimary mt-4"
-          type="submit"
-          value="Añadir"
-        />
-      </form>
-    </div>
+    <NewRace client:load/>
   </div>
 </Layout>
-
-<script>
-  // Declare the functions on the Window interface
-  declare global {
-    interface Window {
-      handleDeleteRace: (id: number) => Promise<void>;
-    }
-  }
-
-  import { initRaceManagement, initDeleteRaceButtons } from "@/lib/admin/races/raceManagment";
-  import { showToast } from "@/lib/utils";
-
-  // Inicializar la gestión de carreras
-  initRaceManagement();
-
-  // Inicializar los botones de eliminar
-  document.addEventListener("astro:page-load", initRaceManagement);
-  document.addEventListener("astro:page-load", initDeleteRaceButtons);
-
-  // Asegurarse de que el componente DataTable pueda acceder a las funciones
-  document.addEventListener("DOMContentLoaded", () => {
-    // Esperar a que React monte el componente
-    setTimeout(() => {
-      const deleteButtons = document.querySelectorAll(".delete-race");
-      deleteButtons.forEach(button => {
-        button.addEventListener("click", (e) => {
-          e.preventDefault();
-          const id = button.getAttribute("data-id");
-          if (id) window.handleDeleteRace(parseInt(id));
-        });
-      });
-    }, 500);
-  });
-</script>

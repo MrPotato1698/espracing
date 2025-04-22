@@ -39,7 +39,7 @@ const { data: userData } = await supabase
   .eq("id", id)
   .single();
 
-if (userData?.roleesp !== 1) {
+if (userData == null || userData.roleesp == null || userData.roleesp > 1) {
   return redirect("/index");
 }
 
