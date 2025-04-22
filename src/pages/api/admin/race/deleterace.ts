@@ -43,7 +43,11 @@ export const POST: APIRoute = async ({ request }) => {
 async function processRaceData(path: string, raceName: string) {
   const { data: raceData } = await supabase.storage.from("results").download(path)
   if (!raceData) {
-    throw new Error(`Fallo al descargar datos de ${raceName}`)
+    // Si el archivo no existe, continuar sin lanzar error
+    console.warn(`Archivo de resultados no encontrado para ${raceName}, se omite la descarga y actualización de estadísticas.`);
+    // Intentar eliminar el archivo igualmente (por si acaso)
+    await supabase.storage.from("results").remove([path]);
+    return;
   }
 
   const raceDataJson = JSON.parse(await raceData.text())
@@ -56,7 +60,8 @@ async function processRaceData(path: string, raceName: string) {
   }
 
   // Modificar estadisticas de Profile
-  const response = await fetch("/api/admin/stats/deleteRaceStats", {
+  const baseUrl = process.env.BASE_URL ?? "http://localhost:4321";
+  const response = await fetch(`${baseUrl}/api/admin/stats/deleteRaceStats`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
