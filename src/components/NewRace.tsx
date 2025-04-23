@@ -13,17 +13,18 @@ type champData = {
   name: string | null;
 }
 
-type pointsystemData = {
+type pointSystemData = {
   id: number;
   name: string;
 }
 
 export default function NewRace(){
   const [championshipContent, setChampionshipContent] = useState<champData[]>([]);
-  const [pointsystemContent, setPointsystemContent] = useState<pointsystemData[]>([]);
-  const [raceNames, setRaceNames] = useState<string[]>([]);
+  const [pointsystemContent, setPointsystemContent] = useState<pointSystemData[]>([]);
+  const [raceNames, setRaceNames] = useState<{ label: string, value: string }[]>([]);
   const [value, setValue] = useState("");
   const [activeTab, setActiveTab] = useState<string>('addRace');
+  const [noteCode, setNoteCode] = useState("0");
 
   // Estados para switches
   const [split2, setSplit2] = useState(false);
@@ -43,11 +44,14 @@ export default function NewRace(){
     const checkAuth = async () => {
       const { data: raceData, error: errorRaceData } = await supabase
         .from("race")
-        .select("name, championship!inner(name)")
+        .select("id, name, championship!inner(name)")
         .order("championship, orderinchamp", { ascending: true });
 
         if(raceData){
-          const auxRaceNames = raceData.map(race => (race.name + " (" + race.championship.name + ")"));
+          const auxRaceNames = raceData.map(race => ({
+            label: race.name + " (" + race.championship.name + ")",
+            value: race.id.toString()
+          }));
           setRaceNames(auxRaceNames);
         } else {
           showToast("Error al cargar las carreras: " + errorRaceData?.message, "error");
@@ -187,6 +191,9 @@ export default function NewRace(){
       .from('race')
       .select('id')
       .order('id', { ascending: true });
+
+    if(getLastRace?.length === 0) return 1;
+
     let findID = false;
     let i = 1;
     if (!getLastRace) throw new Error("Error al obtener el último ID de carrera");
@@ -202,7 +209,9 @@ export default function NewRace(){
   };
 
   // Helper: Insertar carrera en la tabla race
-  const insertRace = async (lastRaceID: number, racename: string, fileS1R1: File, champID: string, numrace: string, pointsystem: string, split2: boolean, URLBucketsResults: string[]) => {
+  type InsertRaceParams = { lastRaceID: number; racename: string; fileS1R1: File; champID: string; numrace: string; pointsystem: string; split2: boolean; URLBucketsResults: string[];};
+
+  const insertRace = async ({lastRaceID, racename, fileS1R1, champID, numrace, pointsystem, split2, URLBucketsResults}: InsertRaceParams) => {
     const { error: insertError } = await supabase
       .from('race')
       .insert({
@@ -240,7 +249,7 @@ export default function NewRace(){
   };
 
   // Validación y submit
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmitRace = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg(null);
     setSuccessMsg(null);
@@ -248,7 +257,6 @@ export default function NewRace(){
     if (!validateFiles()) return;
 
     try {
-      // Leer archivos
       const jsons = await readAllFiles();
 
       // Obtener datos del formulario
@@ -268,7 +276,7 @@ export default function NewRace(){
 
       // Insertar carrera en la tabla race
       const lastRaceID = await getNewRaceID();
-      await insertRace(lastRaceID, racename, fileS1R1 as File, champID, numrace, pointsystem, split2, URLBucketsResults);
+      await insertRace({ lastRaceID, racename, fileS1R1: fileS1R1 as File, champID, numrace, pointsystem, split2, URLBucketsResults});
 
       // Actualizar estadísticas
       await updateStats(transformedJsonR1, transformedJsonR2);
@@ -281,6 +289,72 @@ export default function NewRace(){
     } catch (err: any) {
       setErrorMsg("Error al procesar la carrera: " + (err?.message ?? err));
       showToast("Error al procesar la carrera: " + (err?.message ?? err), "error");
+    }
+  };
+
+  // Helper: Insertar nota en la tabla racenotes
+  type InsertNoteParams = { lastNoteID: number; racename: string; description: string; penalty: string; noteCode: string; };
+  const insertNote = async ({lastNoteID, racename, description, penalty, noteCode}: InsertNoteParams) => {
+    const { error: insertError } = await supabase
+      .from('racenotes')
+      .insert({
+        id: lastNoteID,
+        race: Number(racename),
+        code: Number(noteCode),
+        description: description,
+        penalty: penalty,
+      });
+    if (insertError) throw insertError;
+  };
+
+  // Helper: Obtener nuevo ID de nota
+  const getNewNoteID = async () => {
+    const { data: getLastRaceNotes } = await supabase
+      .from('racenotes')
+      .select('id')
+      .order('id', { ascending: true });
+
+    if(getLastRaceNotes?.length === 0) return 1;
+
+    let findID = false;
+    let i = 1;
+
+    if (!getLastRaceNotes) throw new Error("Error al obtener el último ID de notas de carrera");
+    while (!findID && i < getLastRaceNotes.length) {
+      if (getLastRaceNotes[i - 1].id === i) {
+        i++;
+      } else {
+        findID = true;
+      }
+    }
+    if (!findID) i++;
+    return getLastRaceNotes ? i : 1;
+  };
+
+  // Validación y submit de notas de carrera
+  const handleSubmitNote = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMsg(null);
+    setSuccessMsg(null);
+
+    try{
+      // Obtener datos del formulario
+      const form = document.getElementById("uploadNoteForm") as HTMLFormElement;
+      const formData = new FormData(form);
+      const racename = formData.get('racename') as string;
+      const description = formData.get('description') as string;
+      const penalty = formData.get('penalty') as string;
+      const noteCode = formData.get('noteCode') as string;
+
+      const lastNoteID = await getNewNoteID();
+      await insertNote({lastNoteID, racename, description, penalty, noteCode});
+
+      setSuccessMsg("Notas de Carrera creada con éxito");
+      showToast("Notas de Carrera creada con éxito", "success")
+      form.reset();
+    }catch(err: any){
+      setErrorMsg("Error al procesar la nota de carrera: " + (err?.message ?? err));
+      showToast("Error al procesar la nota de carrera: " + (err?.message ?? err), "error");
     }
   };
 
@@ -302,7 +376,7 @@ export default function NewRace(){
           Añadir Carrera Nueva
         </p>
         <div className="box-border p-5 m-auto bg-darkPrimary rounded-md max-w-screen-2xl border border-primary">
-        <form id="uploadForm" onSubmit={handleSubmit}>
+        <form id="uploadForm" onSubmit={handleSubmitRace}>
           <label className="text-lightPrimary text-lg font-medium" htmlFor="racename">
             Nombre de la carrera
           </label>
@@ -551,73 +625,87 @@ export default function NewRace(){
           Añadir Notas a la Carrera
         </p>
         <div className="box-border p-5 m-auto bg-darkPrimary rounded-md max-w-screen-2xl border border-primary">
-        <form id="uploadForm" onSubmit={handleSubmit}>
-          <label className="text-lightPrimary text-lg font-medium" htmlFor="racename">
+        <form id="uploadNoteForm" onSubmit={handleSubmitNote}>
+            <label className="text-lightPrimary text-lg font-medium" htmlFor="racename">
             Nombre de la carrera
-          </label>
-          <Combobox
-          options={raceNames.map((name) => ({ label: name, value: name }))}
-          value={value}
-          onValueChange={setValue}
-          placeholder="Carrera X en cualquier sitio..."
-          searchPlaceholder="Buscar..."
-          emptyMessage="No se encontraron resultados."
-          />
+            </label>
+            <Combobox
+            options={raceNames}
+            value={value}
+            onValueChange={setValue}
+            placeholder="Carrera X en cualquier sitio..."
+            searchPlaceholder="Buscar..."
+            emptyMessage="No se encontraron resultados."
+            />
+          {/* Input oculto para enviar el id de la carrera seleccionada */}
+          <input type="hidden" name="racename" value={value} />
 
-          <label className="text-lightPrimary text-lg font-medium" htmlFor="champID">
-            Campeonato a la que pertenece la carrera
+          <label className="mt-5 text-lg font-semibold" htmlFor="noteCode">
+            Código de nota
           </label>
           <select
             className="w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkSecond hover:border-primary"
-            id="champID"
-            name="champID"
-            required
+            id="noteCode"
+            name="noteCode"
+            value={noteCode}
+            onChange={e => setNoteCode(e.target.value)}
           >
-            {
-              championshipContent?.map((champ) => (
-                <option key={champ.id} value={champ.id?.toString()}>{champ.name}</option>
-              ))
-            }
+            <option value="0">Notas de Carrera</option>
+            <option value="1">Lance de Carrera</option>
+            <option value="2">Sanción Leve</option>
+            <option value="3">Sanción Leve Primeras Vueltas</option>
+            <option value="4">Sanción Media</option>
+            <option value="5">Sanción Grave</option>
+            <option value="6">Sanción Muy Grave</option>
+            <option value="7">Sanción Antideportiva</option>
           </select>
 
-          <label className="text-lightPrimary text-lg font-medium" htmlFor="numrace">
-            Orden al que pertenece en el campeonato
+          <label className="text-lightPrimary text-lg font-medium" htmlFor="description">
+            Descripción
           </label>
           <input
             className="w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkSecond hover:border-primary"
-            type="number"
-            id="numrace"
-            name="numrace"
-            step="1"
-            min="1"
-            placeholder="1"
+            type="textarea"
+            id="description"
+            name="description"
+            placeholder="Descripción de la nota..."
             required
           />
 
-          <label className="text-lightPrimary text-lg font-medium" htmlFor="pointsystem">
-            Sistema de Puntuación de la carrera
-          </label>
-          <select
-            className="w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkSecond hover:border-primary"
-            id="pointsystem"
-            name="pointsystem"
-            required
-          >
-            {
-              pointsystemContent?.map((ps) => (
-                <option key={ps.id} value={ps.id?.toString()}>{ps.name}</option>
-              ))
-            }
-          </select>
-
-          
-
-
-
-
-
-
-
+          {noteCode !== "0" ? (
+            <>
+              <label className="text-lightPrimary text-lg font-medium" htmlFor="penalty">
+                Sanción Final
+              </label>
+              <input
+                className="w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkSecond hover:border-primary"
+                id="penalty"
+                name="penalty"
+                type="text"
+                placeholder="20s"
+                required
+              />
+            </>
+          ) : (
+            <div className="relative group">
+              <label className="text-lightPrimary text-lg font-medium" htmlFor="penalty">
+                Sanción Final
+              </label>
+              <input
+                className="w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkSecond opacity-60 cursor-not-allowed"
+                id="penalty"
+                name="penalty"
+                type="text"
+                placeholder="No disponible para Notas de Carrera"
+                disabled
+                tabIndex={-1}
+                aria-disabled="true"
+              />
+              <div className="absolute left-0 top-full mt-1 w-max bg-darkSecond text-lightPrimary text-xs rounded px-3 py-2 border border-primary opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                Solo puedes añadir una sanción si el código de nota es distinto de "Notas de Carrera".
+              </div>
+            </div>
+          )}
 
           {errorMsg && <div className="text-red-500 font-semibold mb-2">{errorMsg}</div>}
           {successMsg && <div className="text-green-500 font-semibold mb-2">{successMsg}</div>}

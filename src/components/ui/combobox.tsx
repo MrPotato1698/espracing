@@ -27,51 +27,69 @@ export function Combobox({
   className,
 }: ComboboxProps) {
   const [open, setOpen] = React.useState(false)
+  // Eliminar el estado commandInputValue ya que Command maneja la búsqueda internamente
+
+  // Filtrar solo por label, nunca por value
+  // const filteredOptions = options.filter(option =>
+  //   option.label.toLowerCase().includes(commandInputValue.toLowerCase())
+  // );
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <div className={cn("w-full justify-between text-white bg-black border-gray-700 hover:bg-gray-900 hover:text-white",className,)}>
+        <div
+          className={cn(
+            "w-full flex items-center border border-solid border-lightSecond rounded-md bg-darkSecond text-white hover:border-primary transition-colors px-3 py-2 mb-4",
+            className,
+          )}
+        >
           <input
             type="text"
-            list="combobox-options"
             value={options.find((option) => option.value === value)?.label ?? ""}
             placeholder={placeholder}
             onChange={(e) => {
-              const selectedOption = options.find(option => option.label === e.target.value);
-              onValueChange(selectedOption ? selectedOption.value : "");
+              const selectedOption = options.find((option) => option.label === e.target.value)
+              onValueChange(selectedOption ? selectedOption.value : "")
             }}
-            className="w-full outline-none bg-transparent"
+            className="w-full outline-none bg-transparent text-white placeholder:text-lightSecond"
             aria-label={placeholder}
           />
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-          <datalist id="combobox-options">
-            {options.map(option => (
-              <option key={option.value} value={option.label} />
-            ))}
-          </datalist>
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50 text-lightSecond" />
         </div>
       </PopoverTrigger>
-      <PopoverContent className="w-full p-0 bg-black border-gray-700">
-        <Command className="bg-black">
-          <CommandInput placeholder={searchPlaceholder} className="text-white" />
+      <PopoverContent className="w-full p-0 bg-darkSecond border-lightSecond rounded-md mt-1">
+        <Command className="bg-darkSecond text-white">
+          <CommandInput
+            placeholder={searchPlaceholder}
+            className="text-white bg-darkSecond placeholder:text-lightSecond"
+          />
           <CommandList className="text-white">
             <CommandEmpty className="text-gray-400">{emptyMessage}</CommandEmpty>
             <CommandGroup>
-              {options.map((option) => (
-                <CommandItem
-                  key={option.value}
-                  value={option.value}
-                  onSelect={(currentValue) => {
-                    onValueChange(currentValue === value ? "" : currentValue)
-                    setOpen(false)
-                  }}
-                  className="text-white hover:bg-gray-800"
-                >
-                  <Check className={cn("mr-2 h-4 w-4", value === option.value ? "opacity-100" : "opacity-0")} />
-                  {option.label}
-                </CommandItem>
-              ))}
+              {options.map((option, visibleIdx) => {
+                let itemBgClass = ""
+                if (value === option.value) {
+                  itemBgClass = "bg-primary/20"
+                } else {
+                  itemBgClass = visibleIdx % 2 === 0 ? "bg-darkPrimary" : "bg-darkSecond"
+                }
+                return (
+                  <CommandItem
+                    value={option.label}
+                    key={option.value}
+                    onSelect={() => {
+                      onValueChange(option.value === value ? "" : option.value)
+                      setOpen(false)
+                    }}
+                    className={cn("text-white rounded-md px-2", itemBgClass)}
+                  >
+                    <Check
+                      className={cn("mr-2 h-4 w-4", value === option.value ? "opacity-100 text-primary" : "opacity-0")}
+                    />
+                    {option.label}
+                  </CommandItem>
+                )
+              })}
             </CommandGroup>
           </CommandList>
         </Command>
