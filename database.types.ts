@@ -573,18 +573,21 @@ export type Database = {
           code: number
           description: string | null
           id: number
+          penalty: string | null
           race: number
         }
         Insert: {
           code?: number
           description?: string | null
           id?: number
+          penalty?: string | null
           race: number
         }
         Update: {
           code?: number
           description?: string | null
           id?: number
+          penalty?: string | null
           race?: number
         }
         Relationships: [
