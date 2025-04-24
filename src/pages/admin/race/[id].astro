@@ -1,6 +1,7 @@
 ---
 import Layout from "@/layouts/ProfileLayout.astro";
 import { supabase } from "@/db/supabase";
+import { DataTable } from "@/components/data-table";
 
 const { id } = Astro.params;
 const { cookies, redirect } = Astro;
@@ -73,6 +74,34 @@ const { data: pointsystemData } = await supabase
 if(!pointsystemData) {
   return redirect("/admin/adminraces");
 }
+
+const { data: raceNoteData } = await supabase
+  .from("racenotes")
+  .select("id, code!inner(name), description, penalty")
+  .eq("race", parseInt(id))
+  .order("id", { ascending: true });
+
+if(!raceNoteData) {
+  return redirect("/admin/adminraces");
+}
+
+const { data: raceNoteCodeData } = await supabase
+  .from("racenotecode")
+  .select("name")
+  .order("id", { ascending: true });
+
+if(!raceNoteCodeData) {
+  return redirect("/admin/adminraces");
+}
+
+const serializedRaceNoteData = raceNoteData ? JSON.parse(JSON.stringify(raceNoteData)) : [];
+const serializableRaceNoteCodeData = raceNoteCodeData ? JSON.parse(JSON.stringify(raceNoteCodeData)) : [];
+
+const columns = [
+  { header: "Tipo", accessor: "code.name" },
+  { header: "Penalización", accessor: "penalty" },
+  { header: "Description", accessor: "description" }
+];
 ---
 
 <Layout title="ESP Racing: Modificación datos de carrera">
@@ -417,6 +446,26 @@ if(!pointsystemData) {
       </button>
     </div>
   </form>
+
+  <h3 class="mt-4 text-4xl font-bold w-fit mx-auto">
+    Modificar Notas de Carrera
+  </h3>
+
+  <DataTable
+    client:only="react"
+    data={serializedRaceNoteData}
+    columns={columns}
+    onEdit={{ path: "race/racenote" }}
+    onDelete={{ path: "note" }}
+    pageSize={10}
+    filterOptions={serializableRaceNoteCodeData}
+    filterAccessor={"code.name"}
+    searchable={true}
+    searchPlaceholder="Buscar por penalización"
+    searchableColumns={[
+      {accessor: "penalty"}
+    ]}
+  />
 </Layout>
 
 <script>
