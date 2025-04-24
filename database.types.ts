@@ -568,6 +568,21 @@ export type Database = {
           },
         ]
       }
+      racenotecode: {
+        Row: {
+          id: number
+          name: string
+        }
+        Insert: {
+          id?: number
+          name: string
+        }
+        Update: {
+          id?: number
+          name?: string
+        }
+        Relationships: []
+      }
       racenotes: {
         Row: {
           code: number
@@ -591,6 +606,13 @@ export type Database = {
           race?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "racenotes_code_fkey"
+            columns: ["code"]
+            isOneToOne: false
+            referencedRelation: "racenotecode"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "racenotes_race_fkey"
             columns: ["race"]
