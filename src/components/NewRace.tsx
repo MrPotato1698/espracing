@@ -8,20 +8,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Combobox } from "@/components/ui/combobox";
 import { FileJson, NotebookPen } from 'lucide-react';
 
-type champData = {
-  id: number;
-  name: string | null;
-}
-
-type pointSystemData = {
-  id: number;
-  name: string;
-}
-
 export default function NewRace(){
-  const [championshipContent, setChampionshipContent] = useState<champData[]>([]);
-  const [pointsystemContent, setPointsystemContent] = useState<pointSystemData[]>([]);
+  const [championshipContent, setChampionshipContent] = useState<{ id: number, name: string | null }[]>([]);
+  const [pointsystemContent, setPointsystemContent] = useState<{ id: number, name: string }[]>([]);
   const [raceNames, setRaceNames] = useState<{ label: string, value: string }[]>([]);
+  const [raceCodeNotes, setRaceCodeNotes] = useState<{ id: number, name: string }[]>([]);
   const [value, setValue] = useState("");
   const [activeTab, setActiveTab] = useState<string>('addRace');
   const [noteCode, setNoteCode] = useState("0");
@@ -47,40 +38,54 @@ export default function NewRace(){
         .select("id, name, championship!inner(name)")
         .order("championship, orderinchamp", { ascending: true });
 
-        if(raceData){
-          const auxRaceNames = raceData.map(race => ({
-            label: race.name + " (" + race.championship.name + ")",
-            value: race.id.toString()
-          }));
-          setRaceNames(auxRaceNames);
-        } else {
-          showToast("Error al cargar las carreras: " + errorRaceData?.message, "error");
-          console.error("Error al cargar las carreras: ", errorRaceData);
-        }
+      if(raceData){
+        const auxRaceNames = raceData.map(race => ({
+          label: race.name + " (" + race.championship.name + ")",
+          value: race.id.toString()
+        }));
+        setRaceNames(auxRaceNames);
+      } else {
+        showToast("Error al cargar las carreras: " + errorRaceData?.message, "error");
+        console.error("Error al cargar las carreras: ", errorRaceData);
+      }
 
       const { data: champsData, error: errorChamps } = await supabase
-      .from("championship")
-      .select("id, name")
-      .order("id", { ascending: true });
+        .from("championship")
+        .select("id, name")
+        .order("id", { ascending: true });
 
-    if(champsData){
-      setChampionshipContent(champsData);
-    }else{
-      showToast("Error al cargar las carreras: " + errorRaceData?.message, "error");
-      console.error("Error al cargar los campeonatos: ", errorChamps);
-    }
+      if(champsData){
+        setChampionshipContent(champsData);
+      }else{
+        showToast("Error al cargar las carreras: " + errorChamps?.message, "error");
+        console.error("Error al cargar los campeonatos: ", errorChamps);
+      }
 
-    const { data: pointsystemData, error: errorPS } = await supabase
-      .from("pointsystem")
-      .select("id, name")
-      .order("id", { ascending: true });
+      const { data: pointsystemData, error: errorPS } = await supabase
+        .from("pointsystem")
+        .select("id, name")
+        .order("id", { ascending: true });
 
-    if(pointsystemData){
-      setPointsystemContent(pointsystemData);
-    }else{
-      showToast("Error al cargar las carreras: " + errorRaceData?.message, "error");
-      console.error("Error al cargar los campeonatos: ", errorPS);
-    }
+      if(pointsystemData){
+        setPointsystemContent(pointsystemData);
+      }else{
+        showToast("Error al cargar las carreras: " + errorPS?.message, "error");
+        console.error("Error al cargar los campeonatos: ", errorPS);
+      }
+
+      const { data: raceCodeNotesData, error: errorRaceCodeNotes } = await supabase
+        .from("racenotecode")
+        .select("id, name")
+        .order("id", { ascending: true });
+
+      if(raceCodeNotesData){
+
+        console.log("Notas de carrera: ", raceCodeNotesData);
+        setRaceCodeNotes(raceCodeNotesData);
+      } else {
+        showToast("Error al cargar las carreras: " + errorRaceCodeNotes?.message, "error");
+        console.error("Error al cargar las carreras: ", errorRaceCodeNotes);
+      }
     };
 
     checkAuth();
@@ -650,14 +655,11 @@ export default function NewRace(){
             value={noteCode}
             onChange={e => setNoteCode(e.target.value)}
           >
-            <option value="0">Notas de Carrera</option>
-            <option value="1">Lance de Carrera</option>
-            <option value="2">Sanción Leve</option>
-            <option value="3">Sanción Leve Primeras Vueltas</option>
-            <option value="4">Sanción Media</option>
-            <option value="5">Sanción Grave</option>
-            <option value="6">Sanción Muy Grave</option>
-            <option value="7">Sanción Antideportiva</option>
+          {
+            raceCodeNotes?.map((note) => (
+              <option key={note.id} value={note.id?.toString()}>{note.name}</option>
+            ))
+          }
           </select>
 
           <label className="text-lightPrimary text-lg font-medium" htmlFor="description">
@@ -708,7 +710,6 @@ export default function NewRace(){
           )}
 
           {errorMsg && <div className="text-red-500 font-semibold mb-2">{errorMsg}</div>}
-          {successMsg && <div className="text-green-500 font-semibold mb-2">{successMsg}</div>}
 
           <input
             className="bg-primary text-white font-bold py-3 px-5 border-solid border-primary border-2 rounded-md hover:bg-darkSecond hover:text-lightPrimary mt-4"
