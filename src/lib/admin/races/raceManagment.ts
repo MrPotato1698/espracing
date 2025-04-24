@@ -165,7 +165,7 @@ export function initEditRaceNote() {
     const formData = new FormData(form);
 
     try {
-      const response = await fetch('/api/admin/race/editnote', {
+      const response = await fetch('/api/admin/note/editnote', {
         method: 'POST',
         body: formData,
       });

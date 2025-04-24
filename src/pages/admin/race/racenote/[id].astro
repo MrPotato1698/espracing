@@ -123,12 +123,21 @@ if(errorRaces) {
     <label class="mt-5 text-lg font-semibold" for="penalty">
       Penalización:
     </label>
-    <input
-      type="text"
-      name="penalty"
-      value={dataRaceNote?.penalty}
-      class="bg-darkSecond text-lightPrimary text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
-    />
+    <div class="relative group w-11/12">
+      <input
+        type="text"
+        name="penalty"
+        id="penalty"
+        value={dataRaceNote?.penalty}
+        class="bg-darkSecond text-lightPrimary text-lg w-full border-none rounded-md p-2 ml-1 mt-px opacity-60 cursor-not-allowed"
+        disabled
+        aria-disabled="true"
+        tabindex="-1"
+      />
+      <div id="penalty-tooltip" class="absolute left-0 top-full mt-1 w-max bg-darkSecond text-lightPrimary text-xs rounded px-3 py-2 border border-primary opacity-0 group-hover:opacity-100 pointer-events-none z-10 transition-opacity duration-200">
+        Solo puedes añadir una sanción si el código de nota es distinto de "Notas de Carrera".
+      </div>
+    </div>
 
     <input type="hidden" name="racenoteID" value={id} />
 
@@ -155,3 +164,38 @@ if(errorRaces) {
   initEditRaceNote()
   document.addEventListener("astro:page-load", initEditRaceNote);
 </script>
+<script is:inline data-astro-rerun>
+  // Script para habilitar/deshabilitar el input de penalización dinámicamente
+  document.addEventListener("DOMContentLoaded", function() {
+    const noteSelect = document.getElementById("noteID");
+    const penaltyInput = document.getElementById("penalty");
+    const tooltip = document.getElementById("penalty-tooltip");
+    function updatePenaltyState() {
+      if (noteSelect && penaltyInput && tooltip) {
+        if (noteSelect.value === "0") {
+          penaltyInput.disabled = true;
+          penaltyInput.classList.add("opacity-60", "cursor-not-allowed");
+          penaltyInput.setAttribute("aria-disabled", "true");
+          penaltyInput.setAttribute("tabindex", "-1");
+        } else {
+          penaltyInput.disabled = false;
+          penaltyInput.classList.remove("opacity-60", "cursor-not-allowed");
+          penaltyInput.removeAttribute("aria-disabled");
+          penaltyInput.removeAttribute("tabindex");
+        }
+      }
+    }
+    if (noteSelect && penaltyInput && tooltip) {
+      updatePenaltyState();
+      noteSelect.addEventListener("change", updatePenaltyState);
+    }
+  });
+</script>
+
+<style>
+  /* Tooltip solo visible en hover y si el input está deshabilitado */
+  .group:hover #penalty:disabled + #penalty-tooltip {
+    opacity: 1;
+    pointer-events: auto;
+  }
+</style>

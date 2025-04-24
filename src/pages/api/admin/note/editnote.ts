@@ -4,7 +4,8 @@ import { supabase } from "@/db/supabase"
 export const POST: APIRoute = async ({ request }) => {
   const formData = await request.formData();
 
-  const note_id = formData.get("racenoteID");
+  const id = formData.get("racenoteID") as string;
+  const note_id = formData.get("noteID");
   const race_id = formData.get("raceID") as string;
   const description = formData.get("description");
   const penalty = formData.get("penalty");
@@ -16,12 +17,12 @@ export const POST: APIRoute = async ({ request }) => {
       const updateData: any = {
         ...(race_id && { race: race_id }),
         ...(note_id && { code: note_id }),
-        ...(penalty && { description: penalty }),
-        ...(description && { penalty: description })
+        ...(description && { description: description }),
+        ...((penalty && note_id !== "0") ? { penalty: penalty } : { penalty: null }),
         };
 
       if (Object.keys(updateData).length > 0) {
-        const { error: updateError } = await supabase.from("racenotes").update(updateData).eq("id", Number(note_id));
+        const { error: updateError } = await supabase.from("racenotes").update(updateData).eq("id", Number(id));
 
         if (updateError) throw updateError;
       }
