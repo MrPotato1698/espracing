@@ -157,3 +157,34 @@ export function initEditRace() {
   switchS2Element?.addEventListener("change", toggleInputsS2);
   switchR2Element?.addEventListener("change", toggleInputR2);
 }
+
+export function initEditRaceNote() {
+  const form = document.getElementById('editRaceNoteForm') as HTMLFormElement;
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(form);
+
+    try {
+      const response = await fetch('/api/admin/race/editnote', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Error en la respuesta del servidor: ' + response.statusText);
+      }
+
+      const result = await response.json();
+
+      if (result.success) {
+        showToast('Nota de Carrera actualizada con éxito', 'success');
+        window.location.href = '/admin/adminraces';
+      } else {
+        throw new Error(result.error ?? 'Error desconocido');
+      }
+    } catch (error) {
+      showToast('Error al actualizar la nota de carrera: ' + error, 'error');
+      console.error('Error:', error);
+    }
+  });
+}
