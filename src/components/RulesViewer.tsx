@@ -69,7 +69,7 @@ export default function RulesViewer() {
   }
 
   return (
-    <div className="w-full max-w-4xl mx-auto">
+    <div className="w-full mx-auto">
       {lastUpdated && (
         <div className="rounded-lg border bg-gray-50 p-4 mb-4">
           <div className="text-sm text-gray-600">
