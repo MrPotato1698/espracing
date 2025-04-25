@@ -80,7 +80,7 @@ const Table = ({ node, children, ...props }: { node?: any; children?: React.Reac
         <>
           <thead>
             <tr>
-              <th className="px-4 py-2 text-left font-bold">Header</th>
+              <th className="px-4 py-2 text-left font-bold"></th>
             </tr>
           </thead>
           <tbody>{children}</tbody>
