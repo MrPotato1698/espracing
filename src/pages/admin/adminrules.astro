@@ -2,8 +2,8 @@
 import Layout from "@/layouts/ProfileLayout.astro";
 import RulesEditor from "@/components/RulesEditor";
 import { supabase } from "@/db/supabase";
-import { DataTable } from "@/components/data-table";
-import { showToast } from "@/lib/utils";
+import AdminRulesControl from "@/components/AdminRulesControl";
+
 
 const { cookies, redirect } = Astro;
 
@@ -44,15 +44,49 @@ if (userData == null || userData.roleesp == null || userData.roleesp > 1) {
   return redirect("/index");
 }
 
-type Profile = {
-  id: string;
-  roleesp: number | null;
-};
-
 const profileData = {
   id: id,
   roleesp: userData?.roleesp || null,
 };
+
+// Asegurarse de que existan las normativas principal y secundaria
+const { data: existingRules } = await supabase
+  .from("racerules")
+  .select("id")
+  .in("id", [1, 2]);
+
+// Si no existe la normativa principal, crearla
+if (!existingRules?.some(rule => rule.id === 1)) {
+  await supabase.from("racerules").insert({
+    id: 1,
+    content: "# Normativa Principal\n\nEscribe aquí el contenido de la normativa principal.",
+    championship: 1,
+    isVisible: true,
+    updated_at: new Date().toISOString(),
+    updated_by: id
+  });
+}
+
+// Si no existe la normativa secundaria, crearla
+if (!existingRules?.some(rule => rule.id === 2)) {
+  await supabase.from("racerules").insert({
+    id: 2,
+    content: "# Normativa Secundaria\n\nEscribe aquí el contenido de la normativa secundaria.",
+    championship: 1,
+    isVisible: false,
+    updated_at: new Date().toISOString(),
+    updated_by: id
+  });
+}
+
+// Obtener el estado de visibilidad de la normativa secundaria
+const { data: secondaryRule } = await supabase
+  .from("racerules")
+  .select("isVisible")
+  .eq("id", 2)
+  .single();
+
+const isSecondaryVisible = secondaryRule?.isVisible || false;
 ---
 
 <Layout title="ESP Racing: Administrar Equipos">
@@ -60,8 +94,33 @@ const profileData = {
     Modificación de Normativa
   </h2>
 
+  <div class="container py-8">
+    <!-- Panel de control para gestionar las normativas -->
+    <AdminRulesControl
+      userId={profileData.id}
+      isSecondaryVisible={isSecondaryVisible}
+      client:load
+    />
+
+    <!-- Editor de la normativa principal -->
     <div class="container py-8">
-      <RulesEditor id={profileData.id} roleesp={profileData.roleesp} client:load/>
+      <RulesEditor
+      client:load
+      normativaId={1}
+      userId = {profileData.id}
+      userRole = {profileData.roleesp}
+      />
     </div>
+
+    <!-- Editor de la normativa secundaria -->
+    <div class="container py-8">
+      <RulesEditor
+      client:load
+      normativaId={2}
+      userId = {profileData.id}
+      userRole = {profileData.roleesp}
+      />
+    </div>
+  </div>
 
 </Layout>
