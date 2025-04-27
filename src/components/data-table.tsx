@@ -360,7 +360,8 @@ export function DataTable({
                           if (response.ok) {
                             window.location.reload();
                           } else {
-                            alert("Error eliminando el elemento");
+                            alert("Error eliminando el elemento: " + response.statusText);
+                            console.error("Error eliminando el elemento:", response.statusText);
                           }
                         } catch (error) {
                           alert("Error eliminando el elemento: " + error);
