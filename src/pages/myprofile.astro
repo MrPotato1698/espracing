@@ -214,6 +214,12 @@ const canUpdateFlag: boolean = diffHours > 48;
           >
           Actualizar Estadisticas
         </a>
+        <div id="loadingStats" style="display:none; align-items:center; gap:8px; margin-left:16px;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="animate-spin">
+            <circle cx="12" cy="12" r="10" stroke="#da392b" stroke-width="4" stroke-linecap="round" stroke-dasharray="60 40"/>
+          </svg>
+          <span>Cargando estadísticas...</span>
+        </div>
       </div>
     )
   }
@@ -346,9 +352,12 @@ const canUpdateFlag: boolean = diffHours > 48;
     }
 
     const updateStatsBtn = document.getElementById('updateStats');
+    const loadingStats = document.getElementById('loadingStats');
       if (updateStatsBtn) {
         updateStatsBtn.addEventListener('click', async () => {
           try {
+            if (loadingStats) loadingStats.style.display = 'flex';
+            updateStatsBtn.classList.add('pointer-events-none', 'opacity-60');
             const userId = updateStatsBtn.getAttribute('data-id');
             const response = await fetch('/api/admin/stats/newUserStats', {
               method: 'POST',
@@ -367,6 +376,9 @@ const canUpdateFlag: boolean = diffHours > 48;
             window.location.reload();
           } catch (error: any) {
             alert(error.message || 'Error al actualizar las estadísticas');
+          } finally {
+            if (loadingStats) loadingStats.style.display = 'none';
+            updateStatsBtn.classList.remove('pointer-events-none', 'opacity-60');
           }
         });
       }
