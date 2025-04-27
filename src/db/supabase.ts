@@ -3,7 +3,7 @@ import type { Database } from "database.types";
 
 const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL
 const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY
-const supabaseServiceKey = import.meta.env.SUPABASE_SERVICE_KEY
+const supabaseServiceKey = import.meta.env.PUBLIC_SUPABASE_SERVICE_KEY
 
 if (!supabaseUrl) {
   throw new Error('Falta la URL  de Supabase')
@@ -11,6 +11,10 @@ if (!supabaseUrl) {
 
 if (!supabaseAnonKey) {
   throw new Error('Falta la clave anónima de Supabase')
+}
+
+if (!supabaseServiceKey) {
+  throw new Error('Falta la clave de servicio de Supabase')
 }
 
 export const supabase = createClient<Database>(
