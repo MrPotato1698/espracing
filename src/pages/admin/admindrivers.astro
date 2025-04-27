@@ -1,0 +1,167 @@
+---
+import Layout from "@/layouts/ProfileLayout.astro";
+import { supabase } from "@/db/supabase";
+import { DataTable } from "@/components/data-table";
+import { showToast } from "@/lib/utils";
+
+const { cookies, redirect } = Astro;
+
+const accessToken = cookies.get("sb-access-token");
+const refreshToken = cookies.get("sb-refresh-token");
+
+if (!accessToken || !refreshToken) {
+  return redirect("/login");
+}
+
+// Set the session with the cookies
+const { data: dataAuth, error: errorAuth } = await supabase.auth.setSession({
+  refresh_token: refreshToken.value,
+  access_token: accessToken.value,
+});
+
+// If there is an error, delete the cookies and redirect to login
+if (errorAuth) {
+  cookies.delete("sb-access-token", {
+    path: "/",
+  });
+  cookies.delete("sb-refresh-token", {
+    path: "/",
+  });
+
+  return redirect("/login");
+}
+
+const id = dataAuth?.user?.id || "";
+
+const { data: userData } = await supabase
+  .from("profiles")
+  .select("roleesp")
+  .eq("id", id)
+  .single();
+
+if (userData == null || userData.roleesp == null || userData.roleesp > 1) {
+  return redirect("/index");
+}
+
+const { data: driversData } = await supabase
+  .from("profiles")
+  .select("id, full_name, steam_id, team(name), races")
+  .order("id", { ascending: true });
+
+// Definición de columnas para el DataTable
+const columns = [
+  { header: "Nombre", accessor: "full_name" },
+  { header: "Equipo", accessor: "team.name" },
+  { header: "Steam ID", accessor: "steam_id" }
+];
+
+const serializedDriversData = driversData ? JSON.parse(JSON.stringify(driversData)) : [];
+---
+
+<Layout title="ESP Racing: Administrar Pilotos">
+  <h2 class="text-5xl font-extrabold border-b-2 border-primary w-full">
+    Administración de Pilotos
+  </h2>
+
+  <div class="py-4 mx-auto text-center" style="width: 99%">
+    <p class="text-5xl font-bold border-b border-primary w-fit mx-auto">
+      Lista de Pilotos del Sistema
+    </p>
+    <div class="mt-6">
+      <DataTable
+        client:only="react"
+        data={serializedDriversData}
+        columns={columns}
+        onEdit={{ path: "driver" }}
+        onDelete={{ path: "driver" }}
+        pageSize={10}
+        searchable={true}
+        searchPlaceholder="Buscar por nombre de piloto o equipo"
+        searchableColumns={[
+          {accessor: "full_name"},
+          {accessor: "team.name"}
+        ]}
+      />
+    </div>
+  </div>
+
+  <div class="py-4 mx-auto text-center" style="width: 99%">
+    <p class="text-5xl font-bold border-b border-primary w-fit mx-auto">
+      Actualizar estadistica de Piloto
+    </p>
+    <form id="editDriverStatForm" class="flex flex-col mt-5">
+      <label class="mt-5 text-lg font-semibold" for="driverID">
+        Selecciona el piloto para actualizar su estadística:
+      </label>
+        <select
+          id="driverID"
+          name="driverID"
+          class="bg-darkSecond text-lightPrimary text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
+          >
+        {serializedDriversData.map((driver: { id: string; full_name: string; steam_id: string; races: number}) => (
+            <option value={driver.id}>{driver.full_name} - Steam ID: {driver.steam_id} - Carreras: {driver.races}</option>
+        ))}
+        </select>
+        <button
+          type="submit"
+          class="py-1.5 px-3 w-fit mr-2 bg-darkPrimary text-white border-[#29dd38] border-2 rounded-md my-4 font-medium text-lg hover:bg-[#29dd38] hover:text-darkPrimary"
+        >
+          Actualizar Estadisticas
+        </button>
+        <div id="loaderStat" style="display:none;" class="flex flex-row items-center justify-center gap-2 mt-2">
+          <svg class="animate-spin h-6 w-6 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+          </svg>
+          <span class="text-primary font-semibold">Actualizando estadísticas...</span>
+        </div>
+    </form>
+  </div>
+
+  <script >
+  import { showToast } from "@/lib/utils";
+
+    const form = document.getElementById("editDriverStatForm") as HTMLFormElement;
+    const loader = document.getElementById("loaderStat");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+      const driverID = formData.get("driverID");
+
+      if (loader) loader.style.display = "flex";
+      const submitButton = form.querySelector('button[type="submit"]') as HTMLButtonElement | null;
+      if (submitButton) submitButton.disabled = true;
+
+      try {
+        const response = await fetch("/api/admin/stats/newUserStats", {
+          method: "POST",
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: driverID }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`Error en la respuesta del servidor: ${response.status}`);
+        }
+
+        const result = await response.json();
+
+        if (result.success) {
+          showToast("Estadisticas actualizada con éxito", "success");
+          window.location.href = "/admin/admindrivers";
+        } else {
+          throw new Error(result.error || "Error desconocido");
+        }
+      } catch (error) {
+        console.error("Error al actualizar el piloto:", error);
+        showToast(`Error al actualizar el piloto: ${error}`, "error");
+      } finally {
+        if (loader) loader.style.display = "none";
+        const submitButton = form.querySelector('button[type="submit"]') as HTMLButtonElement | null;
+        if (submitButton) submitButton.disabled = false;
+      }
+    });
+  </script>
+
+</Layout>
+
