@@ -449,7 +449,6 @@ export type Database = {
           id: string
           is_team_manager: boolean | null
           last_modified: string | null
-          number_plate: number | null
           podiums: number
           poles: number
           races: number
@@ -469,7 +468,6 @@ export type Database = {
           id: string
           is_team_manager?: boolean | null
           last_modified?: string | null
-          number_plate?: number | null
           podiums?: number
           poles?: number
           races?: number
@@ -489,7 +487,6 @@ export type Database = {
           id?: string
           is_team_manager?: boolean | null
           last_modified?: string | null
-          number_plate?: number | null
           podiums?: number
           poles?: number
           races?: number
