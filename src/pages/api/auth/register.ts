@@ -29,8 +29,7 @@ export const POST: APIRoute = async ({ request, redirect }) => {
         full_name: name,
         email: email,
         avatar: 'img/user/default.webp',
-        steam_id: steamId,
-        races: -1
+        steam_id: steamId
       }
     }
   });
@@ -53,12 +52,12 @@ export const POST: APIRoute = async ({ request, redirect }) => {
 
   if (profileError) {
     console.error("Error al verificar el perfil:", profileError)
-    return new Response("Error al verificar el perfil del usuario", { status: 500 })
+    return new Response("Error al verificar el perfil del usuario: "+ profileError.message, { status: 500 })
   }
 
   return redirect("/")
 } catch (error) {
   console.error("Error inesperado:", error)
-  return new Response("Error inesperado al registrar usuario", { status: 500 })
+  return new Response("Error inesperado al registrar usuario: "+ error, { status: 500 })
 }
 }
