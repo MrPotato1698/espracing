@@ -349,6 +349,7 @@ export type Database = {
           inscriptions_close: string
           inscriptions_open: string
           inscriptions_times_register: string | null
+          is_open: boolean
           name: string
           order: number
         }
@@ -358,6 +359,7 @@ export type Database = {
           inscriptions_close?: string
           inscriptions_open?: string
           inscriptions_times_register?: string | null
+          is_open?: boolean
           name: string
           order?: number
         }
@@ -367,6 +369,7 @@ export type Database = {
           inscriptions_close?: string
           inscriptions_open?: string
           inscriptions_times_register?: string | null
+          is_open?: boolean
           name?: string
           order?: number
         }
