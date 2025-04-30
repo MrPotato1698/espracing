@@ -665,12 +665,12 @@ export default function NewRace(){
           <label className="text-lightPrimary text-lg font-medium" htmlFor="description">
             Descripción
           </label>
-          <input
+          <textarea
             className="w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkSecond hover:border-primary"
-            type="textarea"
             id="description"
             name="description"
             placeholder="Descripción de la nota..."
+            rows={10}
             required
           />
 
