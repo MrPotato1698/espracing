@@ -962,7 +962,6 @@ function recalculateSplitOne(item: RaceResult, raceTime: number): void {
   }
 }
 
-// TODO: Revisar el porque de esta funcion
 /**
  * Función para recalcular la posición de los pilotos en otros splits
  * @param item - Objeto RaceResult
@@ -1046,7 +1045,6 @@ export function createRaceData(dataFile: any): RaceData{
   const devents = dataFile.Events;
   const dlaps = dataFile.Laps;
   const dresult = dataFile.Result;
-  const dpenalties = dataFile.Penalties;
 
   rd.RaceResult = createRaceResults(dcars, devents, dlaps, dresult, dataFile.SessionConfig.time, 1);
   rd.RaceLaps = createRaceLap(dlaps, rd.RaceResult);
@@ -1098,13 +1096,11 @@ export function createRaceDataMultipleSplits(dataFileS1: any, dataFileS2: any): 
   const deventsS1 = dataFileS1.Events;
   const dlapsS1 = dataFileS1.Laps;
   const dresultS1 = dataFileS1.Result;
-  const dpenaltiesS1 = dataFileS1.Penalties;
 
   const dcarsS2 = dataFileS2.Cars as CarJSON[];
   const deventsS2 = dataFileS2.Events;
   const dlapsS2 = dataFileS2.Laps;
   const dresultS2 = dataFileS2.Result;
-  const dpenaltiesS2 = dataFileS2.Penalties;
 
   const rr1 = createRaceResults(dcarsS1, deventsS1, dlapsS1, dresultS1, dataFileS1.SessionConfig.time, 1);
   const rr2 = createRaceResults(dcarsS2, deventsS2, dlapsS2, dresultS2, dataFileS2.SessionConfig.time, 2);
