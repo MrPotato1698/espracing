@@ -3,9 +3,8 @@ import { supabase } from "@/db/supabase";
 import { getResultTableData, showToast, formatTwoIntegersPlusThreeDecimals, formatTwoIntegers } from "@/lib/utils";
 
 import type { Points } from "@/types/Points";
-import type { RaceData, RaceResult, RaceLap, BestLap, Consistency, BestSector, Incident, RaceConfig, } from "@/types/Results";
+import type { RaceData, BestSector, Lap } from "@/types/Results";
 import type { CarData, CircuitData } from "@/types/Utils";
-import ResultsTable from '@/sections/ResultsTable.astro';
 
 /* *************************** */
 
@@ -13,716 +12,707 @@ function initializeScript() {
   async function loadData() {
     try {
       const isResultsPage = document.getElementById("chartChangePosition1") !== null;
+      if (!isResultsPage) return;
 
-      if (!isResultsPage) return; // Salir si no estamos en la página de resultados
+      const dom = getDomElements();
+      clearDom(dom);
 
-      const filenameRace = window.location.pathname.split("/").pop(); // Obtiene el ID de la URL
+      const filenameRace = window.location.pathname.split("/").pop();
       if (!filenameRace) return;
 
-      const datosCircuito = document.getElementById("datosCircuito");
-      const tablaResultados = document.getElementById("tablaResultados");
-      const sectorTableR1 = document.getElementById("sectorTableR1");
-      const sectorTableR2 = document.getElementById("sectorTableR2");
-      const titleSectorR1 = document.getElementById("titleSectorR1");
-      const titleSectorR2 = document.getElementById("titleSectorR2");
-      const tablaIndividuales1 = document.getElementById("tableIndividualLaps1");
-      const tablasIndividuales2 = document.getElementById("tableIndividualLaps2");
-
-      const chartChangePosition = document.getElementById("chartChangePosition");
-      const chartGaps = document.getElementById("chartGaps");
-
-
-      if (datosCircuito) datosCircuito.innerHTML = "";
-      else throw new Error('Elemento con id "resultado2" no encontrado.');
-
-      if (tablaResultados) tablaResultados.innerHTML = "";
-      else throw new Error('Elemento con id "resultado" no encontrado.');
-
-      if (titleSectorR1) titleSectorR1.innerHTML = "";
-      else throw new Error('Elemento con id "titleSectorR1" no encontrado.');
-
-      if (titleSectorR2) titleSectorR2.innerHTML = "";
-      else throw new Error('Elemento con id "titleSectorR2" no encontrado.');
-
-      if (tablaIndividuales1) tablaIndividuales1.innerHTML = "";
-      else throw new Error('Elemento con id "tablaIndividuales1" no encontrado.');
-
-      if (tablasIndividuales2) tablasIndividuales2.innerHTML = "";
-      else throw new Error('Elemento con id "tablasIndividuales2" no encontrado.');
-
-      if(!chartChangePosition) throw new Error('Elemento con id "chartChangePosition" no encontrado.');
-      if(!chartGaps) throw new Error('Elemento con id "chartGaps" no encontrado.');
-
-      if(!sectorTableR1) throw new Error('Elemento con id "sectorTableR1" no encontrado.');
-      if(!sectorTableR2) throw new Error('Elemento con id "sectorTableR2" no encontrado.');
-
-
-      let tablasIndividuales = [];
-      tablasIndividuales.push(tablaIndividuales1);
-      tablasIndividuales.push(tablasIndividuales2);
-
-
-      // *** Datos de la carrera (JSON Completo) ***
-      const { data: resultSetData, error } = await supabase
-        .from("race")
-        .select("pointsystem!inner(name, points, fastestlap), race_data_1, race_data_2")
-        .eq("filename", filenameRace as string)
-        .single();
-
-      if (error || !resultSetData) {
-        throw new Error("No se encontraron datos de la carrera");
-      }
-
-      const { data: raceDataJSON, error: errorRaceDataJSON } = await supabase
-        .storage
-        .from("results")
-        .download(resultSetData.race_data_1);
-
-      if (errorRaceDataJSON || !raceDataJSON) throw new Error("Error al cargar los datos de la carrera");
-
-      const datosR1 = JSON.parse(await raceDataJSON.text());
-      let datosR2 = null;
-      if (resultSetData.race_data_2 !== null && resultSetData.race_data_2 !== "") {
-        const { data: raceDataJSONR2, error: errorRaceDataJSON2 } = await supabase
-          .storage
-          .from("results")
-          .download(resultSetData.race_data_2);
-
-        if (!errorRaceDataJSON2 || raceDataJSONR2) datosR2 = JSON.parse(await raceDataJSONR2.text());
-      }
-
-      let datos: RaceData[] = [];
-      datos.push(datosR1);
-      if (datosR2 !== null) {
-        datos.push(datosR2);
-      }
-
-      // Flag para indicar si hay más de un split
-      const flagMoreSplits: Boolean = datos[0].RaceResult.some(
-        (driver) => driver.Split > 1
-      );
-
-      // *** Sistema de puntuación ***
-      const points: Points = {
-        Name: resultSetData.pointsystem.name,
-        Puntuation: resultSetData.pointsystem.points
-          .split(",")
-          .map((point) => parseInt(point)),
-        FastestLap: resultSetData.pointsystem.fastestlap,
-      };
-
-      // Datos de los coches involucrados en la carrera
-      let carData: CarData[] = [];
-      for (let carResume of datos[0].RaceCarResume) {
-        const { data: carDataSupabase, error: errorCarData } = await supabase
-          .from("car")
-          .select("filename, carbrand!inner(name, imgbrand), model, carclass!inner(short_name, class_design)")
-          .eq("filename", carResume.CarFileName)
-          .single();
-
-        if (carDataSupabase) {
-          carData.push({
-            filename: carDataSupabase.filename,
-            brand: carDataSupabase.carbrand?.name ?? "",
-            model: carDataSupabase.model ?? "",
-            classShortName: carDataSupabase.carclass.short_name ?? "",
-            classColor: carDataSupabase.carclass.class_design ?? "",
-            imgbrand: carDataSupabase.carbrand?.imgbrand ?? "",
-          });
-        } else {
-          console.error("Error al obtener los datos del coche: ", errorCarData);
-        }
-      }
-
-      // *** Datos del circuito ***
-      const { data: isCircuitExists, error: errorCircuitExists } = await supabase
-          .from("circuit")
-          .select("id, name, shortname, filename, location")
-          .eq("filename", datos[0].RaceConfig.Track)
-          .single();
-
-      if (isCircuitExists) {
-        const { data: layout, error: errorLayout } = await supabase
-          .from("circuitLayout")
-          .select("name, length, capacity")
-          .eq("filename", datos[0].RaceConfig.TrackLayout)
-          .eq("circuit", isCircuitExists.id)
-          .single();
-
-        const circuitData: CircuitData = {
-          name: isCircuitExists?.name || "",
-          layout: layout?.name || "Indefinido",
-          location: isCircuitExists?.location || "",
-          length: layout?.length || 0,
-          capacity: layout?.capacity || 0,
-        };
-
-        const datosCircuitoHTML = `
-        <div class="text-center bg-darkSecond rounded-lg py-5" style = "width=99%">
-        <p class = "text-3xl font-bold border-b border-primary w-fit mx-auto mb-2">Datos del circuito</p>
-          <div class = "grid grid-cols-1">
-            <p class="text-2xl font-semibold">Circuito: ${circuitData.name} (Variante ${circuitData.layout})</p>
-            <p class="text-xl">Localización: ${circuitData.location}</p>
-          </div>
-          <div class = "grid grid-cols-2 text-lg mt-2">
-            <p>Longitud: ${circuitData.length} m</p>
-            <p>Capacidad: ${circuitData.capacity} pilotos</p>
-          </div>
-        </div>`;
-
-        datosCircuito.innerHTML = datosCircuitoHTML;
-        }
-      // *** Datos simples de la carrera ***
-      let tablaResultadosHTML ="";
-      for (let i = 0; i < datos.length; i++) {
-        const resultTable = getResultTableData(
-          datos[i],
-          points.Name,
-          points,
-          carData
-        );
-        tablaResultadosHTML += `
-      <p class="text-3xl font-bold border-b border-primary w-fit mx-auto mt-4 mb-2">Resultado de carrera ${i + 1}</p>
-      <table class="w-full border-collapse border border-lightPrimary">
-        <thead class="font-medium bg-primary">
-          <tr class="tabletitle">
-          <th colspan="2"></th>
-          <th>Pos</th>
-          <th>Nombre</th>
-          <th>Clase</th>
-          <th colspan="2">Coche</th>
-          <th>Equipo</th>
-          <th>Vueltas</th>
-          <th>Tiempo Total</th>
-          <th>Gap to 1st</th>
-          <th>Intervalo</th>
-          <th>Vuelta Rápida</th>
-          <th>Ptos</th>
-          </tr>
-        </thead>
-        <tbody class="font-normal">`;
-
-        const createResultRow = (result: any, index: number) => `
-          <tr class="bg-${index % 2 === 0 ? "darkPrimary" : "darkSecond"}">
-            <td class="text-center">${result.gridPositionClass}</td>                                                        <!-- Gan/Per (Flechas)-->
-            <td class="text-center">${result.gainsAbs}</td>                                                                 <!-- Gan/Per (Número)-->
-            <td class="font-medium text-center">${result.posicionFinal}</td>                                                <!-- Posicion -->
-            <td class="text-start">${result.driverName}</td>                                                                <!-- Nombre -->
-            <td class="text-center"><span ${result.carColorClass}>${result.carClass}</span></td>                            <!-- Clase del Coche -->
-            <td class="text-center"><img class='w-4 justify-end' src='${result.carBrand}' alt=''></img></td>                <!-- Logo Coche -->
-            <td class="text-start">${result.carName}</td>                                                                   <!-- Coche -->
-            <td class="text-start">${result.team}</td>                                                                      <!-- Equipo -->
-            <td class="text-center">${result.totalLaps}</td>                                                                <!-- Nº Vueltas -->
-            <td class="text-center">${result.timeadjust}</td>                                                               <!-- Tiempo Total -->
-            <td class="text-center">${result.gap}</td>                                                                      <!-- Gap con primero -->
-            <td class="text-center">${result.interval}</td>                                                                 <!-- Intervalo -->
-            <td class="text-center"><span class="${result.flapClass}">${result.bestlapToString} ${result.tyre}</span></td>  <!-- Vuelta Rapida  + Neumaticos-->
-            <td class="text-center">${result.points}</td>                                                                   <!-- Puntos -->
-          </tr>`;
-
-        let secondSplitInit = false;
-        resultTable.forEach((result, index) => {
-          if (result.splitNumber === 2 && !secondSplitInit) {
-            tablaResultadosHTML += `
-          <tr class="bg-primary text-center font-bold">
-            <td colspan="14">Segundo Split</td>
-          </tr>`;
-            result.interval = "";
-            secondSplitInit = true;
-          }
-          tablaResultadosHTML += createResultRow(result, index);
-        });
-
-        tablaResultadosHTML += "</tbody></table>";
-      }
-
-      tablaResultados.innerHTML = tablaResultadosHTML;
-
-      // *** Cambios de posiciones ***
-      var ApexchartChangePosition = [];
-      for (let i = 0; i < datos.length; i++) {
-        // Crea un array para almacenar los datos de la serie para cada split
-        let seriesDataPositions: { name: string; data: number[] }[][] = [];
-
-        // Obtiene todos los splits de los resultados, sin duplicados
-        const splitsPositionChange = [
-          ...new Set(datos[i].RaceResult.map((result) => result.Split)),
-        ];
-
-        // Inicializa un array para cada split
-        splitsPositionChange.forEach(() => seriesDataPositions.push([]));
-        // Mapea los datos para cada split
-        datos[i].RaceLaps.filter((lapData) => lapData.Laps.length > 0).forEach((lapData) => {
-          const driverResult = datos[i].RaceResult.find(
-            (result) => result.SteamID === lapData.SteamID
-          );
-
-          if (driverResult) {
-            const splitIndex = driverResult.Split - 1;
-            const gridPosition = driverResult.GridPosition;
-
-            seriesDataPositions[splitIndex].push({
-              name: lapData.DriverName,
-              data: [
-                gridPosition,
-                ...lapData.Laps.map((lap) => lap.Position),
-              ],
-            });
-          }
-        });
-
-        const numlaps: number[] = Array.from({ length: datos[i].RaceLaps[0].Laps.length + 1 },(_, j) => j);
-
-        let nameChartPositions =
-          "Cambios de posiciones (Carrera " + (i + 1) + ")";
-        var optionsChangePositions = {
-          title: {
-            text: nameChartPositions,
-            align: "center",
-            style: {
-              color: "#f9f9f9",
-              fontSize: "24px",
-              fontWeight: "bold",
-            },
-          },
-
-          series: seriesDataPositions[0],
-          colors: [
-            "#2E93fA",
-            "#66DA26",
-            "#E91E63",
-            "#FF9800",
-            "#fff700",
-            "#00ffd4",
-            "#0036ff",
-            "#e91ec4",
-            "#9e57ff",
-            "#ff0000",
-            "#00ffbd",
-            "#546E7A",
-          ],
-
-          chart: {
-            type: "line",
-            zoom: {
-              enable: false,
-              type: "x",
-              autoScaleYaxis: true,
-            },
-            locales: [
-              {
-                name: "es",
-                options: {
-                  toolbar: {
-                    download: "Descargar SVG",
-                    selection: "Seleccionar",
-                    selectionZoom: "Seleccionar Zoom",
-                    zoomIn: "Zoom In",
-                    zoomOut: "Zoom Out",
-                    pan: "Mover",
-                    reset: "Reiniciar Zoom",
-                  },
-                },
-              },
-            ],
-            defaultLocale: "es",
-            toolbar: {
-              show: true,
-              tools: {
-                download: false,
-                selection: false,
-                zoom: true,
-                zoomin: true,
-                zoomout: true,
-                pan: true,
-                reset: true,
-              },
-            },
-            animation: {
-              enabled: true,
-              easing: "linear",
-              speed: 850,
-              animateGradually: {
-                enabled: false,
-              },
-            },
-          },
-
-          xaxis: {
-            categories: numlaps,
-            labels: {
-              style: {
-                colors: "#f9f9f9",
-              },
-            },
-            title: {
-              text: "Vueltas",
-              style: {
-                color: "#f9f9f9",
-                fontSize: "16px",
-              },
-            },
-          },
-
-          yaxis: {
-            stepSize: 1,
-            min: 1,
-            position: "top",
-            reversed: true,
-            title: {
-              text: "Posiciones",
-              style: {
-                color: "#f9f9f9",
-                fontSize: "16px",
-              },
-            },
-            labels: {
-              style: {
-                colors: "#f9f9f9",
-              },
-            },
-          },
-
-          stroke: {
-            curve: "smooth",
-          },
-
-          markers: {
-            size: 1,
-          },
-
-          tooltip: {
-            theme: "dark",
-            shared: false,
-            intersect: true,
-            onDatasetHover: {
-              highlightDataSeries: false,
-            },
-            x: {
-              show: true,
-            },
-            y: {
-              formatter: function (value: number) {
-                return value.toFixed(0);
-              },
-            },
-          },
-
-          legend: {
-            labels: {
-              colors: "#f9f9f9",
-            },
-          },
-        };
-
-        const auxChart= new ApexCharts(
-          document.querySelector("#chartChangePosition" + (i + 1)),
-          optionsChangePositions
-        );
-        //chartChangePosition.resetSeries();
-        ApexchartChangePosition.push(auxChart);
-      }
-
-      chartChangePosition.classList.remove('hidden');
-      for(let i = 0; i < ApexchartChangePosition.length; i++){
-        ApexchartChangePosition[i].render();
-      }
-
-      // *** Gaps durante las vueltas ***
-      let charGapsProgresion = [];
-      for (let i = 0; i < datos.length; i++) {
-        let seriesDataGaps: { name: string; data: number[] }[][] = [];
-
-        // Obtiene todos los splits de los resultados, sin duplicados
-        const splitsGapVariation = [
-          ...new Set(datos[i].RaceResult.map((result) => result.Split)),
-        ];
-
-        // Inicializa un array para cada split
-        splitsGapVariation.forEach(() => seriesDataGaps.push([]));
-
-        // Mapea los datos para cada split
-        datos[i].RaceLaps.filter((lapData) => lapData.Laps.length > 0).forEach((lapData) => {
-          const driverResult = datos[i].RaceResult.find((result) => result.SteamID === lapData.SteamID);
-          if (driverResult) {
-            const splitIndex = driverResult.Split - 1;
-            seriesDataGaps[splitIndex].push({
-              name: lapData.DriverName,
-              data: lapData.Laps.map((lap) => lap.GaptoFirst),
-            });
-          }
-        });
-
-        let nameChartGaps = "Distancia al líder (Carrera " + (i + 1) + ")";
-        const numlaps: number[] = Array.from({ length: datos[i].RaceLaps[0].Laps.length + 1 },(_, j) => j);
-        var optionsGaps = {
-          title: {
-            text: nameChartGaps,
-            align: "center",
-            style: {
-              color: "#f9f9f9",
-              fontSize: "24px",
-              fontWeight: "bold",
-            },
-          },
-
-          series: seriesDataGaps[0],
-          colors: [
-            "#2E93fA",
-            "#66DA26",
-            "#546E7A",
-            "#E91E63",
-            "#FF9800",
-            "#fff700",
-            "#00ffd4",
-            "#0036ff",
-            "#e91ec4",
-            "#9e57ff",
-            "#ff0000",
-            "#00ffbd",
-          ],
-
-          chart: {
-            type: "line",
-            zoom: {
-              enable: false,
-              type: "x",
-              autoScaleYaxis: true,
-            },
-            locales: [
-              {
-                name: "es",
-                options: {
-                  toolbar: {
-                    download: "Descargar SVG",
-                    selection: "Seleccionar",
-                    selectionZoom: "Seleccionar Zoom",
-                    zoomIn: "Zoom In",
-                    zoomOut: "Zoom Out",
-                    pan: "Mover",
-                    reset: "Reiniciar Zoom",
-                  },
-                },
-              },
-            ],
-            defaultLocale: "es",
-            toolbar: {
-              show: true,
-              tools: {
-                download: false,
-                selection: false,
-                zoom: true,
-                zoomin: true,
-                zoomout: true,
-                pan: true,
-                reset: true,
-              },
-            },
-            animation: {
-              enabled: true,
-              easing: "linear",
-              speed: 850,
-              animateGradually: {
-                enabled: false,
-              },
-            },
-          },
-
-          xaxis: {
-            categories: numlaps,
-            labels: {
-              style: {
-                colors: "#f9f9f9",
-              },
-            },
-            title: {
-              text: "Vueltas",
-              style: {
-                color: "#f9f9f9",
-                fontSize: "16px",
-              },
-            },
-          },
-
-          yaxis: {
-            stepSize: 8,
-            min: 0,
-            position: "top",
-            reversed: true,
-            title: {
-              text: "Distancia al líder (segundos)",
-              style: {
-                color: "#f9f9f9",
-                fontSize: "16px",
-              },
-            },
-            labels: {
-              style: {
-                colors: "#f9f9f9",
-              },
-            },
-          },
-
-          stroke: {
-            curve: "smooth",
-          },
-
-          markers: {
-            size: 1,
-          },
-
-          tooltip: {
-            theme: "dark",
-            shared: false,
-            intersect: true,
-            onDatasetHover: {
-              highlightDataSeries: false,
-            },
-            x: {
-              show: true,
-            },
-            y: {
-              formatter: function (value: number) {
-                return value.toFixed(3);
-              },
-            },
-          },
-
-          legend: {
-            labels: {
-              colors: "#f9f9f9",
-            },
-          },
-          grid: {
-            borderColor: "#5a5a5a",
-          },
-        };
-
-        var auxChart = new ApexCharts(
-          document.querySelector("#chartGaps" + (i + 1)),
-          optionsGaps
-        );
-        charGapsProgresion.push(auxChart);
-      }
-
-      chartGaps.classList.remove('hidden');
-      for(let i = 0; i < charGapsProgresion.length; i++){
-        charGapsProgresion[i].render();
-      }
-
-      // *** Sectores ***
-      let flagSectorsR2 = false;
-      for (let i = 0; i < datos.length; i++) {
-        if(i === 1 && !flagSectorsR2){
-          sectorTableR2.classList.remove('hidden');
-          flagSectorsR2 = true;
-        }
-        let titleSector = "";
-        if(datos.length > 1){
-          titleSector += `<p class="text-3xl font-bold border-b border-primary w-fit mx-auto mt-4 mb-2">Mejores Sectores (Carrera ${i + 1})</p>`;
-          switch(i){
-            case 0:
-              titleSectorR1.innerHTML += titleSector;
-              break;
-            case 1:
-              titleSectorR2.innerHTML += titleSector;
-              break;
-          }
-        }
-
-        const sectorsList = datos[i].BestSector.reduce((acc, sector) => {
-          const index = sector.SectorNumber - 1;
-          if (!acc[index]) acc[index] = [];
-          acc[index].push(sector);
-          return acc;
-        }, [] as BestSector[][]);
-
-        const maxContenedores = 3;
-        sectorsList.slice(0, maxContenedores).forEach((sector, index) => {
-          const sectorTable = document.getElementById(`tablaS${index + 1}R${i + 1}`);
-          if (sectorTable) {
-            let sectorHTML = `<p class="text-3xl font-bold border-b border-primary w-fit mx-auto mt-4 mb-2">Mejor Sector ${index + 1}</p>
-                          <table class="w-full border-collapse border border-lightPrimary">
-                          <thead class="font-medium bg-primary">
-                              <tr class="tabletitle">
-                                  <th>Pos</th>
-                                  <th>Nombre</th>
-                                  <th colspan="3">Vehiculo</th>
-                                  <th>Tiempo</th>
-                                  <th>Gap</th>
-                              </tr>
-                          </thead>
-                          <tbody class="font-normal">`;
-            let pos = 0;
-            for (let i of sector) {
-              pos++;
-              let gap: string = "";
-              pos === 1
-                ? (gap = "0.000")
-                : (gap = "+" + formatTwoIntegersPlusThreeDecimals((i.BestSector - sector[0].BestSector) / 1000));
-              const sectorTimeString: string =
-                formatTwoIntegersPlusThreeDecimals(i.BestSector / 1000);
-
-              // Obtener el nombre real del coche
-              const isCarExists = carData.find(
-                (car) => car.filename === i.CarFileName
-              );
-              let carName: string;
-              let carBrand: string;
-              let carClass: string;
-              let carColorClass: string;
-              if (isCarExists) {
-                carName = isCarExists.brand + " " + isCarExists.model;
-                carBrand = isCarExists.imgbrand;
-                carClass = isCarExists.classShortName;
-                carColorClass = `style="background-color: ${isCarExists.classColor.split(" ")[0].replace("bg-[", "").replace("]", "")}; color: ${isCarExists.classColor.split(" ")[1].replace("text-[", "").replace("]", "")}"`;
-                carColorClass += ' class = "rounded text-xs font-bold px-1 py-0.5 ml-1"';
-              } else {
-                carName = i.CarFileName;
-                carBrand = "";
-                carClass = "";
-                carColorClass = "";
-              }
-
-              pos % 2 === 0
-                ? (sectorHTML += `<tr class="bg-darkPrimary text-center">`)
-                : (sectorHTML += `<tr class="bg-darkSecond text-center">`);
-              sectorHTML += `<td>${pos}</td>`;
-
-              flagMoreSplits
-                ? (sectorHTML += `<td>${i.DriverName} (s${i.Split})</td>`)
-                : (sectorHTML += `<td>${i.DriverName}</td>`);
-              sectorHTML += `
-                  <td><span ${carColorClass}>${carClass}</span></td>
-                  <td><img class='w-4 justify-end' src='${carBrand}' alt=''></img></td>
-                  <td>${carName}</td>
-                  <td>${sectorTimeString}</td>
-                  <td>${gap}</td>
-                </tr>`;
-            }
-            sectorHTML += `</tbody></table>`;
-            sectorTable.innerHTML = sectorHTML;
-          } else {
-            console.warn(`Elemento con id "tablaS${index + 1}R${i + 1}" no encontrado.`);
-          }
-        });
-      }
-
-      // *** Tabla de vueltas de carrera por piloto ***
-      for(let i = 0; i < datos.length; i++){
-        if(datos.length > 1){
-          tablasIndividuales[1].classList.remove('hidden');
-        }
-        tablasIndividuales[i].innerHTML = `<p class="text-3xl font-bold border-b border-primary w-fit mx-auto mt-4 mb-2">Vueltas individuales (Carrera ${i + 1})</p>`;
-        const tablaIndividual = loadIndividualTimes(datos[i], carData, flagMoreSplits);
-        tablasIndividuales[i].innerHTML += tablaIndividual;
-        if(i < datos.length - 1)
-        tablasIndividuales[i].innerHTML += `<div class="mt-6"><p class='border-t-8 border-t-primary text-darkPrimary'></p></div>`;
-      }
+      const { datos, points, carData, flagMoreSplits } = await fetchRaceData(filenameRace);
+
+      await renderCircuitData(dom.datosCircuito, datos[0]);
+      renderResultsTable(dom.tablaResultados, datos, points, carData);
+      renderPositionCharts(dom.chartChangePosition, datos);
+      renderGapCharts(dom.chartGaps, datos);
+      renderSectorTables(dom, datos, carData, flagMoreSplits);
+      renderIndividualLaps(dom.tablasIndividuales, datos, carData, flagMoreSplits);
 
     } catch (error) {
       console.error("Error al cargar los datos de la carrera: ", error);
       showToast("Error al cargar los datos de la carrera: " + error, "error");
+    }
+  }
+
+  function getDomElements() {
+    const datosCircuito = document.getElementById("datosCircuito");
+    const tablaResultados = document.getElementById("tablaResultados");
+    const sectorTableR1 = document.getElementById("sectorTableR1");
+    const sectorTableR2 = document.getElementById("sectorTableR2");
+    const titleSectorR1 = document.getElementById("titleSectorR1");
+    const titleSectorR2 = document.getElementById("titleSectorR2");
+    const tablaIndividuales1 = document.getElementById("tableIndividualLaps1");
+    const tablasIndividuales2 = document.getElementById("tableIndividualLaps2");
+    const chartChangePosition = document.getElementById("chartChangePosition");
+    const chartGaps = document.getElementById("chartGaps");
+
+    if (!datosCircuito) throw new Error('Elemento con id "resultado2" no encontrado.');
+    if (!tablaResultados) throw new Error('Elemento con id "resultado" no encontrado.');
+    if (!titleSectorR1) throw new Error('Elemento con id "titleSectorR1" no encontrado.');
+    if (!titleSectorR2) throw new Error('Elemento con id "titleSectorR2" no encontrado.');
+    if (!tablaIndividuales1) throw new Error('Elemento con id "tablaIndividuales1" no encontrado.');
+    if (!tablasIndividuales2) throw new Error('Elemento con id "tablasIndividuales2" no encontrado.');
+    if (!chartChangePosition) throw new Error('Elemento con id "chartChangePosition" no encontrado.');
+    if (!chartGaps) throw new Error('Elemento con id "chartGaps" no encontrado.');
+    if (!sectorTableR1) throw new Error('Elemento con id "sectorTableR1" no encontrado.');
+    if (!sectorTableR2) throw new Error('Elemento con id "sectorTableR2" no encontrado.');
+
+    return {
+      datosCircuito,
+      tablaResultados,
+      sectorTableR1,
+      sectorTableR2,
+      titleSectorR1,
+      titleSectorR2,
+      tablaIndividuales1,
+      tablasIndividuales2,
+      chartChangePosition,
+      chartGaps,
+      tablasIndividuales: [tablaIndividuales1, tablasIndividuales2]
+    };
+  }
+
+  function clearDom(dom: any) {
+    dom.datosCircuito.innerHTML = "";
+    dom.tablaResultados.innerHTML = "";
+    dom.titleSectorR1.innerHTML = "";
+    dom.titleSectorR2.innerHTML = "";
+    dom.tablaIndividuales1.innerHTML = "";
+    dom.tablasIndividuales2.innerHTML = "";
+  }
+
+  async function fetchRaceData(filenameRace: string) {
+    const { data: resultSetData, error } = await supabase
+      .from("race")
+      .select("pointsystem!inner(name, points, fastestlap), race_data_1, race_data_2")
+      .eq("filename", filenameRace)
+      .single();
+
+    if (error || !resultSetData) throw new Error("No se encontraron datos de la carrera");
+
+    const { data: raceDataJSON, error: errorRaceDataJSON } = await supabase
+      .storage
+      .from("results")
+      .download(resultSetData.race_data_1);
+
+    if (errorRaceDataJSON || !raceDataJSON) throw new Error("Error al cargar los datos de la carrera");
+
+    const datosR1 = JSON.parse(await raceDataJSON.text());
+    let datosR2 = null;
+    if (resultSetData.race_data_2 !== null && resultSetData.race_data_2 !== "") {
+      const { data: raceDataJSONR2, error: errorRaceDataJSON2 } = await supabase
+        .storage
+        .from("results")
+        .download(resultSetData.race_data_2);
+
+      if (!errorRaceDataJSON2 || raceDataJSONR2) datosR2 = JSON.parse(await raceDataJSONR2.text());
+    }
+
+    let datos: RaceData[] = [];
+    datos.push(datosR1);
+    if (datosR2 !== null) datos.push(datosR2);
+
+    const flagMoreSplits: boolean = datos[0].RaceResult.some(
+      (driver) => driver.Split > 1
+    );
+
+    const points: Points = {
+      Name: resultSetData.pointsystem.name,
+      Puntuation: resultSetData.pointsystem.points
+        .split(",")
+        .map((point) => parseInt(point)),
+      FastestLap: resultSetData.pointsystem.fastestlap,
+    };
+
+    let carData: CarData[] = [];
+    for (let carResume of datos[0].RaceCarResume) {
+      const { data: carDataSupabase, error: errorCarData } = await supabase
+        .from("car")
+        .select("filename, carbrand!inner(name, imgbrand), model, carclass!inner(short_name, class_design)")
+        .eq("filename", carResume.CarFileName)
+        .single();
+
+      if (carDataSupabase) {
+        carData.push({
+          filename: carDataSupabase.filename,
+          brand: carDataSupabase.carbrand?.name ?? "",
+          model: carDataSupabase.model ?? "",
+          classShortName: carDataSupabase.carclass.short_name ?? "",
+          classColor: carDataSupabase.carclass.class_design ?? "",
+          imgbrand: carDataSupabase.carbrand?.imgbrand ?? "",
+        });
+      } else {
+        console.error("Error al obtener los datos del coche: ", errorCarData);
+      }
+    }
+
+    return { datos, points, carData, flagMoreSplits };
+  }
+
+  async function renderCircuitData(datosCircuito: HTMLElement, raceData: RaceData) {
+    const { data: isCircuitExists } = await supabase
+      .from("circuit")
+      .select("id, name, shortname, filename, location")
+      .eq("filename", raceData.RaceConfig.Track)
+      .single();
+
+    if (isCircuitExists) {
+      const { data: layout } = await supabase
+        .from("circuitLayout")
+        .select("name, length, capacity")
+        .eq("filename", raceData.RaceConfig.TrackLayout)
+        .eq("circuit", isCircuitExists.id)
+        .single();
+
+      const circuitData: CircuitData = {
+        name: isCircuitExists?.name ?? "",
+        layout: layout?.name ?? "Indefinido",
+        location: isCircuitExists?.location ?? "",
+        length: layout?.length ?? 0,
+        capacity: layout?.capacity ?? 0,
+      };
+
+      const datosCircuitoHTML = `
+      <div class="text-center bg-darkSecond rounded-lg py-5" style = "width=99%">
+      <p class = "text-3xl font-bold border-b border-primary w-fit mx-auto mb-2">Datos del circuito</p>
+        <div class = "grid grid-cols-1">
+          <p class="text-2xl font-semibold">Circuito: ${circuitData.name} (Variante ${circuitData.layout})</p>
+          <p class="text-xl">Localización: ${circuitData.location}</p>
+        </div>
+        <div class = "grid grid-cols-2 text-lg mt-2">
+          <p>Longitud: ${circuitData.length} m</p>
+          <p>Capacidad: ${circuitData.capacity} pilotos</p>
+        </div>
+      </div>`;
+      datosCircuito.innerHTML = datosCircuitoHTML;
+    }
+  }
+
+  function renderResultsTable(tablaResultados: HTMLElement, datos: RaceData[], points: Points, carData: CarData[]) {
+    let tablaResultadosHTML = "";
+    for (let i = 0; i < datos.length; i++) {
+      const resultTable = getResultTableData(
+        datos[i],
+        points.Name,
+        points,
+        carData
+      );
+      tablaResultadosHTML += `
+    <p class="text-3xl font-bold border-b border-primary w-fit mx-auto mt-4 mb-2">Resultado de carrera ${i + 1}</p>
+    <table class="w-full border-collapse border border-lightPrimary">
+      <thead class="font-medium bg-primary">
+        <tr class="tabletitle">
+        <th colspan="2"></th>
+        <th>Pos</th>
+        <th>Nombre</th>
+        <th>Clase</th>
+        <th colspan="2">Coche</th>
+        <th>Equipo</th>
+        <th>Vueltas</th>
+        <th>Tiempo Total</th>
+        <th>Gap to 1st</th>
+        <th>Intervalo</th>
+        <th>Vuelta Rápida</th>
+        <th>Ptos</th>
+        </tr>
+      </thead>
+      <tbody class="font-normal">`;
+
+      const createResultRow = (result: any, index: number) => `
+        <tr class="bg-${index % 2 === 0 ? "darkPrimary" : "darkSecond"}">
+          <td class="text-center">${result.gridPositionClass}</td>
+          <td class="text-center">${result.gainsAbs}</td>
+          <td class="font-medium text-center">${result.posicionFinal}</td>
+          <td class="text-start">${result.driverName}</td>
+          <td class="text-center"><span ${result.carColorClass}>${result.carClass}</span></td>
+          <td class="text-center"><img class='w-4 justify-end' src='${result.carBrand}' alt=''></img></td>
+          <td class="text-start">${result.carName}</td>
+          <td class="text-start">${result.team}</td>
+          <td class="text-center">${result.totalLaps}</td>
+          <td class="text-center">${result.timeadjust}</td>
+          <td class="text-center">${result.gap}</td>
+          <td class="text-center">${result.interval}</td>
+          <td class="text-center"><span class="${result.flapClass}">${result.bestlapToString} ${result.tyre}</span></td>
+          <td class="text-center">${result.points}</td>
+        </tr>`;
+
+      let secondSplitInit = false;
+      resultTable.forEach((result, index) => {
+        if (result.splitNumber === 2 && !secondSplitInit) {
+          tablaResultadosHTML += `
+        <tr class="bg-primary text-center font-bold">
+          <td colspan="14">Segundo Split</td>
+        </tr>`;
+          result.interval = "";
+          secondSplitInit = true;
+        }
+        tablaResultadosHTML += createResultRow(result, index);
+      });
+
+      tablaResultadosHTML += "</tbody></table>";
+    }
+    tablaResultados.innerHTML = tablaResultadosHTML;
+  }
+
+  function renderPositionCharts(chartChangePosition: HTMLElement, datos: RaceData[]) {
+    const ApexchartChangePosition = [];
+    for (let i = 0; i < datos.length; i++) {
+      let seriesDataPositions: { name: string; data: number[] }[][] = [];
+      const splitsPositionChange = [
+        ...new Set(datos[i].RaceResult.map((result) => result.Split)),
+      ];
+      splitsPositionChange.forEach(() => seriesDataPositions.push([]));
+      datos[i].RaceLaps.filter((lapData) => lapData.Laps.length > 0).forEach((lapData) => {
+        const driverResult = datos[i].RaceResult.find(
+          (result) => result.SteamID === lapData.SteamID
+        );
+        if (driverResult) {
+          const splitIndex = driverResult.Split - 1;
+          const gridPosition = driverResult.GridPosition;
+          seriesDataPositions[splitIndex].push({
+            name: lapData.DriverName,
+            data: [
+              gridPosition,
+              ...lapData.Laps.map((lap) => lap.Position),
+            ],
+          });
+        }
+      });
+      const numlaps: number[] = Array.from({ length: datos[i].RaceLaps[0].Laps.length + 1 }, (_, j) => j);
+      let nameChartPositions = "Cambios de posiciones (Carrera " + (i + 1) + ")";
+      const optionsChangePositions = {
+        title: {
+          text: nameChartPositions,
+          align: "center",
+          style: {
+            color: "#f9f9f9",
+            fontSize: "24px",
+            fontWeight: "bold",
+          },
+        },
+        series: seriesDataPositions[0],
+        colors: [
+          "#2E93fA",
+          "#66DA26",
+          "#E91E63",
+          "#FF9800",
+          "#fff700",
+          "#00ffd4",
+          "#0036ff",
+          "#e91ec4",
+          "#9e57ff",
+          "#ff0000",
+          "#00ffbd",
+          "#546E7A",
+        ],
+        chart: {
+          type: "line",
+          zoom: {
+            enable: false,
+            type: "x",
+            autoScaleYaxis: true,
+          },
+          locales: [
+            {
+              name: "es",
+              options: {
+                toolbar: {
+                  download: "Descargar SVG",
+                  selection: "Seleccionar",
+                  selectionZoom: "Seleccionar Zoom",
+                  zoomIn: "Zoom In",
+                  zoomOut: "Zoom Out",
+                  pan: "Mover",
+                  reset: "Reiniciar Zoom",
+                },
+              },
+            },
+          ],
+          defaultLocale: "es",
+          toolbar: {
+            show: true,
+            tools: {
+              download: false,
+              selection: false,
+              zoom: true,
+              zoomin: true,
+              zoomout: true,
+              pan: true,
+              reset: true,
+            },
+          },
+          animation: {
+            enabled: true,
+            easing: "linear",
+            speed: 850,
+            animateGradually: {
+              enabled: false,
+            },
+          },
+        },
+        xaxis: {
+          categories: numlaps,
+          labels: {
+            style: {
+              colors: "#f9f9f9",
+            },
+          },
+          title: {
+            text: "Vueltas",
+            style: {
+              color: "#f9f9f9",
+              fontSize: "16px",
+            },
+          },
+        },
+        yaxis: {
+          stepSize: 1,
+          min: 1,
+          position: "top",
+          reversed: true,
+          title: {
+            text: "Posiciones",
+            style: {
+              color: "#f9f9f9",
+              fontSize: "16px",
+            },
+          },
+          labels: {
+            style: {
+              colors: "#f9f9f9",
+            },
+          },
+        },
+        stroke: {
+          curve: "smooth",
+        },
+        markers: {
+          size: 1,
+        },
+        tooltip: {
+          theme: "dark",
+          shared: false,
+          intersect: true,
+          onDatasetHover: {
+            highlightDataSeries: false,
+          },
+          x: {
+            show: true,
+          },
+          y: {
+            formatter: function (value: number) {
+              return value.toFixed(0);
+            },
+          },
+        },
+        legend: {
+          labels: {
+            colors: "#f9f9f9",
+          },
+        },
+      };
+      const auxChart = new ApexCharts(
+        document.querySelector("#chartChangePosition" + (i + 1)),
+        optionsChangePositions
+      );
+      ApexchartChangePosition.push(auxChart);
+    }
+    chartChangePosition.classList.remove('hidden');
+    for (const chart of ApexchartChangePosition) {
+      chart.render();
+    }
+  }
+
+  function renderGapCharts(chartGaps: HTMLElement, datos: RaceData[]) {
+    const charGapsProgresion = [];
+    for (let i = 0; i < datos.length; i++) {
+      let seriesDataGaps: { name: string; data: number[] }[][] = [];
+      const splitsGapVariation = [
+        ...new Set(datos[i].RaceResult.map((result) => result.Split)),
+      ];
+      splitsGapVariation.forEach(() => seriesDataGaps.push([]));
+      datos[i].RaceLaps.filter((lapData) => lapData.Laps.length > 0).forEach((lapData) => {
+        const driverResult = datos[i].RaceResult.find((result) => result.SteamID === lapData.SteamID);
+        if (driverResult) {
+          const splitIndex = driverResult.Split - 1;
+          seriesDataGaps[splitIndex].push({
+            name: lapData.DriverName,
+            data: lapData.Laps.map((lap) => lap.GaptoFirst),
+          });
+        }
+      });
+      let nameChartGaps = "Distancia al líder (Carrera " + (i + 1) + ")";
+      const numlaps: number[] = Array.from({ length: datos[i].RaceLaps[0].Laps.length + 1 }, (_, j) => j);
+      const optionsGaps = {
+        title: {
+          text: nameChartGaps,
+          align: "center",
+          style: {
+            color: "#f9f9f9",
+            fontSize: "24px",
+            fontWeight: "bold",
+          },
+        },
+        series: seriesDataGaps[0],
+        colors: [
+          "#2E93fA",
+          "#66DA26",
+          "#546E7A",
+          "#E91E63",
+          "#FF9800",
+          "#fff700",
+          "#00ffd4",
+          "#0036ff",
+          "#e91ec4",
+          "#9e57ff",
+          "#ff0000",
+          "#00ffbd",
+        ],
+        chart: {
+          type: "line",
+          zoom: {
+            enable: false,
+            type: "x",
+            autoScaleYaxis: true,
+          },
+          locales: [
+            {
+              name: "es",
+              options: {
+                toolbar: {
+                  download: "Descargar SVG",
+                  selection: "Seleccionar",
+                  selectionZoom: "Seleccionar Zoom",
+                  zoomIn: "Zoom In",
+                  zoomOut: "Zoom Out",
+                  pan: "Mover",
+                  reset: "Reiniciar Zoom",
+                },
+              },
+            },
+          ],
+          defaultLocale: "es",
+          toolbar: {
+            show: true,
+            tools: {
+              download: false,
+              selection: false,
+              zoom: true,
+              zoomin: true,
+              zoomout: true,
+              pan: true,
+              reset: true,
+            },
+          },
+          animation: {
+            enabled: true,
+            easing: "linear",
+            speed: 850,
+            animateGradually: {
+              enabled: false,
+            },
+          },
+        },
+        xaxis: {
+          categories: numlaps,
+          labels: {
+            style: {
+              colors: "#f9f9f9",
+            },
+          },
+          title: {
+            text: "Vueltas",
+            style: {
+              color: "#f9f9f9",
+              fontSize: "16px",
+            },
+          },
+        },
+        yaxis: {
+          stepSize: 8,
+          min: 0,
+          position: "top",
+          reversed: true,
+          title: {
+            text: "Distancia al líder (segundos)",
+            style: {
+              color: "#f9f9f9",
+              fontSize: "16px",
+            },
+          },
+          labels: {
+            style: {
+              colors: "#f9f9f9",
+            },
+          },
+        },
+        stroke: {
+          curve: "smooth",
+        },
+        markers: {
+          size: 1,
+        },
+        tooltip: {
+          theme: "dark",
+          shared: false,
+          intersect: true,
+          onDatasetHover: {
+            highlightDataSeries: false,
+          },
+          x: {
+            show: true,
+          },
+          y: {
+            formatter: function (value: number) {
+              return value.toFixed(3);
+            },
+          },
+        },
+        legend: {
+          labels: {
+            colors: "#f9f9f9",
+          },
+        },
+        grid: {
+          borderColor: "#5a5a5a",
+        },
+      };
+      const auxChart = new ApexCharts(
+        document.querySelector("#chartGaps" + (i + 1)),
+        optionsGaps
+      );
+      charGapsProgresion.push(auxChart);
+    }
+    chartGaps.classList.remove('hidden');
+    for (const chart of charGapsProgresion) {
+      chart.render();
+    }
+  }
+
+  function renderSectorTables(dom: any, datos: RaceData[], carData: CarData[], flagMoreSplits: boolean) {
+    let flagSectorsR2 = false;
+    for (let i = 0; i < datos.length; i++) {
+      if (i === 1 && !flagSectorsR2) {
+        dom.sectorTableR2.classList.remove('hidden');
+        flagSectorsR2 = true;
+      }
+      let titleSector = "";
+      if (datos.length > 1) {
+        titleSector += `<p class="text-3xl font-bold border-b border-primary w-fit mx-auto mt-4 mb-2">Mejores Sectores (Carrera ${i + 1})</p>`;
+        switch (i) {
+          case 0:
+            dom.titleSectorR1.innerHTML += titleSector;
+            break;
+          case 1:
+            dom.titleSectorR2.innerHTML += titleSector;
+            break;
+        }
+      }
+      const sectorsList = datos[i].BestSector.reduce((acc, sector) => {
+        const index = sector.SectorNumber - 1;
+        if (!acc[index]) acc[index] = [];
+        acc[index].push(sector);
+        return acc;
+      }, [] as BestSector[][]);
+
+      const maxContenedores = 3;
+      sectorsList.slice(0, maxContenedores).forEach((sector, index) => {
+        renderSectorTable(sector, index, i, carData, flagMoreSplits);
+      });
+    }
+
+    function renderSectorTable(
+      sector: BestSector[],
+      sectorIndex: number,
+      raceIndex: number,
+      carData: CarData[],
+      flagMoreSplits: boolean
+    ) {
+      const sectorTable = document.getElementById(`tablaS${sectorIndex + 1}R${raceIndex + 1}`);
+      if (!sectorTable) {
+        console.warn(`Elemento con id "tablaS${sectorIndex + 1}R${raceIndex + 1}" no encontrado.`);
+        return;
+      }
+      let sectorHTML = `<p class="text-3xl font-bold border-b border-primary w-fit mx-auto mt-4 mb-2">Mejor Sector ${sectorIndex + 1}</p>
+        <table class="w-full border-collapse border border-lightPrimary">
+        <thead class="font-medium bg-primary">
+            <tr class="tabletitle">
+                <th>Pos</th>
+                <th>Nombre</th>
+                <th colspan="3">Vehiculo</th>
+                <th>Tiempo</th>
+                <th>Gap</th>
+            </tr>
+        </thead>
+        <tbody class="font-normal">`;
+      let pos = 0;
+      for (let i of sector) {
+        pos++;
+        let gap: string = "";
+        if (pos === 1) {
+          gap = "0.000";
+        } else {
+          gap = "+" + formatTwoIntegersPlusThreeDecimals((i.BestSector - sector[0].BestSector) / 1000);
+        }
+        const sectorTimeString: string =
+          formatTwoIntegersPlusThreeDecimals(i.BestSector / 1000);
+
+        const isCarExists = carData.find(
+          (car) => car.filename === i.CarFileName
+        );
+        let carName: string;
+        let carBrand: string;
+        let carClass: string;
+        let carColorClass: string;
+        if (isCarExists) {
+          carName = isCarExists.brand + " " + isCarExists.model;
+          carBrand = isCarExists.imgbrand;
+          carClass = isCarExists.classShortName;
+          carColorClass = `style="background-color: ${isCarExists.classColor.split(" ")[0].replace("bg-[", "").replace("]", "")}; color: ${isCarExists.classColor.split(" ")[1].replace("text-[", "").replace("]", "")}"`;
+          carColorClass += ' class = "rounded text-xs font-bold px-1 py-0.5 ml-1"';
+        } else {
+          carName = i.CarFileName;
+          carBrand = "";
+          carClass = "";
+          carColorClass = "";
+        }
+
+        if (pos % 2 === 0) {
+          sectorHTML += `<tr class="bg-darkPrimary text-center">`;
+        } else {
+          sectorHTML += `<tr class="bg-darkSecond text-center">`;
+        }
+        sectorHTML += `<td>${pos}</td>`;
+
+        if (flagMoreSplits) {
+          sectorHTML += `<td>${i.DriverName} (s${i.Split})</td>`;
+        } else {
+          sectorHTML += `<td>${i.DriverName}</td>`;
+        }
+        sectorHTML += `
+            <td><span ${carColorClass}>${carClass}</span></td>
+            <td><img class='w-4 justify-end' src='${carBrand}' alt=''></img></td>
+            <td>${carName}</td>
+            <td>${sectorTimeString}</td>
+            <td>${gap}</td>
+          </tr>`;
+      }
+      sectorHTML += `</tbody></table>`;
+      sectorTable.innerHTML = sectorHTML;
+    }
+  }
+
+  function renderIndividualLaps(tablasIndividuales: HTMLElement[], datos: RaceData[], carData: CarData[], flagMoreSplits: boolean) {
+    for (let i = 0; i < datos.length; i++) {
+      if (datos.length > 1) {
+        tablasIndividuales[1].classList.remove('hidden');
+      }
+      tablasIndividuales[i].innerHTML = `<p class="text-3xl font-bold border-b border-primary w-fit mx-auto mt-4 mb-2">Vueltas individuales (Carrera ${i + 1})</p>`;
+      const tablaIndividual = loadIndividualTimes(datos[i], carData, flagMoreSplits);
+      tablasIndividuales[i].innerHTML += tablaIndividual;
+      if (i < datos.length - 1)
+        tablasIndividuales[i].innerHTML += `<div class="mt-6"><p class='border-t-8 border-t-primary text-darkPrimary'></p></div>`;
     }
   }
 
@@ -746,8 +736,7 @@ if (document.readyState === 'loading') {
   initializeScript();
 }
 
-function loadIndividualTimes(datos: RaceData, carData: CarData[], flagMoreSplits: Boolean): string{
-  let result: string = "";
+function loadIndividualTimes(datos: RaceData, carData: CarData[], flagMoreSplits: boolean): string {
   const BestLapGeneral = datos.BestLap[0].BestLap;
   const sectorsList = datos.BestSector.reduce((acc, sector) => {
     const index = sector.SectorNumber - 1;
@@ -756,152 +745,65 @@ function loadIndividualTimes(datos: RaceData, carData: CarData[], flagMoreSplits
     return acc;
   }, [] as BestSector[][]);
 
-  // Dividir la generación de HTML en chunks para una carga más rápida
-  const chunkSize = 1; // Número de pilotos por chunk
   const drivers = datos.RaceLaps;
+  let result = "";
 
-  for (let i = 0; i < drivers.length; i += chunkSize) {
-    const chunk = drivers.slice(i, i + chunkSize);
-    let chunkHTML = "";
-    for (const itemRL of chunk) {
-      const driverName = itemRL.DriverName;
-      const driverID = itemRL.SteamID;
-      const laps = itemRL.Laps;
-      const totalLaps = laps.length;
-      const bestLap = itemRL.Best;
-      const optimalLap: number[] = itemRL.Optimal;
-      const average = itemRL.Average;
-      const consistency = datos.Consistency.find(
-        (consistency) => consistency.SteamID === driverID
-      )?.Consistency;
-
-      let pos = datos.RaceResult.find(
-        (driver) => driver.SteamID === driverID
-      )?.Pos;
-      if (pos === undefined) pos = -3;
-
-      const BestLap = datos.RaceResult.find(
-        (driver) => driver.SteamID === driverID
-      )?.BestLap;
-      let BestLapFound: boolean = false;
-
-      const CarFileNameFromDriver = datos.RaceResult.find(
-        (driver) => driver.SteamID === driverID
-      )?.CarFileName;
-
-      // Obtener el nombre real del coche
-      const isCarExists = carData.find(
-        (car) => car.filename === CarFileNameFromDriver
-      );
-      let carName: string;
-      let carBrand: string;
-      let carClass: string;
-      let carColorClass: string;
-      if (isCarExists) {
-        carName = isCarExists.brand + " " + isCarExists.model;
-        carBrand = isCarExists.imgbrand;
-        carClass = isCarExists.classShortName;
-        carColorClass = `style="background-color: ${isCarExists.classColor.split(" ")[0].replace("bg-[", "").replace("]", "")}; color: ${isCarExists.classColor.split(" ")[1].replace("text-[", "").replace("]", "")}"`;
-        carColorClass +=
-          ' class = "rounded text-xs font-bold px-1 py-0.5 ml-1"';
-      } else {
-        carName = CarFileNameFromDriver ?? "";
-        carBrand = "";
-        carClass = "";
-        carColorClass = "";
-      }
-
-      const AvgSectors: number[] = average.slice(1);
-      let secondsavg = formatTwoIntegersPlusThreeDecimals(
-        average[0] % 60
-      );
-      let minutesavg = formatTwoIntegers(
-        Math.trunc((average[0] / 60) % 60)
-      );
-      let avglapToString: string = "";
-      let avgSectorString: string = "";
-      if (pos >= -2) {
-        avglapToString = `Vuelta Media: ${minutesavg}:${secondsavg}`;
-        avgSectorString += `(`;
-        AvgSectors.map((sector, index, array) => {
-          sector /= 1000;
-          const minutes = Math.trunc(sector / 60);
-          const seconds = sector % 60;
-          avgSectorString += `S${index + 1}: ${
-            minutes
-              ? `${formatTwoIntegers(minutes)}:${formatTwoIntegersPlusThreeDecimals(seconds)}`
-              : formatTwoIntegersPlusThreeDecimals(seconds)
-          }${index < array.length - 1 ? " | " : ""}`;
-        });
-        avgSectorString += `)`;
-      }
-
-      let optimallapToString: string = "";
-      let optimalSectorsString: string = "";
-
-      if (optimalLap && pos >= -2) {
-        const [totalTime, ...OptimalSectors] = optimalLap;
-        const minutes = Math.trunc((totalTime / 60) % 60);
-        const seconds = totalTime % 60;
-
-        optimallapToString = `Vuelta Optima: ${formatTwoIntegers(minutes)}:${formatTwoIntegersPlusThreeDecimals(seconds)}`;
-
-        optimalSectorsString =
-          "(" +
-          OptimalSectors.map((sector, index) => {
-            sector = sector / 1000;
-            const sectorTime =
-              sector > 60
-                ? `${formatTwoIntegers(Math.trunc((sector / 60) % 60))}:${formatTwoIntegersPlusThreeDecimals(sector % 60)}`
-                : formatTwoIntegersPlusThreeDecimals(sector);
-
-            return `S${index + 1}: ${sectorTime}`;
-          }).join(" | ") +
-          ")";
-      }
-
-      const formatBestLapTime = (BestLap: number | undefined): string => {
-        if (!BestLap || BestLap >= 999999.999)
-          return "Vuelta Rápida: No Time";
-
-        const minutes = Math.trunc((BestLap / 60) % 60);
-        const seconds = BestLap % 60;
-        return `Vuelta Rápida: ${formatTwoIntegers(minutes)}:${formatTwoIntegersPlusThreeDecimals(seconds)}`;
+  function getCarInfo(CarFileNameFromDriver: string | undefined) {
+    const isCarExists = carData.find(car => car.filename === CarFileNameFromDriver);
+    if (isCarExists) {
+      return {
+        carName: isCarExists.brand + " " + isCarExists.model,
+        carClass: isCarExists.classShortName,
+        carColorClass: `style="background-color: ${isCarExists.classColor.split(" ")[0].replace("bg-[", "").replace("]", "")}; color: ${isCarExists.classColor.split(" ")[1].replace("text-[", "").replace("]", "")}" class = "rounded text-xs font-bold px-1 py-0.5 ml-1"`
       };
+    }
+    return {
+      carName: CarFileNameFromDriver ?? "",
+      carClass: "",
+      carColorClass: ""
+    };
+  }
 
-      const formatSectors = (sectors: number[]): string => {
-        return (
-          "(" +
-          sectors
-            .map((sector, index) => {
-              sector = sector / 1000;
-              const timeStr =
-                sector > 60
-                  ? `${formatTwoIntegers(Math.trunc((sector / 60) % 60))}:${formatTwoIntegersPlusThreeDecimals(sector % 60)}`
-                  : formatTwoIntegersPlusThreeDecimals(sector);
-              return `S${index + 1}: ${timeStr}`;
-            })
-            .join(" | ") +
-          ")"
-        );
-      };
+  function formatBestLapTime(BestLap: number | undefined): string {
+    if (!BestLap || BestLap >= 999999.999)
+      return "Vuelta Rápida: No Time";
+    const minutes = Math.trunc((BestLap / 60) % 60);
+    const seconds = BestLap % 60;
+    return `Vuelta Rápida: ${formatTwoIntegers(minutes)}:${formatTwoIntegersPlusThreeDecimals(seconds)}`;
+  }
 
-      const bestlapToString = formatBestLapTime(BestLap);
-      const bestSectorsString =
-        pos >= -2 && BestLap && BestLap < 999999.999
-          ? formatSectors(bestLap.slice(1))
-          : "";
+  function formatSectors(sectors: number[]): string {
+    return (
+      "(" +
+      sectors
+        .map((sector, index) => {
+          sector = sector / 1000;
+          const timeStr =
+            sector > 60
+              ? `${formatTwoIntegers(Math.trunc((sector / 60) % 60))}:${formatTwoIntegersPlusThreeDecimals(sector % 60)}`
+              : formatTwoIntegersPlusThreeDecimals(sector);
+          return `S${index + 1}: ${timeStr}`;
+        })
+        .join(" | ") +
+      ")"
+    );
+  }
 
-      let consistencyString =
-        consistency === undefined || consistency === -1
-          ? ""
-          : ` | Consistencia: ${consistency.toFixed(2)}% ( ${(consistency - 100).toFixed(2)} )`;
-
-      if (pos < -3) break;
-
-      const createDriverHeader = () => {
-        const splitInfo = flagMoreSplits ? `(Split ${itemRL.Split})` : "";
-        return `
+  function createDriverHeader(
+    driverName: string,
+    carName: string,
+    carClass: string,
+    carColorClass: string,
+    bestlapToString: string,
+    avglapToString: string,
+    consistencyString: string,
+    optimallapToString: string,
+    bestSectorsString: string,
+    avgSectorString: string,
+    optimalSectorsString: string,
+    splitInfo: string)
+  {
+    return `
       <div class="mt-8">
         <div class="text-center bg-darkSecond rounded-lg py-5">
           <p class="text-3xl font-bold border-b border-primary w-fit mx-auto mb-2">${driverName} ${splitInfo}</p>
@@ -923,74 +825,75 @@ function loadIndividualTimes(datos: RaceData, carData: CarData[], flagMoreSplits
           </div>
         </div>
     `;
-      };
+  }
 
-      const formatLapRow = (
-        lap: any,
-        bestGlobalSectors: number[],
-        bestSectorsDriverID: number[]
-      ) => {
-        const getBestLapClass = () => {
-          if (lap.LapTime === BestLapGeneral && !BestLapFound) {
-            BestLapFound = true;
-            return '"bg-[#c100ff] text-white font-bold rounded-full w-content px-2"';
-          }
-          if (lap.LapTime === BestLap && !BestLapFound) {
-            BestLapFound = true;
-            return '"bg-[#00ee07] text-black font-bold rounded-full w-content px-2"';
-          }
+  function formatLapRow(
+    lap: Lap,
+    bestGlobalSectors: number[],
+    bestSectorsDriverID: number[],
+    BestLapGeneral: number,
+    BestLap: number | undefined,
+    pos: number,
+    BestLapFoundRef: boolean )
+  {
+    function getBestLapClass() {
+      if (lap.LapTime === BestLapGeneral && !BestLapFoundRef) {
+        BestLapFoundRef = true;
+        return '"bg-[#c100ff] text-white font-bold rounded-full w-content px-2"';
+      }
+      if (lap.LapTime === BestLap && !BestLapFoundRef) {
+        BestLapFoundRef = true;
+        return '"bg-[#00ee07] text-black font-bold rounded-full w-content px-2"';
+      }
+      if (lap.Cut > 0) {
+        BestLapFoundRef = true;
+        return '"bg-primary text-black font-bold rounded-full w-content px-2"';
+      }
+      return '""';
+    }
 
-          if (lap.Cut > 0) {
-            BestLapFound = true;
-            return '"bg-primary text-black font-bold rounded-full w-content px-2"';
-          }
-          return '""';
-        };
+    function formatSectorTime(time: number) {
+      time /= 1000;
+      if (time >= 60) {
+        const seconds = formatTwoIntegersPlusThreeDecimals(time % 60);
+        const minutes = formatTwoIntegers(Math.trunc((time / 60) % 60));
+        return `${minutes}:${seconds}`;
+      }
+      return formatTwoIntegersPlusThreeDecimals(time);
+    }
 
-        const formatSectorTime = (time: number) => {
-          time /= 1000;
-          if (time >= 60) {
-            const seconds = formatTwoIntegersPlusThreeDecimals(time % 60);
-            const minutes = formatTwoIntegers(
-              Math.trunc((time / 60) % 60)
-            );
-            return `${minutes}:${seconds}`;
-          }
-          return formatTwoIntegersPlusThreeDecimals(time);
-        };
+    function getSectorClass(sectorIndex: number) {
+      const sectorTime = lap.Sector[sectorIndex];
+      if (sectorTime === bestSectorsDriverID[sectorIndex]) {
+        return sectorTime === bestGlobalSectors[sectorIndex]
+          ? '"bg-[#c100ff] text-white font-bold rounded-full w-content px-2"'
+          : '"bg-[#00ee07] text-black font-bold rounded-full w-content px-2"';
+      }
+      return '""';
+    }
 
-        const getSectorClass = (sectorIndex: number) => {
-          const sectorTime = lap.Sector[sectorIndex];
-          if (sectorTime === bestSectorsDriverID[sectorIndex]) {
-            return sectorTime === bestGlobalSectors[sectorIndex]
-              ? '"bg-[#c100ff] text-white font-bold rounded-full w-content px-2"'
-              : '"bg-[#00ee07] text-black font-bold rounded-full w-content px-2"';
-          }
-          return '""';
-        };
+    const lapTime =
+      pos >= -1
+        ? `${formatTwoIntegers(Math.trunc((lap.LapTime / 60) % 60))}:${formatTwoIntegersPlusThreeDecimals(lap.LapTime % 60)}`
+        : "";
 
-        const lapTime =
-          pos >= -1
-            ? `${formatTwoIntegers(Math.trunc((lap.LapTime / 60) % 60))}:${formatTwoIntegersPlusThreeDecimals(lap.LapTime % 60)}`
-            : "";
+    const bgClass =
+      lap.LapNumber % 2 === 0 ? "bg-darkPrimary" : "bg-darkSecond";
+    const cutClass =
+      lap.Cut > 0
+        ? '"bg-primary text-black font-semibold rounded-full w-content px-2"'
+        : '""';
 
-        const bgClass =
-          lap.LapNumber % 2 === 0 ? "bg-darkPrimary" : "bg-darkSecond";
-        const cutClass =
-          lap.Cut > 0
-            ? '"bg-primary text-black font-semibold rounded-full w-content px-2"'
-            : '""';
-        
-        const positionClass =
-          lap.Position === 1
-            ? '"bg-[#ffc750] text-black font-bold rounded-full w-content px-2"'
-            : lap.Position === 2
-            ? '"bg-[#c0c0c0] text-black font-bold rounded-full w-content px-2"'
-            : lap.Position === 3
-            ? '"bg-[#cd7f32] text-white font-bold rounded-full w-content px-2"'
-            : '""';
+    let positionClass = '""';
+    if (lap.Position === 1) {
+      positionClass = '"bg-[#ffc750] text-black font-bold rounded-full w-content px-2"';
+    } else if (lap.Position === 2) {
+      positionClass = '"bg-[#c0c0c0] text-black font-bold rounded-full w-content px-2"';
+    } else if (lap.Position === 3) {
+      positionClass = '"bg-[#cd7f32] text-white font-bold rounded-full w-content px-2"';
+    }
 
-        return `
+    return `
       <tr class="${bgClass} text-center">
         <td>${lap.LapNumber}</td>
         <td><span class=${getBestLapClass()}>${lapTime}</span></td>
@@ -1002,21 +905,99 @@ function loadIndividualTimes(datos: RaceData, carData: CarData[], flagMoreSplits
         <td><span class=${positionClass}>${lap.Position}</span></td>
         <td><span class=${cutClass}>${lap.Cut}</span></td>
       </tr>`;
-      };
+  }
 
-      chunkHTML += createDriverHeader();
+  for (const itemRL of drivers) {
+    const driverName = itemRL.DriverName;
+    const driverID = itemRL.SteamID;
+    const laps = itemRL.Laps;
+    const bestLap = itemRL.Best;
+    const optimalLap: number[] = itemRL.Optimal;
+    const average = itemRL.Average;
+    const consistency = datos.Consistency.find((consistency) => consistency.SteamID === driverID)?.Consistency;
 
-      if (pos >= -2) {
-        const bestGlobalSectors = sectorsList.map(
-          (sector) => sector[0].BestSector
-        );
-        const bestSectorsDriverID = sectorsList.map(
-          (sector) =>
-            sector.find((s) => s.SteamID === driverID)?.BestSector ??
-            999999999
-        );
+    let pos = datos.RaceResult.find((driver) => driver.SteamID === driverID)?.Pos;
+    pos ??= -3;
 
-        chunkHTML += `
+    const BestLap = datos.RaceResult.find((driver) => driver.SteamID === driverID)?.BestLap;
+    let BestLapFoundRef = false ;
+
+    const CarFileNameFromDriver = datos.RaceResult.find((driver) => driver.SteamID === driverID)?.CarFileName;
+
+    const { carName, carClass, carColorClass } = getCarInfo(CarFileNameFromDriver);
+
+    const AvgSectors: number[] = average.slice(1);
+    let secondsavg = formatTwoIntegersPlusThreeDecimals(average[0] % 60);
+    let minutesavg = formatTwoIntegers(Math.trunc((average[0] / 60) % 60));
+    let avglapToString: string = "";
+    let avgSectorString: string = "";
+    if (pos >= -2) {
+      avglapToString = `Vuelta Media: ${minutesavg}:${secondsavg}`;
+      avgSectorString += `(`;
+      AvgSectors.forEach((sector, index, array) => {
+        sector /= 1000;
+        const minutes = Math.trunc(sector / 60);
+        const seconds = sector % 60;
+        avgSectorString += `S${index + 1}: ${
+          minutes
+            ? `${formatTwoIntegers(minutes)}:${formatTwoIntegersPlusThreeDecimals(seconds)}`
+            : formatTwoIntegersPlusThreeDecimals(seconds)
+        }${index < array.length - 1 ? " | " : ""}`;
+      });
+      avgSectorString += `)`;
+    }
+
+    let optimallapToString: string = "";
+    let optimalSectorsString: string = "";
+
+    if (optimalLap && pos >= -2) {
+      const [totalTime, ...OptimalSectors] = optimalLap;
+      const minutes = Math.trunc((totalTime / 60) % 60);
+      const seconds = totalTime % 60;
+
+      optimallapToString = `Vuelta Optima: ${formatTwoIntegers(minutes)}:${formatTwoIntegersPlusThreeDecimals(seconds)}`;
+
+      optimalSectorsString =
+        "(" +
+        OptimalSectors.map((sector, index) => {
+          sector = sector / 1000;
+          const sectorTime =
+            sector > 60
+              ? `${formatTwoIntegers(Math.trunc((sector / 60) % 60))}:${formatTwoIntegersPlusThreeDecimals(sector % 60)}`
+              : formatTwoIntegersPlusThreeDecimals(sector);
+
+          return `S${index + 1}: ${sectorTime}`;
+        }).join(" | ") +
+        ")";
+    }
+
+    const bestlapToString = formatBestLapTime(BestLap);
+    const bestSectorsString =
+      pos >= -2 && BestLap && BestLap < 999999.999
+        ? formatSectors(bestLap.slice(1))
+        : "";
+
+    let consistencyString =
+      consistency === undefined || consistency === -1
+        ? ""
+        : ` | Consistencia: ${consistency.toFixed(2)}% ( ${(consistency - 100).toFixed(2)} )`;
+
+    if (pos < -3) continue;
+
+    const splitInfo = flagMoreSplits ? `(Split ${itemRL.Split})` : "";
+    result += createDriverHeader(driverName, carName, carClass, carColorClass, bestlapToString, avglapToString, consistencyString, optimallapToString, bestSectorsString, avgSectorString, optimalSectorsString, splitInfo);
+
+    if (pos >= -2) {
+      const bestGlobalSectors = sectorsList.map(
+        (sector) => sector[0].BestSector
+      );
+      const bestSectorsDriverID = sectorsList.map(
+        (sector) =>
+          sector.find((s) => s.SteamID === driverID)?.BestSector ??
+          999999999
+      );
+
+      result += `
       <table class="w-full border-collapse border border-lightPrimary">
         <thead class="font-medium bg-primary">
           <tr class="tabletitle">
@@ -1029,19 +1010,15 @@ function loadIndividualTimes(datos: RaceData, carData: CarData[], flagMoreSplits
           </tr>
         </thead>
         <tbody class="font-normal">
-          ${laps.map((lap) => formatLapRow(lap, bestGlobalSectors, bestSectorsDriverID)).join("")}
+          ${laps.map((lap) => formatLapRow(lap, bestGlobalSectors, bestSectorsDriverID, BestLapGeneral, BestLap, pos, BestLapFoundRef)).join("")}
         </tbody>
       </table>
     </div>`;
-      } else {
-        chunkHTML += `
+    } else {
+      result += `
       <p class="w-fit mx-auto font-medium text-xl">Piloto sin vueltas: No empezó la prueba / no completó ninguna vuelta</p>
       </div>`;
-      }
     }
-
-    // Actualizar el DOM de forma incremental
-    result += chunkHTML;
   }
 
   return result;
