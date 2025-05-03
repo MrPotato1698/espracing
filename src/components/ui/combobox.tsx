@@ -27,12 +27,16 @@ export function Combobox({
   className,
 }: ComboboxProps) {
   const [open, setOpen] = React.useState(false)
-  // Eliminar el estado commandInputValue ya que Command maneja la búsqueda internamente
+  const [search, setSearch] = React.useState("")
 
-  // Filtrar solo por label, nunca por value
-  // const filteredOptions = options.filter(option =>
-  //   option.label.toLowerCase().includes(commandInputValue.toLowerCase())
-  // );
+  // Filtrar solo por palabra completa, insensible a mayúsculas/minúsculas
+  const filteredOptions = React.useMemo(() => {
+    if (!search.trim()) return options
+    const words = search.trim().toLowerCase().split(/\s+/)
+    return options.filter((option) =>
+      words.every((word) => option.label?.toLowerCase().includes(word)),
+    )
+  }, [options, search])
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -62,11 +66,13 @@ export function Combobox({
           <CommandInput
             placeholder={searchPlaceholder}
             className="text-white bg-darkSecond placeholder:text-lightSecond"
+            value={search}
+            onValueChange={setSearch}
           />
           <CommandList className="text-white">
             <CommandEmpty className="text-gray-400">{emptyMessage}</CommandEmpty>
             <CommandGroup>
-              {options.map((option, visibleIdx) => {
+              {filteredOptions.map((option, visibleIdx) => {
                 let itemBgClass = ""
                 if (value === option.value) {
                   itemBgClass = "bg-primary/20"
