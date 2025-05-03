@@ -1,6 +1,8 @@
 ---
 import Layout from "@/layouts/ProfileLayout.astro";
 import { supabase } from "@/db/supabase";
+import { DataTable } from "@/components/data-table";
+import EditChampCars from "@/components/EditChampCars";
 
 const { id } = Astro.params;
 const { cookies, redirect } = Astro;
@@ -51,6 +53,28 @@ const { data: champsData } = await supabase
   .select("*")
   .eq("id", parseInt(id))
   .single();
+
+const {data: champWinnersData} = await supabase
+  .from("champwinners")
+  .select("winner, isTeam, category, car_name")
+  .eq("championship_id", parseInt(id))
+  .order("id", { ascending: true });
+
+const isTeamData = champWinnersData?.map((winner) => {
+  return {
+    ...winner,
+    isTeam: winner.isTeam ? "Equipo" : "Piloto",
+  };
+});
+
+const columns = [
+  { header: "Nombre", accessor: "winner" },
+  { header: "Tipo", accessor: "isTeam" },
+  { header: "Categoría", accessor: "category" },
+  { header: "Coche", accessor: "car_name" },
+];
+
+const serializedChampWinnersData = isTeamData? JSON.parse(JSON.stringify(isTeamData)): [];
 ---
 
 <Layout title="ESP Racing: Modificación datos de campeonato">
@@ -170,6 +194,7 @@ const { data: champsData } = await supabase
         {champsData?.isfinished ? "Finalizado" : "No finalizado"}
       </span>
     </div>
+
     <input type="hidden" name="champ_id" value={id} />
     <div>
       <button
@@ -189,14 +214,27 @@ const { data: champsData } = await supabase
     </div>
   </form>
 
+  <h3 class="mt-4 text-4xl font-bold w-fit mx-auto">
+    Modificar Campeonatos de la Temporada
+  </h3>
+
+  <DataTable
+    client:only="react"
+    data={serializedChampWinnersData}
+    columns={columns}
+    onDelete={{ path: "champwinner" }}
+    pageSize={10}
+    searchable={false}
+  />
+
+  <EditChampCars champId={parseInt(id)} client:load />
+
 </Layout>
 
 <script>
   const form = document.getElementById("editChampForm") as HTMLFormElement;
 
-  const isEventSwitch = document.getElementById(
-    "champORevent"
-  ) as HTMLInputElement;
+  const isEventSwitch = document.getElementById("champORevent") as HTMLInputElement;
   const eventTypeText = document.getElementById("eventTypeText");
 
   if (isEventSwitch && eventTypeText) {
@@ -209,9 +247,7 @@ const { data: champsData } = await supabase
     });
   }
 
-  const isFinishedSwitch = document.getElementById(
-    "isFinished"
-  ) as HTMLInputElement;
+  const isFinishedSwitch = document.getElementById("isFinished") as HTMLInputElement;
   const isFinishedText = document.getElementById("isFinishedText");
 
   if (isFinishedSwitch && isFinishedText) {
@@ -227,6 +263,8 @@ const { data: champsData } = await supabase
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const formData = new FormData(form);
+    // Obtener coches seleccionados
+    const selectedCars = formData.getAll("carsChamp");
 
     try {
       const response = await fetch("/api/admin/championship/editchamp", {
@@ -241,7 +279,7 @@ const { data: champsData } = await supabase
       const result = await response.json();
 
       if (result.success) {
-        alert("Campeonato actualizada con éxito");
+        alert("Campeonato actualizado con éxito");
         window.location.href = "/admin/adminchampionship";
       } else {
         throw new Error(result.error || "Error desconocido");
