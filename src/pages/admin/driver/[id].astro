@@ -46,11 +46,39 @@ if (roleData == null || roleData.roleesp == null || roleData.roleesp > 1) {
   return redirect("/index");
 }
 
+const minRole = roleData.roleesp;
+
 const { data: profileData } = await supabase
   .from("profiles")
-  .select("full_name, steam_id")
+  .select("full_name, steam_id, roleesp!inner(id)")
   .eq("id", id)
   .single();
+
+const { data: rolesData } = await supabase
+  .from("role")
+  .select("*")
+  .gte("id", minRole)
+  .neq("id", 2)
+  .neq("id", 0)
+  .order("id", { ascending: true });
+
+// Nueva lógica para el renderizado del select de roles
+const isSuperAdmin = minRole === 0;
+const isAdmin = minRole === 1;
+const isEditingAdmin = profileData?.roleesp?.id === 1;
+const availableRoles = rolesData?.filter((role) => {
+  if (role.id === 2) return false; // nunca mostrar el rol 2
+  if (isSuperAdmin) return true; // SuperAdmin puede ver todos (menos 2)
+  if (isAdmin) {
+    if (isEditingAdmin) { // Si el usuario a editar es Admin, solo puede ver el rol 1
+      return role.id === 1;
+    } else { // Si el usuario a editar NO es Admin, puede ver 1 y 3
+      return role.id === 1 || role.id === 3;
+    }
+  }
+  return false;
+});
+const disableRoleSelect = isAdmin && isEditingAdmin;
 ---
 
 <Layout title="ESP Racing: Modificación datos de campeonato">
@@ -78,6 +106,24 @@ const { data: profileData } = await supabase
       value={profileData?.steam_id}
       class="bg-darkSecond text-lightPrimary text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
     />
+
+    <label class="mt-5 text-lg font-semibold" for="role">
+      Rol del piloto
+    </label>
+    <select
+      name="role"
+      id="role"
+      class="bg-darkSecond text-lightPrimary text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
+      disabled={disableRoleSelect}
+    >
+      {availableRoles?.map((role: any) => {
+        return (
+          <option value={role.id} selected={role.id === profileData?.roleesp.id}>
+            {role.name}
+          </option>
+        );
+      })}
+    </select>
 
     <input type="hidden" name="driver_id" value={id} />
     <div>
@@ -122,7 +168,7 @@ import { showToast } from "@/lib/utils";
       const result = await response.json();
 
       if (result.success) {
-        showToast("Campeonato actualizada con éxito", "success");
+        showToast("Piloto actualizado con éxito", "success");
         window.location.href = "/admin/admindrivers";
       } else {
         throw new Error(result.error || "Error desconocido");

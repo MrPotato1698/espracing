@@ -45,14 +45,16 @@ if (userData == null || userData.roleesp == null || userData.roleesp > 1) {
 
 const { data: driversData } = await supabase
   .from("profiles")
-  .select("id, full_name, steam_id, team(name), races")
+  .select("id, full_name, steam_id, team(name), races, roleesp!inner(name)")
   .order("id", { ascending: true });
 
 // Definición de columnas para el DataTable
 const columns = [
   { header: "Nombre", accessor: "full_name" },
   { header: "Equipo", accessor: "team.name" },
-  { header: "Steam ID", accessor: "steam_id" }
+  { header: "Steam ID", accessor: "steam_id" },
+  { header: "Carreras", accessor: "races" },
+  { header: "Rol", accessor: "roleesp.name" }
 ];
 
 const serializedDriversData = driversData ? JSON.parse(JSON.stringify(driversData)) : [];
