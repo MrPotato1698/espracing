@@ -178,33 +178,60 @@ export type Database = {
         }
         Relationships: []
       }
+      championshipcars: {
+        Row: {
+          car: number
+          championship: number
+        }
+        Insert: {
+          car: number
+          championship: number
+        }
+        Update: {
+          car?: number
+          championship?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "championshipcars_car_fkey"
+            columns: ["car"]
+            isOneToOne: false
+            referencedRelation: "car"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "championshipcars_championship_fkey"
+            columns: ["championship"]
+            isOneToOne: false
+            referencedRelation: "championship"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       champwinners: {
         Row: {
           car_name: number | null
-          category: number
+          category: number | null
           championship: number
           id: number
           isTeam: boolean
           winner: string
-          winner_id: string | null
         }
         Insert: {
           car_name?: number | null
-          category?: number
+          category?: number | null
           championship: number
           id?: number
           isTeam?: boolean
           winner: string
-          winner_id?: string | null
         }
         Update: {
           car_name?: number | null
-          category?: number
+          category?: number | null
           championship?: number
           id?: number
           isTeam?: boolean
           winner?: string
-          winner_id?: string | null
         }
         Relationships: [
           {
@@ -215,17 +242,17 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "champwinners_category_fkey"
+            columns: ["category"]
+            isOneToOne: false
+            referencedRelation: "carclass"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "champwinners_championship_fkey"
             columns: ["championship"]
             isOneToOne: false
             referencedRelation: "championship"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "champwinners_winner_id_fkey"
-            columns: ["winner_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
