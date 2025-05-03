@@ -51,6 +51,8 @@ const {data: rolUser} = await supabase
 if(rolUser === null) {
   return redirect("/");
 }
+
+const adminZone: boolean = rolUser && rolUser.roleesp !== null && rolUser.roleesp <= 1 ? true : false;
 ---
 
 <!-- Nombre Inicial + Redes -->
@@ -150,7 +152,7 @@ class="fixed z-50 left-0 top-1/2 -translate-y-1/2 p-2 bg-darkSecond text-lightPr
 
       {
         //Si es admin, verá estas opciones de Zona Admin
-        rolUser.roleesp === 1 ? (
+        adminZone ? (
           <li>
             <button
               type="button"
