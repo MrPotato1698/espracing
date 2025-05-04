@@ -37,8 +37,6 @@ const {data: roleData} = await supabase
   .eq("id", id)
   .single();
 
-  console.log('roleData', roleData);
-
 const {data: TeamData} = await supabase
   .from("team")
   .select("name, description, image, id, profiles!inner(id)")
@@ -55,9 +53,11 @@ if (TeamData === null || TeamData === undefined) {
 
 const {data: TeamUsersData} = await supabase
   .from("profiles")
-  .select("id, full_name, races, wins, top5, top10, avatar, number_plate, poles, podiums, is_team_manager")
+  .select("id, full_name, races, wins, top5, top10, avatar, poles, podiums, is_team_manager")
   .eq("team", idTeam);
 
+
+const roleEditingPrivileges = roleData?.roleesp === 0 ||roleData?.roleesp === 1 || roleData?.roleesp === 2 ? true : false;
 ---
 
 <Layout title="ESP Racing: Mi Equipo">
@@ -107,13 +107,7 @@ const {data: TeamUsersData} = await supabase
             TeamUsersData?.map((user, index) => (
               <tr class="bg-darkSecond align-middle">
                 <td class="font-semibold">{index + 1}</td>
-                {user.number_plate === null || user.number_plate === 0 ? (
-                  <td>#0 - {user.full_name}</td>
-                ) : (
-                  <td>
-                    #{user.number_plate} - {user.full_name}
-                  </td>
-                )}
+                <td>{user.full_name}</td>
                 {roleData?.roleesp === 1 || roleData?.roleesp === 2 ? (
                   <td class = "align-middle pt-1">
                     <input
@@ -142,7 +136,7 @@ const {data: TeamUsersData} = await supabase
 
     <div class="grid grid-flow-col mt-8">
       {
-        roleData?.roleesp === 1 || roleData?.roleesp === 2 ? (
+        roleEditingPrivileges ? (
           <a
             href="/modteamprofile"
             class="py-1.5 px-2 w-fit bg-darkPrimary text-lightPrimary border-primary border-2 rounded-md font-medium text-lg hover:bg-darkSecond"
