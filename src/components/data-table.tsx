@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
   Pagination,
   PaginationContent,
@@ -8,10 +8,11 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from './ui/pagination';
+} from '@/components/ui/pagination';
 import { ChevronUp, ChevronDown, Search } from 'lucide-react';
-import { MultiSelect } from './multi-select';
-import { Input } from './ui/input';
+import { MultiSelect } from '@/components/multi-select';
+import { Input } from '@/components/ui/input';
+import { Skeleton } from "@/components/ui/skeleton";
 
 export interface DataTableColumn {
   header: string;
@@ -33,6 +34,7 @@ export interface DataTableProps {
   readonly searchable?: boolean;
   readonly searchPlaceholder?: string;
   readonly searchableColumns?: readonly { readonly accessor: string }[] | null;
+  loading?: boolean;
 }
 
 export function DataTable({
@@ -50,6 +52,7 @@ export function DataTable({
   searchable = true,
   searchPlaceholder = 'Buscar en la tabla...',
   searchableColumns = null,
+  loading = false,
 }: Readonly<DataTableProps>) {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [activeFilters, setActiveFilters] = useState<string[]>([...filterOptions]);
@@ -314,7 +317,27 @@ export function DataTable({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {paginatedData.length > 0 ? (
+          {loading ? (
+            Array.from({ length: pageSize }).map((_, idx) => (
+              <TableRow key={idx}>
+                <TableCell><Skeleton className="h-4 w-8 mx-auto" /></TableCell>
+                {columns.map((column, colIdx) => (
+                  <TableCell key={colIdx}>
+                    <Skeleton className="h-4 w-full" />
+                  </TableCell>
+                ))}
+                {customActions && (
+                  <TableCell><Skeleton className="h-4 w-12 mx-auto" /></TableCell>
+                )}
+                {onEdit && (
+                  <TableCell><Skeleton className="h-4 w-8 mx-auto" /></TableCell>
+                )}
+                {onDelete && (
+                  <TableCell><Skeleton className="h-4 w-8 mx-auto" /></TableCell>
+                )}
+              </TableRow>
+            ))
+          ) : paginatedData.length > 0 ? (
             paginatedData.map((row, rowIndex) => (
               <TableRow
                 key={row.id ?? rowIndex}
