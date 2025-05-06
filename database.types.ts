@@ -343,21 +343,21 @@ export type Database = {
           position: number
           profile: string | null
           race: string | null
-          valid_laps: string | null
+          valid_laps: number | null
         }
         Insert: {
           id: number
           position?: number
           profile?: string | null
           race?: string | null
-          valid_laps?: string | null
+          valid_laps?: number | null
         }
         Update: {
           id?: number
           position?: number
           profile?: string | null
           race?: string | null
-          valid_laps?: string | null
+          valid_laps?: number | null
         }
         Relationships: [
           {
@@ -554,6 +554,7 @@ export type Database = {
           pointsystem: number
           race_data_1: string
           race_data_2: string | null
+          race_date: string
           splits: number
         }
         Insert: {
@@ -565,6 +566,7 @@ export type Database = {
           pointsystem?: number
           race_data_1: string
           race_data_2?: string | null
+          race_date?: string
           splits?: number
         }
         Update: {
@@ -576,6 +578,7 @@ export type Database = {
           pointsystem?: number
           race_data_1?: string
           race_data_2?: string | null
+          race_date?: string
           splits?: number
         }
         Relationships: [
@@ -694,6 +697,24 @@ export type Database = {
           },
         ]
       }
+      racerulesimg: {
+        Row: {
+          id: number
+          img_url: string
+          name: string
+        }
+        Insert: {
+          id?: number
+          img_url?: string
+          name?: string
+        }
+        Update: {
+          id?: number
+          img_url?: string
+          name?: string
+        }
+        Relationships: []
+      }
       role: {
         Row: {
           id: number
@@ -712,79 +733,26 @@ export type Database = {
       team: {
         Row: {
           active: boolean | null
-          championships: number
           description: string | null
-          dnf: number
-          flaps: number
           id: number
           image: string | null
           name: string
-          podiums: number
-          poles: number
-          races: number
-          top10: number
-          top5: number
-          wins: number
         }
         Insert: {
           active?: boolean | null
-          championships?: number
           description?: string | null
-          dnf?: number
-          flaps?: number
           id: number
           image?: string | null
           name?: string
-          podiums?: number
-          poles?: number
-          races?: number
-          top10?: number
-          top5?: number
-          wins?: number
         }
         Update: {
           active?: boolean | null
-          championships?: number
           description?: string | null
-          dnf?: number
-          flaps?: number
           id?: number
           image?: string | null
           name?: string
-          podiums?: number
-          poles?: number
-          races?: number
-          top10?: number
-          top5?: number
-          wins?: number
         }
         Relationships: []
-      }
-      teamalias: {
-        Row: {
-          alias: string
-          id: number
-          team: number
-        }
-        Insert: {
-          alias: string
-          id?: number
-          team: number
-        }
-        Update: {
-          alias?: string
-          id?: number
-          team?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "teamalias_team_fkey"
-            columns: ["team"]
-            isOneToOne: false
-            referencedRelation: "team"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       teamsapplication: {
         Row: {
