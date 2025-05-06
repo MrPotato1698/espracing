@@ -57,8 +57,8 @@ const { data: champsData } = await supabase
 
 const {data: champWinnersData} = await supabase
   .from("champwinners")
-  .select("winner, isTeam, category, car_name")
-  .eq("championship_id", parseInt(id))
+  .select("id, winner, isTeam, category, car_name")
+  .eq("championship", parseInt(id))
   .order("id", { ascending: true });
 
 const isTeamData = champWinnersData?.map((winner) => {
@@ -128,7 +128,7 @@ if (champsData?.champ_img) {
       Temporada a la que pertenece (antiguo: {champsData?.season})
     </label>
     <select
-      class="w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkSecond hover:border-primary"
+      class="w-11/12 p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkSecond hover:border-primary"
       id="season"
       name="season"
     >
@@ -220,35 +220,34 @@ if (champsData?.champ_img) {
       </button>
     </div>
   </form>
+  <div class="w-11/12">
+    <ChampionshipPosterUpload
+      client:load
+      championshipId={Number(id)}
+      currentPosterUrl={publicPosterUrl}
+      onUploadComplete={(imageName: string) => {
+        console.log("Upload complete:", imageName)
+        return null;
+      }}
+    />
+  </div>
+  <div class = 'w-11/12'>
+    <h3 class="mt-4 text-4xl font-bold w-fit mx-auto">
+      Modificar Campeones del Campeonato
+    </h3>
+    <div class="text-center">
+      <DataTable
+        client:only="react"
+        data={serializedChampWinnersData}
+        columns={columns}
+        onDelete={{ path: "champwinner" }}
+        pageSize={10}
+        searchable={false}
+      />
+    </div>
 
-  <h3 class="mt-4 text-4xl font-bold w-fit mx-auto">
-    Poster del Campeonato
-  </h3>
-
-  <ChampionshipPosterUpload
-    client:load
-    championshipId={Number(id)}
-    currentPosterUrl={publicPosterUrl}
-    onUploadComplete={(imageName: string) => {
-      console.log("Upload complete:", imageName)
-      return null;
-    }}
-  />
-
-  <h3 class="mt-4 text-4xl font-bold w-fit mx-auto">
-    Modificar Campeones del Campeonato
-  </h3>
-
-  <DataTable
-    client:only="react"
-    data={serializedChampWinnersData}
-    columns={columns}
-    onDelete={{ path: "champwinner" }}
-    pageSize={10}
-    searchable={false}
-  />
-
-  <EditChampCars champId={parseInt(id)} client:load />
+    <EditChampCars champId={parseInt(id)} client:load />
+  </div>
 
 </Layout>
 
