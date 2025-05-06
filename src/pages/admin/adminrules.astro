@@ -3,6 +3,7 @@ import Layout from "@/layouts/ProfileLayout.astro";
 import RulesEditor from "@/components/RulesEditor";
 import { supabase } from "@/db/supabase";
 import AdminRulesControl from "@/components/AdminRulesControl";
+import RulesImagesManager from "@/components/RulesImagesManager";
 
 
 const { cookies, redirect } = Astro;
@@ -89,7 +90,7 @@ const { data: secondaryRule } = await supabase
 const isSecondaryVisible = secondaryRule?.isVisible || false;
 ---
 
-<Layout title="ESP Racing: Administrar Equipos">
+<Layout title="ESP Racing: Administrar Normativa">
   <h2 class="text-5xl font-extrabold border-b-2 border-primary w-full">
     Modificación de Normativa
   </h2>
@@ -112,6 +113,8 @@ const isSecondaryVisible = secondaryRule?.isVisible || false;
       />
     </div>
 
+    <div class ='border border-primary mx-16' />
+
     <!-- Editor de la normativa secundaria -->
     <div class="container py-8">
       <RulesEditor
@@ -121,6 +124,10 @@ const isSecondaryVisible = secondaryRule?.isVisible || false;
       userRole = {profileData.roleesp}
       />
     </div>
+  </div>
+
+  <div class="container py-8">
+    <RulesImagesManager client:load />
   </div>
 
 </Layout>
