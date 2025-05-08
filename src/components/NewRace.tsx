@@ -79,8 +79,6 @@ export default function NewRace(){
         .order("id", { ascending: true });
 
       if(raceCodeNotesData){
-
-        console.log("Notas de carrera: ", raceCodeNotesData);
         setRaceCodeNotes(raceCodeNotesData);
       } else {
         showToast("Error al cargar las carreras: " + errorRaceCodeNotes?.message, "error");
@@ -214,9 +212,9 @@ export default function NewRace(){
   };
 
   // Helper: Insertar carrera en la tabla race
-  type InsertRaceParams = { lastRaceID: number; racename: string; fileS1R1: File; champID: string; numrace: string; pointsystem: string; split2: boolean; URLBucketsResults: string[];};
+  type InsertRaceParams = { lastRaceID: number; racename: string; fileS1R1: File; champID: string; numrace: string; pointsystem: string; split2: boolean; URLBucketsResults: string[]; date: string;};
 
-  const insertRace = async ({lastRaceID, racename, fileS1R1, champID, numrace, pointsystem, split2, URLBucketsResults}: InsertRaceParams) => {
+  const insertRace = async ({lastRaceID, racename, fileS1R1, champID, numrace, pointsystem, split2, URLBucketsResults, date}: InsertRaceParams) => {
     const { error: insertError } = await supabase
       .from('race')
       .insert({
@@ -229,6 +227,7 @@ export default function NewRace(){
         splits: split2 ? 2 : 1,
         race_data_1: URLBucketsResults[0],
         race_data_2: URLBucketsResults[1],
+        race_date: date,
       });
     if (insertError) throw insertError;
   };
@@ -281,7 +280,8 @@ export default function NewRace(){
 
       // Insertar carrera en la tabla race
       const lastRaceID = await getNewRaceID();
-      await insertRace({ lastRaceID, racename, fileS1R1: fileS1R1 as File, champID, numrace, pointsystem, split2, URLBucketsResults});
+      const date = transformedJsonR1.RaceConfig.Date.slice(0, 10);
+      await insertRace({ lastRaceID, racename, fileS1R1: fileS1R1 as File, champID, numrace, pointsystem, split2, URLBucketsResults, date});
 
       // Actualizar estadísticas
       await updateStats(transformedJsonR1, transformedJsonR2);
