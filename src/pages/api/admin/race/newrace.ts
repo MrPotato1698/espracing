@@ -20,7 +20,9 @@ export const POST: APIRoute = async ({ request }) => {
 
   const { error } = await supabase.from('race').insert([insertObj]);
 
+
   if (error) {
+    console.log('Error inserting: ', error);
     return new Response(JSON.stringify({ error: error.message }), { status: 500 });
   }
   return new Response(JSON.stringify({ success: true }), { status: 200 });

@@ -147,9 +147,9 @@ export default function NewRace({ championshipContent = [], pointsystemContent =
   };
 
   // Helper: Insertar carrera en la tabla race
-  type InsertRaceParams = { lastRaceID: number; racename: string; fileS1R1: File; champID: string; numrace: string; pointsystem: string; split2: boolean; URLBucketsResults: string[]; date: string;};
+  type InsertRaceParams = { lastRaceID: number; racename: string; champID: string; numrace: string; pointsystem: string; splits: number; race_data_1: string; race_data_2: string | null; race_date: string; filename: string };
 
-  const insertRace = async (params: any) => {
+  const insertRace = async (params: InsertRaceParams) => {
     const res = await fetch('/api/admin/race/newrace', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -206,8 +206,18 @@ export default function NewRace({ championshipContent = [], pointsystemContent =
 
       // Insertar carrera en la tabla race
       const lastRaceID = await getNewRaceID();
-      const date = transformedJsonR1.RaceConfig.Date.slice(0, 10);
-      await insertRace({ lastRaceID, racename, fileS1R1: fileS1R1 as File, champID, numrace, pointsystem, split2, URLBucketsResults, date});
+      await insertRace({
+        lastRaceID,
+        racename,
+        champID,
+        numrace,
+        pointsystem,
+        splits: split2 ? 2 : 1,
+        race_data_1: URLBucketsResults[0],
+        race_data_2: URLBucketsResults[1] || null,
+        race_date: transformedJsonR1.RaceConfig.Date.slice(0, 10),
+        filename: fileS1R1?.name ?? ""
+      });
 
       // Actualizar estadísticas
       await updateStats(transformedJsonR1, transformedJsonR2);
