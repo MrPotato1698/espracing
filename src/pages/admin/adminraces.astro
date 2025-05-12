@@ -60,6 +60,35 @@ const columns = [
   { header: "Campeonato", accessor: "championship.name" },
   { header: "Sistema de Puntuación", accessor: "pointsystem.name" }
 ];
+
+// NUEVO: Obtener datos para NewRace
+const { data: championshipContent } = await supabase
+  .from("championship")
+  .select("id, name")
+  .order("id", { ascending: true });
+
+const { data: pointsystemContent } = await supabase
+  .from("pointsystem")
+  .select("id, name")
+  .order("id", { ascending: true });
+
+const { data: raceCodeNotes } = await supabase
+  .from("racenotecode")
+  .select("id, name")
+  .order("id", { ascending: true });
+
+const { data: allRaces } = await supabase
+  .from("race")
+  .select("id, name, championship!inner(name)")
+  .order("championship, orderinchamp", { ascending: true });
+
+const raceNames = allRaces
+  ? allRaces.map(race => ({
+      label: race.name + " (" + race.championship.name + ")",
+      value: race.id.toString()
+    }))
+  : [];
+
 ---
 
 <Layout title="ESP Racing: Administrar Carreras">
@@ -92,6 +121,12 @@ const columns = [
   </div>
 
   <div class="py-4 mx-auto text-center" style="width: 99%">
-    <NewRace client:load/>
+    <NewRace
+      client:load
+      championshipContent={(championshipContent || []).map(c => ({ id: c.id, name: c.name ?? "" }))}
+      pointsystemContent={pointsystemContent || []}
+      raceNames={raceNames}
+      raceCodeNotes={raceCodeNotes || []}
+    />
   </div>
 </Layout>

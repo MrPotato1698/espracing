@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { supabase } from "@/db/supabase";
 import { createRaceData, createRaceDataMultipleSplits } from "@/lib/results/resultConverter";
 import { showToast } from "@/lib/utils";
@@ -8,11 +8,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Combobox } from "@/components/ui/combobox";
 import { FileJson, NotebookPen } from 'lucide-react';
 
-export default function NewRace(){
-  const [championshipContent, setChampionshipContent] = useState<{ id: number, name: string | null }[]>([]);
-  const [pointsystemContent, setPointsystemContent] = useState<{ id: number, name: string }[]>([]);
-  const [raceNames, setRaceNames] = useState<{ label: string, value: string }[]>([]);
-  const [raceCodeNotes, setRaceCodeNotes] = useState<{ id: number, name: string }[]>([]);
+type Championship = { id: number; name: string };
+type Pointsystem = { id: number; name: string };
+type RaceName = { label: string; value: string };
+type RaceCodeNote = { id: number; name: string };
+
+interface NewRaceProps {
+  readonly championshipContent?: readonly Championship[];
+  readonly pointsystemContent?: readonly Pointsystem[];
+  readonly raceNames?: readonly RaceName[];
+  readonly raceCodeNotes?: readonly RaceCodeNote[];
+}
+
+export default function NewRace({ championshipContent = [], pointsystemContent = [], raceNames = [], raceCodeNotes = [] }: NewRaceProps){
   const [value, setValue] = useState("");
   const [activeTab, setActiveTab] = useState<string>('addRace');
   const [noteCode, setNoteCode] = useState("0");
@@ -30,64 +38,6 @@ export default function NewRace(){
   // Mensajes de error
   const [errorMsg, setErrorMsg] = useState<string|null>(null);
   const [successMsg, setSuccessMsg] = useState<string|null>(null);
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      const { data: raceData, error: errorRaceData } = await supabase
-        .from("race")
-        .select("id, name, championship!inner(name)")
-        .order("championship, orderinchamp", { ascending: true });
-
-      if(raceData){
-        const auxRaceNames = raceData.map(race => ({
-          label: race.name + " (" + race.championship.name + ")",
-          value: race.id.toString()
-        }));
-        setRaceNames(auxRaceNames);
-      } else {
-        showToast("Error al cargar las carreras: " + errorRaceData?.message, "error");
-        console.error("Error al cargar las carreras: ", errorRaceData);
-      }
-
-      const { data: champsData, error: errorChamps } = await supabase
-        .from("championship")
-        .select("id, name")
-        .order("id", { ascending: true });
-
-      if(champsData){
-        setChampionshipContent(champsData);
-      }else{
-        showToast("Error al cargar las carreras: " + errorChamps?.message, "error");
-        console.error("Error al cargar los campeonatos: ", errorChamps);
-      }
-
-      const { data: pointsystemData, error: errorPS } = await supabase
-        .from("pointsystem")
-        .select("id, name")
-        .order("id", { ascending: true });
-
-      if(pointsystemData){
-        setPointsystemContent(pointsystemData);
-      }else{
-        showToast("Error al cargar las carreras: " + errorPS?.message, "error");
-        console.error("Error al cargar los campeonatos: ", errorPS);
-      }
-
-      const { data: raceCodeNotesData, error: errorRaceCodeNotes } = await supabase
-        .from("racenotecode")
-        .select("id, name")
-        .order("id", { ascending: true });
-
-      if(raceCodeNotesData){
-        setRaceCodeNotes(raceCodeNotesData);
-      } else {
-        showToast("Error al cargar las carreras: " + errorRaceCodeNotes?.message, "error");
-        console.error("Error al cargar las carreras: ", errorRaceCodeNotes);
-      }
-    };
-
-    checkAuth();
-  }, []);
 
   // Handlers para switches
   const handleSplit2 = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -190,46 +140,22 @@ export default function NewRace(){
 
   // Helper: Obtener nuevo ID de carrera
   const getNewRaceID = async () => {
-    const { data: getLastRace } = await supabase
-      .from('race')
-      .select('id')
-      .order('id', { ascending: true });
-
-    if(getLastRace?.length === 0) return 1;
-
-    let findID = false;
-    let i = 1;
-    if (!getLastRace) throw new Error("Error al obtener el último ID de carrera");
-    while (!findID && i < getLastRace.length) {
-      if (getLastRace[i - 1].id === i) {
-        i++;
-      } else {
-        findID = true;
-      }
-    }
-    if (!findID) i++;
-    return getLastRace ? i : 1;
+    const res = await fetch('/api/generic/getnextid?table=race');
+    if (!res.ok) throw new Error('Error al obtener el nuevo ID de carrera');
+    const data = await res.json();
+    return data.id;
   };
 
   // Helper: Insertar carrera en la tabla race
   type InsertRaceParams = { lastRaceID: number; racename: string; fileS1R1: File; champID: string; numrace: string; pointsystem: string; split2: boolean; URLBucketsResults: string[]; date: string;};
 
-  const insertRace = async ({lastRaceID, racename, fileS1R1, champID, numrace, pointsystem, split2, URLBucketsResults, date}: InsertRaceParams) => {
-    const { error: insertError } = await supabase
-      .from('race')
-      .insert({
-        id: lastRaceID,
-        name: racename,
-        filename: fileS1R1.name,
-        championship: Number(champID),
-        orderinchamp: Number(numrace),
-        pointsystem: Number(pointsystem),
-        splits: split2 ? 2 : 1,
-        race_data_1: URLBucketsResults[0],
-        race_data_2: URLBucketsResults[1],
-        race_date: date,
-      });
-    if (insertError) throw insertError;
+  const insertRace = async (params: any) => {
+    const res = await fetch('/api/admin/race/newrace', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(params)
+    });
+    if (!res.ok) throw new Error('Error al insertar la carrera');
   };
 
   // Helper: Actualizar estadísticas
@@ -299,41 +225,21 @@ export default function NewRace(){
 
   // Helper: Insertar nota en la tabla racenotes
   type InsertNoteParams = { lastNoteID: number; racename: string; description: string; penalty: string; noteCode: string; };
-  const insertNote = async ({lastNoteID, racename, description, penalty, noteCode}: InsertNoteParams) => {
-    const { error: insertError } = await supabase
-      .from('racenotes')
-      .insert({
-        id: lastNoteID,
-        race: Number(racename),
-        code: Number(noteCode),
-        description: description,
-        penalty: penalty,
-      });
-    if (insertError) throw insertError;
+  const insertNote = async (params: any) => {
+    const res = await fetch('/api/admin/race/newnote', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(params)
+    });
+    if (!res.ok) throw new Error('Error al insertar la nota');
   };
 
   // Helper: Obtener nuevo ID de nota
   const getNewNoteID = async () => {
-    const { data: getLastRaceNotes } = await supabase
-      .from('racenotes')
-      .select('id')
-      .order('id', { ascending: true });
-
-    if(getLastRaceNotes?.length === 0) return 1;
-
-    let findID = false;
-    let i = 1;
-
-    if (!getLastRaceNotes) throw new Error("Error al obtener el último ID de notas de carrera");
-    while (!findID && i < getLastRaceNotes.length) {
-      if (getLastRaceNotes[i - 1].id === i) {
-        i++;
-      } else {
-        findID = true;
-      }
-    }
-    if (!findID) i++;
-    return getLastRaceNotes ? i : 1;
+    const res = await fetch('/api/generic/getnextid?table=racenotes');
+    if (!res.ok) throw new Error('Error al obtener el nuevo ID de nota');
+    const data = await res.json();
+    return data.id;
   };
 
   // Validación y submit de notas de carrera
@@ -404,7 +310,7 @@ export default function NewRace(){
             required
           >
             {
-              championshipContent?.map((champ) => (
+              championshipContent?.map((champ: Championship) => (
                 <option key={champ.id} value={champ.id?.toString()}>{champ.name}</option>
               ))
             }
@@ -434,37 +340,29 @@ export default function NewRace(){
             required
           >
             {
-              pointsystemContent?.map((ps) => (
+              pointsystemContent?.map((ps: Pointsystem) => (
                 <option key={ps.id} value={ps.id?.toString()}>{ps.name}</option>
               ))
             }
           </select>
 
           <div className="flex items-center gap-2">
-            <label className="relative inline-flex cursor-pointer">
+            <label htmlFor="switch-S2" className="relative inline-flex cursor-pointer items-center">
               <input id="switch-S2" type="checkbox" className="peer sr-only" checked={split2} onChange={handleSplit2} />
-              <label htmlFor="switch-S2" className="hidden"></label>
               <div
                 className="peer h-4 w-11 rounded-full border bg-slate-200 after:absolute after:-top-1 after:left-0 after:h-6 after:w-6 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-full peer-focus:ring-primary"
-              >
-              </div>
-            </label>
-            <label className="text-lightPrimary text-lg font-medium" htmlFor="switch-S2">
-              ¿1 o 2 splits?
+              ></div>
+              <span className="ml-3 text-lightPrimary text-lg font-medium">¿1 o 2 splits?</span>
             </label>
           </div>
 
           <div className="flex items-center gap-2 mb-6">
-            <label className="relative inline-flex cursor-pointer">
+            <label htmlFor="switch-R2" className="relative inline-flex cursor-pointer items-center">
               <input id="switch-R2" type="checkbox" className="peer sr-only" checked={race2} onChange={handleRace2} />
-              <label htmlFor="switch-R2" className="hidden"></label>
               <div
                 className="peer h-4 w-11 rounded-full border bg-slate-200 after:absolute after:-top-1 after:left-0 after:h-6 after:w-6 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-full peer-focus:ring-primary"
-              >
-              </div>
-            </label>
-            <label className="text-lightPrimary text-lg font-medium" htmlFor="switch-R2">
-              ¿1 o 2 carreras por GP?
+              ></div>
+              <span className="ml-3 text-lightPrimary text-lg font-medium">¿1 o 2 carreras por GP?</span>
             </label>
           </div>
 
@@ -656,7 +554,7 @@ export default function NewRace(){
             onChange={e => setNoteCode(e.target.value)}
           >
           {
-            raceCodeNotes?.map((note) => (
+            raceCodeNotes?.map((note: RaceCodeNote) => (
               <option key={note.id} value={note.id?.toString()}>{note.name}</option>
             ))
           }
