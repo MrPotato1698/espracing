@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { supabase } from "@/db/supabase";
 import { showToast } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -6,16 +6,15 @@ import { Combobox } from "@/components/ui/combobox";
 import MultiSelect from "@/components/ui/multiselect";
 import { FilePlus2, Trophy } from 'lucide-react';
 
-export default function NewChamp() {
+export default function NewChamp({ championships, cars, carClasses, races }: {
+  readonly championships: any[] | null;
+  readonly cars: any[] | null;
+  readonly carClasses: any[] | null;
+  readonly races: any[] | null;
+}) {
   // Estados para pestañas
   const [activeTab, setActiveTab] = useState<string>('addChamp');
 
-  // Estados para campeonatos/eventos
-  const [championships, setChampionships] = useState<{ id: number, name: string | null, isfinished: boolean, number_of_races_total: number }[]>([]);
-  const [races, setRaces] = useState<{ id: number, championship: number }[]>([]);
-  // Estados para coches y clases
-  const [cars, setCars] = useState<{ id: number, model: string | null, class: number, brand: { id: number, name: string | null } | null }[]>([]);
-  const [carClasses, setCarClasses] = useState<{ id: number, name: string | null }[]>([]);
   // Estados para coches y clases filtrados por campeonato seleccionado
   const [champCars, setChampCars] = useState<{ id: number, model: string | null, class: number, brand: { id: number, name: string | null } | null }[]>([]);
   const [champClasses, setChampClasses] = useState<{ id: number, name: string | null }[]>([]);
@@ -35,39 +34,35 @@ export default function NewChamp() {
   const [errorMsg, setErrorMsg] = useState<string|null>(null);
   const [successMsg, setSuccessMsg] = useState<string|null>(null);
 
-  // Cargar datos iniciales
-  useEffect(() => {
-    const fetchData = async () => {
-      const { data: champs } = await supabase
-        .from("championship")
-        .select("id, name, isfinished, number_of_races_total")
-        .order("id", { ascending: true });
-      setChampionships(champs || []);
+  // Estado para el año introducido manualmente
+  const [yearInput, setYearInput] = useState<string>("");
 
-      // Traer también la marca (brand) para mostrar brand.name + model
-      const { data: carsData } = await supabase
-        .from("car")
-        .select("id, model, class, brand:brand(id, name)")
-        .order("id", { ascending: true });
-      setCars(carsData || []);
-
-      const { data: classesData } = await supabase
-        .from("carclass")
-        .select("id, name")
-        .order("id", { ascending: true });
-      setCarClasses(classesData || []);
-
-      // Traer todas las carreras para filtrar campeonatos finalizados correctamente
-      const { data: racesData } = await supabase
-        .from("race")
-        .select("id, championship");
-      setRaces(racesData || []);
-    };
-    fetchData();
-  }, []);
+  // Calcular años mínimo y máximo para temporadas
+  const champYears = (championships ?? []).map(c => c.year).filter(y => typeof y === 'number');
+  let minYear: number, maxYear: number;
+  if (champYears.length > 0) {
+    minYear = Math.min(...champYears);
+    maxYear = Math.max(...champYears);
+  } else if (yearInput && !isNaN(Number(yearInput))) {
+    minYear = Number(yearInput);
+    maxYear = Number(yearInput);
+  } else {
+    minYear = 2020;
+    maxYear = 2020;
+  }
+  // Generar temporadas dinámicamente
+  const seasonOptions = [];
+  for (let y = minYear - 2; y <= maxYear + 1; y++) {
+    const start = y.toString().slice(-2);
+    const end = (y + 1).toString().slice(-2);
+    seasonOptions.push({
+      label: `${y}/${y + 1}`,
+      value: `${start}${end}`
+    });
+  }
 
   // Cargar coches y clases del campeonato seleccionado
-  useEffect(() => {
+  React.useEffect(() => {
     const fetchChampCarsAndClasses = async () => {
       if (!selectedChamp) {
         setChampCars([]);
@@ -86,12 +81,12 @@ export default function NewChamp() {
       }
       const champCarIds = champCarsRows.map(row => row.car);
       // Filtrar los coches globales
-      const filteredCars = cars.filter(car => champCarIds.includes(car.id));
-      setChampCars(filteredCars);
+      const filteredCars = cars?.filter(car => champCarIds.includes(car.id));
+      setChampCars(filteredCars || []);
       // Obtener las clases únicas de esos coches
-      const classIds = Array.from(new Set(filteredCars.map(car => car.class)));
-      const filteredClasses = carClasses.filter(cl => classIds.includes(cl.id));
-      setChampClasses(filteredClasses);
+      const classIds = Array.from(new Set(filteredCars?.map(car => car.class)));
+      const filteredClasses = carClasses?.filter(cl => classIds.includes(cl.id));
+      setChampClasses(filteredClasses || []);
     };
     fetchChampCarsAndClasses();
   }, [selectedChamp, cars, carClasses]);
@@ -131,19 +126,19 @@ export default function NewChamp() {
     if (error) throw error;
   };
 
-  const isTeamWinner = (isTeam: boolean, carId: number | null) =>{
-    if (isTeam) {
-      return {
-        carId: null,
-        classId: Number(selectedClass),
-      }
-    } else {
-      const car = cars.find(c => c.id === carId);
-      return {
-        carId: Number(selectedCar),
-        classId: car ? car.class : null
-      }
-    }
+  const getTeamWinnerData = () => {
+    return {
+      carId: null,
+      classId: Number(selectedClass),
+    };
+  };
+
+  const getIndividualWinnerData = (carId: number | null) => {
+    const car = cars?.find(c => c.id === carId);
+    return {
+      carId: Number(selectedCar),
+      classId: car ? car.class : null,
+    };
   };
 
   // Handler submit campeón de campeonato
@@ -158,7 +153,13 @@ export default function NewChamp() {
       }
       const lastID = await getNewChampWinnerID();
 
-      const { carId: carIdResult, classId: classIdResult } = isTeamWinner(isTeam, Number(selectedCar));
+      let carIdResult: number | null;
+      let classIdResult: number | null;
+      if (isTeam) {
+        ({ carId: carIdResult, classId: classIdResult } = getTeamWinnerData());
+      } else {
+        ({ carId: carIdResult, classId: classIdResult } = getIndividualWinnerData(Number(selectedCar)));
+      }
 
       await insertChampion(lastID, winnerName, isTeam, carIdResult, classIdResult, Number(selectedChamp));
       setSuccessMsg("Campeón añadido con éxito");
@@ -280,6 +281,7 @@ export default function NewChamp() {
               placeholder="Campeonato X en cualquier sitio..."
               required
             />
+
             <label className="text-lightPrimary text-lg font-medium" htmlFor="keySearchAPI">
               Keysearch del campeonato/evento (sentencia para buscar el campeonato en la API del servidor)
             </label>
@@ -290,6 +292,7 @@ export default function NewChamp() {
               name="keySearchAPI"
               placeholder="+car_filename_1 +car_filename_2 +RACE"
             />
+
             <label className="text-lightPrimary text-lg font-medium" htmlFor="yearChamp">
               Año de inicio del campeonato/evento
             </label>
@@ -302,6 +305,8 @@ export default function NewChamp() {
               min="2000"
               placeholder="2020"
               required
+              value={yearInput}
+              onChange={e => setYearInput(e.target.value)}
             />
             <label className="text-lightPrimary text-lg font-medium" htmlFor="season">
               Temporada a la que pertenece
@@ -312,15 +317,12 @@ export default function NewChamp() {
               name="season"
               required
             >
-              <option value="2021">2020/2021</option>
-              <option value="2122">2021/2022</option>
-              <option value="2223">2022/2023</option>
-              <option value="2324">2023/2024</option>
-              <option value="2425">2024/2025</option>
-              <option value="2526">2025/2026</option>
-              <option value="2627">2026/2027</option>
               <option value="0">Sin Temporada / Otra</option>
+              {seasonOptions.map(opt => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
             </select>
+
             <label className="text-lightPrimary text-lg font-medium" htmlFor="numbertotalraces">
               Número de carreras totales del campeonato/evento
             </label>
@@ -335,11 +337,12 @@ export default function NewChamp() {
               placeholder="4"
               required
             />
+
             <label className="text-lightPrimary text-lg font-medium" htmlFor="carsChamp">
               Selecciona los coches que participan en el campeonato
             </label>
             <MultiSelect
-              options={cars
+              options={(cars ?? [])
                 .slice()
                 .sort((a, b) => {
                   const nameA = `${a.brand?.name ?? ''} ${a.model ?? ''}`.trim().toLowerCase();
@@ -367,6 +370,7 @@ export default function NewChamp() {
                 </span>
               </div>
             </div>
+
             {errorMsg && <div className="text-red-500 font-semibold mb-2">{errorMsg}</div>}
             {successMsg && <div className="text-green-500 font-semibold mb-2">{successMsg}</div>}
             <input
@@ -374,9 +378,11 @@ export default function NewChamp() {
               type="submit"
               value="Enviar"
             />
+
           </form>
         </div>
       </TabsContent>
+
       <TabsContent value="addWinner">
         <p className="text-5xl font-bold border-b border-primary w-fit mx-auto">
           Añadir Campeón
@@ -387,10 +393,10 @@ export default function NewChamp() {
               Selecciona el campeonato/evento
             </label>
             <Combobox
-              options={championships
+              options={(championships ?? [])
                 .filter(champ => {
                   if (!champ.isfinished) return false;
-                  const numRaces = races.filter(r => r.championship === champ.id).length;
+                  const numRaces = races?.filter(r => r.championship === champ.id).length;
                   return numRaces === champ.number_of_races_total;
                 })
                 .map(c => ({ label: c.name ?? '', value: c.id.toString() }))}
@@ -400,7 +406,9 @@ export default function NewChamp() {
               searchPlaceholder="Buscar..."
               emptyMessage="No se encontraron resultados."
             />
+
             <input type="hidden" name="championship" value={selectedChamp} />
+
             <div className="flex items-center gap-2 mt-4 mb-4">
               <label className="relative inline-flex cursor-pointer">
                 <input id="isTeam" name="isTeam" type="checkbox" className="sr-only peer" checked={isTeam} onChange={e => setIsTeam(e.target.checked)} />
@@ -410,6 +418,7 @@ export default function NewChamp() {
                 {isTeam ? "Equipo" : "Piloto"}
               </span>
             </div>
+
             <label className="text-lightPrimary text-lg font-medium" htmlFor="winnerName">
               Nombre del ganador
             </label>
@@ -423,6 +432,7 @@ export default function NewChamp() {
               placeholder={isTeam ? "Nombre del equipo ganador" : "Nombre del piloto ganador"}
               required
             />
+
             {!isTeam ? (
               <>
                 <label className="text-lightPrimary text-lg font-medium" htmlFor="car">
@@ -462,8 +472,10 @@ export default function NewChamp() {
                 <input type="hidden" name="class" value={selectedClass} />
               </>
             )}
+
             {errorMsg && <div className="text-red-500 font-semibold mb-2">{errorMsg}</div>}
             {successMsg && <div className="text-green-500 font-semibold mb-2">{successMsg}</div>}
+
             <input
               className="bg-primary text-white font-bold py-3 px-5 border-solid border-primary border-2 rounded-md hover:bg-darkSecond hover:text-lightPrimary mt-4"
               type="submit"

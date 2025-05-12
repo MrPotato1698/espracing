@@ -45,17 +45,32 @@ if (userData == null || userData.roleesp == null || userData.roleesp > 1) {
 
 const { data: champsData } = await supabase
   .from("championship")
-  .select(`id, name, season, race:race(id), number_of_races_total, isfinished`)
+  .select(`id, name, year, season, race:race(id), number_of_races_total, isfinished`)
   .eq("ischampionship", true)
   .order("id", { ascending: true });
 
 const { data: eventsData } = await supabase
   .from("championship")
-  .select(`id, name, season, race:race(id)`)
+  .select(`id, name, year, season, race:race(id)`)
   .eq("ischampionship", false)
   .order("id", { ascending: true });
 
-  // Definición de columnas para eventos
+const { data: carsData } = await supabase
+  .from("car")
+  .select("*")
+  .order("id", { ascending: true });
+
+const { data: classesData } = await supabase
+  .from("carclass")
+  .select("*")
+  .order("id", { ascending: true });
+
+const { data: racesData } = await supabase
+  .from("race")
+  .select("*")
+  .order("id", { ascending: true });
+
+// Definición de columnas para eventos
 const eventColumns = [
   { header: "Nombre", accessor: "name" },
   { header: "Nº Carreras", accessor: "raceCount" },
@@ -130,7 +145,7 @@ const champTableData = champsData?.map((champ) => ({
         onDelete={{ path: "championship" }}
         pageSize={10}
         filterOptions={seasonOptions}
-        filterAccessor="Temporada"
+        filterAccessor="seasonDisplay"
         initialSortConfig={{ key: "name", direction: "asc" }}
         searchable={true}
         searchPlaceholder="Buscar por nombre de evento o temporada"
@@ -169,6 +184,12 @@ const champTableData = champsData?.map((champ) => ({
   </div>
 
   <div class="py-4 mx-auto text-center" style="width: 99%">
-    <NewChamp client:load />
+    <NewChamp 
+      championships={champsData ?? []}
+      cars={carsData}
+      carClasses={classesData}
+      races={racesData}
+      client:load 
+    />
   </div>
 </Layout>
