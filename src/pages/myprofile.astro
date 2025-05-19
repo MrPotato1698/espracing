@@ -1,6 +1,7 @@
 ---
 import Layout from "@/layouts/ProfileLayout.astro";
 import { supabase } from "@/db/supabase";
+import { RadialMultiProgress } from "@/components/ui/radial-multi-progress";
 
 // ****************************************************************************
 
@@ -115,284 +116,179 @@ const canUpdateFlag: boolean = diffHours > 48;
   </div>
   {
     statsActiveFlag ? (
-      <h2 class="text-5xl font-extrabold border-b-2 border-primary w-full mt-12">
-        Estadisticas de Carrera
-      </h2>
+      <>
+        <h2 class="text-5xl font-extrabold border-b-2 border-primary w-full mt-12">
+          Estadisticas de Carrera
+        </h2>
 
-      <div class = 'grid grid-cols-1 gap-1 lg:grid-cols-2'>
-        <div
-          id="chartStatsDriver"
-          data-driverraces={userData.races}
-          data-driverwins={userData.wins}
-          data-driverpodiums={userData.podiums}
-          data-drivertop5={userData.top5}
-          data-drivertop10={userData.top10}
-          data-driverdnf={userData.dnf}>
+        <div class="flex flex-col lg:flex-row lg:items-start lg:justify-center w-full gap-8 my-8">
+          <div class="flex justify-center lg:justify-center lg:w-1/2">
+            <RadialMultiProgress
+              data={[
+                {
+                  label: "Victorias",
+                  value: userData.races > 0 ? Math.round(userData.wins/userData.races*100) : 0,
+                  color: "#ffec00"
+                },
+                {
+                  label: "Podios",
+                  value: userData.races > 0 ? Math.round(userData.podiums/userData.races*100) : 0,
+                  color: "#37ffed"
+                },
+                {
+                  label: "Top 5",
+                  value: userData.races > 0 ? Math.round(userData.top5/userData.races*100) : 0,
+                  color: "#ff0b90"
+                },
+                {
+                  label: "Top 10",
+                  value: userData.races > 0 ? Math.round(userData.top10/userData.races*100) : 0,
+                  color: "#00ff1b"
+                },
+                {
+                  label: "DNF",
+                  value: userData.races > 0 ? Math.round(userData.dnf/userData.races*100) : 0,
+                  color: "#ff2300"
+                }
+              ]}
+            />
+          </div>
+          <div class="lg:w-1/2">
+            <div class="grid w-full grid-cols-1 my-5 gap-4 md:grid-cols-2">
+              <div class="blockdata">
+                <h3 class="text-4xl font-semibold border-b-2 border-primary w-3/4">
+                  Carreras
+                </h3>
+                <p class="pl-2 text-2xl font-medium">{userData.races}</p>
+              </div>
+              <div class="blockdata">
+                <h3 class="text-4xl font-semibold border-b-2 border-primary w-3/4">
+                  Victorias
+                </h3>
+                <p class="pl-2 text-2xl font-medium">{userData.wins}</p>
+              </div>
+              <div class="blockdata">
+                <h3 class="text-4xl font-semibold border-b-2 border-primary w-3/4">
+                  Podios
+                </h3>
+                <p class="pl-2 text-2xl font-medium">{userData.podiums}</p>
+              </div>
+              <div class="blockdata">
+                <h3 class="text-4xl font-semibold border-b-2 border-primary w-3/4">
+                  Top 5
+                </h3>
+                <p class="pl-2 text-2xl font-medium">{userData.top5}</p>
+              </div>
+              <div class="blockdata">
+                <h3 class="text-4xl font-semibold border-b-2 border-primary w-3/4">
+                  Top 10
+                </h3>
+                <p class="pl-2 text-2xl font-medium">{userData.top10}</p>
+              </div>
+              <div class="blockdata">
+                <h3 class="text-4xl font-semibold border-b-2 border-primary w-3/4">
+                  V. Rápidas
+                </h3>
+                <p class="pl-2 text-2xl font-medium">{userData.flaps}</p>
+              </div>
+              <div class="blockdata">
+                <h3 class="text-4xl font-semibold border-b-2 border-primary w-3/4">
+                  DNF
+                </h3>
+                <p class="pl-2 text-2xl font-medium">{userData.dnf}</p>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="grid w-11/12 grid-cols-1 my-5 lg:grid-cols-2">
-          <div class="blockdata">
-            <h3 class="text-4xl font-semibold border-b-2 border-primary w-3/4">
-              Carreras
-            </h3>
-            <p class="pl-2 text-2xl font-medium">{userData.races}</p>
-          </div>
-
-          <div class="blockdata">
-            <h3 class="text-4xl font-semibold border-b-2 border-primary w-3/4">
-              Victorias
-            </h3>
-            <p class="pl-2 text-2xl font-medium">{userData.wins}</p>
-          </div>
-
-          <div class="blockdata">
-            <h3 class="text-4xl font-semibold border-b-2 border-primary w-3/4">
-              Podios
-            </h3>
-            <p class="pl-2 text-2xl font-medium">{userData.podiums}</p>
-          </div>
-
-          <div class="blockdata">
-            <h3 class="text-4xl font-semibold border-b-2 border-primary w-3/4">
-              Top 5
-            </h3>
-            <p class="pl-2 text-2xl font-medium">{userData.top5}</p>
-          </div>
-
-          <div class="blockdata">
-            <h3 class="text-4xl font-semibold border-b-2 border-primary w-3/4">
-              Top 10
-            </h3>
-            <p class="pl-2 text-2xl font-medium">{userData.top10}</p>
-          </div>
-
-          <div class="blockdata">
-            <h3 class="text-4xl font-semibold border-b-2 border-primary w-3/4">
-              V. Rápidas
-            </h3>
-            <p class="pl-2 text-2xl font-medium">{userData.flaps}</p>
-          </div>
-
-          <div class="blockdata">
-            <h3 class="text-4xl font-semibold border-b-2 border-primary w-3/4">
-              DNF
-            </h3>
-            <p class="pl-2 text-2xl font-medium">{userData.dnf}</p>
-          </div>
+        <div class="grid grid-flow-col mt-8">
+          {canUpdateFlag ? (
+            <a
+              href="/modprofile"
+              class="py-1.5 px-2 w-fit bg-darkPrimary text-lightPrimary border-primary border-2 rounded-md font-medium text-lg hover:bg-darkSecond"
+            >
+              Modificar Perfil
+            </a>
+          ) : (
+            <a
+              id="disabledProfileButton" data-diffhours={diffHours}
+              class="py-1.5 px-2 w-fit bg-darkPrimary text-lightPrimary border-primary border-2 rounded-md font-medium text-lg hover:bg-darkSecond cursor-not-allowed"
+            >
+              Modificar Perfil
+            </a>
+          )}
         </div>
-      </div>
-
-      <div class="grid grid-flow-col mt-8">
-        {canUpdateFlag ? (
+      </>
+    ) : (
+      <>
+        <h2 class="text-5xl font-extrabold border-b-2 border-primary w-full mt-12">
+          Estadisticas de Carrera
+        </h2>
+        <div>
+          <p> *Actualmente, no hay estadisticas de tu perfil cargadas en el sistema, si quieres actualizarlas, haz click en el botón de abajo para realizar el cálculo</p>
+        </div>
+        <div class="grid grid-flow-col mt-8">
           <a
-            href="/modprofile"
+            id = "updateStats" data-id = {userData.id}
             class="py-1.5 px-2 w-fit bg-darkPrimary text-lightPrimary border-primary border-2 rounded-md font-medium text-lg hover:bg-darkSecond"
           >
-            Modificar Perfil
+            Actualizar Estadisticas
           </a>
-        ) : (
-        <a
-        id="disabledProfileButton" data-diffhours = {diffHours}
-        class="py-1.5 px-2 w-fit bg-darkPrimary text-lightPrimary border-primary border-2 rounded-md font-medium text-lg hover:bg-darkSecond cursor-not-allowed"
-        >
-          Modificar Perfil
-        </a>
-    )}
-  </div>
-      )
-    :
-    (
-    <h2 class="text-5xl font-extrabold border-b-2 border-primary w-full mt-12">
-        Estadisticas de Carrera
-      </h2>
-      <div>
-        <p> *Actualmente, no hay estadisticas de tu perfil cargadas en el sistema, si quieres actualizarlas, haz click en el botón de abajo para realizar el cálculo</p>
-      </div>
-      <div class="grid grid-flow-col mt-8">
-        <a
-          id = "updateStats" data-id = {userData.id}
-          class="py-1.5 px-2 w-fit bg-darkPrimary text-lightPrimary border-primary border-2 rounded-md font-medium text-lg hover:bg-darkSecond"
-          >
-          Actualizar Estadisticas
-        </a>
-        <div id="loadingStats" style="display:none; align-items:center; gap:8px; margin-left:16px;">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="animate-spin">
-            <circle cx="12" cy="12" r="10" stroke="#da392b" stroke-width="4" stroke-linecap="round" stroke-dasharray="60 40"/>
-          </svg>
-          <span>Cargando estadísticas...</span>
+          <div id="loadingStats" style="display:none; align-items:center; gap:8px; margin-left:16px;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="animate-spin">
+              <circle cx="12" cy="12" r="10" stroke="#da392b" stroke-width="4" stroke-linecap="round" stroke-dasharray="60 40"/>
+            </svg>
+            <span>Cargando estadísticas...</span>
+          </div>
         </div>
-      </div>
+      </>
     )
   }
 
   <script>
-    interface userDataRaces{
-      races: number;
-      wins: number;
-      podiums: number;
-      top5: number;
-      top10: number;
-      dnf: number;
-    }
-
     import { showToast } from '@/lib/utils';
-    import ApexCharts from 'apexcharts';
-
     function initializeProfileButton() {
-        const disabledButton = document.getElementById('disabledProfileButton');
-        if (disabledButton) {
-          const diffHours = disabledButton.getAttribute('data-diffhours');
-
-          disabledButton.addEventListener('click', () => {
-            window.showToast(`Solo puedes modificar tu perfil cada 48 horas. Último cambio hace ${diffHours} horas`, 'info');
-          });
-        }
-      }
-
-    function showStats(){
-      const chartElement = document.getElementById('chartStatsDriver');
-
-      if (!chartElement || chartElement.hasChildNodes()) {
-        return;
-      }
-
-      const userData: userDataRaces = {
-        races: Number(document.getElementById('chartStatsDriver')?.getAttribute('data-driverraces')) ?? 0,
-        wins: Number(document.getElementById('chartStatsDriver')?.getAttribute('data-driverwins')) ?? 0,
-        podiums: Number(document.getElementById('chartStatsDriver')?.getAttribute('data-driverpodiums')) ?? 0,
-        top5: Number(document.getElementById('chartStatsDriver')?.getAttribute('data-drivertop5')) ?? 0,
-        top10: Number(document.getElementById('chartStatsDriver')?.getAttribute('data-drivertop10')) ?? 0,
-        dnf: Number(document.getElementById('chartStatsDriver')?.getAttribute('data-driverdnf')) ?? 0
-      }
-      if(!userData.races){
-        showToast('No se ha podido cargar la información del usuario', 'warning');
-        return;
-      }
-      var optionchartStats = {
-        chart: {
-          height: 500,
-          type: "radialBar",
-        },
-        series: [
-          userData.wins/userData.races*100,
-          userData.podiums/userData.races*100,
-          userData.top5/userData.races*100,
-          userData.top10/userData.races*100,
-          userData.dnf/userData.races*100],
-        plotOptions: {
-          radialBar: {
-              inverseOrder: false,
-              startAngle: -90,
-              endAngle: 90,
-              offsetX: 0,
-              offsetY: 0,
-              hollow:{
-                  margin: 7,
-                  size: '25%',
-                  background: "transparent",
-                  position: 'back',
-              },
-              track: {
-                  show: true,
-                  startAngle: -90,
-                  endAngle: 90,
-                  background: "#f7f7f7",
-                  strokeWidth: '65%',
-                  opacity: 0.15,
-                  margin: 7,
-              },
-              dataLabels: {
-                  show: true,
-                  name: {
-                      show: true,
-                      fontSize: '24px',
-                      fontWeight: 600,
-                      offsetY: -5
-                    },
-                    value: {
-                      show: true,
-                      fontSize: '24px',
-                      color: '#f9f9f9',
-                      offsetY: 5,
-                      formatter: function (val: any) {
-                        return Math.round((Number(val)/100)*userData.races);
-                      }
-                    },
-                    total: {
-                      show: true,
-                      label: 'Carreras',
-                      color: '#f9f9f9',
-                      fontSize: '24px',
-                      fontWeight: 600,
-                      formatter: function () {
-                        return  userData.races
-                      }
-                  }
-              },
-              barLabels: {
-                  enabled: false,
-                  offsetX: 0,
-                  offsetY: 5,
-                  useSeriesColors: true,
-                  fontWeight: 600,
-                  fontSize: '15px'
-              },
-          }
-      },
-        labels: ['Victorias', 'Podios', 'Top 5', 'Top 10', 'DNF'],
-        colors: [
-            "#ffec00",
-            "#37ffed",
-            "#ff0b90",
-            "#00ff1b",
-            "#ff2300",
-          ],
-      };
-
-      new ApexCharts(document.querySelector("#chartStatsDriver"), optionchartStats).render();
-    }
-
-    const updateStatsBtn = document.getElementById('updateStats');
-    const loadingStats = document.getElementById('loadingStats');
-      if (updateStatsBtn) {
-        updateStatsBtn.addEventListener('click', async () => {
-          try {
-            if (loadingStats) loadingStats.style.display = 'flex';
-            updateStatsBtn.classList.add('pointer-events-none', 'opacity-60');
-            const userId = updateStatsBtn.getAttribute('data-id');
-            const response = await fetch('/api/admin/stats/newUserStats', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({ userId })
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-              throw new Error(data.error);
-            }
-
-            window.location.reload();
-          } catch (error: any) {
-            alert(error.message || 'Error al actualizar las estadísticas');
-          } finally {
-            if (loadingStats) loadingStats.style.display = 'none';
-            updateStatsBtn.classList.remove('pointer-events-none', 'opacity-60');
-          }
+      const disabledButton = document.getElementById('disabledProfileButton');
+      if (disabledButton) {
+        const diffHours = disabledButton.getAttribute('data-diffhours');
+        disabledButton.addEventListener('click', () => {
+          window.showToast(`Solo puedes modificar tu perfil cada 48 horas. Último cambio hace ${diffHours} horas`, 'info');
         });
       }
-
-      initializeProfileButton();
-      showStats();
-      document.addEventListener('astro:page-load', initializeProfileButton);
-      document.addEventListener('astro:page-load', () => {
-        const chartElement = document.getElementById('chartStatsDriver');
-        if (chartElement) {
-          chartElement.innerHTML = '';
-          showStats();
+    }
+    const updateStatsBtn = document.getElementById('updateStats');
+    const loadingStats = document.getElementById('loadingStats');
+    if (updateStatsBtn) {
+      updateStatsBtn.addEventListener('click', async () => {
+        try {
+          if (loadingStats) loadingStats.style.display = 'flex';
+          updateStatsBtn.classList.add('pointer-events-none', 'opacity-60');
+          const userId = updateStatsBtn.getAttribute('data-id');
+          const response = await fetch('/api/admin/stats/newUserStats', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ userId })
+          });
+          const data = await response.json();
+          if (!response.ok) {
+            throw new Error(data.error);
+          }
+          window.location.reload();
+        } catch (error) {
+          if (error instanceof Error) {
+            alert(error.message || 'Error al actualizar las estadísticas');
+          } else {
+            alert('Error al actualizar las estadísticas');
+          }
+        } finally {
+          if (loadingStats) loadingStats.style.display = 'none';
+          updateStatsBtn.classList.remove('pointer-events-none', 'opacity-60');
         }
       });
+    }
+    initializeProfileButton();
+    document.addEventListener('astro:page-load', initializeProfileButton);
   </script>
 
 </Layout>
