@@ -1,5 +1,6 @@
 ---
 import { supabase } from "@/db/supabase";
+import ChampCharts from "@/components/champ-charts";
 
 interface GroupedChamp {
   ChampID: string;
@@ -87,17 +88,43 @@ const champsBySeason = seasons.reduce((acc, season) => {
       Cargar Datos
     </button>
   </div>
-
   <div id="resultsIndyChampsTable"></div>
-  <div class="mx-auto mt-4 tablecharts"><div id="chartProgressiónIndyChamp" class = "border-2 border-primary"></div></div>
   <div id="resultsTeamsChampsTable"></div>
-  <div class="mx-auto mt-4 tablecharts"><div id="chartProgressiónTeamsChamp" class = "border-2 border-primary"></div></div>
-  <div id="resultTableOtherPrizes"></div>
+  <div id="resultTableOtherPrizes"></div>  <!-- Componente React para los gráficos del campeonato -->
+  <div class="w-full mt-8" id="champChartsContainer">
+    <ChampCharts champId="" client:load />
+  </div>
 </div>
 
 <script>
   // Script para cargar los resultados de los campeonatos
   import "@/pages/api/champresults/champresults.ts";
+
+  // Registrar un componente web personalizado para la comunicación con React
+  class ESPRChampCharts extends HTMLElement {
+    constructor() {
+      super();
+    }
+    
+    static get observedAttributes() {
+      return ['champid'];
+    }
+    
+    attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null) {
+      if (name === 'champid' && oldValue !== newValue) {
+        // Disparar evento para que React lo recoja
+        const event = new CustomEvent('champ-id-changed', { 
+          detail: { champId: newValue } 
+        });
+        document.dispatchEvent(event);
+      }
+    }
+  }
+  
+  // Registrar el elemento si no está ya registrado
+  if (typeof customElements !== 'undefined' && !customElements.get('espr-champ-charts')) {
+    customElements.define('espr-champ-charts', ESPRChampCharts);
+  }
 </script>
 
 <style>
