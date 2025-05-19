@@ -1,4 +1,3 @@
-import ApexCharts from 'apexcharts';
 import { supabase } from "@/db/supabase";
 import { getResultTableData, showToast, formatTwoIntegersPlusThreeDecimals, formatTwoIntegers } from "@/lib/utils";
 
@@ -36,42 +35,43 @@ function initializeScript() {
   }
 
   function getDomElements() {
-    const datosCircuito = document.getElementById("datosCircuito");
-    const tablaResultados = document.getElementById("tablaResultados");
-    const sectorTableR1 = document.getElementById("sectorTableR1");
-    const sectorTableR2 = document.getElementById("sectorTableR2");
-    const titleSectorR1 = document.getElementById("titleSectorR1");
-    const titleSectorR2 = document.getElementById("titleSectorR2");
-    const tablaIndividuales1 = document.getElementById("tableIndividualLaps1");
-    const tablasIndividuales2 = document.getElementById("tableIndividualLaps2");
-    const chartChangePosition = document.getElementById("chartChangePosition");
-    const chartGaps = document.getElementById("chartGaps");
+  const datosCircuito = document.getElementById("datosCircuito")
+  const tablaResultados = document.getElementById("tablaResultados")
+  const sectorTableR1 = document.getElementById("sectorTableR1")
+  const sectorTableR2 = document.getElementById("sectorTableR2")
+  const titleSectorR1 = document.getElementById("titleSectorR1")
+  const titleSectorR2 = document.getElementById("titleSectorR2")
+  const tablaIndividuales1 = document.getElementById("tableIndividualLaps1")
+  const tablasIndividuales2 = document.getElementById("tableIndividualLaps2")
+  const chartChangePosition = document.getElementById("chartChangePosition")
+  const chartGaps = document.getElementById("chartGaps")
 
-    if (!datosCircuito) throw new Error('Elemento con id "resultado2" no encontrado.');
-    if (!tablaResultados) throw new Error('Elemento con id "resultado" no encontrado.');
-    if (!titleSectorR1) throw new Error('Elemento con id "titleSectorR1" no encontrado.');
-    if (!titleSectorR2) throw new Error('Elemento con id "titleSectorR2" no encontrado.');
-    if (!tablaIndividuales1) throw new Error('Elemento con id "tablaIndividuales1" no encontrado.');
-    if (!tablasIndividuales2) throw new Error('Elemento con id "tablasIndividuales2" no encontrado.');
-    if (!chartChangePosition) throw new Error('Elemento con id "chartChangePosition" no encontrado.');
-    if (!chartGaps) throw new Error('Elemento con id "chartGaps" no encontrado.');
-    if (!sectorTableR1) throw new Error('Elemento con id "sectorTableR1" no encontrado.');
-    if (!sectorTableR2) throw new Error('Elemento con id "sectorTableR2" no encontrado.');
+  // Verificar que todos los elementos existen
+  if (!datosCircuito) throw new Error('Elemento con id "datosCircuito" no encontrado.')
+  if (!tablaResultados) throw new Error('Elemento con id "tablaResultados" no encontrado.')
+  if (!titleSectorR1) throw new Error('Elemento con id "titleSectorR1" no encontrado.')
+  if (!titleSectorR2) throw new Error('Elemento con id "titleSectorR2" no encontrado.')
+  if (!tablaIndividuales1) throw new Error('Elemento con id "tableIndividualLaps1" no encontrado.')
+  if (!tablasIndividuales2) throw new Error('Elemento con id "tableIndividualLaps2" no encontrado.')
+  if (!chartChangePosition) throw new Error('Elemento con id "chartChangePosition" no encontrado.')
+  if (!chartGaps) throw new Error('Elemento con id "chartGaps" no encontrado.')
+  if (!sectorTableR1) throw new Error('Elemento con id "sectorTableR1" no encontrado.')
+  if (!sectorTableR2) throw new Error('Elemento con id "sectorTableR2" no encontrado.')
 
-    return {
-      datosCircuito,
-      tablaResultados,
-      sectorTableR1,
-      sectorTableR2,
-      titleSectorR1,
-      titleSectorR2,
-      tablaIndividuales1,
-      tablasIndividuales2,
-      chartChangePosition,
-      chartGaps,
-      tablasIndividuales: [tablaIndividuales1, tablasIndividuales2]
-    };
+  return {
+    datosCircuito,
+    tablaResultados,
+    sectorTableR1,
+    sectorTableR2,
+    titleSectorR1,
+    titleSectorR2,
+    tablaIndividuales1,
+    tablasIndividuales2,
+    chartChangePosition,
+    chartGaps,
+    tablasIndividuales: [tablaIndividuales1, tablasIndividuales2],
   }
+}
 
   function clearDom(dom: any) {
     dom.datosCircuito.innerHTML = "";
@@ -256,338 +256,11 @@ function initializeScript() {
   }
 
   function renderPositionCharts(chartChangePosition: HTMLElement, datos: RaceData[]) {
-    const ApexchartChangePosition = [];
-    for (let i = 0; i < datos.length; i++) {
-      let seriesDataPositions: { name: string; data: number[] }[][] = [];
-      const splitsPositionChange = [
-        ...new Set(datos[i].RaceResult.map((result) => result.Split)),
-      ];
-      splitsPositionChange.forEach(() => seriesDataPositions.push([]));
-      datos[i].RaceLaps.filter((lapData) => lapData.Laps.length > 0).forEach((lapData) => {
-        const driverResult = datos[i].RaceResult.find(
-          (result) => result.SteamID === lapData.SteamID
-        );
-        if (driverResult) {
-          const splitIndex = driverResult.Split - 1;
-          const gridPosition = driverResult.GridPosition;
-          seriesDataPositions[splitIndex].push({
-            name: lapData.DriverName,
-            data: [
-              gridPosition,
-              ...lapData.Laps.map((lap) => lap.Position),
-            ],
-          });
-        }
-      });
-      const numlaps: number[] = Array.from({ length: datos[i].RaceLaps[0].Laps.length + 1 }, (_, j) => j);
-      let nameChartPositions = "Cambios de posiciones (Carrera " + (i + 1) + ")";
-      const optionsChangePositions = {
-        title: {
-          text: nameChartPositions,
-          align: "center",
-          style: {
-            color: "#f9f9f9",
-            fontSize: "24px",
-            fontWeight: "bold",
-          },
-        },
-        series: seriesDataPositions[0],
-        colors: [
-          "#2E93fA",
-          "#66DA26",
-          "#E91E63",
-          "#FF9800",
-          "#fff700",
-          "#00ffd4",
-          "#0036ff",
-          "#e91ec4",
-          "#9e57ff",
-          "#ff0000",
-          "#00ffbd",
-          "#546E7A",
-        ],
-        chart: {
-          type: "line",
-          zoom: {
-            enable: false,
-            type: "x",
-            autoScaleYaxis: true,
-          },
-          locales: [
-            {
-              name: "es",
-              options: {
-                toolbar: {
-                  download: "Descargar SVG",
-                  selection: "Seleccionar",
-                  selectionZoom: "Seleccionar Zoom",
-                  zoomIn: "Zoom In",
-                  zoomOut: "Zoom Out",
-                  pan: "Mover",
-                  reset: "Reiniciar Zoom",
-                },
-              },
-            },
-          ],
-          defaultLocale: "es",
-          toolbar: {
-            show: true,
-            tools: {
-              download: false,
-              selection: false,
-              zoom: true,
-              zoomin: true,
-              zoomout: true,
-              pan: true,
-              reset: true,
-            },
-          },
-          animation: {
-            enabled: true,
-            easing: "linear",
-            speed: 850,
-            animateGradually: {
-              enabled: false,
-            },
-          },
-        },
-        xaxis: {
-          categories: numlaps,
-          labels: {
-            style: {
-              colors: "#f9f9f9",
-            },
-          },
-          title: {
-            text: "Vueltas",
-            style: {
-              color: "#f9f9f9",
-              fontSize: "16px",
-            },
-          },
-        },
-        yaxis: {
-          stepSize: 1,
-          min: 1,
-          position: "top",
-          reversed: true,
-          title: {
-            text: "Posiciones",
-            style: {
-              color: "#f9f9f9",
-              fontSize: "16px",
-            },
-          },
-          labels: {
-            style: {
-              colors: "#f9f9f9",
-            },
-          },
-        },
-        stroke: {
-          curve: "smooth",
-        },
-        markers: {
-          size: 1,
-        },
-        tooltip: {
-          theme: "dark",
-          shared: false,
-          intersect: true,
-          onDatasetHover: {
-            highlightDataSeries: false,
-          },
-          x: {
-            show: true,
-          },
-          y: {
-            formatter: function (value: number) {
-              return value.toFixed(0);
-            },
-          },
-        },
-        legend: {
-          labels: {
-            colors: "#f9f9f9",
-          },
-        },
-      };
-      const auxChart = new ApexCharts(
-        document.querySelector("#chartChangePosition" + (i + 1)),
-        optionsChangePositions
-      );
-      ApexchartChangePosition.push(auxChart);
-    }
-    chartChangePosition.classList.remove('hidden');
-    for (const chart of ApexchartChangePosition) {
-      chart.render();
-    }
+    chartChangePosition.classList.remove("hidden")
   }
 
   function renderGapCharts(chartGaps: HTMLElement, datos: RaceData[]) {
-    const charGapsProgresion = [];
-    for (let i = 0; i < datos.length; i++) {
-      let seriesDataGaps: { name: string; data: number[] }[][] = [];
-      const splitsGapVariation = [
-        ...new Set(datos[i].RaceResult.map((result) => result.Split)),
-      ];
-      splitsGapVariation.forEach(() => seriesDataGaps.push([]));
-      datos[i].RaceLaps.filter((lapData) => lapData.Laps.length > 0).forEach((lapData) => {
-        const driverResult = datos[i].RaceResult.find((result) => result.SteamID === lapData.SteamID);
-        if (driverResult) {
-          const splitIndex = driverResult.Split - 1;
-          seriesDataGaps[splitIndex].push({
-            name: lapData.DriverName,
-            data: lapData.Laps.map((lap) => lap.GaptoFirst),
-          });
-        }
-      });
-      let nameChartGaps = "Distancia al líder (Carrera " + (i + 1) + ")";
-      const numlaps: number[] = Array.from({ length: datos[i].RaceLaps[0].Laps.length + 1 }, (_, j) => j);
-      const optionsGaps = {
-        title: {
-          text: nameChartGaps,
-          align: "center",
-          style: {
-            color: "#f9f9f9",
-            fontSize: "24px",
-            fontWeight: "bold",
-          },
-        },
-        series: seriesDataGaps[0],
-        colors: [
-          "#2E93fA",
-          "#66DA26",
-          "#546E7A",
-          "#E91E63",
-          "#FF9800",
-          "#fff700",
-          "#00ffd4",
-          "#0036ff",
-          "#e91ec4",
-          "#9e57ff",
-          "#ff0000",
-          "#00ffbd",
-        ],
-        chart: {
-          type: "line",
-          zoom: {
-            enable: false,
-            type: "x",
-            autoScaleYaxis: true,
-          },
-          locales: [
-            {
-              name: "es",
-              options: {
-                toolbar: {
-                  download: "Descargar SVG",
-                  selection: "Seleccionar",
-                  selectionZoom: "Seleccionar Zoom",
-                  zoomIn: "Zoom In",
-                  zoomOut: "Zoom Out",
-                  pan: "Mover",
-                  reset: "Reiniciar Zoom",
-                },
-              },
-            },
-          ],
-          defaultLocale: "es",
-          toolbar: {
-            show: true,
-            tools: {
-              download: false,
-              selection: false,
-              zoom: true,
-              zoomin: true,
-              zoomout: true,
-              pan: true,
-              reset: true,
-            },
-          },
-          animation: {
-            enabled: true,
-            easing: "linear",
-            speed: 850,
-            animateGradually: {
-              enabled: false,
-            },
-          },
-        },
-        xaxis: {
-          categories: numlaps,
-          labels: {
-            style: {
-              colors: "#f9f9f9",
-            },
-          },
-          title: {
-            text: "Vueltas",
-            style: {
-              color: "#f9f9f9",
-              fontSize: "16px",
-            },
-          },
-        },
-        yaxis: {
-          stepSize: 8,
-          min: 0,
-          position: "top",
-          reversed: true,
-          title: {
-            text: "Distancia al líder (segundos)",
-            style: {
-              color: "#f9f9f9",
-              fontSize: "16px",
-            },
-          },
-          labels: {
-            style: {
-              colors: "#f9f9f9",
-            },
-          },
-        },
-        stroke: {
-          curve: "smooth",
-        },
-        markers: {
-          size: 1,
-        },
-        tooltip: {
-          theme: "dark",
-          shared: false,
-          intersect: true,
-          onDatasetHover: {
-            highlightDataSeries: false,
-          },
-          x: {
-            show: true,
-          },
-          y: {
-            formatter: function (value: number) {
-              return value.toFixed(3);
-            },
-          },
-        },
-        legend: {
-          labels: {
-            colors: "#f9f9f9",
-          },
-        },
-        grid: {
-          borderColor: "#5a5a5a",
-        },
-      };
-      const auxChart = new ApexCharts(
-        document.querySelector("#chartGaps" + (i + 1)),
-        optionsGaps
-      );
-      charGapsProgresion.push(auxChart);
-    }
-    chartGaps.classList.remove('hidden');
-    for (const chart of charGapsProgresion) {
-      chart.render();
-    }
+    chartGaps.classList.remove("hidden");
   }
 
   function renderSectorTables(dom: any, datos: RaceData[], carData: CarData[], flagMoreSplits: boolean) {
@@ -736,6 +409,223 @@ if (document.readyState === 'loading') {
   initializeScript();
 }
 
+// Helper functions outside main function to reduce cognitive complexity
+function getDriverCarInfo(CarFileNameFromDriver: string | undefined, carData: CarData[]) {
+  const isCarExists = carData.find(car => car.filename === CarFileNameFromDriver);
+  if (isCarExists) {
+    return {
+      carName: isCarExists.brand + " " + isCarExists.model,
+      carClass: isCarExists.classShortName,
+      carColorClass: `style="background-color: ${isCarExists.classColor.split(" ")[0].replace("bg-[", "").replace("]", "")}; color: ${isCarExists.classColor.split(" ")[1].replace("text-[", "").replace("]", "")}" class = "rounded text-xs font-bold px-1 py-0.5 ml-1"`
+    };
+  }
+  return {
+    carName: CarFileNameFromDriver ?? "",
+    carClass: "",
+    carColorClass: ""
+  };
+}
+
+function formatDriverBestLapTime(BestLap: number | undefined): string {
+  if (!BestLap || BestLap >= 999999.999)
+    return "Vuelta Rápida: No Time";
+  const minutes = Math.trunc((BestLap / 60) % 60);
+  const seconds = BestLap % 60;
+  return `Vuelta Rápida: ${formatTwoIntegers(minutes)}:${formatTwoIntegersPlusThreeDecimals(seconds)}`;
+}
+
+function formatDriverSectors(sectors: number[]): string {
+  return (
+    "(" +
+    sectors
+      .map((sector, index) => {
+        sector = sector / 1000;
+        const timeStr =
+          sector > 60
+            ? `${formatTwoIntegers(Math.trunc((sector / 60) % 60))}:${formatTwoIntegersPlusThreeDecimals(sector % 60)}`
+            : formatTwoIntegersPlusThreeDecimals(sector);
+        return `S${index + 1}: ${timeStr}`;
+      })
+      .join(" | ") +
+    ")"
+  );
+}
+
+function createDriverHeaderHTML(
+  driverName: string,
+  carName: string,
+  carClass: string,
+  carColorClass: string,
+  bestlapToString: string,
+  avglapToString: string,
+  consistencyString: string,
+  optimallapToString: string,
+  bestSectorsString: string,
+  avgSectorString: string,
+  optimalSectorsString: string,
+  splitInfo: string)
+{
+  return `
+    <div class="mt-8">
+      <div class="text-center bg-darkSecond rounded-lg py-5">
+        <p class="text-3xl font-bold border-b border-primary w-fit mx-auto mb-2">${driverName} ${splitInfo}</p>
+        <div class="grid grid-cols-1">
+          <p class="text-2xl font-semibold align-middle">Coche: ${carName}</p>
+          <div class="block">
+            <span ${carColorClass}>${carClass}</span>
+          </div>
+        </div>
+        <div class="grid grid-cols-3 text-lg mt-2">
+          <p>${bestlapToString}</p>
+          <p>${avglapToString} ${consistencyString}</p>
+          <p>${optimallapToString}</p>
+        </div>
+        <div class="grid grid-cols-3 text-lg mt-2">
+          <p>${bestSectorsString}</p>
+          <p>${avgSectorString}</p>
+          <p>${optimalSectorsString}</p>
+        </div>
+      </div>
+  `;
+}
+
+function processOptimalLapData(optimalLap: number[] | undefined, pos: number): { optimallapToString: string, optimalSectorsString: string } {
+  let optimallapToString = "";
+  let optimalSectorsString = "";
+
+  if (optimalLap && pos >= -2) {
+    const [totalTime, ...OptimalSectors] = optimalLap;
+    const minutes = Math.trunc((totalTime / 60) % 60);
+    const seconds = totalTime % 60;
+
+    optimallapToString = `Vuelta Optima: ${formatTwoIntegers(minutes)}:${formatTwoIntegersPlusThreeDecimals(seconds)}`;
+
+    optimalSectorsString =
+      "(" +
+      OptimalSectors.map((sector, index) => {
+        sector = sector / 1000;
+        const sectorTime =
+          sector > 60
+            ? `${formatTwoIntegers(Math.trunc((sector / 60) % 60))}:${formatTwoIntegersPlusThreeDecimals(sector % 60)}`
+            : formatTwoIntegersPlusThreeDecimals(sector);
+
+        return `S${index + 1}: ${sectorTime}`;
+      }).join(" | ") +
+      ")";
+  }
+
+  return { optimallapToString, optimalSectorsString };
+}
+
+function processAverageLapData(average: number[], pos: number): { avglapToString: string, avgSectorString: string } {
+  let avglapToString = "";
+  let avgSectorString = "";
+  
+  if (pos >= -2) {
+    const AvgSectors = average.slice(1);
+    const secondsavg = formatTwoIntegersPlusThreeDecimals(average[0] % 60);
+    const minutesavg = formatTwoIntegers(Math.trunc((average[0] / 60) % 60));
+    
+    avglapToString = `Vuelta Media: ${minutesavg}:${secondsavg}`;
+    avgSectorString += `(`;
+    AvgSectors.forEach((sector, index, array) => {
+      sector /= 1000;
+      const minutes = Math.trunc(sector / 60);
+      const seconds = sector % 60;
+      avgSectorString += `S${index + 1}: ${
+        minutes
+          ? `${formatTwoIntegers(minutes)}:${formatTwoIntegersPlusThreeDecimals(seconds)}`
+          : formatTwoIntegersPlusThreeDecimals(seconds)
+      }${index < array.length - 1 ? " | " : ""}`;
+    });
+    avgSectorString += `)`;
+  }
+  
+  return { avglapToString, avgSectorString };
+}
+
+function generateLapRows(
+  laps: Lap[], 
+  bestGlobalSectors: number[],
+  bestSectorsDriverID: number[],
+  BestLapGeneral: number,
+  BestLap: number | undefined,
+  pos: number
+): string {
+  let BestLapFoundRef = false;
+  return laps.map(lap => {
+    // Format lap time
+    const lapTime = pos >= -1
+      ? `${formatTwoIntegers(Math.trunc((lap.LapTime / 60) % 60))}:${formatTwoIntegersPlusThreeDecimals(lap.LapTime % 60)}`
+      : "";
+
+    // Determine row background class
+    const bgClass = lap.LapNumber % 2 === 0 ? "bg-darkPrimary" : "bg-darkSecond";
+    
+    // Determine lap time class
+    let lapTimeClass = '""';
+    if (lap.LapTime === BestLapGeneral && !BestLapFoundRef) {
+      BestLapFoundRef = true;
+      lapTimeClass = '"bg-[#c100ff] text-white font-bold rounded-full w-content px-2"';
+    } else if (lap.LapTime === BestLap && !BestLapFoundRef) {
+      BestLapFoundRef = true;
+      lapTimeClass = '"bg-[#00ee07] text-black font-bold rounded-full w-content px-2"';
+    } else if (lap.Cut > 0) {
+      BestLapFoundRef = true;
+      lapTimeClass = '"bg-primary text-black font-bold rounded-full w-content px-2"';
+    }
+    
+    // Determine cut class
+    const cutClass = lap.Cut > 0
+      ? '"bg-primary text-black font-semibold rounded-full w-content px-2"'
+      : '""';
+
+    // Determine position class
+    let positionClass = '""';
+    if (lap.Position === 1) {
+      positionClass = '"bg-[#ffc750] text-black font-bold rounded-full w-content px-2"';
+    } else if (lap.Position === 2) {
+      positionClass = '"bg-[#c0c0c0] text-black font-bold rounded-full w-content px-2"';
+    } else if (lap.Position === 3) {
+      positionClass = '"bg-[#cd7f32] text-white font-bold rounded-full w-content px-2"';
+    }
+
+    // Format sectors
+    const sectors = lap.Sector.map((sectorTime, idx) => {
+      // Format sector time
+      const formattedTime = (() => {
+        let time = sectorTime / 1000;
+        if (time >= 60) {
+          const seconds = formatTwoIntegersPlusThreeDecimals(time % 60);
+          const minutes = formatTwoIntegers(Math.trunc((time / 60) % 60));
+          return `${minutes}:${seconds}`;
+        }
+        return formatTwoIntegersPlusThreeDecimals(time);
+      })();
+      
+      // Determine sector class
+      let sectorClass = '""';
+      if (sectorTime === bestSectorsDriverID[idx]) {
+        sectorClass = sectorTime === bestGlobalSectors[idx]
+          ? '"bg-[#c100ff] text-white font-bold rounded-full w-content px-2"'
+          : '"bg-[#00ee07] text-black font-bold rounded-full w-content px-2"';
+      }
+      
+      return `<td><span class=${sectorClass}>${formattedTime}</span></td>`;
+    }).join("");
+
+    return `
+      <tr class="${bgClass} text-center">
+        <td>${lap.LapNumber}</td>
+        <td><span class=${lapTimeClass}>${lapTime}</span></td>
+        ${sectors}
+        <td>${lap.Tyre}</td>
+        <td><span class=${positionClass}>${lap.Position}</span></td>
+        <td><span class=${cutClass}>${lap.Cut}</span></td>
+      </tr>`;
+  }).join("");
+}
+
 function loadIndividualTimes(datos: RaceData, carData: CarData[], flagMoreSplits: boolean): string {
   const BestLapGeneral = datos.BestLap[0].BestLap;
   const sectorsList = datos.BestSector.reduce((acc, sector) => {
@@ -748,165 +638,6 @@ function loadIndividualTimes(datos: RaceData, carData: CarData[], flagMoreSplits
   const drivers = datos.RaceLaps;
   let result = "";
 
-  function getCarInfo(CarFileNameFromDriver: string | undefined) {
-    const isCarExists = carData.find(car => car.filename === CarFileNameFromDriver);
-    if (isCarExists) {
-      return {
-        carName: isCarExists.brand + " " + isCarExists.model,
-        carClass: isCarExists.classShortName,
-        carColorClass: `style="background-color: ${isCarExists.classColor.split(" ")[0].replace("bg-[", "").replace("]", "")}; color: ${isCarExists.classColor.split(" ")[1].replace("text-[", "").replace("]", "")}" class = "rounded text-xs font-bold px-1 py-0.5 ml-1"`
-      };
-    }
-    return {
-      carName: CarFileNameFromDriver ?? "",
-      carClass: "",
-      carColorClass: ""
-    };
-  }
-
-  function formatBestLapTime(BestLap: number | undefined): string {
-    if (!BestLap || BestLap >= 999999.999)
-      return "Vuelta Rápida: No Time";
-    const minutes = Math.trunc((BestLap / 60) % 60);
-    const seconds = BestLap % 60;
-    return `Vuelta Rápida: ${formatTwoIntegers(minutes)}:${formatTwoIntegersPlusThreeDecimals(seconds)}`;
-  }
-
-  function formatSectors(sectors: number[]): string {
-    return (
-      "(" +
-      sectors
-        .map((sector, index) => {
-          sector = sector / 1000;
-          const timeStr =
-            sector > 60
-              ? `${formatTwoIntegers(Math.trunc((sector / 60) % 60))}:${formatTwoIntegersPlusThreeDecimals(sector % 60)}`
-              : formatTwoIntegersPlusThreeDecimals(sector);
-          return `S${index + 1}: ${timeStr}`;
-        })
-        .join(" | ") +
-      ")"
-    );
-  }
-
-  function createDriverHeader(
-    driverName: string,
-    carName: string,
-    carClass: string,
-    carColorClass: string,
-    bestlapToString: string,
-    avglapToString: string,
-    consistencyString: string,
-    optimallapToString: string,
-    bestSectorsString: string,
-    avgSectorString: string,
-    optimalSectorsString: string,
-    splitInfo: string)
-  {
-    return `
-      <div class="mt-8">
-        <div class="text-center bg-darkSecond rounded-lg py-5">
-          <p class="text-3xl font-bold border-b border-primary w-fit mx-auto mb-2">${driverName} ${splitInfo}</p>
-          <div class="grid grid-cols-1">
-            <p class="text-2xl font-semibold align-middle">Coche: ${carName}</p>
-            <div class="block">
-              <span ${carColorClass}>${carClass}</span>
-            </div>
-          </div>
-          <div class="grid grid-cols-3 text-lg mt-2">
-            <p>${bestlapToString}</p>
-            <p>${avglapToString} ${consistencyString}</p>
-            <p>${optimallapToString}</p>
-          </div>
-          <div class="grid grid-cols-3 text-lg mt-2">
-            <p>${bestSectorsString}</p>
-            <p>${avgSectorString}</p>
-            <p>${optimalSectorsString}</p>
-          </div>
-        </div>
-    `;
-  }
-
-  function formatLapRow(
-    lap: Lap,
-    bestGlobalSectors: number[],
-    bestSectorsDriverID: number[],
-    BestLapGeneral: number,
-    BestLap: number | undefined,
-    pos: number,
-    BestLapFoundRef: boolean )
-  {
-    function getBestLapClass() {
-      if (lap.LapTime === BestLapGeneral && !BestLapFoundRef) {
-        BestLapFoundRef = true;
-        return '"bg-[#c100ff] text-white font-bold rounded-full w-content px-2"';
-      }
-      if (lap.LapTime === BestLap && !BestLapFoundRef) {
-        BestLapFoundRef = true;
-        return '"bg-[#00ee07] text-black font-bold rounded-full w-content px-2"';
-      }
-      if (lap.Cut > 0) {
-        BestLapFoundRef = true;
-        return '"bg-primary text-black font-bold rounded-full w-content px-2"';
-      }
-      return '""';
-    }
-
-    function formatSectorTime(time: number) {
-      time /= 1000;
-      if (time >= 60) {
-        const seconds = formatTwoIntegersPlusThreeDecimals(time % 60);
-        const minutes = formatTwoIntegers(Math.trunc((time / 60) % 60));
-        return `${minutes}:${seconds}`;
-      }
-      return formatTwoIntegersPlusThreeDecimals(time);
-    }
-
-    function getSectorClass(sectorIndex: number) {
-      const sectorTime = lap.Sector[sectorIndex];
-      if (sectorTime === bestSectorsDriverID[sectorIndex]) {
-        return sectorTime === bestGlobalSectors[sectorIndex]
-          ? '"bg-[#c100ff] text-white font-bold rounded-full w-content px-2"'
-          : '"bg-[#00ee07] text-black font-bold rounded-full w-content px-2"';
-      }
-      return '""';
-    }
-
-    const lapTime =
-      pos >= -1
-        ? `${formatTwoIntegers(Math.trunc((lap.LapTime / 60) % 60))}:${formatTwoIntegersPlusThreeDecimals(lap.LapTime % 60)}`
-        : "";
-
-    const bgClass =
-      lap.LapNumber % 2 === 0 ? "bg-darkPrimary" : "bg-darkSecond";
-    const cutClass =
-      lap.Cut > 0
-        ? '"bg-primary text-black font-semibold rounded-full w-content px-2"'
-        : '""';
-
-    let positionClass = '""';
-    if (lap.Position === 1) {
-      positionClass = '"bg-[#ffc750] text-black font-bold rounded-full w-content px-2"';
-    } else if (lap.Position === 2) {
-      positionClass = '"bg-[#c0c0c0] text-black font-bold rounded-full w-content px-2"';
-    } else if (lap.Position === 3) {
-      positionClass = '"bg-[#cd7f32] text-white font-bold rounded-full w-content px-2"';
-    }
-
-    return `
-      <tr class="${bgClass} text-center">
-        <td>${lap.LapNumber}</td>
-        <td><span class=${getBestLapClass()}>${lapTime}</span></td>
-        ${lap.Sector.map(
-          (sector: number, idx: number) =>
-            `<td><span class=${getSectorClass(idx)}>${formatSectorTime(sector)}</span></td>`
-        ).join("")}
-        <td>${lap.Tyre}</td>
-        <td><span class=${positionClass}>${lap.Position}</span></td>
-        <td><span class=${cutClass}>${lap.Cut}</span></td>
-      </tr>`;
-  }
-
   for (const itemRL of drivers) {
     const driverName = itemRL.DriverName;
     const driverID = itemRL.SteamID;
@@ -914,87 +645,43 @@ function loadIndividualTimes(datos: RaceData, carData: CarData[], flagMoreSplits
     const bestLap = itemRL.Best;
     const optimalLap: number[] = itemRL.Optimal;
     const average = itemRL.Average;
-    const consistency = datos.Consistency.find((consistency) => consistency.SteamID === driverID)?.Consistency;
+    const consistency = datos.Consistency.find((c) => c.SteamID === driverID)?.Consistency;
 
-    let pos = datos.RaceResult.find((driver) => driver.SteamID === driverID)?.Pos;
-    pos ??= -3;
-
-    const BestLap = datos.RaceResult.find((driver) => driver.SteamID === driverID)?.BestLap;
-    let BestLapFoundRef = false ;
-
-    const CarFileNameFromDriver = datos.RaceResult.find((driver) => driver.SteamID === driverID)?.CarFileName;
-
-    const { carName, carClass, carColorClass } = getCarInfo(CarFileNameFromDriver);
-
-    const AvgSectors: number[] = average.slice(1);
-    let secondsavg = formatTwoIntegersPlusThreeDecimals(average[0] % 60);
-    let minutesavg = formatTwoIntegers(Math.trunc((average[0] / 60) % 60));
-    let avglapToString: string = "";
-    let avgSectorString: string = "";
-    if (pos >= -2) {
-      avglapToString = `Vuelta Media: ${minutesavg}:${secondsavg}`;
-      avgSectorString += `(`;
-      AvgSectors.forEach((sector, index, array) => {
-        sector /= 1000;
-        const minutes = Math.trunc(sector / 60);
-        const seconds = sector % 60;
-        avgSectorString += `S${index + 1}: ${
-          minutes
-            ? `${formatTwoIntegers(minutes)}:${formatTwoIntegersPlusThreeDecimals(seconds)}`
-            : formatTwoIntegersPlusThreeDecimals(seconds)
-        }${index < array.length - 1 ? " | " : ""}`;
-      });
-      avgSectorString += `)`;
-    }
-
-    let optimallapToString: string = "";
-    let optimalSectorsString: string = "";
-
-    if (optimalLap && pos >= -2) {
-      const [totalTime, ...OptimalSectors] = optimalLap;
-      const minutes = Math.trunc((totalTime / 60) % 60);
-      const seconds = totalTime % 60;
-
-      optimallapToString = `Vuelta Optima: ${formatTwoIntegers(minutes)}:${formatTwoIntegersPlusThreeDecimals(seconds)}`;
-
-      optimalSectorsString =
-        "(" +
-        OptimalSectors.map((sector, index) => {
-          sector = sector / 1000;
-          const sectorTime =
-            sector > 60
-              ? `${formatTwoIntegers(Math.trunc((sector / 60) % 60))}:${formatTwoIntegersPlusThreeDecimals(sector % 60)}`
-              : formatTwoIntegersPlusThreeDecimals(sector);
-
-          return `S${index + 1}: ${sectorTime}`;
-        }).join(" | ") +
-        ")";
-    }
-
-    const bestlapToString = formatBestLapTime(BestLap);
-    const bestSectorsString =
-      pos >= -2 && BestLap && BestLap < 999999.999
-        ? formatSectors(bestLap.slice(1))
-        : "";
-
-    let consistencyString =
-      consistency === undefined || consistency === -1
-        ? ""
-        : ` | Consistencia: ${consistency.toFixed(2)}% ( ${(consistency - 100).toFixed(2)} )`;
-
+    // Get driver position
+    let pos = datos.RaceResult.find((driver) => driver.SteamID === driverID)?.Pos ?? -3;
     if (pos < -3) continue;
 
-    const splitInfo = flagMoreSplits ? `(Split ${itemRL.Split})` : "";
-    result += createDriverHeader(driverName, carName, carClass, carColorClass, bestlapToString, avglapToString, consistencyString, optimallapToString, bestSectorsString, avgSectorString, optimalSectorsString, splitInfo);
+    // Get driver best lap
+    const BestLap = datos.RaceResult.find((driver) => driver.SteamID === driverID)?.BestLap;
+    
+    // Get driver car
+    const CarFileNameFromDriver = datos.RaceResult.find((driver) => driver.SteamID === driverID)?.CarFileName;
+    const { carName, carClass, carColorClass } = getDriverCarInfo(CarFileNameFromDriver, carData);
 
+    // Process average and optimal lap data
+    const { avglapToString, avgSectorString } = processAverageLapData(average, pos);
+    const { optimallapToString, optimalSectorsString } = processOptimalLapData(optimalLap, pos);
+
+    // Format best lap and consistency
+    const bestlapToString = formatDriverBestLapTime(BestLap);
+    const bestSectorsString = (pos >= -2 && BestLap && BestLap < 999999.999) ? formatDriverSectors(bestLap.slice(1)) : "";
+    const consistencyString = (consistency === undefined || consistency === -1) ? "" : 
+        ` | Consistencia: ${consistency.toFixed(2)}% ( ${(consistency - 100).toFixed(2)} )`;
+
+    // Add driver header
+    const splitInfo = flagMoreSplits ? `(Split ${itemRL.Split})` : "";
+    result += createDriverHeaderHTML(
+      driverName, carName, carClass, carColorClass, 
+      bestlapToString, avglapToString, consistencyString, 
+      optimallapToString, bestSectorsString, avgSectorString, 
+      optimalSectorsString, splitInfo
+    );
+
+    // Add driver laps
     if (pos >= -2) {
-      const bestGlobalSectors = sectorsList.map(
-        (sector) => sector[0].BestSector
-      );
-      const bestSectorsDriverID = sectorsList.map(
-        (sector) =>
-          sector.find((s) => s.SteamID === driverID)?.BestSector ??
-          999999999
+      const bestGlobalSectors = sectorsList.map(sector => sector[0].BestSector);
+      const bestSectorsDriverID = sectorsList.map(sector => 
+        sector.find(s => s.SteamID === driverID)?.BestSector ?? 999999999
       );
 
       result += `
@@ -1010,7 +697,7 @@ function loadIndividualTimes(datos: RaceData, carData: CarData[], flagMoreSplits
           </tr>
         </thead>
         <tbody class="font-normal">
-          ${laps.map((lap) => formatLapRow(lap, bestGlobalSectors, bestSectorsDriverID, BestLapGeneral, BestLap, pos, BestLapFoundRef)).join("")}
+          ${generateLapRows(laps, bestGlobalSectors, bestSectorsDriverID, BestLapGeneral, BestLap, pos)}
         </tbody>
       </table>
     </div>`;

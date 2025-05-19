@@ -1,15 +1,21 @@
 ---
 import Layout from "@/layouts/NormalLayout.astro";
 import { supabase } from "@/db/supabase";
+import RaceCharts from "@/components/race-charts";
 
 const { id } = Astro.params;
-if (!id) return Astro.redirect("/404");
 
-const {data: raceData} = await supabase
+let raceData;
+
+if(id){
+  const {data} = await supabase
   .from('race')
   .select('name, championship!inner(name)')
   .eq('filename', id)
   .single();
+
+  raceData = data;
+}
 ---
 
 <Layout title="ESP Racing: Estadisticas Completas">
@@ -20,21 +26,31 @@ const {data: raceData} = await supabase
       Volver atras
     </button>
 
-  <div class="container mx-auto" style="witdh: 95%">
+  <div class="container mx-auto" style="witdh: 99%">
     <p class="py-4 w-11/12 mx-auto text-4xl font-bold text-center">
       Estadistica completas de {raceData?.championship.name}: {raceData?.name}
     </p>
 
     <div id = "datosCircuito"></div>
     <div id = "tablaResultados"></div>
-    <div class = "w-11/12 mx-auto mt-4 border-2 rounded-lg border-primary hidden" id="chartChangePosition">
-      <div id = "chartChangePosition1"></div>
-      <div id = "chartChangePosition2"></div>
+
+    <!-- Mantenemos los divs originales para que el script no falle, pero los ocultamos visualmente -->
+    <div class="hidden">
+      <div id="chartChangePosition">
+        <div id="chartChangePosition1"></div>
+        <div id="chartChangePosition2"></div>
+      </div>
+      <div id="chartGaps">
+        <div id="chartGaps1"></div>
+        <div id="chartGaps2"></div>
+      </div>
     </div>
-    <div class = "w-11/12 mx-auto mt-4 border-2 rounded-lg border-primary hidden" id="chartGaps">
-      <div id = "chartGaps1" ></div>
-      <div id = "chartGaps2"></div>
+
+    <!-- Nuestro componente React para los gráficos -->
+    <div class = "w-full mt-8">
+      <RaceCharts raceId={id ?? ""} client:load />
     </div>
+
     <div id = "sectorTableR1">
       <div id = "titleSectorR1"></div>
       <div class="grid gap-2 mx-auto sectorTables">
