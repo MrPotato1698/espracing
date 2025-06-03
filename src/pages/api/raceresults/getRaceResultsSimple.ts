@@ -93,6 +93,15 @@ function initializeScript() {
 
 		if (errorRaceDataJSON || !raceDataJSONR1) throw new Error ('Error al cargar los datos de la carrera 1');
 		const datosR1 = JSON.parse(await raceDataJSONR1.text());
+		interface RaceResultDriver {
+			DriverName: string;
+			[key: string]: any;
+		}
+
+		interface RaceData {
+			RaceResult?: RaceResultDriver[];
+			[key: string]: any;
+		}
 
 		let datos = [];
 		datos.push(datosR1);
@@ -189,9 +198,9 @@ function initializeScript() {
 		}
 		return tablaResultadosFinal;
 	}
-
 	function buildRaceResultTable(dato: any, points: Points, carData: CarData[], layoutLength: number | null, raceNumber: number, addDivider: boolean) {
 		const resultTable = getResultTableData(dato, points.Name, points, carData);
+
 		const resultTableClasified = resultTable.filter((result) => Number(result.posicionFinal) > 0);
 		const resultTableDNF = resultTable.filter((result) => result.posicionFinal === 'DNF');
 		const resultTableDQ = resultTable.filter((result) => result.posicionFinal === 'DQ');

@@ -282,6 +282,30 @@ async function transformRaceJsons({ fileS1R1, fileS1R2, fileS2R1, fileS2R2, swit
 
     const contentS1R1 = await fileS1R1!.text();
     const jsonS1R1 = JSON.parse(contentS1R1);
+
+    // Agregar validación de la estructura del JSON
+    if (!jsonS1R1.Cars || !Array.isArray(jsonS1R1.Cars)) {
+      return { error: true, response: new Response(JSON.stringify({ error: "Estructura de archivo JSON inválida: falta el array 'Cars'" }), { status: 400 }) };
+    }
+
+    if (!jsonS1R1.Result || !Array.isArray(jsonS1R1.Result)) {
+      return { error: true, response: new Response(JSON.stringify({ error: "Estructura de archivo JSON inválida: falta el array 'Result'" }), { status: 400 }) };
+    }
+
+    // Validar que hay datos de resultados y que no está vacío
+    if (jsonS1R1.Result.length === 0) {
+      return { error: true, response: new Response(JSON.stringify({ error: "El archivo JSON no contiene resultados de carrera" }), { status: 400 }) };
+    }
+
+    // Verificar que los datos del array Cars tienen la estructura mínima requerida
+    const validCars = jsonS1R1.Cars.filter((car: any) => car.CarId !== undefined && car.Driver?.Name && car.Driver?.Guid);
+
+
+    // Si no hay coches válidos pero sí hay resultados, podemos intentar procesar solo con los datos de Result
+    if (validCars.length === 0 && jsonS1R1.Result.length > 0) {
+      console.warn("No valid cars found in Cars array, but Results exist. Proceeding with Results data only.");
+    }
+
     dateRace = jsonS1R1.SessionFile.slice(0, 10).replace("_", "-").replace(/_/g, "-");
     let jsonS1R2: any = null;
     if (switchR2Element) {

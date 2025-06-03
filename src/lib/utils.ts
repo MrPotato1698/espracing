@@ -40,8 +40,19 @@ export function getResultTableData(datos: RaceData, pointsystemName: string, poi
     postabla++;
     pos = itemResult.Pos;
 
+    // Usar la posición real del piloto en lugar de la posición en la tabla
     const positionsOtherSplits = driversPerSplitQualified.slice(0, itemResult.Split - 1).reduce((sum, current) => sum + current, 0);
-    let gains = itemResult.GridPosition - postabla + positionsOtherSplits;
+    let gains = 0;
+
+    // Solo calcular gains si el piloto tiene una posición válida
+    if (pos > 0) {
+      gains = itemResult.GridPosition - (pos + positionsOtherSplits);
+    } else if (pos === -1 || pos === -2) {
+      // DNF y DQ pueden tener gains basados en su GridPosition vs donde terminaron
+      gains = itemResult.GridPosition - postabla;
+    }
+    // DNS, DQ, etc. mantienen gains = 0 (valor inicial)
+
     const { gridPositionClass, gainsAbs } = getGridPositionClass(gains, pos);
 
     const equipo = itemResult.Team;
@@ -270,7 +281,7 @@ function getPosicionFinal(itemResult: RaceResult, pos: number, vueltastotales: n
     return { posicionFinal: '1', vueltasLider: vueltastotales };
   }
   let posicionFinal = "";
-  switch (itemResult.Pos) {
+  switch (pos) {
     case -1: posicionFinal = 'DNF'; break;
     case -2: posicionFinal = 'DQ'; break;
     case -3: posicionFinal = 'DNS'; break;
@@ -282,11 +293,17 @@ function getPosicionFinal(itemResult: RaceResult, pos: number, vueltastotales: n
         default: posicionFinal = 'DNS'; break;
       }
       break;
-    default: posicionFinal = pos.toString();
+    default:
+      if (pos > 0) {
+        posicionFinal = pos.toString();
+      } else {
+        posicionFinal = 'DNS'; // Fallback para posiciones inválidas
+      }
   }
   if (itemResult.Pos === -4 && itemResult.DriverName === "STREAMING") {
     posicionFinal = 'TV';
   }
+
   return { posicionFinal, vueltasLider };
 }
 

@@ -31,21 +31,27 @@ function createRaceResults( dcars: CarJSON[], devents: EventJSON[], dlaps: LapJS
     pos++;
     let uniqueRR: RaceResult = {} as RaceResult;
 
-    uniqueRR.SteamID = itemR.DriverGuid;
+    // Validar que el coche existe y obtener información del driver
+    const car = dcars.find(c => c.CarId === itemR.CarId);
+    const driverName = itemR.DriverName || car?.Driver?.Name || `Unknown Driver ${itemR.CarId}`;
+    const driverGuid = itemR.DriverGuid || car?.Driver?.Guid || `unknown_guid_${itemR.CarId}`;
+    const driverTeam = car?.Driver?.Team || "Unknown Team";
+    const carModel = itemR.CarModel || car?.Model || "Unknown Car";
+
+    uniqueRR.SteamID = driverGuid;
     uniqueRR.CarId = itemR.CarId;
-    uniqueRR.DriverName = itemR.DriverName;
-    uniqueRR.Team = dcars[itemR.CarId].Driver.Team;
-    uniqueRR.CarFileName = itemR.CarModel;
-    uniqueRR.TotalTime = itemR.TotalTime / 1000;
-    uniqueRR.Penalties = itemR.PenaltyTime / 1000000000;
-    uniqueRR.Laps = itemR.NumLaps;
-    uniqueRR.BestLap = itemR.BestLap / 1000;
+    uniqueRR.DriverName = driverName;
+    uniqueRR.Team = driverTeam;
+    uniqueRR.CarFileName = carModel;    uniqueRR.TotalTime = (itemR.TotalTime || 0) / 1000;
+    uniqueRR.Penalties = (itemR.PenaltyTime || 0) / 1000000000;
+    uniqueRR.Laps = itemR.NumLaps || 0;
+    uniqueRR.BestLap = (itemR.BestLap || 0) / 1000;
     uniqueRR.LedLaps = 0;
-    uniqueRR.Ballast = itemR.BallastKG;
-    uniqueRR.Restrictor = itemR.Restrictor;
+    uniqueRR.Ballast = itemR.BallastKG || car?.BallastKG || 0;
+    uniqueRR.Restrictor = itemR.Restrictor || car?.Restrictor || 0;
     uniqueRR.Split = split;
 
-    uniqueRR.GridPosition = getGridPosition(itemR.GridPosition);
+    uniqueRR.GridPosition = getGridPosition(itemR.GridPosition || 0);
     uniqueRR.Pos = getFinalPosition(pos, itemR, uniqueRR, raceTime);
 
     uniqueRR.AvgLap = calculateAvgLap(dlaps, uniqueRR.CarId);
@@ -55,27 +61,34 @@ function createRaceResults( dcars: CarJSON[], devents: EventJSON[], dlaps: LapJS
   }
 
   for (let itemdC of dcars) {
+    // Validar que el Driver existe y tiene las propiedades necesarias
+    if (!itemdC.Driver || !itemdC.Driver.Name || !itemdC.CarId === undefined) {
+      console.warn(`Car missing required data - CarId: ${itemdC.CarId}, Driver: ${JSON.stringify(itemdC.Driver)}`);
+      continue;
+    }
+
     const carID = itemdC.CarId;
     const driverFound = rr.some(result => result.CarId === carID);
     if (!driverFound && itemdC.Driver.Name !== "") {
       let uniqueRR: RaceResult = {} as RaceResult;
-      uniqueRR.SteamID = itemdC.Driver.Guid;
+      uniqueRR.SteamID = itemdC.Driver.Guid || `unknown_guid_${itemdC.CarId}`;
       uniqueRR.CarId = itemdC.CarId;
       uniqueRR.DriverName = itemdC.Driver.Name;
-      uniqueRR.Team = itemdC.Driver.Team;
-      uniqueRR.CarFileName = itemdC.Model;
-      uniqueRR.TotalTime = 0;
+      uniqueRR.Team = itemdC.Driver.Team || "Unknown Team";
+      uniqueRR.CarFileName = itemdC.Model || "Unknown Car";      uniqueRR.TotalTime = 0;
       uniqueRR.Penalties = 0;
       uniqueRR.Laps = 0;
       uniqueRR.BestLap = 0;
       uniqueRR.LedLaps = 0;
-      uniqueRR.Ballast = itemdC.BallastKG;
-      uniqueRR.Restrictor = itemdC.Restrictor;
+      uniqueRR.Ballast = itemdC.BallastKG || 0;
+      uniqueRR.Restrictor = itemdC.Restrictor || 0;
 
       if (
-        itemdC.Driver.Team === "ESP Racing Staff" ||
-        itemdC.Driver.Team === "Safety Car" ||
-        itemdC.Driver.Team === "STREAMING" ||
+        (itemdC.Driver.Team && (
+          itemdC.Driver.Team === "ESP Racing Staff" ||
+          itemdC.Driver.Team === "Safety Car" ||
+          itemdC.Driver.Team === "STREAMING"
+        )) ||
         itemdC.Driver.Name === "STREAMING"
       ) {
         uniqueRR.Pos = -4;
@@ -86,8 +99,7 @@ function createRaceResults( dcars: CarJSON[], devents: EventJSON[], dlaps: LapJS
       }
       uniqueRR.AvgLap = 0;
       uniqueRR.Collisions = 0;
-      uniqueRR.Ballast = itemdC.BallastKG;
-      uniqueRR.Restrictor = itemdC.Restrictor;
+      uniqueRR.Split = split;
       rr.push(uniqueRR);
     }
   }
@@ -1078,6 +1090,7 @@ export function createRaceData(dataFile: any): RaceData{
   });
 
   rd.RaceResult = recalculatePositions(rd.RaceResult, dataFile.SessionConfig.time);
+
   rd.RaceDriversResume = createRaceDriversResume(rd.RaceResult, rd.BestLap, rd.RaceLaps);
   rd.RaceCarResume = createRaceCarResume(rd.RaceResult);
 
