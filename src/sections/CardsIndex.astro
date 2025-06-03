@@ -1,5 +1,27 @@
 ---
+import { supabase } from "@/db/supabase";
 import Card from "@/components/Card.astro";
+
+import Sergig from "@/assets/social/TwitchBackGPurple.webp";
+import FunAC from "@/assets/social/FUNAC.webp";
+import ESPRacing from "@/assets/imgresource/ESPRACINGLogo.webp";
+import PreviewImageRace from "@/assets/imgresource/previewraces.webp";
+
+const { data: champData, error: champError } = await supabase
+  .from("championship")
+  .select("id, name, champ_img, number_of_races_total")
+  .eq("isfinished", false)
+  .order("id", { ascending: false })
+  .single();
+
+
+let champImgUrl = "";
+if (champData && champData.champ_img) {
+  const { data: urlData } = supabase
+    .storage.from("championshipposter")
+    .getPublicUrl(champData.champ_img);
+  champImgUrl = urlData?.publicUrl || "";
+}
 ---
 
 <div class="grid grid-cols-1 gap-4 p-3 mb-24 max-w-screen-3xl md:grid-cols-3 md:gap-8 xl:grid-cols-5">
@@ -8,7 +30,7 @@ import Card from "@/components/Card.astro";
       title="ESP Racing"
       subtitle="Nuestro Discord"
       body="Nuestro discord, donde encontraras el punto neuralgico de todas las carreras, donde encontraras el contenido para correr con nosotros, y mucho más"
-      imgbg="/img/ESPRACINGLogo.webp"
+      imgbg={ESPRacing.src}
       linkbutton="https://discord.gg/hjawMXGU6k"
       buttonname="Unete a nosotros"
       altimg="Card ESP Racing"
@@ -21,7 +43,7 @@ import Card from "@/components/Card.astro";
       title="Sergig_"
       subtitle="Retransmisión de Carreras"
       body="Para ver todas nuestras carreras en directo, este es el canal oficial de retransmisiones, comentado por el gran Sergig_."
-      imgbg="/img/social/TwitchBackGPurple.webp"
+      imgbg={Sergig.src}
       linkbutton="https://www.twitch.tv/sergig_"
       buttonname="Visita su Canal"
       altimg="Card Twitch Sergig_"
@@ -34,7 +56,7 @@ import Card from "@/components/Card.astro";
       title="FunACCommunity"
       subtitle="Comunidad Recomendada"
       body="Comunidad Hermana de ESP Racing. Para disfrutar de carreras más relajadas, pero con el mismo nivel y respeto, este es tu lugar."
-      imgbg="/img/social/FUNAC.webp"
+      imgbg={FunAC.src}
       linkbutton="https://discord.com/invite/pFBPuxt28g"
       buttonname="Echa un vistazo"
       altimg="Card FunACCommunity"
@@ -44,10 +66,10 @@ import Card from "@/components/Card.astro";
 
   <div>
     <Card
-      title="Iberian Twingo Cup 2"
+      title={champData && champData.name ? champData.name : "Campeonato Actual"}
       subtitle="Campeonato Actual"
-      body="Campeonato Iberian Twingo Cup 2 ESP Racing 2024. Campeonato actual, que discurre entre los meses de Septiembre y Octubre por toda la peninsula iberica."
-      imgbg="/img/actualchamp/CartelCampeonato.webp"
+      body=`${champData && champData.name ? champData.name : "Campeonato Actual"}. Campeonato actual, compuesto de ${champData && champData?.number_of_races_total ? champData.number_of_races_total : "varias"} carreras trepidantes y con un gran desafio detras de cada una de ellas.`
+      imgbg={champImgUrl}
       linkbutton="/actualchamp"
       buttonname="Más Información"
       altimg = "Car Info Campeonato Actual"
@@ -59,10 +81,10 @@ import Card from "@/components/Card.astro";
     <Card
       title="Ultima Carrera"
       subtitle="¿No vistes la anterior carrera?"
-      body="Campeonato Iberian Twingo Cup 2 ESP Racing 2024. Campeonato actual, que discurre entre los meses de Septiembre y Octubre por toda la peninsula iberica."
-      imgbg="/img/raceresources/previewraces.webp"
+      body="Pasate por nuestro canal de Youtube, donde encontraras la ultima carrera que se ha realizado, y todas las anteriores. No te las pierdas."
+      imgbg={PreviewImageRace.src}
       linkbutton="https://www.youtube.com/@esp-racing-com-es/videos"
-      buttonname="Visitar Canal Youtube"
+      buttonname="Visitar Canal YT"
       altimg="Card Ultima Carrera Youtube"
       targetpage="_blank"
     />

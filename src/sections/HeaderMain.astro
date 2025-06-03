@@ -1,34 +1,43 @@
 ---
-import Chevron from "../icons/Chevron.astro";
+import { Image } from "astro:assets";
+
+import Twitter from "@/assets/social/brand-x.svg";
+import Instagram from "@/assets/social/brand-instagram.svg";
+import Paypal from "@/assets/social/brand-paypal.svg";
+import Discord from "@/assets/social/brand-discord.svg";
+import Youtube from "@/assets/social/brand-youtube.svg";
+import Twitch from "@/assets/social/brand-twitch.svg";
+import ESPRacing from "@/assets/imgresource/ESPRACINGLogo.webp";
+import Chevron from "@/icons/Chevron.astro";
 ---
 
 <!-- Nombre Inicial + Redes -->
 <header class="z-20 flex flex-row-reverse md:flex-none">
   <div class="flex gap-6 py-1 mr-4">
     <a href="https://x.com/EspRacingCom" target="_blank">
-      <img class="w-8 .p-2 invert" src="/img/social/brand-x.svg" alt="Twitter ESP Racing" />
+      <Image class="w-8 .p-2 invert" src={Twitter} alt="Twitter ESP Racing" />
     </a>
 
     <a href="https://www.instagram.com/espsimracingoficial/" target="_blank">
-      <img class="w-8 .p-2 invert" src="/img/social/brand-instagram.svg" alt="Instagram ESP Racing" />
+      <Image class="w-8 .p-2 invert" src={Instagram} alt="Instagram ESP Racing" />
     </a>
 
     <a href="https://www.paypal.com/es/home" target="_blank">
-      <img class="w-8 .p-2 invert" src="/img/social/brand-paypal.svg" alt="Paypal ESP Racing" />
+      <Image class="w-8 .p-2 invert" src={Paypal} alt="Paypal ESP Racing" />
     </a>
   </div>
 
   <div class="flex gap-6 mr-4 md:flex-row">
     <a href="https://discord.gg/hjawMXGU6k" target="_blank">
-      <img class="w-8 .p-2 invert" src="/img/social/brand-discord.svg" alt="Discord ESP Racing" />
+      <Image class="w-8 .p-2 invert" src={Discord} alt="Discord ESP Racing" />
     </a>
 
     <a href="https://www.youtube.com/@esp-racing-com-es" target="_blank">
-      <img class="w-8 .p-2 invert" src="/img/social/brand-youtube.svg" alt="Youtube ESP Racing" />
+      <Image class="w-8 .p-2 invert" src={Youtube} alt="Youtube ESP Racing" />
     </a>
 
     <a href="https://www.twitch.tv/sergig_" target="_blank">
-      <img class="w-8 .p-2 invert" src="/img/social/brand-twitch.svg" alt="Twitch ESP Racing" />
+      <Image class="w-8 .p-2 invert" src={Twitch} alt="Twitch ESP Racing" />
     </a>
   </div>
 </header>
@@ -43,9 +52,9 @@ import Chevron from "../icons/Chevron.astro";
   <div class="flex flex-wrap items-center justify-between max-w-screen-xl p-4 mx-auto">
 
     <a href="/" class="flex items-center space-x-3 rtl:space-x-reverse">
-      <img
-        src="/img/ESPRACINGLogo.webp"
-        class="h-8"
+      <Image
+        src={ESPRacing}
+        class="h-8 w-auto"
         alt="ESP Racing Logo Logo"
       />
       <span
@@ -65,7 +74,6 @@ import Chevron from "../icons/Chevron.astro";
       <svg
         class="w-5 h-5"
         aria-hidden="true"
-        xmlns="http://www.w3.org/2000/svg"
         fill="none"
         viewBox="0 0 17 14"
       >

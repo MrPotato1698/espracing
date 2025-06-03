@@ -1,4 +1,13 @@
 ---
+import { Image } from "astro:assets";
+import Twitter from "@/assets/social/brand-x.svg";
+import Instagram from "@/assets/social/brand-instagram.svg";
+import Paypal from "@/assets/social/brand-paypal.svg";
+import Discord from "@/assets/social/brand-discord.svg";
+import Youtube from "@/assets/social/brand-youtube.svg";
+import Twitch from "@/assets/social/brand-twitch.svg";
+import ESPRacing from "@/assets/imgresource/ESPRACINGLogoBlanco.webp";
+
 const { cookies, redirect } = Astro;
 
 const accessToken = cookies.get("sb-access-token");
@@ -10,7 +19,7 @@ const refreshToken = cookies.get("sb-refresh-token");
     <div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
       <div>
         <div>
-          <a href ="/"><img src="/img/ESPRACINGLogoBlanco.webp" alt="ESP Racing Logo" class="w-auto h-56" /></a>
+          <a href ="/"><Image src={ESPRacing} alt="ESP Racing Logo" class="w-auto h-56" /></a>
         </div>
 
         <ul class="flex gap-6 mt-8">
@@ -18,7 +27,7 @@ const refreshToken = cookies.get("sb-refresh-token");
             <a
               href="https://x.com/EspRacingCom" target="_blank">
               <span class="sr-only">X (previously Twitter)</span>
-              <img class="w-8 .p-2 invert" src="/img/social/brand-x.svg" alt="Twitter ESP Racing" />
+              <Image class="w-8 .p-2 invert" src={Twitter} alt="Twitter ESP Racing" />
             </a>
           </li>
 
@@ -26,35 +35,35 @@ const refreshToken = cookies.get("sb-refresh-token");
             <a
             href="https://www.instagram.com/espsimracingoficial/" target="_blank">
             <span class="sr-only">Instagram</span>
-            <img class="w-8 .p-2 invert" src="/img/social/brand-instagram.svg" alt="Instagram ESP Racing" />
+            <Image class="w-8 .p-2 invert" src={Instagram} alt="Instagram ESP Racing" />
           </a>
           </li>
 
           <li>
             <a href="https://discord.gg/hjawMXGU6k" target="_blank">
               <span class="sr-only">Discord</span>
-              <img class="w-8 .p-2 invert" src="/img/social/brand-discord.svg" alt="Discord ESP Racing" />
+              <Image class="w-8 .p-2 invert" src={Discord} alt="Discord ESP Racing" />
             </a>
           </li>
 
           <li>
             <a href="https://www.youtube.com/@esp-racing-com-es" target="_blank">
               <span class="sr-only">Youtube</span>
-              <img class="w-8 .p-2 invert" src="/img/social/brand-youtube.svg" alt="Youtube ESP Racing" />
+              <Image class="w-8 .p-2 invert" src={Youtube} alt="Youtube ESP Racing" />
             </a>
           </li>
 
           <li>
             <a href="https://www.twitch.tv/sergig_" target="_blank">
               <span class="sr-only">Twitch</span>
-              <img class="w-8 .p-2 invert" src="/img/social/brand-twitch.svg" alt="Twitch ESP Racing" />
+              <Image class="w-8 .p-2 invert" src={Twitch} alt="Twitch ESP Racing" />
             </a>
           </li>
 
           <li>
             <a href="https://www.paypal.com/es/home" target="_blank">
               <span class="sr-only">Paypal</span>
-              <img class="w-8 .p-2 invert" src="/img/social/brand-paypal.svg" alt="Paypal ESP Racing" />
+              <Image class="w-8 .p-2 invert" src={Paypal} alt="Paypal ESP Racing" />
             </a>
           </li>
 
