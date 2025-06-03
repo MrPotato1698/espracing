@@ -1,11 +1,18 @@
 ---
 import Layout from "@/layouts/NormalLayout.astro";
-import Twitter from "@/components/LastTweets.astro";
+import TwitterFeed from "@/components/TwitterFeed";
 ---
 
 <Layout title="ESP Racing: Noticias">
-  <h1 class="py-5 text-3xl font-extrabold text-center text-lightPrimary sm:text-5xl">
-    Ultimas noticias (via Twitter / X)
-  </h1>
-  <Twitter />
+  <main class="min-h-screen bg-darkPrimary">
+    <div class="container mx-auto px-4 py-8">
+      <h1 class="text-5xl font-bold mb-8 text-lightPrimary text-center">
+        Últimas Noticias
+      </h1>
+
+      <div class="bg-darkSecond rounded-lg shadow-lg p-6">
+        <TwitterFeed username="EspRacingCom" useMockData={false} client:load />
+      </div>
+    </div>
+  </main>
 </Layout>
