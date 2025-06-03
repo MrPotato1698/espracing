@@ -5,7 +5,7 @@ import { DataTable } from "@/components/data-table";
 
 const { data: UsersData, error: errorUsers } = await supabase
   .from("profiles")
-  .select('full_name, number_plate, avatar, races, wins, podiums, flaps, poles, top5, top10, dnf, team(name)')
+  .select('full_name, avatar, races, wins, podiums, flaps, poles, top5, top10, dnf, team(name)')
   .order('full_name', { ascending: true });
 
 if(errorUsers) {
