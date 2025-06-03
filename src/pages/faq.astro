@@ -1,11 +1,8 @@
 ---
 import Layout from "@/layouts/NormalLayout.astro";
-import FAQ from "@/sections/FAQ.astro";
+import { FAQSection } from '@/components/faq-section'
 ---
 
 <Layout title = "ESP Racing: Preguntas Frecuentes">
-  <h1 class = "py-5 text-3xl font-extrabold text-center text-lightPrimary sm:text-5xl">
-    Preguntas Frecuentes
-  </h1>
-  <FAQ />
+  <FAQSection client:load />
 </Layout>
