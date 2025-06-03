@@ -339,7 +339,7 @@ function initializeScript() {
         let carClass: string;
         let carColorClass: string;
         if (isCarExists) {
-          carName = isCarExists.brand + " " + isCarExists.model;
+          carName = isCarExists.model;
           carBrand = isCarExists.imgbrand;
           carClass = isCarExists.classShortName;
           carColorClass = `style="background-color: ${isCarExists.classColor.split(" ")[0].replace("bg-[", "").replace("]", "")}; color: ${isCarExists.classColor.split(" ")[1].replace("text-[", "").replace("]", "")}"`;
@@ -540,19 +540,18 @@ function processAverageLapData(average: number[], pos: number): { avglapToString
     });
     avgSectorString += `)`;
   }
-  
+
   return { avglapToString, avgSectorString };
 }
 
 function generateLapRows(
-  laps: Lap[], 
+  laps: Lap[],
   bestGlobalSectors: number[],
   bestSectorsDriverID: number[],
   BestLapGeneral: number,
   BestLap: number | undefined,
   pos: number
 ): string {
-  let BestLapFoundRef = false;
   return laps.map(lap => {
     // Format lap time
     const lapTime = pos >= -1
@@ -561,20 +560,17 @@ function generateLapRows(
 
     // Determine row background class
     const bgClass = lap.LapNumber % 2 === 0 ? "bg-darkPrimary" : "bg-darkSecond";
-    
+
     // Determine lap time class
     let lapTimeClass = '""';
-    if (lap.LapTime === BestLapGeneral && !BestLapFoundRef) {
-      BestLapFoundRef = true;
+    if (lap.LapTime === BestLapGeneral) {
       lapTimeClass = '"bg-[#c100ff] text-white font-bold rounded-full w-content px-2"';
-    } else if (lap.LapTime === BestLap && !BestLapFoundRef) {
-      BestLapFoundRef = true;
+    } else if (typeof BestLap !== "undefined" && lap.LapTime === BestLap) {
       lapTimeClass = '"bg-[#00ee07] text-black font-bold rounded-full w-content px-2"';
     } else if (lap.Cut > 0) {
-      BestLapFoundRef = true;
       lapTimeClass = '"bg-primary text-black font-bold rounded-full w-content px-2"';
     }
-    
+
     // Determine cut class
     const cutClass = lap.Cut > 0
       ? '"bg-primary text-black font-semibold rounded-full w-content px-2"'
@@ -602,7 +598,7 @@ function generateLapRows(
         }
         return formatTwoIntegersPlusThreeDecimals(time);
       })();
-      
+
       // Determine sector class
       let sectorClass = '""';
       if (sectorTime === bestSectorsDriverID[idx]) {
@@ -610,7 +606,7 @@ function generateLapRows(
           ? '"bg-[#c100ff] text-white font-bold rounded-full w-content px-2"'
           : '"bg-[#00ee07] text-black font-bold rounded-full w-content px-2"';
       }
-      
+
       return `<td><span class=${sectorClass}>${formattedTime}</span></td>`;
     }).join("");
 
@@ -653,7 +649,7 @@ function loadIndividualTimes(datos: RaceData, carData: CarData[], flagMoreSplits
 
     // Get driver best lap
     const BestLap = datos.RaceResult.find((driver) => driver.SteamID === driverID)?.BestLap;
-    
+
     // Get driver car
     const CarFileNameFromDriver = datos.RaceResult.find((driver) => driver.SteamID === driverID)?.CarFileName;
     const { carName, carClass, carColorClass } = getDriverCarInfo(CarFileNameFromDriver, carData);
@@ -671,16 +667,16 @@ function loadIndividualTimes(datos: RaceData, carData: CarData[], flagMoreSplits
     // Add driver header
     const splitInfo = flagMoreSplits ? `(Split ${itemRL.Split})` : "";
     result += createDriverHeaderHTML(
-      driverName, carName, carClass, carColorClass, 
-      bestlapToString, avglapToString, consistencyString, 
-      optimallapToString, bestSectorsString, avgSectorString, 
+      driverName, carName, carClass, carColorClass,
+      bestlapToString, avglapToString, consistencyString,
+      optimallapToString, bestSectorsString, avgSectorString,
       optimalSectorsString, splitInfo
     );
 
     // Add driver laps
     if (pos >= -2) {
       const bestGlobalSectors = sectorsList.map(sector => sector[0].BestSector);
-      const bestSectorsDriverID = sectorsList.map(sector => 
+      const bestSectorsDriverID = sectorsList.map(sector =>
         sector.find(s => s.SteamID === driverID)?.BestSector ?? 999999999
       );
 
