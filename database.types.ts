@@ -337,6 +337,24 @@ export type Database = {
         }
         Relationships: []
       }
+      global_adjust: {
+        Row: {
+          key: string
+          name: string | null
+          value: string
+        }
+        Insert: {
+          key?: string
+          name?: string | null
+          value?: string
+        }
+        Update: {
+          key?: string
+          name?: string | null
+          value?: string
+        }
+        Relationships: []
+      }
       inscription: {
         Row: {
           id: number
