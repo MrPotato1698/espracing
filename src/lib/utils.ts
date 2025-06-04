@@ -157,7 +157,7 @@ export function showToast(message: string, type: ToastType = 'info') {
       class="fixed bottom-4 right-4 p-4 rounded-lg border bg-darkPrimary ${styles.border} text-ligth-primary
       shadow-lg flex flex-col gap-2 opacity-0 transition-all duration-300 ease-in-out transform translate-y-2">
       <div class="flex items-center gap-3">
-        <img src="/img/ESPRACINGLogoBlanco.webp" class="h-auto w-10" />
+        <img src="/ESPRACINGLogoBlanco.webp" class="h-auto w-10" />
         <p class="font-medium">${message}</p>
         <button onclick="this.parentElement.parentElement.remove()" class="ml-auto">
           <svg class = "w-4 h-4"viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4">
