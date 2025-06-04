@@ -45,7 +45,14 @@ const {data: UserRol} = await supabase
   .single();
 
 let admin:Boolean = false;
-UserRol?.roleesp === 1 ? admin = true : admin = false;
+switch (UserRol?.roleesp) {
+  case 0:
+  case 1:
+    admin = true;
+    break;
+  default:
+    admin = false;
+}
 
 // Obtener los mensajes del usuario
 const {data: MessageListData} = await supabase
