@@ -753,21 +753,21 @@ export type Database = {
           active: boolean | null
           description: string | null
           id: number
-          image: string | null
+          image: string
           name: string
         }
         Insert: {
           active?: boolean | null
           description?: string | null
           id: number
-          image?: string | null
+          image?: string
           name?: string
         }
         Update: {
           active?: boolean | null
           description?: string | null
           id?: number
-          image?: string | null
+          image?: string
           name?: string
         }
         Relationships: []
@@ -826,6 +826,27 @@ export type Database = {
       fetch_inscriptions_table: {
         Args: Record<PropertyKey, never>
         Returns: undefined
+      }
+      get_car_brands_with_model_count: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          brand_id: number
+          brand_name: string
+          brand_img: string
+          brand_location: string
+          brand_foundation: number
+          model_count: number
+        }[]
+      }
+      get_car_classes_with_model_count: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          class_id: number
+          class_name: string
+          class_shortname: string
+          class_design: string
+          model_count: number
+        }[]
       }
       get_championship_data: {
         Args: { champ_id: number }
