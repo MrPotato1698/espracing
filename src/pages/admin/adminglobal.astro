@@ -4,6 +4,7 @@ import { supabase } from "@/db/supabase";
 import { showToast } from "@/lib/utils";
 import { DataTable } from "@/components/data-table";
 import PointSystemManager from "@/components/PointSystemManager";
+import CarBrandManager from "@/components/CarBrandManager";
 
 const { cookies, redirect } = Astro;
 
@@ -85,8 +86,31 @@ const columnsPoints = [
   </h2>
 
   <div class="py-4 mx-auto text-center" style="width: 99%">
+    <p class="mb-2 text-5xl font-bold w-fit mx-auto">
+      Ajuste de Marcas de Coches
+    </p>
+    <CarBrandManager
+      client:only="react"
+    />
+  </div>
+
+  <div class="mt-4 border border-primary" style="width: 99%" />
+
+  <div class="py-4 mx-auto text-center" style="width: 99%">
     <p class="text-5xl font-bold w-fit mx-auto">
-      Ajuste Global Actuales
+      Ajuste de Puntuaciones de Campeonatos
+    </p>
+    <PointSystemManager
+      client:only="react"
+      initialData={serializedPointsData}
+    />
+  </div>
+
+    <div class="mt-4 border border-primary" style="width: 99%" />
+
+  <div class="py-4 mx-auto text-center" style="width: 99%">
+    <p class="text-5xl font-bold w-fit mx-auto">
+      Otros Ajuste Global Actuales
     </p>
     <DataTable
       client:only="react"
@@ -104,16 +128,6 @@ const columnsPoints = [
     />
   </div>
 
-  <div class="mt-4 border- border-primary" style="width: 99%" />
-
-  <div class="py-4 mx-auto text-center" style="width: 99%">
-    <p class="text-5xl font-bold w-fit mx-auto">
-      Ajuste de Puntuaciones de Campeonatos
-    </p>
-    <PointSystemManager
-      client:only="react"
-      initialData={serializedPointsData}
-/>
-  </div>
+  <div class="mb-8"></div>
 
 </Layout>
