@@ -9,10 +9,11 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination';
-import { ChevronUp, ChevronDown, Search } from 'lucide-react';
+import { ChevronUp, ChevronDown, Search, Edit2, Trash2 } from 'lucide-react';
 import { MultiSelect } from '@/components/multi-select';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 
 export interface DataTableColumn {
   header: string;
@@ -27,7 +28,6 @@ export interface DataTableProps {
   readonly pageSize?: number;
   readonly filterOptions?: readonly string[];
   readonly filterAccessor?: string | null;
-  readonly customActions?: ((row: any) => React.ReactNode) | null;
   readonly customRowClass?: ((row: any, index: number) => string) | null;
   readonly customCellRenderer?: { readonly [accessor: string]: (row: any) => React.ReactNode } | null;
   readonly initialSortConfig?: { readonly key: string | null; readonly direction: 'asc' | 'desc' };
@@ -45,7 +45,6 @@ export function DataTable({
   pageSize = 10,
   filterOptions = [],
   filterAccessor = null,
-  customActions = null,
   customRowClass = null,
   customCellRenderer = null,
   initialSortConfig = { key: null, direction: 'asc' },
@@ -311,9 +310,7 @@ export function DataTable({
                 </div>
               </TableHead>
             ))}
-            {customActions && <TableHead className="text-white">Acciones</TableHead>}
-            {onEdit && <TableHead className="text-white justify-center">Editar</TableHead>}
-            {onDelete && <TableHead className="text-white justify-center">Eliminar</TableHead>}
+            <TableHead className="text-white text-center">Acciones</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -326,15 +323,7 @@ export function DataTable({
                     <Skeleton className="h-4 w-full" />
                   </TableCell>
                 ))}
-                {customActions && (
-                  <TableCell><Skeleton className="h-4 w-12 mx-auto" /></TableCell>
-                )}
-                {onEdit && (
-                  <TableCell><Skeleton className="h-4 w-8 mx-auto" /></TableCell>
-                )}
-                {onDelete && (
-                  <TableCell><Skeleton className="h-4 w-8 mx-auto" /></TableCell>
-                )}
+                <TableCell className="text-center"><Skeleton className="h-4 w-12 mx-auto"/></TableCell>
               </TableRow>
             ))
           ) : paginatedData.length > 0 ? (
@@ -351,26 +340,23 @@ export function DataTable({
                     {renderCell(row, column, columns.findIndex(col => col.accessor === column.accessor))}
                   </TableCell>
                 ))}
-                {customActions && (
-                  <TableCell>
-                    {customActions(row)}
-                  </TableCell>
-                )}
-                {onEdit && (
-                  <TableCell>
-                    <a href={`/admin/${(onEdit as { path: string }).path}/${row.id}`} className="flex justify-center">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="w-6 text-center mx-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
-                        <path d="m15 5 4 4"/>
-                      </svg>
-                    </a>
-                  </TableCell>
-                )}
-                {onDelete && (
-                  <TableCell>
-                    <button
-                      className="justify-center text-red-500 hover:text-red-700"
-                      onClick={async (e) => {
+
+              <TableCell className="text-center">
+                <div className="flex justify-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      window.location.href = `/admin/${(onEdit as { path: string }).path}/${row.id}`;
+                    }}
+                    className="text-blue-500 border-blue-500 hover:bg-blue-500 hover:text-white"
+                  >
+                    <Edit2 className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={async (e) => {
                         e.preventDefault();
                         if (!row.id) return;
                         if (!confirm("¿Estás seguro de que quieres eliminar este elemento?")) return;
@@ -390,16 +376,12 @@ export function DataTable({
                           alert("Error eliminando el elemento: " + error);
                         }
                       }}
-                      title="Eliminar"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="w-6 text-center mx-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M3 6h18"/>
-                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
-                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
-                      </svg>
-                    </button>
-                  </TableCell>
-                )}
+                    className="text-red-500 border-red-500 hover:bg-red-500 hover:text-white"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </TableCell>
               </TableRow>
             ))
           ) : (
