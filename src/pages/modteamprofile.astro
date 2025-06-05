@@ -1,6 +1,7 @@
 ---
 import Layout from "@/layouts/ProfileLayout.astro";
 import { supabase } from "@/db/supabase";
+import TeamImageUpload from "@/components/TeamImageUpload";
 
 const { cookies, redirect } = Astro;
 
@@ -50,7 +51,7 @@ const {data: TeamData} = await supabase
       name = "name"
       value = {TeamData?.name.toString()}
       class = "bg-darkSecond text-lightPrimary text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
-      >
+    >
 
     <label class="mt-5 text-lg font-semibold" for = "description">Descripción:</label>
     <textarea
@@ -65,23 +66,39 @@ const {data: TeamData} = await supabase
     <div>
       <button
         type="submit"
-        class="py-1.5 px-3 w-fit mr-2 bg-darkPrimary text-lightPrimary border-[#29dd38] border-2 rounded-md my-4 font-medium text-lg hover:bg-[#29dd38] hover:text-darkPrimary">
+        class="py-1.5 px-3 w-fit mr-2 bg-darkPrimary text-lightPrimary border-[#29dd38] border-2 rounded-md my-4 font-medium text-lg hover:bg-[#29dd38] hover:text-darkPrimary"
+      >
         Aceptar
       </button>
 
       <button
+        type="button"
         onclick="window, location.href = '/myteam'"
-        class="py-1.5 px-3 w-fit bg-darkPrimary text-lightPrimary border-primary border-2 rounded-md my-4 font-medium text-lg hover:bg-primary hover:text-darkPrimary">
-        Cancelar
+        class="py-1.5 px-3 w-fit bg-darkPrimary text-lightPrimary border-primary border-2 rounded-md my-4 font-medium text-lg hover:bg-primary hover:text-darkPrimary"
+      >
+        Cancelar / Volver
       </button>
     </div>
 
   </form>
+
+    <div class="w-11/12">
+    <TeamImageUpload
+      client:load
+      teamId={parseInt(id || "0")}
+      currentImageUrl={TeamData?.image || null}
+      onUploadComplete={(imageUrl: string) => {
+        console.log("Upload complete:", imageUrl)
+        return null;
+      }}
+    />
+  </div>
 </Layout>
 
 <script>
-  const form = document.getElementById('teamForm');
+import { showToast } from "@/lib/utils";
 
+  const form = document.getElementById('teamForm');
   if (form) {
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -95,14 +112,17 @@ const {data: TeamData} = await supabase
 
         if (!response.ok) {
           const errorData = await response.json();
+          console.error('Error response:', errorData);
+          showToast('Error al actualizar el equipo: ' + errorData.message, 'error');
           throw new Error(errorData.message || 'Error al actualizar el equipo');
         }
 
         // Redireccionar a myprofile tras éxito
+        showToast('Equipo actualizado correctamente', 'success');
         window.location.href = '/myteam';
       } catch (error) {
         console.error('Error:', error);
-        alert('Error al actualizar el equipo: '+error);
+        showToast('Error al actualizar el equipo: '+ error, 'error');
       }
     });
   }
