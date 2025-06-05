@@ -7,12 +7,6 @@ export const POST: APIRoute = async ({ request }) => {
   let brand = formData.get('carbrand');
   let carClass = formData.get('carclass');
 
-  if (brand === '-2') {
-    const { brandId, error } = await handleNewBrand(formData);
-    if (error) return error;
-    brand = brandId;
-  }
-
   if (carClass === '-2') {
     const { classId, error } = await handleNewClass(formData);
     if (error) return error;
@@ -48,37 +42,6 @@ function extractStringValue(value: FormDataEntryValue | null): string {
   }
   if (value) return String(value);
   return "";
-}
-
-async function handleNewBrand(formData: FormData): Promise<{ brandId: string | null, error: Response | null }> {
-  const newBrandCar = formData.get('newBrandCar');
-  const newImgBrandCar = formData.get('newImgBrandCar');
-  const newCountryCar = formData.get('newCountryCar');
-  const newFoundationCar = formData.get('newFoundationCar');
-  const { data: lastBrand } = await supabase
-    .from('carbrand')
-    .select('id')
-    .order('id', { ascending: false })
-    .limit(1)
-    .single();
-  const newBrandId = lastBrand ? lastBrand.id + 1 : 1;
-  const brandName = extractStringValue(newBrandCar);
-  const imgbrandValue = extractStringValue(newImgBrandCar);
-  const locationValue = extractStringValue(newCountryCar);
-
-  const { error: insertBrandError } = await supabase
-    .from('carbrand')
-    .insert({
-      id: newBrandId,
-      name: brandName,
-      imgbrand: imgbrandValue,
-      location: locationValue,
-      foundation: Number(newFoundationCar)
-    });
-  if (insertBrandError) {
-    return { brandId: null, error: new Response(JSON.stringify({ error: 'Error al crear la marca' }), { status: 500 }) };
-  }
-  return { brandId: String(newBrandId), error: null };
 }
 
 async function handleNewClass(formData: FormData): Promise<{ classId: string | null, error: Response | null }> {

@@ -237,80 +237,7 @@ const handleDeleteCar = (id: string | number): void => {
                 <option value={carBrand.id}>{carBrand.name}</option>
               ))
             }
-            <option value = -2>Añadir nueva marca</option>
           </select>
-
-          <!-- Nueva Marca de Coche -->
-          <div id="newBrandContainer" class="hidden">
-            <div
-              class="grid grid-cols-1 gap-4 bg-darkSecond px-2 pt-2 border border-primary rounded-xl sm:grid-cols-2"
-            >
-              <div>
-                <label
-                  class="text-lightPrimary text-lg font-medium"
-                  for="newBrandCar"
-                >
-                  Marca
-                </label>
-                <input
-                  class="w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkPrimary hover:border-primary"
-                  type="text"
-                  id="newBrandCar"
-                  name="newBrandCar"
-                  placeholder="Datsun"
-                />
-              </div>
-
-              <div>
-                <label
-                  class="text-lightPrimary text-lg font-medium"
-                  for="newImgBrandCar"
-                >
-                  Imagen
-                </label>
-                <input
-                  class="w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkPrimary hover:border-primary"
-                  type="text"
-                  id="newImgBrandCar"
-                  name="newImgBrandCar"
-                  placeholder="Datsun Logo"
-                />
-              </div>
-              <div>
-                <label
-                  class="text-lightPrimary text-lg font-medium"
-                  for="newCountryCar"
-                >
-                  País
-                </label>
-                <input
-                  class="w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkPrimary hover:border-primary"
-                  type="text"
-                  id="newCountryCar"
-                  name="newCountryCar"
-                  placeholder="Reino Unido"
-                />
-              </div>
-
-              <div>
-                <label
-                  class="text-lightPrimary text-lg font-medium"
-                  for="newFoundationCar"
-                >
-                  Fundado en...
-                </label>
-                <input
-                  class="w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkPrimary hover:border-primary"
-                  type="number"
-                  id="newFoundationCar"
-                  name="newFoundationCar"
-                  step="1"
-                  min="1550"
-                  placeholder="1935"
-                />
-              </div>
-            </div>
-          </div>
 
           <label class = "text-lightPrimary text-lg font-medium" for = "carClasses">
             Clase del coche
@@ -579,26 +506,14 @@ import { showToast } from "@/lib/utils";
     // Aplicar filtros iniciales
     applyFilters();
   }
-
   function initCarForm() {
     const CarForm = document.getElementById("uploadForm");
-    const carBrandSelect = document.getElementById("carbrand");
     const carClassSelect = document.getElementById("carClasses");
-    const newBrandContainer = document.getElementById("newBrandContainer");
     const newClassContainer = document.getElementById("newClassContainer");
-
-    carBrandSelect?.addEventListener("change", (e) => {
-      const target = e.target as HTMLSelectElement;
-      if (target && target.value === "new") {
-        newBrandContainer?.classList.remove("hidden");
-      } else {
-        newBrandContainer?.classList.add("hidden");
-      }
-    });
 
     carClassSelect?.addEventListener("change", (e) => {
       const target = e.target as HTMLSelectElement;
-      if (target && target.value === "new") {
+      if (target && target.value === "-2") {
         newClassContainer?.classList.remove("hidden");
       } else {
         newClassContainer?.classList.add("hidden");
@@ -638,22 +553,10 @@ import { showToast } from "@/lib/utils";
     // Inicializar la vista previa
     updatePreview();
   }
-
   function toggleNewBrandClassFields() {
-    const carBrandSelect = document.getElementById("carbrand");
-    const newBrandContainer = document.getElementById("newBrandContainer");
     const carClassSelect = document.getElementById("carClasses");
     const newClassContainer = document.getElementById("newClassContainer");
 
-    function updateBrandVisibility() {
-      if (carBrandSelect && newBrandContainer) {
-        if ((carBrandSelect as HTMLSelectElement).value === "-2") {
-          newBrandContainer.classList.remove("hidden");
-        } else {
-          newBrandContainer.classList.add("hidden");
-        }
-      }
-    }
     function updateClassVisibility() {
       if (carClassSelect && newClassContainer) {
         if ((carClassSelect as HTMLSelectElement).value === "-2") {
@@ -663,10 +566,7 @@ import { showToast } from "@/lib/utils";
         }
       }
     }
-    if (carBrandSelect) {
-      carBrandSelect.addEventListener("change", updateBrandVisibility);
-      updateBrandVisibility(); // Comprobar al cargar
-    }
+    
     if (carClassSelect) {
       carClassSelect.addEventListener("change", updateClassVisibility);
       updateClassVisibility(); // Comprobar al cargar

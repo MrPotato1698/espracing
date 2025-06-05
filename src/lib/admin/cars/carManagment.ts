@@ -44,13 +44,7 @@ export function initCarManagement() {
   // NUEVO: Referencias para el switch y contenedor de edición avanzada
   const switchMoreData = document.getElementById("switch-moreData") as HTMLInputElement;
   const moreDataContainer = document.getElementById("moreDataContainer") as HTMLElement;
-
   const carBrandSelect = document.getElementById("carbrand") as HTMLSelectElement;
-
-  const newBrandCar = document.getElementById("newBrandCar") as HTMLSelectElement;
-  const newImgBrandCar = document.getElementById("newImgBrandCar") as HTMLSelectElement;
-  const newCountryCar = document.getElementById("newCountryCar") as HTMLSelectElement;
-  const newFoundationCar = document.getElementById("newFoundationCar") as HTMLSelectElement;
 
   const carClassSelect = document.getElementById("carClasses") as HTMLSelectElement;
 
@@ -426,39 +420,11 @@ export function initCarManagement() {
     previewMaxLiter.textContent = data.maxLiter?.toString();
     previewFuelLiterTime.textContent = data.fuelLiterTime?.toString();
   }
-
   async function getBrandId(carBrandValue: string, carData: ProcessedCarData): Promise<number> {
-    switch (carBrandValue) {
-      case "-1":
-        return carData.brandID;
-      case "-2":
-        try {
-          const { data: getLastCarBrand } = await supabase
-            .from('carbrand')
-            .select('id')
-            .order('id', { ascending: false })
-            .limit(1)
-            .single();
-          const lastBrandID = getLastCarBrand ? (getLastCarBrand.id + 1) : 1;
-          const { error: insertBrandError } = await supabase
-            .from('carbrand')
-            .insert({
-              id: Number(lastBrandID),
-              name: String(newBrandCar.value),
-              imgbrand: String(newImgBrandCar.value),
-              location: String(newCountryCar.value),
-              foundation: Number(newFoundationCar.value)
-            });
-          if (insertBrandError) throw insertBrandError;
-          return lastBrandID;
-        } catch (error) {
-          showToast("Error al crear la marca del coche: "+ error, "error");
-          console.error("Error al crear la marca del coche: "+ error);
-          return carData.brandID;
-        }
-      default:
-        return Number(carBrandValue);
+    if (carBrandValue === "-1") {
+      return carData.brandID;
     }
+    return Number(carBrandValue);
   }
 
   async function getClassId(carClassValue: string, carData: ProcessedCarData): Promise<number> {
