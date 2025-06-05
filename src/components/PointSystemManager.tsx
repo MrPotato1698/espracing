@@ -520,7 +520,7 @@ export default function PointSystemManager({ initialData }: PointSystemManagerPr
         </TabsList>
 
         <TabsContent value="current" className="space-y-4">
-          <Card>
+          <Card className="border-2 border-primary">
             <CardHeader>
               <CardTitle>Sistemas de Puntuación Actuales</CardTitle>
               <CardDescription>Selecciona un sistema para ver, editar o eliminar</CardDescription>
@@ -674,7 +674,7 @@ export default function PointSystemManager({ initialData }: PointSystemManagerPr
         </TabsContent>
 
         <TabsContent value="new" className="space-y-4">
-          <Card>
+          <Card className="border-2 border-primary">
             <CardHeader>
               <CardTitle>Crear Nuevo Sistema de Puntuación</CardTitle>
               <CardDescription>Define un nuevo sistema de puntuación para los campeonatos</CardDescription>
