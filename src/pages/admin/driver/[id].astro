@@ -1,6 +1,7 @@
 ---
 import Layout from "@/layouts/ProfileLayout.astro";
 import { supabase } from "@/db/supabase";
+import DriverAvatarUpload from "@/components/DriverAvatarUpload";
 
 const { id } = Astro.params;
 const { cookies, redirect } = Astro;
@@ -50,7 +51,7 @@ const minRole = roleData.roleesp;
 
 const { data: profileData } = await supabase
   .from("profiles")
-  .select("full_name, steam_id, roleesp!inner(id)")
+  .select("full_name, steam_id, roleesp!inner(id), avatar")
   .eq("id", id)
   .single();
 
@@ -81,9 +82,9 @@ const availableRoles = rolesData?.filter((role) => {
 const disableRoleSelect = isAdmin && isEditingAdmin;
 ---
 
-<Layout title="ESP Racing: Modificación datos de campeonato">
+<Layout title="ESP Racing: Modificación datos de piloto">
   <h2 class="text-5xl font-bold border-b border-primary w-fit mx-auto">
-    Modificar Datos de Campeonato
+    Modificar Datos de Piloto
   </h2>
   <form id="editDriverForm" class="flex flex-col mt-5">
     <label class="mt-5 text-lg font-semibold" for="name">
@@ -143,6 +144,17 @@ const disableRoleSelect = isAdmin && isEditingAdmin;
       </button>
     </div>
   </form>
+  <div class="w-11/12">
+    <DriverAvatarUpload
+      client:load
+      driverId={id}
+      currentAvatarUrl={profileData?.avatar || "https://tavjuyhbdqnkgsosdymq.supabase.co/storage/v1/object/public/avatars//default.webp"}
+      onUploadComplete={(imageUrl: string) => {
+        console.log("Upload complete:", imageUrl)
+        return null;
+      }}
+    />
+  </div>
 
 </Layout>
 
@@ -162,6 +174,8 @@ import { showToast } from "@/lib/utils";
       });
 
       if (!response.ok) {
+        console.error("Error en la respuesta del servidor:", response.status);
+        showToast(`Error en la respuesta del servidor: ${response.status}`, "error");
         throw new Error(`Error en la respuesta del servidor: ${response.status}`);
       }
 
@@ -171,6 +185,8 @@ import { showToast } from "@/lib/utils";
         showToast("Piloto actualizado con éxito", "success");
         window.location.href = "/admin/admindrivers";
       } else {
+        console.error("Error al actualizar el piloto:", result.error);
+        showToast(`Error al actualizar el piloto: ${result.error || "Error desconocido"}`, "error");
         throw new Error(result.error || "Error desconocido");
       }
     } catch (error) {
