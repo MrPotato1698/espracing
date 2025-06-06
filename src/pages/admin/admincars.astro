@@ -247,92 +247,13 @@ const handleDeleteCar = (id: string | number): void => {
             id="carClasses"
             name="carClasses"
           >
-            <option value = -1 > -- No variar -- </option>
+          <option value = -1 > -- No variar -- </option>
             {
               carClassesData?.map((carClass) => (
                 <option value={carClass.id}>{carClass.name}</option>
               ))
             }
-            <option value = -2>Añadir nueva clase</option>
           </select>
-
-          <!-- Nueva Clase -->
-          <div id="newClassContainer" class="hidden px-2 pt-2 bg-darkSecond border border-primary rounded-xl">
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div>
-                <label
-                  class="text-lightPrimary text-lg font-medium"
-                  for="newClassName"
-                >
-                  Nombre de Clase
-                </label>
-                <input
-                  class="w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkPrimary hover:border-primary"
-                  type="text"
-                  id="newClassName"
-                  name="newClassName"
-                  placeholder="Gran Turismos X"
-                />
-              </div>
-
-              <div>
-                <label
-                  class="text-lightPrimary text-lg font-medium"
-                  for="newClassShortName"
-                >
-                  Nombre de Clase Corto
-                </label>
-                <input
-                  class="w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkPrimary hover:border-primary"
-                  type="text"
-                  id="newClassShortName"
-                  name="newClassShortName"
-                  placeholder="GTX"
-                />
-              </div>
-
-              <div>
-                <label
-                  class="text-lightPrimary text-lg font-medium"
-                  for="newClassBackgroundColor"
-                >
-                  Color Fondo de Clase
-                </label>
-                <input
-                  class="p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 text-white bg-darkPrimary hover:border-primary"
-                  type="color"
-                  id="newClassBackgroundColor"
-                  name="newClassBackgroundColor"
-                  value="#006fba"
-                />
-              </div>
-
-              <div>
-                <label
-                  class="text-lightPrimary text-lg font-medium"
-                  for="newClassTextColor"
-                >
-                  Color Texto de Clase
-                </label>
-                <input
-                  class="p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 text-white bg-darkPrimary hover:border-primary"
-                  type="color"
-                  id="newClassTextColor"
-                  name="newClassTextColor"
-                  value="#f9f9f9"
-                />
-              </div>
-
-              <div class="col-span-2">
-                <div
-                  id="classPreview"
-                  class="mb-2 p-4 rounded-md text-center font-bold w-2/4 mx-auto"
-                >
-                  GTX
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
 
   <!-- Switch para mostrar edición avanzada, oculto por defecto -->

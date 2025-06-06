@@ -487,6 +487,12 @@ export function initCarManagement() {
       const lastBrandID = await getBrandId(carBrandValue, carData);
       const lastClassID = await getClassId(carClassValue, carData);
 
+      // Aviso si la marca no existe
+      if (lastBrandID === -1) {
+        showToast("La marca seleccionada no existe en la base de datos. Vaya a ajustes globales para crearla", "info");
+        return;
+      }
+
       const { data: getLastCar } = await supabase
         .from('car')
         .select('id')
@@ -502,8 +508,10 @@ export function initCarManagement() {
           findID = true;
         }
       }
-      if (!findID) i++;
+      if (!findID && getLastCar[i-1].id === i) i++;
       const lastCarID = getLastCar ? i : 1;
+
+      console.table({"id": lastCarID, "marca": lastBrandID,"modelo": carData.model })
 
       const { error: insertError } = await supabase
         .from('car')

@@ -5,6 +5,7 @@ import { showToast } from "@/lib/utils";
 import { DataTable } from "@/components/data-table";
 import PointSystemManager from "@/components/PointSystemManager";
 import CarBrandManager from "@/components/CarBrandManager";
+import CarClassManager from "@/components/CarClassManager";
 
 const { cookies, redirect } = Astro;
 
@@ -90,6 +91,15 @@ const columnsPoints = [
       Ajuste de Marcas de Coches
     </p>
     <CarBrandManager
+      client:only="react"
+    />
+  </div>
+
+  <div class="py-4 mx-auto text-center" style="width: 99%">
+    <p class="mb-2 text-5xl font-bold w-fit mx-auto">
+      Ajuste de Clases de Coches
+    </p>
+    <CarClassManager
       client:only="react"
     />
   </div>
