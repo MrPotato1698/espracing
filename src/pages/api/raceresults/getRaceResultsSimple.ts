@@ -262,7 +262,7 @@ function initializeScript() {
 		tablaResultadosString += '</tbody></table>';
 
 		// DNFs
-		if(resultTableDNF.length > 0) {
+		if(resultTableDNF.length > 0 || resultTableDQ.length > 0) {
 			tablaResultadosString += `
 			<p class="text-3xl font-bold border-b border-primary w-fit mx-auto mt-4 mb-2">No Clasificados</p>
 

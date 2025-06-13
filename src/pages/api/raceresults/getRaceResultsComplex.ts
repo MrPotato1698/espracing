@@ -554,7 +554,7 @@ function generateLapRows(
 ): string {
   return laps.map(lap => {
     // Format lap time
-    const lapTime = pos >= -1
+    const lapTime = pos >= -2
       ? `${formatTwoIntegers(Math.trunc((lap.LapTime / 60) % 60))}:${formatTwoIntegersPlusThreeDecimals(lap.LapTime % 60)}`
       : "";
 
@@ -661,7 +661,7 @@ function loadIndividualTimes(datos: RaceData, carData: CarData[], flagMoreSplits
     // Format best lap and consistency
     const bestlapToString = formatDriverBestLapTime(BestLap);
     const bestSectorsString = (pos >= -2 && BestLap && BestLap < 999999.999) ? formatDriverSectors(bestLap.slice(1)) : "";
-    const consistencyString = (consistency === undefined || consistency === -1) ? "" : 
+    const consistencyString = (consistency === undefined || consistency === -1) ? "" :
         ` | Consistencia: ${consistency.toFixed(2)}% ( ${(consistency - 100).toFixed(2)} )`;
 
     // Add driver header
