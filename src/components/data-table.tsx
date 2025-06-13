@@ -310,7 +310,9 @@ export function DataTable({
                 </div>
               </TableHead>
             ))}
-            <TableHead className="text-white text-center">Acciones</TableHead>
+            {(onEdit !== false || onDelete !== false) && (
+              <TableHead className="text-white text-center">Acciones</TableHead>
+            )}
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -323,7 +325,9 @@ export function DataTable({
                     <Skeleton className="h-4 w-full" />
                   </TableCell>
                 ))}
-                <TableCell className="text-center"><Skeleton className="h-4 w-12 mx-auto"/></TableCell>
+                {(onEdit !== false || onDelete !== false) && (
+                  <TableCell className="text-center"><Skeleton className="h-4 w-12 mx-auto"/></TableCell>
+                )}
               </TableRow>
             ))
           ) : paginatedData.length > 0 ? (
@@ -340,53 +344,58 @@ export function DataTable({
                     {renderCell(row, column, columns.findIndex(col => col.accessor === column.accessor))}
                   </TableCell>
                 ))}
-
-              <TableCell className="text-center">
-                <div className="flex justify-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      window.location.href = `/admin/${(onEdit as { path: string }).path}/${row.id}`;
-                    }}
-                    className="text-blue-500 border-blue-500 hover:bg-blue-500 hover:text-white"
-                  >
-                    <Edit2 className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={async (e) => {
-                        e.preventDefault();
-                        if (!row.id) return;
-                        if (!confirm("¿Estás seguro de que quieres eliminar este elemento?")) return;
-                        try {
-                          const response = await fetch(`/api/admin/${(onDelete as { path: string }).path}/delete${(onDelete as { path: string }).path}`, {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ id: row.id }),
-                          });
-                          if (response.ok) {
-                            window.location.reload();
-                          } else {
-                            alert("Error eliminando el elemento: " + response.statusText);
-                            console.error("Error eliminando el elemento:", response.statusText);
-                          }
-                        } catch (error) {
-                          alert("Error eliminando el elemento: " + error);
-                        }
-                      }}
-                    className="text-red-500 border-red-500 hover:bg-red-500 hover:text-white"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </TableCell>
+                {(onEdit !== false || onDelete !== false) && (
+                  <TableCell className="text-center">
+                    <div className="flex justify-center gap-2">
+                      {onEdit !== false && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            window.location.href = `/admin/${(onEdit as { path: string }).path}/${row.id}`;
+                          }}
+                          className="text-blue-500 border-blue-500 hover:bg-blue-500 hover:text-white"
+                        >
+                          <Edit2 className="h-4 w-4" />
+                        </Button>
+                      )}
+                      {onDelete !== false && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={async (e) => {
+                              e.preventDefault();
+                              if (!row.id) return;
+                              if (!confirm("¿Estás seguro de que quieres eliminar este elemento?")) return;
+                              try {
+                                const response = await fetch(`/api/admin/${(onDelete as { path: string }).path}/delete${(onDelete as { path: string }).path}`, {
+                                  method: "POST",
+                                  headers: { "Content-Type": "application/json" },
+                                  body: JSON.stringify({ id: row.id }),
+                                });
+                                if (response.ok) {
+                                  window.location.reload();
+                                } else {
+                                  alert("Error eliminando el elemento: " + response.statusText);
+                                  console.error("Error eliminando el elemento:", response.statusText);
+                                }
+                              } catch (error) {
+                                alert("Error eliminando el elemento: " + error);
+                              }
+                            }}
+                          className="text-red-500 border-red-500 hover:bg-red-500 hover:text-white"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </TableCell>
+                )}
               </TableRow>
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={columns.length + 3} className="text-center py-4 text-lightSecond">
+              <TableCell colSpan={columns.length + ((onEdit !== false || onDelete !== false) ? 3 : 2)} className="text-center py-4 text-lightSecond">
                 No hay datos disponibles
               </TableCell>
             </TableRow>
