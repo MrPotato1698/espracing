@@ -82,6 +82,28 @@ if (champsData?.champ_img) {
   // Usar la API interna para obtener la URL pública del póster
   publicPosterUrl = `/api/admin/championship/getposter?name=poster_${id}.webp`;
 }
+
+// Función para formatear la temporada igual que en adminchampionship.astro
+const formatSeason = (season: string) => {
+  if (season === "0") return "Sin Temporada / Otra";
+  if (season.length === 4 && !isNaN(Number(season))) {
+    const firstPart = parseInt(season.substring(0, 2));
+    const secondPart = parseInt(season.substring(2, 4));
+    const startYear = 2000 + firstPart;
+    const endYear = 2000 + secondPart;
+    return `${startYear}/${endYear}`;
+  }
+  return season;
+};
+
+// Obtener temporadas únicas del sistema (solo para el select)
+const { data: allChamps } = await supabase
+  .from("championship")
+  .select("season")
+  .order("season", { ascending: true });
+
+const seasons = [...new Set((allChamps || []).map(item => item.season))].filter(Boolean).sort();
+const seasonOptions = seasons.map(season => ({ value: season, label: formatSeason(season ? season : "0") }));
 ---
 
 <Layout title="ESP Racing: Modificación datos de campeonato">
@@ -125,21 +147,17 @@ if (champsData?.champ_img) {
     />
 
     <label class="mt-5 text-lg font-semibold" for="season">
-      Temporada a la que pertenece (antiguo: {champsData?.season})
+      Temporada a la que pertenece
     </label>
     <select
       class="w-11/12 p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkSecond hover:border-primary"
       id="season"
       name="season"
+      value={champsData?.season}
     >
-      <option value="2021">2020/2021</option>
-      <option value="2122">2021/2022</option>
-      <option value="2223">2022/2023</option>
-      <option value="2324">2023/2024</option>
-      <option value="2425">2024/2025</option>
-      <option value="2526">2025/2026</option>
-      <option value="2627">2026/2027</option>
-      <option value="0">Sin Temporada / Otra</option>
+      {seasonOptions.map(opt => (
+        <option value={opt.value} selected={champsData?.season === opt.value}>{opt.label}</option>
+      ))}
     </select>
 
     <label class="mt-5 text-lg font-semibold" for="yearChamp">
@@ -252,6 +270,9 @@ if (champsData?.champ_img) {
 </Layout>
 
 <script>
+import { showToast } from "@/lib/utils";
+
+  
   const form = document.getElementById("editChampForm") as HTMLFormElement;
 
   const isEventSwitch = document.getElementById("champORevent") as HTMLInputElement;
@@ -287,7 +308,7 @@ if (champsData?.champ_img) {
     const selectedCars = formData.getAll("carsChamp");
 
     try {
-      const response = await fetch("/api/admin/championship/editchamp", {
+      const response = await fetch("/api/admin/championship/editchampionship", {
         method: "POST",
         body: formData,
       });
@@ -299,14 +320,14 @@ if (champsData?.champ_img) {
       const result = await response.json();
 
       if (result.success) {
-        alert("Campeonato actualizado con éxito");
+        showToast("Campeonato actualizado con éxito", "success");
         window.location.href = "/admin/adminchampionship";
       } else {
         throw new Error(result.error || "Error desconocido");
       }
     } catch (error) {
       console.error("Error al actualizar el campeonato:", error);
-      alert(`Error al actualizar el campeonato: ${error}`);
+      showToast(`Error al actualizar el campeonato: ${error}`, "error");
     }
   });
 </script>

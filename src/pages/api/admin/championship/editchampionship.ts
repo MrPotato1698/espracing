@@ -12,11 +12,6 @@ export const POST: APIRoute = async ({ request }) => {
   const numberTotalRaces = formData.get('numbertotalraces');
   const isfinished = formData.get('isFinished') !== null;
 
-  const seasonPart1 = '20' + season.slice(0, 2);
-      const seasonPart2 = '20' + season.slice(2, 4);
-      const formattedSeason = `${seasonPart1}/${seasonPart2}`;
-
-
   if (!champ_id) {
     return new Response(JSON.stringify({ error: 'ID de campeonato no proporcionado' }), { status: 400 });
   }
@@ -26,7 +21,7 @@ export const POST: APIRoute = async ({ request }) => {
       ...(champ_name && { name: champ_name }),
       ...(keySearchAPI && { key_search: keySearchAPI }),
       ...(yearChamp && { year: Number(yearChamp) }),
-      ...(season && { season: formattedSeason }),
+      ...(season && { season: season }),
       ischampionship: champORevent,
       ...(numberTotalRaces && { number_of_races_total: Number(numberTotalRaces) }),
       isfinished: isfinished
