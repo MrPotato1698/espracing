@@ -7,13 +7,32 @@ import FunAC from "@/assets/social/FUNAC.webp";
 import ESPRacing from "@/assets/imgresource/ESPRACINGLogo.webp";
 import PreviewImageRace from "@/assets/imgresource/previewraces.webp";
 
-const { data: champData, error: champError } = await supabase
+let champData: any= [];
+
+const { data: champDataDB, error: champErrorDB } = await supabase
   .from("championship")
   .select("id, name, champ_img, number_of_races_total")
   .eq("isfinished", false)
-  .order("id", { ascending: false })
-  .single();
+  .eq("ischampionship", true)
+  .order("id", { ascending: true })
+  .limit(1);
 
+if(champDataDB === null || champDataDB.length === 0){
+  const { data: champDataDB2, error: champErrorDB2 } = await supabase
+  .from("championship")
+  .select("id, name, champ_img, number_of_races_total")
+  .eq("ischampionship", true)
+  .order("id", { ascending: false })
+  .limit(1);
+
+  if (champErrorDB2) {
+    console.error("Error fetching championship data:", champErrorDB2);
+  } else {
+    champData = champDataDB2[0];
+  }
+}else{
+  champData = champDataDB[0];
+}
 
 let champImgUrl = "";
 if (champData && champData.champ_img) {

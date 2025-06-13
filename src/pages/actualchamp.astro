@@ -4,12 +4,32 @@ import YTVideo from "@/components/YoutubeVideo.astro";
 import { supabase } from "@/db/supabase";
 
 // Obtener los datos del campeonato actual desde la base de datos
-const { data: champData, error: champError } = await supabase
+let champData: any = [];
+
+const { data: champDataDB, error: champError } = await supabase
   .from("championship")
   .select("id, name, champ_img")
   .eq("isfinished", false)
+  .eq("ischampionship", true)
+  .order("id", { ascending: true })
+  .limit(1);
+
+if(champDataDB === null || champDataDB.length === 0) {
+  const { data: champDataDB2, error: champErrorDB2 } = await supabase
+  .from("championship")
+  .select("id, name, champ_img")
+  .eq("ischampionship", true)
   .order("id", { ascending: false })
-  .single();
+  .limit(1);
+
+  if (champErrorDB2) {
+    console.error("Error fetching championship data:", champErrorDB2);
+  } else {
+    champData = champDataDB2[0];
+  }
+}else{
+  champData = champDataDB[0];
+}
 
 let champImgUrl = "";
 let champName = "";
