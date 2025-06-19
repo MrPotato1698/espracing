@@ -52,7 +52,7 @@ const { data: userData } = await supabase
     <input
       type="text"
       name="name"
-      value={userData?.full_name?.toString() ?? "No hay nombre"}
+      value={userData?.full_name === null ? "NULL" : userData?.full_name?.toString() ?? "No hay nombre"}
       class="bg-darkSecond text-lightPrimary text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
     />
 
@@ -60,7 +60,7 @@ const { data: userData } = await supabase
     <input
       type="text"
       name="steam_id"
-      value={userData?.steam_id.toString() ?? "No hay Steam ID"}
+      value={userData?.steam_id === null ? "NULL" : userData?.steam_id?.toString() ?? "No hay Steam ID"}
       class="bg-darkSecond text-lightPrimary text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
     />
     <input type="hidden" name="id" value={userData?.id} />
