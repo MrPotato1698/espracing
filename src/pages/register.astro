@@ -1,9 +1,9 @@
 ---
-import Layout from "../layouts/NormalLayout.astro";
+import Layout from "@/layouts/NormalLayout.astro";
 import OpenEye from "@/icons/OpenEye.astro";
 import CloseEye from "@/icons/CloseEye.astro";
 
-const { cookies, redirect } = Astro;
+const { cookies, redirect, url } = Astro;
 
 const accessToken = cookies.get("sb-access-token");
 const refreshToken = cookies.get("sb-refresh-token");
@@ -11,9 +11,19 @@ const refreshToken = cookies.get("sb-refresh-token");
 if (accessToken && refreshToken) {
   return redirect("/");
 }
+
+// Mostrar mensaje si viene de OAuth
+const reason = url.searchParams.get('reason');
+const showOAuthMsg = reason === 'oauth';
 ---
 
 <Layout title="ESP Racing: Registrarse">
+  {showOAuthMsg && (
+    <div class="mb-6 p-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 rounded">
+      Por motivos de seguridad, primero debes crear una cuenta con contraseña antes de poder iniciar sesión con Google.
+    </div>
+  )}
+
   <div
     class="absolute bottom-0 left-0 w-full h-full overflow-hidden leading-5 bg-[#f0f0f0] top-72 -z-10 bg-gradient-to-b from-primary via-primary to-darkPrimary"
   >

@@ -102,8 +102,8 @@ if (accessToken && refreshToken) {
           </div>
           <div class="flex justify-center w-full gap-5">
             <button
-              id="loginGoogle"
-              type="submit"
+              value="google" name="provider" type="button"
+              id="googleLogin"
               class="flex items-center justify-center w-full p-3 mb-6 text-sm font-medium tracking-wide text-gray-500 transition duration-300 ease-in border border-gray-300 rounded-lg cursor-pointer md:mb-0 hover:border-lightPrimary hover:bg-[#EA4335] hover:text-lightPrimary"
             >
             <GoogleColor />
@@ -123,6 +123,7 @@ if (accessToken && refreshToken) {
 ></script>
 <script>
   const form = document.getElementById('loginForm') as HTMLFormElement;
+  const googleBtn = document.getElementById('googleLogin') as HTMLButtonElement;
 
   if (form) {
     form.addEventListener('submit', async (e) => {
@@ -146,6 +147,14 @@ if (accessToken && refreshToken) {
       } catch (error: Error | any) {
         alert(error.message || 'Error al iniciar sesión');
       }
+    });
+  }
+
+  if (googleBtn) {
+    googleBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      // Redirigir directamente al endpoint con provider=google para evitar CORS
+      window.location.href = '/api/auth/signin?provider=google';
     });
   }
 </script>

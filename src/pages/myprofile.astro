@@ -200,7 +200,43 @@ const canUpdateFlag: boolean = diffHours > 48;
             </div>
           </div>
         </div>
+      </>
+    ) : (
+      <>
+        <h2 class="text-5xl font-extrabold border-b-2 border-primary w-full mt-12">
+          Estadisticas de Carrera
+        </h2>
+        <div>
+          <p> *Actualmente, no hay estadisticas de tu perfil cargadas en el sistema, si quieres actualizarlas, haz click en el botón de abajo para realizar el cálculo</p>
+        </div>
         <div class="grid grid-flow-col mt-8">
+          {userData.steam_id ? (
+            <a
+              id = "updateStats" data-id = {userData.id}
+              class="py-1.5 px-2 w-fit bg-darkPrimary text-lightPrimary border-primary border-2 rounded-md font-medium text-lg hover:bg-darkSecond"
+            >
+              Actualizar Estadisticas
+            </a>
+          ) : (
+            <a
+              class="py-1.5 px-2 w-fit bg-darkPrimary text-lightPrimary border-primary border-2 rounded-md font-medium text-lg cursor-not-allowed opacity-60"
+              title="Debes tener un Steam ID para actualizar estadísticas"
+            >
+              Actualizar Estadisticas
+            </a>
+          )}
+          <div id="loadingStats" style="display:none; align-items:center; gap:8px; margin-left:16px;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="animate-spin">
+              <circle cx="12" cy="12" r="10" stroke="#da392b" stroke-width="4" stroke-linecap="round" stroke-dasharray="60 40"/>
+            </svg>
+            <span>Cargando estadísticas...</span>
+          </div>
+        </div>
+      </>
+    )
+    
+  }
+  <div class="grid grid-flow-col mt-8">
           {canUpdateFlag ? (
             <a
               href="/modprofile"
@@ -216,33 +252,7 @@ const canUpdateFlag: boolean = diffHours > 48;
               Modificar Perfil
             </a>
           )}
-        </div>
-      </>
-    ) : (
-      <>
-        <h2 class="text-5xl font-extrabold border-b-2 border-primary w-full mt-12">
-          Estadisticas de Carrera
-        </h2>
-        <div>
-          <p> *Actualmente, no hay estadisticas de tu perfil cargadas en el sistema, si quieres actualizarlas, haz click en el botón de abajo para realizar el cálculo</p>
-        </div>
-        <div class="grid grid-flow-col mt-8">
-          <a
-            id = "updateStats" data-id = {userData.id}
-            class="py-1.5 px-2 w-fit bg-darkPrimary text-lightPrimary border-primary border-2 rounded-md font-medium text-lg hover:bg-darkSecond"
-          >
-            Actualizar Estadisticas
-          </a>
-          <div id="loadingStats" style="display:none; align-items:center; gap:8px; margin-left:16px;">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="animate-spin">
-              <circle cx="12" cy="12" r="10" stroke="#da392b" stroke-width="4" stroke-linecap="round" stroke-dasharray="60 40"/>
-            </svg>
-            <span>Cargando estadísticas...</span>
-          </div>
-        </div>
-      </>
-    )
-  }
+    </div>
 
   <script>
     import { showToast } from '@/lib/utils';
