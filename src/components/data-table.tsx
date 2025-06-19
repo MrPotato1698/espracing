@@ -77,7 +77,7 @@ export function DataTable({
       processedData = processedData.filter((row) => {
         const columnsToSearch = searchableColumns || columns;
         return columnsToSearch.some((column) => {
-          const value = getNestedValue(row, column.accessor)
+          const value: any = getNestedValue(row, column.accessor)
           return value && String(value).toLowerCase().includes(searchLower)
         })
       })
@@ -159,31 +159,7 @@ export function DataTable({
     );
     let startPage = Math.max(2, currentPage - Math.floor(maxPagesToShow / 2));
     let endPage = Math.min(totalPages - 1, startPage + maxPagesToShow - 2);
-    if (endPage - startPage < maxPagesToShow - 2) {
-      startPage = Math.max(2, endPage - (maxPagesToShow - 2));
-    }
-    if (startPage > 2) {
-      items.push(
-        <PaginationItem key="ellipsis-1">
-          <PaginationEllipsis />
-        </PaginationItem>
-      );
-    }
-    for (let i = startPage; i <= endPage; i++) {
-      items.push(
-        <PaginationItem key={`page-${i}`}>
-          <PaginationLink
-            isActive={currentPage === i}
-            onClick={(e) => {
-              e.preventDefault()
-              handlePageChange(i)}
-            }
-          >
-            {i}
-          </PaginationLink>
-        </PaginationItem>
-      );
-    }
+
     if (endPage < totalPages - 1) {
       items.push(
         <PaginationItem key="ellipsis-2">
@@ -236,6 +212,9 @@ export function DataTable({
       return customCellRenderer[column.accessor](row);
     }
     const value = getNestedValue(row, column.accessor)
+    if ((column.accessor === "avatar" || column.accessor === "image") && value) {
+      return <div style={{display:'flex', justifyContent:'center'}}><img src={value} alt="logo" style={{width:32, height:32}} /></div>;
+    }
     if (searchTerm.trim() && value) {
       return highlightMatch(value, searchTerm)
     }
@@ -297,11 +276,11 @@ export function DataTable({
             {columns.map((column) => (
               <TableHead
                 key={column.accessor}
-                className="text-white cursor-pointer justify-center"
+                className={`text-white cursor-pointer justify-center${column.accessor === 'avatar' ? ' text-center' : ''}`}
                 onClick={() => requestSort(column.accessor)}
               >
                 <div className="flex w-auto items-center justify-center">
-                  {column.header}
+                  {column.accessor === 'avatar' ? '' : column.header}
                   {sortConfig.key === column.accessor && (
                     sortConfig.direction === 'asc' ?
                       <ChevronUp className="inline-block ml-1 w-4 h-4" /> :
@@ -340,7 +319,7 @@ export function DataTable({
               >
                 <TableCell>{(currentPage - 1) * pageSize + rowIndex + 1}</TableCell>
                 {columns.map((column) => (
-                  <TableCell key={column.accessor}>
+                  <TableCell key={column.accessor} className={column.accessor === 'avatar' ? 'text-center' : ''}>
                     {renderCell(row, column, columns.findIndex(col => col.accessor === column.accessor))}
                   </TableCell>
                 ))}

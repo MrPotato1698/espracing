@@ -13,6 +13,10 @@ if(errorUsers) {
 }
 // Definición de columnas para coches
 const userColumns = [
+  { 
+    header: "Avatar", 
+    accessor: "avatar"
+  },
   { header: "Nombre", accessor: "full_name" },
   { header: "Equipo", accessor: "team.name" },
   { header: "Carreras", accessor: "races" },
@@ -40,18 +44,10 @@ const userColumns = [
         onDelete={false}
         pageSize={10}
         searchable={true}
-        searchPlaceholder="Buscar por nombre, equipo, carreras, ..."
+        searchPlaceholder="Buscar por nombre o equipo"
         searchableColumns={[
           {accessor: "full_name"},
-          {accessor: "team.name"},
-          {accessor: "races"},
-          {accessor: "wins"},
-          {accessor: "podiums"},
-          {accessor: "flaps"},
-          {accessor: "poles"},
-          {accessor: "top5"},
-          {accessor: "top10"},
-          {accessor: "dnf"}
+          {accessor: "team.name"}
         ]}
       />
     </div>

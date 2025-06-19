@@ -26,6 +26,7 @@ const TeamsDataWithDrivers = (TeamsData || []).map((team, idx) => ({
 
 // Definición de columnas para coches
 const teamColumns = [
+  { header: "", accessor: "image" },
   { header: "Nombre", accessor: "name" },
   { header: "Nº Pilotos", accessor: "numberOFDrivers" },
   { header: "Descripción", accessor: "description" },
