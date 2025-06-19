@@ -3,10 +3,15 @@ import { supabase } from "@/db/supabase"
 
 export const POST: APIRoute = async ({ request, redirect }) => {
   const formData = await request.formData()
-  const email = formData.get("email")?.toString()
-  const password = formData.get("password")?.toString()
-  const name = formData.get("name")?.toString()
-  const steamId = formData.get("steam_id")?.toString()
+  const emailRaw = formData.get("email")
+  const passwordRaw = formData.get("password")
+  const nameRaw = formData.get("name")
+  const steamIdRaw = formData.get("steam_id")
+
+  const email = typeof emailRaw === "string" ? emailRaw : ""
+  const password = typeof passwordRaw === "string" ? passwordRaw : ""
+  const name = typeof nameRaw === "string" ? nameRaw : ""
+  const steamId = typeof steamIdRaw === "string" ? steamIdRaw : ""
 
   if (!email || !password) {
     return new Response("Correo electrónico y contraseña obligatorios", { status: 400 })
@@ -44,7 +49,7 @@ export const POST: APIRoute = async ({ request, redirect }) => {
     return new Response("Error: User ID not found", { status: 400 })
   }
 
-  const { data: profile, error: profileError } = await supabase
+  const { error: profileError } = await supabase
     .from("profiles")
     .select("*")
     .eq("id", user.user.id)
