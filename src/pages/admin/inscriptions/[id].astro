@@ -1,0 +1,197 @@
+---
+import Layout from "@/layouts/ProfileLayout.astro";
+import { supabase } from "@/db/supabase";
+import ChampionshipComboBox from "@/components/ChampionshipComboBox";
+
+const { id } = Astro.params;
+const { cookies, redirect } = Astro;
+
+if (!id) {
+  return redirect("/admin/admininscriptions");
+}
+
+const accessToken = cookies.get("sb-access-token");
+const refreshToken = cookies.get("sb-refresh-token");
+
+if (!accessToken || !refreshToken) {
+  return redirect("/login");
+}
+
+const { data: dataAuth, error: errorAuth } = await supabase.auth.setSession({
+  refresh_token: refreshToken.value,
+  access_token: accessToken.value,
+});
+
+if (errorAuth) {
+  cookies.delete("sb-access-token", { path: "/" });
+  cookies.delete("sb-refresh-token", { path: "/" });
+  return redirect("/login");
+}
+
+const idAuth = dataAuth?.user?.id || "";
+const { data: roleData } = await supabase
+  .from("profiles")
+  .select("roleesp")
+  .eq("id", idAuth)
+  .single();
+
+if (roleData == null || roleData.roleesp == null || roleData.roleesp > 1) {
+  return redirect("/index");
+}
+
+const { data: inscriptionData } = await supabase
+  .from("inscriptionscalendar")
+  .select("*, championship:championship(id, name)")
+  .eq("id", parseInt(id))
+  .single();
+
+const { data: allChamps } = await supabase
+  .from("championship")
+  .select("id, name")
+  .order("name", { ascending: true });
+
+let champSearch = "";
+let filteredChamps = allChamps;
+if (Astro.request.method === "POST") {
+  const formData = await Astro.request.formData();
+  champSearch = formData.get("champSearch")?.toString() ?? "";
+  filteredChamps = allChamps ? allChamps.filter(c => c.name && c.name.toLowerCase().includes(champSearch.toLowerCase())) : [];
+}
+
+const championships = (allChamps ?? []).map((champ) => ({
+  id: champ.id,
+  name: champ.name ?? "",
+})).filter((champ) => champ.name !== "");
+
+const selectedChampId = inscriptionData?.championship?.id ?? null;
+---
+
+<Layout title="ESP Racing: Modificar Fecha de Inscripción">
+  <h2 class="text-5xl font-bold border-b border-primary w-fit mx-auto">
+    Modificar Fecha de Inscripción
+  </h2>
+  <form id="editInscriptionForm" class="flex flex-col mt-5" method="POST">
+    <label class="mt-5 text-lg font-semibold" for="name">
+      Nombre de la Carrera:
+    </label>
+    <input
+      type="text"
+      name="name"
+      value={inscriptionData?.name}
+      class="bg-darkSecond text-lightPrimary text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
+      required
+    />
+
+    <label class="mt-5 text-lg font-semibold" for="championship">
+      Campeonato:
+    </label>
+    <div>
+      <ChampionshipComboBox
+        client:load
+        championships={championships}
+        selectedId={selectedChampId}
+        onChange={(id: number) => {
+          const champInput = document.querySelector('input[name=\'championship\']');
+          if (champInput) (champInput as HTMLInputElement).value = id.toString();
+        }}
+      />
+    </div>
+    <input type="hidden" name="championship" value={selectedChampId ?? ''} />
+
+    <label class="mt-5 text-lg font-semibold" for="order">
+      Orden en el Campeonato:
+    </label>
+    <input
+      type="number"
+      name="order"
+      value={inscriptionData?.order}
+      min="1"
+      class="bg-darkSecond text-lightPrimary text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
+      required
+    />
+
+    <label class="mt-5 text-lg font-semibold" for="inscriptions_open">
+      Fecha y Hora de Apertura:
+    </label>
+    <input
+      type="datetime-local"
+      name="inscriptions_open"
+      value={inscriptionData?.inscriptions_open ? new Date(inscriptionData.inscriptions_open).toISOString().slice(0,16) : ""}
+      class="bg-darkSecond text-lightPrimary text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
+      required
+    />
+
+    <label class="mt-5 text-lg font-semibold" for="inscriptions_close">
+      Fecha y Hora de Cierre:
+    </label>
+    <input
+      type="datetime-local"
+      name="inscriptions_close"
+      value={inscriptionData?.inscriptions_close ? new Date(inscriptionData.inscriptions_close).toISOString().slice(0,16) : ""}
+      class="bg-darkSecond text-lightPrimary text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
+      required
+    />
+
+    <label class="mt-5 text-lg font-semibold" for="url_time">
+      URL de Resultados:
+    </label>
+    <input
+      type="text"
+      name="url_time"
+      value={inscriptionData?.url_time}
+      class="bg-darkSecond text-lightPrimary text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
+      required
+    />
+
+    <input type="hidden" name="id" value={id} />
+
+    <div>
+      <button
+        type="submit"
+        class="py-1.5 px-3 w-fit mr-2 bg-darkPrimary text-white border-[#29dd38] border-2 rounded-md my-4 font-medium text-lg hover:bg-[#29dd38] hover:text-darkPrimary"
+      >
+        Guardar Cambios
+      </button>
+      <button
+        type="button"
+        onclick="window.location.href = '/admin/admininscriptions'"
+        class="py-1.5 px-3 w-fit bg-darkPrimary text-white border-primary border-2 rounded-md my-4 font-medium text-lg hover:bg-primary hover:text-darkPrimary"
+      >
+        Cancelar
+      </button>
+    </div>
+  </form>
+</Layout>
+
+<script>
+import { showToast } from "@/lib/utils";
+
+const form = document.getElementById("editInscriptionForm") as HTMLFormElement | null;
+if (form) {
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const formData = new FormData(form);
+    try {
+      const response = await fetch("/api/admin/inscriptionscalendar", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(Object.fromEntries(formData)),
+      });
+      if (!response.ok) {
+        showToast("Error en la respuesta del servidor", "error");
+        throw new Error("Error en la respuesta del servidor");
+      }
+      const result = await response.json();
+      if (result.id) {
+        showToast("Fecha de inscripción actualizada con éxito", "success");
+        window.location.href = "/admin/admininscriptions";
+      } else {
+        showToast(result.error || "Error desconocido", 'error');
+        throw new Error(result.error || "Error desconocido");
+      }
+    } catch (error) {
+      showToast("Hubo un error al actualizar la fecha. Por favor, inténtalo de nuevo.", 'error');
+    }
+  });
+}
+</script>
