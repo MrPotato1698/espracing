@@ -1,55 +1,112 @@
 ---
 import Layout from "@/layouts/NormalLayout.astro";
-import STracker from "@/sections/sTrackerTable.astro";
+import { InscriptionsTableFusion } from "@/components/InscriptionsTableForm";
+import { supabase } from "@/db/supabase";
+
+let inscriptionsOpen: boolean = true;
+let userAlreadyInscribed = false;
+let isLoggedIn = false;
+let userId = null;
+let tableData: any[] = [];
+let raceName = "";
+let cars: { id: number, filename: string, brand: string, model: string, class: string, class_design: string }[] = [];
+
+const { cookies, redirect } = Astro;
+const accessToken = cookies.get("sb-access-token");
+const refreshToken = cookies.get("sb-refresh-token");
+
+if (accessToken && refreshToken) {
+  const { data: dataAuth, error: errorAuth } = await supabase.auth.setSession({
+    refresh_token: refreshToken.value,
+    access_token: accessToken.value,
+  });
+  if (!errorAuth) {
+    isLoggedIn = true;
+    userId = dataAuth?.user?.id;
+  } else {
+    cookies.delete("sb-access-token", { path: "/" });
+    cookies.delete("sb-refresh-token", { path: "/" });
+    return redirect("/login");
+  }
+}
+
+const { data: dataInscriptions, error: errorInscriptions } = await supabase
+  .from('inscriptionscalendar')
+  .select('name, inscriptions_times_register, championship')
+  .eq('is_open', true)
+  .order('id', { ascending: true })
+  .limit(1);
+
+if (errorInscriptions) {
+  console.error("Error fetching inscriptions:", errorInscriptions);
+}
+
+if (!dataInscriptions || dataInscriptions.length === 0) {
+  inscriptionsOpen = false;
+  console.log("No hay inscripciones abiertas.");
+} else {
+  inscriptionsOpen = true;
+  raceName = dataInscriptions[0].name;
+  const timesRegister = dataInscriptions[0].inscriptions_times_register;
+  tableData = Array.isArray(timesRegister) ? timesRegister : [];
+  // Obtener equivalencias de coches
+  const championshipId = dataInscriptions[0].championship ?? 1;
+  const { data: carsData, error: carsError } = await supabase
+    .from('championshipcars')
+    .select('car!inner(id, filename, brand!inner(name), model, class!inner(short_name, class_design))')
+    .eq('championship', championshipId);
+  if (!carsError && carsData) {
+    cars = carsData.map((c: any) => ({
+      id: c.car.id,
+      filename: c.car.filename || '',
+      brand: c.car.brand?.name || '',
+      model: c.car.model || '',
+      class: c.car.class?.short_name || '',
+      class_design: c.car.class?.class_design || 'bg-primary rounded',
+    }));
+  }
+  // Comprobar si el usuario ya está inscrito
+  if (isLoggedIn && userId) {
+    const { data: inscription, error: errorInscription } = await supabase
+      .from('inscription')
+      .select('id')
+      .eq('profile', userId)
+      .eq('race', raceName)
+      .maybeSingle();
+    if (inscription) {
+      userAlreadyInscribed = true;
+    }
+  }
+
+  // Mapear los datos de la tabla para que car sea el id numérico
+  if (tableData && cars.length > 0) {
+    tableData = tableData.map((row: any) => {
+      // Buscar el coche por filename
+      const carObj = cars.find(c => c.filename === row.car || c.id === row.car);
+      return {
+        ...row,
+        car: carObj ? carObj.id : row.car,
+      };
+    });
+  }
+}
 ---
 
 <Layout title="ESP Racing: Inscripciones">
   <div class="py-4 mx-auto text-center" style="width: 99%">
-    <p class="text-5xl font-bold border-b border-primary w-fit mx-auto">
-      Tabla de Vueltas Válidas
+    <p class="text-5xl font-bold border-b border-primary w-fit mx-auto mb-8">
+      Inscripciones - Tabla de Vueltas Válidas
     </p>
-    <STracker />
-
-    <form method="POST" class="mt-8 bg-darkPrimary border-primary border-2 rounded-lg px-8 pt-6 pb-8 mb-4">
-      <h2 class="text-2xl font-bold mb-6">Formulario de Inscripción</h2>
-      <div class = "grid grid-cols-1 gap-6 md:grid-cols-2">
-        <div>
-          <label
-            for="position"
-            class="text-lightPrimary text-lg font-medium">
-            Posición
-          </label>
-          <input
-            id="position"
-            name="position"
-            type="number"
-            placeholder="Tu posición en la tabla"
-            class="w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkSecond hover:border-primary">
-        </div>
-        <div>
-          <label
-            for="validLaps"
-            class="text-lightPrimary text-lg font-medium">
-            Vueltas Válidas
-          </label>
-          <input
-            id="validLaps"
-            name="validLaps"
-            type="number"
-            placeholder="Número de vueltas válidas"
-            class="w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkSecond hover:border-primary"
-            >
-        </div>
-        <div class="flex items-center justify-between">
-        </div>
-      </div>
-      <button
-        type="submit"
-        class="bg-primary text-white font-bold py-3 px-5 border-solid border-primary border-2 rounded-md hover:bg-darkSecond hover:text-lightPrimary"
-        >
-        Enviar
-      </button>
-    </form>
-
+    <InscriptionsTableFusion
+      client:load
+      inscriptionsOpen={inscriptionsOpen}
+      isLoggedIn={isLoggedIn}
+      userId={userId ?? undefined}
+      userAlreadyInscribed={userAlreadyInscribed}
+      data={tableData}
+      raceName={raceName}
+      cars={cars}
+      onLogin={() => { window.location.href = '/login'; }}
+    />
   </div>
 </Layout>
