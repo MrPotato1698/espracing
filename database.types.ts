@@ -357,6 +357,7 @@ export type Database = {
       }
       inscription: {
         Row: {
+          car: number
           id: number
           position: number
           profile: string | null
@@ -364,6 +365,7 @@ export type Database = {
           valid_laps: number | null
         }
         Insert: {
+          car?: number
           id: number
           position?: number
           profile?: string | null
@@ -371,6 +373,7 @@ export type Database = {
           valid_laps?: number | null
         }
         Update: {
+          car?: number
           id?: number
           position?: number
           profile?: string | null
@@ -378,6 +381,13 @@ export type Database = {
           valid_laps?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "inscription_car_fkey"
+            columns: ["car"]
+            isOneToOne: false
+            referencedRelation: "car"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "inscription_profile_fkey"
             columns: ["profile"]
@@ -393,30 +403,33 @@ export type Database = {
           id: number
           inscriptions_close: string
           inscriptions_open: string
-          inscriptions_times_register: string | null
+          inscriptions_times_register: Json | null
           is_open: boolean
           name: string
           order: number
+          url_time: string
         }
         Insert: {
           championship?: number | null
           id?: number
           inscriptions_close?: string
           inscriptions_open?: string
-          inscriptions_times_register?: string | null
+          inscriptions_times_register?: Json | null
           is_open?: boolean
           name: string
           order?: number
+          url_time?: string
         }
         Update: {
           championship?: number | null
           id?: number
           inscriptions_close?: string
           inscriptions_open?: string
-          inscriptions_times_register?: string | null
+          inscriptions_times_register?: Json | null
           is_open?: boolean
           name?: string
           order?: number
+          url_time?: string
         }
         Relationships: [
           {
@@ -501,7 +514,7 @@ export type Database = {
           poles: number
           races: number
           roleesp: number | null
-          steam_id: string
+          steam_id: string | null
           team: number | null
           top10: number
           top5: number
@@ -520,7 +533,7 @@ export type Database = {
           poles?: number
           races?: number
           roleesp?: number | null
-          steam_id: string
+          steam_id?: string | null
           team?: number | null
           top10?: number
           top5?: number
@@ -539,7 +552,7 @@ export type Database = {
           poles?: number
           races?: number
           roleesp?: number | null
-          steam_id?: string
+          steam_id?: string | null
           team?: number | null
           top10?: number
           top5?: number
