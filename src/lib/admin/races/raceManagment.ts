@@ -131,8 +131,8 @@ export function initEditRace() {
     formData.set('switch-R2', switchR2Element?.checked.toString());
 
     try {
-      const response = await fetch('/api/admin/race/editrace', {
-        method: 'POST',
+      const response = await fetch('/api/admin/race', {
+        method: 'PUT',
         body: formData,
       });
 
@@ -165,8 +165,8 @@ export function initEditRaceNote() {
     const formData = new FormData(form);
 
     try {
-      const response = await fetch('/api/admin/note/editnote', {
-        method: 'POST',
+      const response = await fetch('/api/admin/racenote', {
+        method: 'PUT',
         body: formData,
       });
 

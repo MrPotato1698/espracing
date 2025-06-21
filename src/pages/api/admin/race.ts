@@ -1,9 +1,51 @@
 import type { APIRoute } from "astro"
-import { supabase } from "@/db/supabase"
+import { supabase } from "@/db/supabase";
 import { createRaceData, createRaceDataMultipleSplits } from "@/lib/results/resultConverter"
 import type { RaceData, RaceDriversResume } from "@/types/Results"
 
+export const GET: APIRoute = async ({ request }) => {
+  const { data, error } = await supabase
+    .from("race")
+    .select("*, championship!inner(*), pointsystem!inner(*)")
+    .order("id", { ascending: true });
+  if (error) {
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+  return new Response(JSON.stringify(data), {
+    status: 200,
+    headers: { "Content-Type": "application/json" },
+  });
+};
+
 export const POST: APIRoute = async ({ request }) => {
+  const body = await request.json();
+  const {racename, champID, numrace, pointsystem, splits, race_data_1, race_data_2, race_date, filename } = body;
+  const lastRaceID = await getNextRaceId();
+  const insertObj: any = {
+    id: lastRaceID,
+    name: racename,
+    championship: champID,
+    orderinchamp: numrace,
+    pointsystem,
+    splits,
+    race_data_1,
+    race_date,
+    filename
+  };
+  if (race_data_2) insertObj.race_data_2 = race_data_2;
+  const { error } = await supabase.from('race').insert([insertObj]);
+
+  if (error) {
+    console.log('Error inserting: ', error);
+    return new Response(JSON.stringify({ error: error.message }), { status: 500 });
+  }
+  return new Response(JSON.stringify({ success: true }), { status: 200 });
+};
+
+export const PUT: APIRoute = async ({ request }) => {
   const formData = await request.formData();
 
   const race_id = formData.get("race_id");
@@ -35,6 +77,67 @@ export const POST: APIRoute = async ({ request }) => {
     return new Response(JSON.stringify({ error: "Error al actualizar la carrera" }), { status: 500 });
   }
 };
+
+export const DELETE: APIRoute = async ({ request }) => {
+  try {
+    const { id } = await request.json()
+    if (!id) {
+      return new Response(JSON.stringify({ error: "El Id es obligatorio" }), { status: 400 })
+    }
+
+    const { data: RaceDataSearch, error: RaceDataSearchError } = await supabase
+      .from("race")
+      .select("race_data_1, race_data_2")
+      .eq("id", id)
+      .single()
+
+    if (RaceDataSearchError || !RaceDataSearch) {
+      throw new Error(RaceDataSearchError?.message || "Fallo al buscar la carrera")
+    }
+
+    // Procesar Carrera 1
+    await processRaceData(RaceDataSearch.race_data_1, "Carrera 1")
+
+    // Procesar Carrera 2 si existe
+    if (RaceDataSearch.race_data_2) {
+      await processRaceData(RaceDataSearch.race_data_2, "Carrera 2")
+    }
+
+    // Eliminar la carrera de la BD
+    const { error: deleteError } = await supabase.from("race").delete().eq("id", id)
+
+    if (deleteError) {
+      throw new Error(`Fallo al eliminar carrera: ${deleteError.message}`)
+    }
+
+    return new Response(JSON.stringify({ message: "Carrera eliminada con éxito" }), { status: 200 })
+  } catch (error) {
+    console.error("Error:", error)
+    return new Response(JSON.stringify({ error: (error as Error).message }), { status: 500 })
+  }
+};
+
+async function getNextRaceId() {
+  const { data: getLastRace } = await supabase
+    .from('race')
+    .select('id')
+    .neq('id', 0)
+    .order('id', { ascending: true });
+  if (!getLastRace) throw new Error("Error al obtener el último ID de carrera");
+  const length = getLastRace.length;
+  let i = 1;
+  let findID = false;
+  while (!findID && i < length) {
+    if (getLastRace[i - 1].id === i) {
+      i++;
+    } else {
+      findID = true;
+    }
+  }
+  if (!findID) i++;
+  return getLastRace ? i : 1;
+}
+
 
 type HandleRaceEditParams = {
   race_id: FormDataEntryValue | null;
@@ -480,4 +583,38 @@ function changeStats(updates: any, driver: any, newDriverData?: RaceDriversResum
       break;
   }
   return updates;
+}
+
+async function processRaceData(path: string, raceName: string) {
+  const { data: raceData } = await supabase.storage.from("results").download(path)
+  if (!raceData) {
+    // Si el archivo no existe, continuar sin lanzar error
+    console.warn(`Archivo de resultados no encontrado para ${raceName}, se omite la descarga y actualización de estadísticas.`);
+    // Intentar eliminar el archivo igualmente (por si acaso)
+    await supabase.storage.from("results").remove([path]);
+    return;
+  }
+
+  const raceDataJson = JSON.parse(await raceData.text())
+
+  // Eliminar carrera de bucket de Supabase
+  const { data: removeRace, error: ErrorRemoveRace } = await supabase.storage.from("results").remove([path])
+
+  if (ErrorRemoveRace || !removeRace) {
+    throw new Error(`Fallo al eliminar carrera ${raceName}: ${ErrorRemoveRace?.message}`)
+  }
+
+  // Modificar estadisticas de Profile
+  const baseUrl = process.env.BASE_URL ?? "http://localhost:4321";
+  const response = await fetch(`${baseUrl}/api/admin/stats`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ resume: raceDataJson.RaceDriversResume }),
+  })
+
+  if (!response.ok) {
+    throw new Error(`Error actualizando estadísticas de ${raceName}`)
+  }
 }

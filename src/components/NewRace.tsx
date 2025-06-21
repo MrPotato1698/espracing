@@ -1,6 +1,4 @@
 import React, { useState } from 'react';
-import { supabase } from "@/db/supabase";
-import { createRaceData, createRaceDataMultipleSplits } from "@/lib/results/resultConverter";
 import { showToast } from "@/lib/utils";
 
 //Importaciones de UI
@@ -66,161 +64,47 @@ export default function NewRace({ championshipContent = [], pointsystemContent =
     }
   };
 
-  // Helper: Validación de archivos requeridos
-  const validateFiles = () => {
-    if (!fileS1R1) {
-      showToast("Por favor, selecciona un archivo JSON para la Carrera 1 del Split 1.", "error");
-      return false;
-    }
-    if (race2 && !fileS1R2) {
-      showToast("Por favor, selecciona un archivo JSON para la Carrera 2 del Split 1.", "error");
-      return false;
-    }
-    if (split2 && !fileS2R1) {
-      showToast("Por favor, selecciona un archivo JSON para la Carrera 1 del Split 2.", "error");
-      return false;
-    }
-    if (split2 && race2 && !fileS2R2) {
-      showToast("Por favor, selecciona un archivo JSON para la Carrera 2 del Split 2.", "error");
-      return false;
-    }
-    return true;
-  };
-
-  // Helper: Leer archivos JSON
-  const readAllFiles = async () => {
-    const readFile = async (file: File|null) => file ? JSON.parse(await file.text()) : null;
-    return {
-      jsonS1R1: await readFile(fileS1R1),
-      jsonS2R1: await readFile(fileS2R1),
-      jsonS1R2: await readFile(fileS1R2),
-      jsonS2R2: await readFile(fileS2R2),
-    };
-  };
-
-  // Helper: Transformar JSONs
-  const transformJsons = (jsons: any) => {
-    let transformedJsonR1: any, transformedJsonR2: any = null;
-    if (split2) {
-      if (!jsons.jsonS2R1) throw new Error("Falta JSON Split 2 Carrera 1");
-      transformedJsonR1 = createRaceDataMultipleSplits(jsons.jsonS1R1, jsons.jsonS2R1);
-      if (race2) {
-        if (!jsons.jsonS1R2 || !jsons.jsonS2R2) throw new Error("Falta JSON Split 2 Carrera 2");
-        transformedJsonR2 = createRaceDataMultipleSplits(jsons.jsonS1R2, jsons.jsonS2R2);
-      }
-    } else {
-      transformedJsonR1 = createRaceData(jsons.jsonS1R1);
-      if (race2) {
-        if (!jsons.jsonS1R2) throw new Error("Falta JSON Split 1 Carrera 2");
-        transformedJsonR2 = createRaceData(jsons.jsonS1R2);
-      }
-    }
-    return { transformedJsonR1, transformedJsonR2 };
-  };
-
-  // Helper: Subir resultados a Supabase Storage
-  const uploadResults = async (champID: string, numrace: string, racenameFile: string, transformedJsonR1: any, transformedJsonR2: any) => {
-    let URLBucketsResults = ["", ""];
-    const { data: uploadRace1, error: uploadErrorR1 } = await supabase
-      .storage
-      .from('results')
-      .upload(`${champID}/${numrace}_${racenameFile}Race1`, JSON.stringify(transformedJsonR1), { upsert: true });
-    if (uploadErrorR1 || !uploadRace1) throw uploadErrorR1;
-    URLBucketsResults[0] = uploadRace1.path;
-    if (race2 && transformedJsonR2) {
-      const { data: uploadRace2, error: uploadErrorR2 } = await supabase
-        .storage
-        .from('results')
-        .upload(`${champID}/${numrace}_${racenameFile}Race2`, JSON.stringify(transformedJsonR2), { upsert: true });
-      if (uploadErrorR2 || !uploadRace2) throw uploadErrorR2;
-      URLBucketsResults[1] = uploadRace2.path;
-    }
-    return URLBucketsResults;
-  };
-
-  // Helper: Obtener nuevo ID de carrera
-  const getNewRaceID = async () => {
-    const res = await fetch('/api/generic/getnextid?table=race');
-    if (!res.ok) throw new Error('Error al obtener el nuevo ID de carrera');
-    const data = await res.json();
-    return data.id;
-  };
-
-  // Helper: Insertar carrera en la tabla race
-  type InsertRaceParams = { lastRaceID: number; racename: string; champID: string; numrace: string; pointsystem: string; splits: number; race_data_1: string; race_data_2: string | null; race_date: string; filename: string };
-
-  const insertRace = async (params: InsertRaceParams) => {
-    const res = await fetch('/api/admin/race/newrace', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(params)
-    });
-    if (!res.ok) throw new Error('Error al insertar la carrera');
-  };
-
-  // Helper: Actualizar estadísticas
-  const updateStats = async (transformedJsonR1: any, transformedJsonR2: any) => {
-    const raceData = transformedJsonR1;
-    const response = await fetch('/api/admin/stats/newRaceStats', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ resume: raceData.RaceDriversResume })
-    });
-    if (!response.ok) throw new Error('Error actualizando estadísticas');
-    if (race2 && transformedJsonR2) {
-      const raceData2 = transformedJsonR2;
-      const response2 = await fetch('/api/admin/stats/newRaceStats', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ resume: raceData2.RaceDriversResume })
-      });
-      if (!response2.ok) throw new Error('Error actualizando estadísticas de carrera 2');
-    }
-  };
-
   // Validación y submit
   const handleSubmitRace = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg(null);
     setSuccessMsg(null);
 
-    if (!validateFiles()) return;
+    // Validación básica de archivos en frontend
+    if (!fileS1R1) {
+      showToast("Por favor, selecciona un archivo JSON para la Carrera 1 del Split 1.", "error");
+      return;
+    }
+    if (race2 && !fileS1R2) {
+      showToast("Por favor, selecciona un archivo JSON para la Carrera 2 del Split 1.", "error");
+      return;
+    }
+    if (split2 && !fileS2R1) {
+      showToast("Por favor, selecciona un archivo JSON para la Carrera 1 del Split 2.", "error");
+      return;
+    }
+    if (split2 && race2 && !fileS2R2) {
+      showToast("Por favor, selecciona un archivo JSON para la Carrera 2 del Split 2.", "error");
+      return;
+    }
 
     try {
-      const jsons = await readAllFiles();
-
-      // Obtener datos del formulario
       const form = document.getElementById("uploadForm") as HTMLFormElement;
       const formData = new FormData(form);
-      const racename = formData.get('racename') as string;
-      const champID = formData.get('champID') as string;
-      const numrace = formData.get('numrace') as string;
-      const pointsystem = formData.get('pointsystem') as string;
-      const racenameFile = racename.replace(/\s/g, '');
+      // Adjuntar archivos
+      if (fileS1R1) formData.append("fileS1R1", fileS1R1);
+      if (fileS2R1) formData.append("fileS2R1", fileS2R1);
+      if (fileS1R2) formData.append("fileS1R2", fileS1R2);
+      if (fileS2R2) formData.append("fileS2R2", fileS2R2);
+      formData.append("split2", split2 ? "1" : "0");
+      formData.append("race2", race2 ? "1" : "0");
 
-      // Transformar JSONs
-      const { transformedJsonR1, transformedJsonR2 } = transformJsons(jsons);
-
-      // Subir resultados a Supabase Storage
-      const URLBucketsResults = await uploadResults(champID, numrace, racenameFile, transformedJsonR1, transformedJsonR2);
-
-      // Insertar carrera en la tabla race
-      const lastRaceID = await getNewRaceID();
-      await insertRace({
-        lastRaceID,
-        racename,
-        champID,
-        numrace,
-        pointsystem,
-        splits: split2 ? 2 : 1,
-        race_data_1: URLBucketsResults[0],
-        race_data_2: URLBucketsResults[1] || null,
-        race_date: transformedJsonR1.RaceConfig.Date.slice(0, 10),
-        filename: fileS1R1?.name ?? ""
+      const res = await fetch("/api/admin/race/uploadracefile", {
+        method: "POST",
+        body: formData
       });
-
-      // Actualizar estadísticas
-      await updateStats(transformedJsonR1, transformedJsonR2);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Error al procesar la carrera");
 
       setSuccessMsg("Carrera creada con éxito");
       showToast("Carrera creada con éxito", "success");
@@ -234,22 +118,14 @@ export default function NewRace({ championshipContent = [], pointsystemContent =
   };
 
   // Helper: Insertar nota en la tabla racenotes
-  type InsertNoteParams = { lastNoteID: number; racename: string; description: string; penalty: string; noteCode: string; };
-  const insertNote = async (params: any) => {
-    const res = await fetch('/api/admin/race/newnote', {
+  type InsertNoteParams = { racename: string; description: string; penalty: string; noteCode: string; };
+  const insertNote = async (params: InsertNoteParams) => {
+    const res = await fetch('/api/admin/racenote', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(params)
     });
     if (!res.ok) throw new Error('Error al insertar la nota');
-  };
-
-  // Helper: Obtener nuevo ID de nota
-  const getNewNoteID = async () => {
-    const res = await fetch('/api/generic/getnextid?table=racenotes');
-    if (!res.ok) throw new Error('Error al obtener el nuevo ID de nota');
-    const data = await res.json();
-    return data.id;
   };
 
   // Validación y submit de notas de carrera
@@ -267,8 +143,7 @@ export default function NewRace({ championshipContent = [], pointsystemContent =
       const penalty = formData.get('penalty') as string;
       const noteCode = formData.get('noteCode') as string;
 
-      const lastNoteID = await getNewNoteID();
-      await insertNote({lastNoteID, racename, description, penalty, noteCode});
+      await insertNote({racename, description, penalty, noteCode});
 
       setSuccessMsg("Notas de Carrera creada con éxito");
       showToast("Notas de Carrera creada con éxito", "success")
