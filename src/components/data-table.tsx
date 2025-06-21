@@ -144,6 +144,8 @@ export function DataTable({
   const generatePaginationItems = () => {
     const items = [] as React.ReactNode[];
     const maxPagesToShow = 5;
+    if (totalPages <= 1) return items;
+    // Siempre mostrar la primera página
     items.push(
       <PaginationItem key="page-1">
         <PaginationLink
@@ -157,24 +159,50 @@ export function DataTable({
         </PaginationLink>
       </PaginationItem>
     );
-    let startPage = Math.max(2, currentPage - Math.floor(maxPagesToShow / 2));
-    let endPage = Math.min(totalPages - 1, startPage + maxPagesToShow - 2);
-
-    if (endPage < totalPages - 1) {
+    // Determinar el rango de páginas a mostrar alrededor de la actual
+    let startPage = Math.max(2, currentPage - 2);
+    let endPage = Math.min(totalPages - 1, currentPage + 2);
+    // Ellipsis si hay salto entre la primera y el bloque
+    if (startPage > 2) {
       items.push(
-        <PaginationItem key="ellipsis-2">
+        <PaginationItem key="ellipsis-start">
           <PaginationEllipsis />
         </PaginationItem>
       );
     }
+    // Páginas intermedias
+    for (let page = startPage; page <= endPage; page++) {
+      items.push(
+        <PaginationItem key={`page-${page}`}>
+          <PaginationLink
+            isActive={currentPage === page}
+            onClick={(e) => {
+              e.preventDefault();
+              handlePageChange(page);
+            }}
+          >
+            {page}
+          </PaginationLink>
+        </PaginationItem>
+      );
+    }
+    // Ellipsis si hay salto entre el bloque y la última
+    if (endPage < totalPages - 1) {
+      items.push(
+        <PaginationItem key="ellipsis-end">
+          <PaginationEllipsis />
+        </PaginationItem>
+      );
+    }
+    // Siempre mostrar la última página si hay más de una
     if (totalPages > 1) {
       items.push(
         <PaginationItem key={`page-${totalPages}`}>
           <PaginationLink
             isActive={currentPage === totalPages}
             onClick={(e) => {
-              e.preventDefault()
-              handlePageChange(totalPages)
+              e.preventDefault();
+              handlePageChange(totalPages);
             }}
           >
             {totalPages}
@@ -347,8 +375,8 @@ export function DataTable({
                               if (!row.id) return;
                               if (!confirm("¿Estás seguro de que quieres eliminar este elemento?")) return;
                               try {
-                                const response = await fetch(`/api/admin/${(onDelete as { path: string }).path}/delete${(onDelete as { path: string }).path}`, {
-                                  method: "POST",
+                                const response = await fetch(`/api/admin/${(onDelete as { path: string }).path}`, {
+                                  method: "DELETE",
                                   headers: { "Content-Type": "application/json" },
                                   body: JSON.stringify({ id: row.id }),
                                 });
