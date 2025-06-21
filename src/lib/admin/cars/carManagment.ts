@@ -483,100 +483,35 @@ export function initCarManagement() {
       }
     });
 
+    // Enviar los datos a la API
     try {
-      const lastBrandID = await getBrandId(carBrandValue, carData);
-      const lastClassID = await getClassId(carClassValue, carData);
-
-      // Aviso si la marca no existe
-      if (lastBrandID === -1) {
-        showToast("La marca seleccionada no existe en la base de datos. Vaya a ajustes globales para crearla", "info");
-        return;
+      const response = await fetch("/api/admin/car", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          carData,
+          carClassValue,
+          carBrandValue,
+          newClassName: newClassName?.value,
+          newClassShortName: newClassShortName?.value,
+          newClassBackgroundColor: newClassBackgroundColor?.value,
+          newClassTextColor: newClassTextColor?.value
+        })
+      });
+      const result = await response.json();
+      if (response.ok) {
+        showToast("Coche creado con éxito", "success");
+        form.reset();
+        window.location.reload();
+      } else {
+        showToast(result.error ?? "Error al crear el coche", "error");
+        console.error("Error al crear el coche:", result.error);
       }
-
-      const { data: getLastCar } = await supabase
-        .from('car')
-        .select('id')
-        .order('id', { ascending: true });
-
-      if(!getLastCar) throw new Error("Error al obtener el último ID de coche");
-      let findID = false;
-      let i = 1;
-      while (!findID && i < getLastCar.length) {
-        if (getLastCar[i-1].id === i) {
-          i++;
-        } else {
-          findID = true;
-        }
-      }
-      if (!findID && getLastCar[i-1].id === i) i++;
-      const lastCarID = getLastCar ? i : 1;
-
-      console.table({"id": lastCarID, "marca": lastBrandID,"modelo": carData.model })
-
-      const { error: insertError } = await supabase
-        .from('car')
-        .insert({
-          id: Number(lastCarID),
-          filename: carData.filename,
-          brand: Number(lastBrandID),
-          model: carData.model,
-          year: carData.year,
-          class: Number(lastClassID),
-          power: carData.power,
-          torque: carData.torque,
-          weight: carData.weight,
-          description: carData.description,
-          tyreTimeChange: carData.tyreTimeChange,
-          fuelLiterTime: carData.fuelLiterTime,
-          maxLiter: carData.maxLiter,
-        });
-
-      if (insertError) throw insertError;
-      showToast("Coche creado con éxito", "success");
-
-      form.reset();
-      window.location.reload();
     } catch (error) {
-      console.error("Error al crear el coche:", error);
       showToast("Error al crear el coche: "+ error, "error");
+      console.error("Error al crear el coche:", error);
     }
-  });
-}
-
-export function initDeleteCarButtons() {
-  const deleteCarButtons = document.querySelectorAll(".delete-car");
-
-  deleteCarButtons.forEach((button) => {
-    button.addEventListener("click", async (e) => {
-      e.preventDefault();
-      const id = button.getAttribute("data-id");
-
-      if (confirm("¿Estás seguro de que quieres eliminar este coche?")) {
-        try {
-          const response = await fetch("/api/admin/championship/deletecar", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ id }),
-          });
-
-          if (response.ok) {
-            const closestTr = button.closest("tr");
-            if (closestTr) {
-              closestTr.remove();
-            }
-            window.location.reload();
-            showToast("Coche eliminado con éxito", "success");
-          } else {
-            showToast("Error eliminando coche", "error");
-            console.error("Error eliminando coche");
-          }
-        } catch (error) {
-          showToast("Error: " + error, "error");
-          console.error("Error:", error);
-        }
-      }
-    });
   });
 }

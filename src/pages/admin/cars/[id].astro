@@ -74,18 +74,7 @@ const { data: classList } = await supabase
       {carBrandList?.map((brand) => (
         <option value={brand.id} selected={carData.brand === brand.id}>{brand.name}</option>
       ))}
-      <option value="-2">Añadir nueva marca</option>
     </select>
-    <div id="newBrandContainer" class="hidden">
-      <label class="text-lightPrimary text-lg font-medium" for="newBrandCar">Marca</label>
-      <input class="w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkPrimary hover:border-primary" type="text" id="newBrandCar" name="newBrandCar" placeholder="Datsun" />
-      <label class="text-lightPrimary text-lg font-medium" for="newImgBrandCar">Imagen</label>
-      <input class="w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkPrimary hover:border-primary" type="text" id="newImgBrandCar" name="newImgBrandCar" placeholder="Datsun Logo" />
-      <label class="text-lightPrimary text-lg font-medium" for="newCountryCar">País</label>
-      <input class="w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkPrimary hover:border-primary" type="text" id="newCountryCar" name="newCountryCar" placeholder="Reino Unido" />
-      <label class="text-lightPrimary text-lg font-medium" for="newFoundationCar">Fundado en...</label>
-      <input class="w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkPrimary hover:border-primary" type="number" id="newFoundationCar" name="newFoundationCar" step="1" min="1550" placeholder="1935" />
-    </div>
     <label class="mt-5 text-lg font-semibold" for="model">
       Modelo:
     </label>
@@ -119,18 +108,7 @@ const { data: classList } = await supabase
       {classList?.map((cl) => (
         <option value={cl.id} selected={carData.class === cl.id}>{cl.name}</option>
       ))}
-      <option value="-2">Añadir nueva clase</option>
     </select>
-    <div id="newClassContainer" class="hidden">
-      <label class="text-lightPrimary text-lg font-medium" for="newClassName">Nombre de Clase</label>
-      <input class="w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkPrimary hover:border-primary" type="text" id="newClassName" name="newClassName" placeholder="Gran Turismos X" />
-      <label class="text-lightPrimary text-lg font-medium" for="newClassShortName">Nombre de Clase Corto</label>
-      <input class="w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkPrimary hover:border-primary" type="text" id="newClassShortName" name="newClassShortName" placeholder="GTX" />
-      <label class="text-lightPrimary text-lg font-medium" for="newClassBackgroundColor">Color Fondo de Clase</label>
-      <input class="p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 text-white bg-darkPrimary hover:border-primary" type="color" id="newClassBackgroundColor" name="newClassBackgroundColor" value="#006fba" />
-      <label class="text-lightPrimary text-lg font-medium" for="newClassTextColor">Color Texto de Clase</label>
-      <input class="p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 text-white bg-darkPrimary hover:border-primary" type="color" id="newClassTextColor" name="newClassTextColor" value="#f9f9f9" />
-    </div>
     <label class="mt-5 text-lg font-semibold" for="power">
       Potencia (cv):
     </label>
@@ -220,35 +198,14 @@ const { data: classList } = await supabase
 import { showToast } from "@/lib/utils";
 
   const form = document.getElementById("editCarForm") as HTMLFormElement | null;
-  const carBrandSelect = document.getElementById("carbrand");
-  const carClassSelect = document.getElementById("carclass");
-  const newBrandContainer = document.getElementById("newBrandContainer");
-  const newClassContainer = document.getElementById("newClassContainer");
-
-  carBrandSelect?.addEventListener("change", (e) => {
-    const target = e.target as HTMLSelectElement;
-    if (target && target.value === "-2") {
-      newBrandContainer?.classList.remove("hidden");
-    } else {
-      newBrandContainer?.classList.add("hidden");
-    }
-  });
-  carClassSelect?.addEventListener("change", (e) => {
-    const target = e.target as HTMLSelectElement;
-    if (target && target.value === "-2") {
-      newClassContainer?.classList.remove("hidden");
-    } else {
-      newClassContainer?.classList.add("hidden");
-    }
-  });
 
   if (form) {
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       const formData = new FormData(form);
       try {
-        const response = await fetch("/api/admin/cars/editcar", {
-          method: "POST",
+        const response = await fetch("/api/admin/car", {
+          method: "PUT",
           body: formData,
         });
         if (!response.ok) {
