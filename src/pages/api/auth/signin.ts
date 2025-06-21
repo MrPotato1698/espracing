@@ -38,7 +38,6 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
 
 export const GET: APIRoute = async ({ request, redirect }) => {
   const url = new URL(request.url);
-  const baseUrl = url.origin;
   const provider = url.searchParams.get("provider");
   const validProviders = ["google", "github", "apple"];
 
@@ -46,7 +45,7 @@ export const GET: APIRoute = async ({ request, redirect }) => {
     const { data: signInOAuth, error: signInOAuthError } = await supabase.auth.signInWithOAuth({
       provider: provider as Provider,
       options: {
-        redirectTo: `${baseUrl}/api/auth/callback`,
+        redirectTo: `${new URL(request.url).origin}/api/auth/callback`,
       },
     });
     if (signInOAuthError) {
