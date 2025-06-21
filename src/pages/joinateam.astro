@@ -1,7 +1,6 @@
 ---
 import Layout from "@/layouts/ProfileLayout.astro";
-import { supabase } from "@/lib/supabase";
-import { turso } from '@/turso';
+import { supabase } from "@/db/supabase";
 
 const { cookies, redirect } = Astro;
 
@@ -30,49 +29,39 @@ if (errorAuth) {
   return redirect("/login");
 }
 
-const id = dataAuth?.user?.id || "";
-const email = dataAuth?.user?.email || "";
+const idAuth = dataAuth?.user?.id || "";
 
-// Asign ID to user in Turso if it doesn't exist
-const emailSearchQuery = await turso.execute({
-  sql: 'SELECT id FROM User WHERE email = ?',
-  args: [email],
-});
+const {data: TeamData} = await supabase
+  .from("team")
+  .select("name, description, image, id, profiles!inner(id)")
+  .eq("profiles.id", idAuth)
+  .single();
 
-const idSearch = emailSearchQuery.rows[0].email;
-
-if(idSearch === undefined || idSearch === null) {
-  const transaction = await turso.transaction("write");
-  await transaction.execute({
-    sql: 'UPDATE User SET id = ? WHERE email = ?',
-    args: [id, email],
-  });
-  await transaction.commit();
+if(TeamData !== null && TeamData !== undefined) {
+  return redirect("/myteam");
 }
 
-// Get team data
-const { rows: TeamData } = await turso.execute({
-  sql: 'SELECT T.name, T.id, T.description, T.image FROM User AS U RIGHT JOIN Team AS T WHERE U.id = ? AND U.team = T.id',
-  args: [id],
-});
+const {data: TeamRequestData} = await supabase
+  .from("teamsapplication")
+  .select("team!inner(name)")
+  .eq("user_application", idAuth)
+  .single();
 
-if(TeamData.length > 0) {
-  return redirect("/joinateam");
-}
+const RequestData: Boolean = TeamRequestData !== null ? true : false;
 
-// Get every teams data
-const { rows: TeamsData } = await turso.execute(
-  "SELECT T.name, COUNT (U.team) AS TeamMembers, T.description, T.image, T.id FROM User AS U RIGHT JOIN Team AS T ON T.id = U.team GROUP BY T.name"
-);
+const {data: TeamsData} = await supabase
+  .from("team")
+  .select("name, description, image, id, profiles(count)")
+  .eq("active", true);
 ---
 
 <Layout title = "ESP Racing: Unirse a un equipo">
   <div class="py-4 mx-auto text-center" style="width: 99%">
-    <p class="text-5xl font-bold border-b border-[#da392b] w-fit mx-auto"
+    <p class="text-5xl font-bold border-b border-primary w-fit mx-auto"
       >Unirse a un equipo</p
     >
-    <table class="mt-6 w-full border-collapse border border-[#f9f9f9]">
-      <thead class="font-medium bg-[#da392b]">
+    <table class="mt-6 w-full border-collapse border border-lightPrimary">
+      <thead class="font-medium bg-primary">
         <tr>
           <th>Nº</th>
           <th colspan="2">Nombre</th>
@@ -82,12 +71,12 @@ const { rows: TeamsData } = await turso.execute(
       </thead>
       <tbody>
         {
-          TeamsData.map((team, index) =>
-            <tr class="bg-[#0f0f0f]">
+          TeamsData?.map((team, index) =>
+            <tr class="bg-darkPrimary">
               <td class = "font-semibold">{index + 1}</td>
               <td><img src={String(team.image)} alt="Avatar" class="w-8 py-1"/></td>
               <td>{team.name}</td>
-              <td>{team.TeamMembers}</td>
+              <td>{team.profiles[0].count}</td>
               <td>{team.description}</td>
             </tr>
           )
@@ -95,33 +84,77 @@ const { rows: TeamsData } = await turso.execute(
       </tbody>
     </table>
   </div>
+  {
+  RequestData ?
+  (
+    <p class="text-4xl font-bold border-b border-primary w-fit mx-auto mb-2">
+      Selecciona un equipo al que quiera unirse
+    </p>
+    <p class = "text-xl font-medium w-fit mx-auto mt-10">
+      Esperando que se acepte la solicitud para el ingreso en el equipo {TeamRequestData?.team.name} ...
+    </p>
 
-  <p class="text-5xl font-bold border-b border-[#da392b] w-fit mx-auto">
-  Selecciona un equipo
-  </p>
+  ):(
 
-  <form action = "/api/teams/getInsideTeam"
-    method = "post"
-    class = "grid grid-flow-col"
-  >
-    <select
-    id="select-team"
-    name="select_team"
-    class="block m-auto w-4/5 px-4 py-3 mt-2 text-lg font-medium rounded-xl pe-9 focus:border-[#da392b] disabled:opacity-50 disabled:pointer-events-none bg-[#19191c] border-neutral-700 text-white placeholder-neutral-500"
+    <p class="text-4xl font-bold border-b border-primary w-fit mx-auto mb-2">
+    Selecciona un equipo al que quiera unirse
+    </p>
+
+    <form action = "/api/teams/getInsideTeam"
+      method = "POST"
+      class = "grid grid-flow-col"
     >
-      {
-        TeamsData.map((team) => (
-          <option value={team.id?.toString()}>{team.name}</option>
-        ))
-      }
-    </select>
-    <input type="hidden" name="user_id" value={id}>
-    <button
-      class="cargarselector no-underline bg-[#19191c] rounded-xl my-4 font-medium text-white text-lg py-4 px-8 block mx-auto mt-2"
-      id="btnCargarTabla"
-      type="submit"
+      <select
+      id="select-team"
+      name="select_team"
+      class="block m-auto w-4/5 px-4 py-3 mt-2 text-lg font-medium rounded-xl pe-9 focus:border-primary disabled:opacity-50 disabled:pointer-events-none bg-darkSecond border-neutral-700 text-lightPrimary placeholder-neutral-500"
+      >
+        {
+          TeamsData?.map((team) => (
+            <option value={team.id?.toString()}>{team.name}</option>
+          ))
+        }
+      </select>
+      <input type="hidden" name="user_id" value={idAuth}>
+      <button
+        class="cargarselector no-underline bg-darkSecond rounded-xl my-4 font-medium text-lightPrimary text-lg py-4 px-8 block mx-auto mt-2"
+        id="btnCargarTabla"
+        type="submit"
+      >
+        Enviar solicitud
+      </button>
+    </form>
+
+    <p class="text-4xl font-bold border-b border-primary w-fit mx-auto mb-2">
+    O crea tu propio equipo
+    </p>
+
+    <form action = "/api/teams/createTeam"
+      method = "POST"
+      class = "flex flex-col items-center gap-4 w-full"
     >
-      Cargar Datos
-    </button>
-  </form>
+      <input
+        type="text"
+        name="team_name"
+        placeholder="Nombre del equipo"
+        class="block m-auto w-4/5 px-4 py-3 mt-2 text-lg font-medium rounded-xl pe-9 focus:border-primary bg-darkSecond border-neutral-700 text-lightPrimary placeholder-neutral-500"
+      />
+      <input
+        type="text"
+        name="team_description"
+        placeholder="Descripción del equipo"
+        class="block m-auto w-4/5 px-4 py-3 mt-2 text-lg font-medium rounded-xl pe-9 focus:border-primary bg-darkSecond border-neutral-700 text-lightPrimary placeholder-neutral-500"
+      />
+
+      <input type="hidden" name="user_id" value={idAuth}>
+      <button
+        class="cargarselector no-underline bg-darkSecond rounded-xl my-4 font-medium text-lightPrimary text-lg py-4 px-8 block mx-auto mt-2"
+        id="btnCargarTabla"
+        type="submit"
+      >
+        Enviar solicitud de creación
+      </button>
+    </form>
+    )}
+
 </Layout>

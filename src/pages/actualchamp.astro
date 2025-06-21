@@ -1,18 +1,71 @@
 ---
 import Layout from "@/layouts/NormalLayout.astro";
 import YTVideo from "@/components/YoutubeVideo.astro";
+import { supabase } from "@/db/supabase";
+
+// Obtener los datos del campeonato actual desde la base de datos
+let champData: any = [];
+
+const { data: champDataDB, error: champError } = await supabase
+  .from("championship")
+  .select("id, name, champ_img")
+  .eq("isfinished", false)
+  .eq("ischampionship", true)
+  .order("id", { ascending: true })
+  .limit(1);
+
+if(champDataDB === null || champDataDB.length === 0) {
+  const { data: champDataDB2, error: champErrorDB2 } = await supabase
+  .from("championship")
+  .select("id, name, champ_img")
+  .eq("ischampionship", true)
+  .order("id", { ascending: false })
+  .limit(1);
+
+  if (champErrorDB2) {
+    console.error("Error fetching championship data:", champErrorDB2);
+  } else {
+    champData = champDataDB2[0];
+  }
+}else{
+  champData = champDataDB[0];
+}
+
+let champImgUrl = "";
+let champName = "";
+if (champData && champData.champ_img) {
+  const { data: urlData } = supabase
+    .storage.from("championshipposter")
+    .getPublicUrl(champData.champ_img);
+  champImgUrl = urlData?.publicUrl || "";
+  champName = champData.name || "Campeonato Actual";
+}
+
+
+// Obtener el ID del video de YouTube desde la base de datos
+const { data: YTVideoID, error: YTVideoError } = await supabase
+  .from('global_adjust')
+  .select('value')
+  .eq('key', 'yt_video_id_actualchamp')
+  .single();
+
+if (YTVideoError) {
+  console.error("Error al obtener el ID del video de YouTube:", YTVideoError);
+}
+
+let videoID = YTVideoID?.value || "oZaTOR-k5Ik"; // Valor por defecto si no se encuentra el ID
 ---
 
 <Layout title="ESP Racing: Información Campeonato Actual">
-  <h1 class="py-5 text-3xl font-extrabold text-center text-white sm:text-5xl">
+  <h1 class="py-5 text-3xl font-extrabold text-center text-lightPrimary sm:text-5xl">
     Campeonato Actual
   </h1>
   <img
-    class="block w-4/5 mx-auto mb-16"
-    src="/img/actualchamp/CartelCampeonato.webp"
+    class="block w-4/5 mx-auto mb-16 object-contain aspect-video"
+    src={champImgUrl}
     alt="Campeonato Actual"
   >
-  <YTVideo
-  videolink="oZaTOR-k5Ik"
-  />
+  <div class = "w-4/5 mx-auto">
+  <YTVideo videoId={videoID} title=`Trailer ${champName}`/>
+</div>
 </Layout>

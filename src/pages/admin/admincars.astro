@@ -1,0 +1,501 @@
+---
+import Layout from "@/layouts/ProfileLayout.astro";
+import { supabase } from "@/db/supabase";
+import { DataTable } from "@/components/data-table";
+import { showToast } from "@/lib/utils";
+import { Checkbox } from "@/components/ui/checkbox";
+
+const { cookies, redirect } = Astro;
+
+const accessToken = cookies.get("sb-access-token");
+const refreshToken = cookies.get("sb-refresh-token");
+
+if (!accessToken || !refreshToken) {
+  return redirect("/login");
+}
+
+// Set the session with the cookies
+const { data: dataAuth, error: errorAuth } = await supabase.auth.setSession({
+  refresh_token: refreshToken.value,
+  access_token: accessToken.value,
+});
+
+// If there is an error, delete the cookies and redirect to login
+if (errorAuth) {
+  cookies.delete("sb-access-token", {
+    path: "/",
+  });
+  cookies.delete("sb-refresh-token", {
+    path: "/",
+  });
+
+  return redirect("/login");
+}
+
+const id = dataAuth?.user?.id || "";
+
+const { data: userData } = await supabase
+  .from("profiles")
+  .select("roleesp")
+  .eq("id", id)
+  .single();
+
+if (userData == null || userData.roleesp == null || userData.roleesp > 1) {
+  return redirect("/index");
+}
+
+const { data: carsData } = await supabase
+  .from("car")
+  .select(
+    "id, carbrand!inner(name), model, year, carclass!inner(name, class_design)"
+  )
+  .order("id", { ascending: true });
+
+const { data: carBrandsData } = await supabase
+  .from("carbrand")
+  .select("id, name")
+  .order("name", { ascending: true });
+
+const { data: carClassesData } = await supabase
+  .from("carclass")
+  .select("id, name")
+  .order("name", { ascending: true });
+
+const carDataOrderer = carsData?.sort((a, b) => {
+  const brandComparison = (a.carbrand?.name ?? '').localeCompare(b.carbrand?.name ?? '');
+  if (brandComparison === 0) {
+    return (a.model ?? '').localeCompare(b.model ?? '');
+  }
+  return brandComparison;
+});
+
+// Definición de columnas para coches
+const carColumns = [
+  { header: "Nombre", accessor: "fullName" },
+  { header: "Año", accessor: "year" },
+  { header: "Clase", accessor: "className" }
+];
+
+// Preparar datos para coches
+const carTableData = carsData?.map((car) => ({
+  id: car.id,
+  fullName: `${car.carbrand?.name} ${car.model}`,
+  year: car.year,
+  className: car.carclass.name,
+  decade: `${Math.floor(car.year ? car.year / 10 : 0) * 10}s`, // Añadir década para filtrado
+  classId: car.carclass.name // Añadir ID de clase para filtrado
+})) || [];
+
+// Obtener décadas únicas
+const decades = [...new Set(carTableData.map(car => car.decade))].sort();
+
+// Función para manejar la eliminación
+const handleDeleteCar = (id: string | number): void => {
+  const carId = typeof id === "string" ? parseInt(id, 10) : id;
+  if (confirm("¿Estás seguro de que quieres eliminar este coche?")) {
+    fetch("/api/admin/car/deletecar", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ id: carId }),
+    })
+      .then((response) => {
+        if (response.ok) {
+          window.location.reload();
+          showToast("Coche eliminado correctamente", "success");
+        } else {
+          showToast("Error eliminando coche", "error");
+          console.error("Error eliminando coche");
+        }
+      })
+      .catch((error) => {
+        showToast("Error: " + error, "error");
+        console.error("Error:", error);
+      });
+  }
+};
+---
+
+<Layout title="ESP Racing:  Administrar Carreras">
+  <h2 class="text-5xl font-extrabold border-b-2 border-primary w-full">
+    Administración de Coches del Sistema
+  </h2>
+
+  <div class="py-4 mx-auto text-center" style="width: 99%">
+    <p class="text-5xl font-bold border-b border-primary w-fit mx-auto">
+      Lista de Coches del Sistema
+    </p>
+
+    <div class="mt-6 relative z-10"> <!-- Añadir z-index para asegurar que los filtros estén visibles -->
+      <div id="cars-table-container">
+        <DataTable
+          client:only="react"
+          data={carTableData}
+          columns={carColumns}
+          onEdit={{ path: "cars" }}
+          onDelete={{ path: "car"}}
+          pageSize={10}
+          filterOptions={decades}
+          filterAccessor={"decade"}
+          initialSortConfig={{ key: "fullName", direction: "asc" }}
+          searchable={true}
+          searchPlaceholder="Buscar por nombre, año o clase"
+          searchableColumns={[
+            {accessor: "fullName"},
+            {accessor: "year"},
+            {accessor: "className"}
+          ]}
+        />
+      </div>
+    </div>
+  </div>
+
+  <div class="py-4 mx-auto text-center" style="width: 99%">
+    <p class="text-5xl font-bold border-b border-primary w-fit mx-auto">
+      Añadir nuevo Coche
+    </p>
+    <div
+      class="box-border p-5 m-auto bg-darkPrimary rounded-md max-w-screen-2xl border border-primary"
+    >
+      <form id="uploadForm" data-astro-reload>
+        <div class="mb-6 p-6 border-2 border-primary rounded-lg bg-darkSecond">
+          <div class="mb-4">
+            <label class="block text-lightPrimary text-lg font-semibold mb-3">
+              Arrastra la carpeta del coche aquí
+            </label>
+            <div
+              id="dropZone"
+              class="flex flex-col items-center justify-center p-8 border-2 border-dashed border-primary rounded-lg bg-darkSecond text-lightPrimary cursor-pointer min-h-[150px] transition-colors hover:border-primary-dark"
+              >
+              <svg class="w-12 h-12 mb-3 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+              </svg>
+              <span class="text-sm font-medium">Arrastra y suelta tu carpeta aquí</span>
+              <span class="text-xs text-lightSecond mt-1">o haz clic para seleccionar</span>
+            </div>
+          </div>
+        </div>
+
+          <div class = "flex items-center gap-2">
+            <label class = "relative inline-flex cursor-pointer">
+              <input id = "switch-clean_install" type = "checkbox" class="peer sr-only" />
+              <label for = "switch-clean_install" class = "hidden"></label>
+              <div
+                class = "peer h-4 w-11 rounded-full border bg-slate-200 after:absolute after:-top-1 after:left-0 after:h-6 after:w-6 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-full peer-focus:ring-primary"
+              >
+              </div>
+            </label>
+            <label class = "text-lightPrimary text-lg font-medium" for="switch-clean_install">
+              Instalación limpia
+            </label>
+            <label class = "text-lightSecond text-sm font-thin">
+            *(Recomendado activar para actualización de coches ya en el sistema)
+            </label>
+          </div>
+        <div id = "fileData" class = "my-4 hidden">
+          <div id = "fileInfo" class = "my-4">
+            <div class = "text-sm text-lightPrimary bg-darkPrimary p-3 rounded-lg border border-primary">
+              <h3 class = "text-lg font-bold mb-2">Información detectada:</h3>
+              <div id = "preview">
+                <div class = "grid grid-cols-2 gap-4 text-left">
+                  <div>
+                    <p><span class = "font-semibold">Nombre del coche:</span> <span id = "previewName"></span></p>
+                    <p><span class = "font-semibold">Año:</span> <span id = "previewYear"></span></p>
+                    <p><span class = "font-semibold">País de Origen:</span> <span id = "previewLocation"></span></p>
+                    <p><span class = "font-semibold">Nombre de Carpeta:</span> <span id = "previewFolder"></span></p>
+                  </div>
+                  <div>
+                    <p><span class = "font-semibold">Clase:</span> <span id = "previewClass"></span></p>
+                    <p><span class = "font-semibold">Potencia:</span> <span id = "previewPower"></span></p>
+                    <p><span class = "font-semibold">Par:</span> <span id = "previewTorque"></span></p>
+                    <p><span class = "font-semibold">Peso:</span> <span id = "previewWeight"></span></p>
+                  </div>
+                  <div>
+                    <p><span class = "font-semibold">Tiempo Cambio Gomas:</span> <span id = "previewTyreTime"></span></p>
+                    <p><span class = "font-semibold">Combustible MAX:</span> <span id = "previewMaxLiter"></span></p>
+                    <p><span class = "font-semibold">Tiempo de Respostaje:</span> <span id = "previewFuelLiterTime"></span></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <p>Si hay algún dato erroneo del coche, cambielo abajo:</p>
+
+          <label class = "text-lightPrimary text-lg font-medium" for="carbrand">
+            Marca del coche
+          </label>
+          <select
+            class = "w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkSecond hover:border-primary"
+            id = "carbrand"
+            name = "carbrand"
+          >
+          <option value = -1 > -- No variar -- </option>
+            {
+              carBrandsData?.map((carBrand) => (
+                <option value={carBrand.id}>{carBrand.name}</option>
+              ))
+            }
+          </select>
+
+          <label class = "text-lightPrimary text-lg font-medium" for = "carClasses">
+            Clase del coche
+          </label>
+          <select
+            class="w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkSecond hover:border-primary"
+            id="carClasses"
+            name="carClasses"
+          >
+          <option value = -1 > -- No variar -- </option>
+            {
+              carClassesData?.map((carClass) => (
+                <option value={carClass.id}>{carClass.name}</option>
+              ))
+            }
+          </select>
+        </div>
+
+  <!-- Switch para mostrar edición avanzada, oculto por defecto -->
+        <div class="flex items-center gap-2 hidden">
+          <label class="relative inline-flex cursor-pointer">
+            <input id="switch-moreData" type="checkbox" class="peer sr-only" />
+            <label for="switch-moreData" class="hidden"></label>
+            <div class="peer h-4 w-11 rounded-full border bg-slate-200 after:absolute after:-top-1 after:left-0 after:h-6 after:w-6 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-full peer-focus:ring-primary"></div>
+          </label>
+          <label class="text-lightPrimary text-lg font-medium" for="switch-moreData">
+            ¿Modificar otros datos?
+          </label>
+        </div>
+        <!-- Contenedor switches y campos edición avanzada -->
+        <div id="moreDataContainer" class="hidden mt-4">
+          <!-- Modelo -->
+          <div class="flex items-center gap-2 mb-2 hidden" data-edit-field="model">
+            <Checkbox id="editModelSwitch" client:only="react"/>
+            <label for="editModelSwitch" class="text-lightPrimary">Editar modelo</label>
+            <input id="editModelInput" name="model" type="text" class="hidden w-full p-2 rounded bg-darkSecond border border-primary text-white ml-2" placeholder="Nuevo modelo" />
+          </div>
+          <!-- Año -->
+          <div class="flex items-center gap-2 mb-2 hidden" data-edit-field="year">
+            <Checkbox id="editYearSwitch" client:only="react"/>
+            <label for="editYearSwitch" class="text-lightPrimary">Editar año</label>
+            <input id="editYearInput" name="year" type="number" class="hidden w-full p-2 rounded bg-darkSecond border border-primary text-white ml-2" placeholder="Nuevo año" />
+          </div>
+          <!-- Descripción -->
+          <div class="flex items-center gap-2 mb-2 hidden" data-edit-field="description">
+            <Checkbox id="editDescriptionSwitch" client:only="react"/>
+            <label for="editDescriptionSwitch" class="text-lightPrimary">Editar descripción</label>
+            <input id="editDescriptionInput" name="description" type="text" class="hidden w-full p-2 rounded bg-darkSecond border border-primary text-white ml-2" placeholder="Nueva descripción" />
+          </div>
+          <!-- Potencia -->
+          <div class="flex items-center gap-2 mb-2 hidden" data-edit-field="power">
+            <Checkbox id="editPowerSwitch" client:only="react" />
+            <label for="editPowerSwitch" class="text-lightPrimary">Editar potencia</label>
+            <input id="editPowerInput" name="power" type="number" class="hidden w-full p-2 rounded bg-darkSecond border border-primary text-white ml-2" placeholder="Nueva potencia (cv)" />
+          </div>
+          <!-- Par -->
+          <div class="flex items-center gap-2 mb-2 hidden" data-edit-field="torque">
+            <Checkbox id="editTorqueSwitch" client:only="react" />
+            <label for="editTorqueSwitch" class="text-lightPrimary">Editar par</label>
+            <input id="editTorqueInput" name="torque" type="number" class="hidden w-full p-2 rounded bg-darkSecond border border-primary text-white ml-2" placeholder="Nuevo par (Nm)" />
+          </div>
+          <!-- Peso -->
+          <div class="flex items-center gap-2 mb-2 hidden" data-edit-field="weight">
+            <Checkbox id="editWeightSwitch" client:only="react" />
+            <label for="editWeightSwitch" class="text-lightPrimary">Editar peso</label>
+            <input id="editWeightInput" name="weight" type="number" class="hidden w-full p-2 rounded bg-darkSecond border border-primary text-white ml-2" placeholder="Nuevo peso (kg)" />
+          </div>
+          <!-- Tiempo cambio gomas -->
+          <div class="flex items-center gap-2 mb-2 hidden" data-edit-field="tyreTimeChange">
+            <Checkbox id="editTyreTimeSwitch" client:only="react" />
+            <label for="editTyreTimeSwitch" class="text-lightPrimary">Editar tiempo cambio gomas</label>
+            <input id="editTyreTimeInput" name="tyreTimeChange" type="number" step="0.01" class="hidden w-full p-2 rounded bg-darkSecond border border-primary text-white ml-2" placeholder="Nuevo tiempo (s)" />
+          </div>
+          <!-- Combustible máximo -->
+          <div class="flex items-center gap-2 mb-2 hidden" data-edit-field="maxLiter">
+            <Checkbox id="editMaxLiterSwitch" client:only="react" />
+            <label for="editMaxLiterSwitch" class="text-lightPrimary">Editar combustible máximo</label>
+            <input id="editMaxLiterInput" name="maxLiter" type="number" step="0.01" class="hidden w-full p-2 rounded bg-darkSecond border border-primary text-white ml-2" placeholder="Nuevo máximo (L)" />
+          </div>
+          <!-- Tiempo de repostaje -->
+          <div class="flex items-center gap-2 mb-2 hidden" data-edit-field="fuelLiterTime">
+            <Checkbox id="editFuelLiterTimeSwitch" client:only="react" />
+            <label for="editFuelLiterTimeSwitch" class="text-lightPrimary">Editar tiempo de repostaje</label>
+            <input id="editFuelLiterTimeInput" name="fuelLiterTime" type="number" step="0.01" class="hidden w-full p-2 rounded bg-darkSecond border border-primary text-white ml-2" placeholder="Nuevo tiempo (s)" />
+          </div>
+        </div>
+
+        <input
+          class="bg-primary text-white font-bold py-3 px-5 border-solid border-primary border-2 rounded-md hover:bg-darkSecond hover:text-lightPrimary mt-4"
+          type="submit"
+          value="Subir Coche"
+        />
+      </form>
+    </div>
+  </div>
+</Layout>
+
+<script>
+import {
+    initCarManagement,
+    initDeleteCarButtons,
+  } from "@/lib/admin/cars/carManagment";
+import { showToast } from "@/lib/utils";
+
+  // Inicializar el manejador de eliminación en el cliente
+  document.addEventListener("astro:page-load", () => {
+    const deleteButtons = document.querySelectorAll(".delete-item");
+
+    deleteButtons.forEach((button) => {
+      button.addEventListener("click", async (e) => {
+        e.preventDefault();
+        const id = button.getAttribute("data-id");
+
+        if (confirm("¿Estás seguro de que quieres eliminar este coche?")) {
+          try {
+            const response = await fetch("/api/admin/car/deletecar", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ id }),
+            });
+
+            if (response.ok) {
+              window.location.reload();
+              showToast("Coche eliminado correctamente", "success");
+            } else {
+              showToast("Error eliminando coche", "error");
+              console.error("Error eliminando coche");
+            }
+          } catch (error) {
+            showToast("Error: " + error, "error");
+            console.error("Error:", error);
+          }
+        }
+      });
+    });
+
+    // Inicializar otros manejadores
+    toggleNewBrandClassFields();
+    initCarManagement();
+    initDeleteCarButtons();
+    initCarForm();
+    initColorPickers();
+    initFilters();
+  });
+
+  function initFilters() {
+    const decadeFilter = document.getElementById('decade-filter') as HTMLSelectElement;
+    const tableContainer = document.getElementById('cars-table-container');
+
+    if (!decadeFilter || !tableContainer) return;
+
+    // Función para aplicar filtros
+    function applyFilters() {
+      const selectedDecade = decadeFilter?.value;
+
+      // Obtener todas las filas de la tabla
+      const rows = tableContainer?.querySelectorAll('tbody tr');
+
+      rows?.forEach(row => {
+        const yearCell = row.querySelector('td:nth-child(3)'); // Columna de año
+        if (!yearCell) return;
+
+        const year = parseInt(yearCell.textContent || '0');
+        const decade = `${Math.floor(year / 10) * 10}s`;
+        const classId = row.getAttribute('data-class-id');
+
+        const decadeMatch = !selectedDecade || decade === selectedDecade;
+
+        // Mostrar u ocultar la fila según los filtros
+        if (decadeMatch) {
+          (row as HTMLElement).style.display = '';
+        } else {
+          (row as HTMLElement).style.display = 'none';
+        }
+      });
+
+      // Actualizar la paginación si es necesario
+      const paginationEvent = new CustomEvent('pagination-update');
+      document.dispatchEvent(paginationEvent);
+    }
+
+    // Añadir event listeners
+    decadeFilter.addEventListener('change', applyFilters);
+
+    // Aplicar filtros iniciales
+    applyFilters();
+  }
+  function initCarForm() {
+    const CarForm = document.getElementById("uploadForm");
+    const carClassSelect = document.getElementById("carClasses");
+    const newClassContainer = document.getElementById("newClassContainer");
+
+    carClassSelect?.addEventListener("change", (e) => {
+      const target = e.target as HTMLSelectElement;
+      if (target && target.value === "-2") {
+        newClassContainer?.classList.remove("hidden");
+      } else {
+        newClassContainer?.classList.add("hidden");
+      }
+    });
+  }
+
+  function initColorPickers() {
+    const backgroundColorPicker = document.getElementById(
+      "newClassBackgroundColor"
+    ) as HTMLInputElement;
+    const textColorPicker = document.getElementById(
+      "newClassTextColor"
+    ) as HTMLInputElement;
+    const backgroundColorCode = document.getElementById("backgroundColorCode");
+    const textColorCode = document.getElementById("textColorCode");
+    const classPreview = document.getElementById("classPreview");
+    const shortNameInput = document.getElementById(
+      "newClassShortName"
+    ) as HTMLInputElement;
+
+    function updatePreview() {
+      if (backgroundColorCode)
+        backgroundColorCode.textContent = backgroundColorPicker.value;
+      if (textColorCode) textColorCode.textContent = textColorPicker.value;
+      if (classPreview) {
+        classPreview.style.backgroundColor = backgroundColorPicker.value;
+        classPreview.style.color = textColorPicker.value;
+        classPreview.textContent = shortNameInput.value || "GTX";
+      }
+    }
+
+    backgroundColorPicker.addEventListener("input", updatePreview);
+    textColorPicker.addEventListener("input", updatePreview);
+    shortNameInput.addEventListener("input", updatePreview);
+
+    // Inicializar la vista previa
+    updatePreview();
+  }
+  function toggleNewBrandClassFields() {
+    const carClassSelect = document.getElementById("carClasses");
+    const newClassContainer = document.getElementById("newClassContainer");
+
+    function updateClassVisibility() {
+      if (carClassSelect && newClassContainer) {
+        if ((carClassSelect as HTMLSelectElement).value === "-2") {
+          newClassContainer.classList.remove("hidden");
+        } else {
+          newClassContainer.classList.add("hidden");
+        }
+      }
+    }
+    
+    if (carClassSelect) {
+      carClassSelect.addEventListener("change", updateClassVisibility);
+      updateClassVisibility(); // Comprobar al cargar
+    }
+  }
+
+  document.addEventListener("astro:page-load", () => {
+    toggleNewBrandClassFields();
+    initCarManagement();
+  });
+</script>

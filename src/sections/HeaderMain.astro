@@ -1,34 +1,43 @@
 ---
-import Chevron from "../icons/Chevron.astro";
+import { Image } from "astro:assets";
+
+import Twitter from "@/assets/social/brand-x.svg";
+import Instagram from "@/assets/social/brand-instagram.svg";
+import Paypal from "@/assets/social/brand-paypal.svg";
+import Discord from "@/assets/social/brand-discord.svg";
+import Youtube from "@/assets/social/brand-youtube.svg";
+import Twitch from "@/assets/social/brand-twitch.svg";
+import ESPRacing from "@/assets/imgresource/ESPRACINGLogo.webp";
+import Chevron from "@/icons/Chevron.astro";
 ---
 
 <!-- Nombre Inicial + Redes -->
 <header class="z-20 flex flex-row-reverse md:flex-none">
   <div class="flex gap-6 py-1 mr-4">
     <a href="https://x.com/EspRacingCom" target="_blank">
-      <img class="w-8 .p-2 invert" src="/img/social/brand-x.svg" alt="Twitter ESP Racing" />
+      <Image class="w-8 .p-2 invert" src={Twitter} alt="Twitter ESP Racing" />
     </a>
 
     <a href="https://www.instagram.com/espsimracingoficial/" target="_blank">
-      <img class="w-8 .p-2 invert" src="/img/social/brand-instagram.svg" alt="Instagram ESP Racing" />
+      <Image class="w-8 .p-2 invert" src={Instagram} alt="Instagram ESP Racing" />
     </a>
 
     <a href="https://www.paypal.com/es/home" target="_blank">
-      <img class="w-8 .p-2 invert" src="/img/social/brand-paypal.svg" alt="Paypal ESP Racing" />
+      <Image class="w-8 .p-2 invert" src={Paypal} alt="Paypal ESP Racing" />
     </a>
   </div>
 
   <div class="flex gap-6 mr-4 md:flex-row">
     <a href="https://discord.gg/hjawMXGU6k" target="_blank">
-      <img class="w-8 .p-2 invert" src="/img/social/brand-discord.svg" alt="Discord ESP Racing" />
+      <Image class="w-8 .p-2 invert" src={Discord} alt="Discord ESP Racing" />
     </a>
 
     <a href="https://www.youtube.com/@esp-racing-com-es" target="_blank">
-      <img class="w-8 .p-2 invert" src="/img/social/brand-youtube.svg" alt="Youtube ESP Racing" />
+      <Image class="w-8 .p-2 invert" src={Youtube} alt="Youtube ESP Racing" />
     </a>
 
     <a href="https://www.twitch.tv/sergig_" target="_blank">
-      <img class="w-8 .p-2 invert" src="/img/social/brand-twitch.svg" alt="Twitch ESP Racing" />
+      <Image class="w-8 .p-2 invert" src={Twitch} alt="Twitch ESP Racing" />
     </a>
   </div>
 </header>
@@ -39,13 +48,13 @@ import Chevron from "../icons/Chevron.astro";
 </div>
 
 <!-- NAVBAR -->
-<nav role="navigation" class="bg-[#da392b] border-[#da392b]">
+<nav role="navigation" class="bg-primary border-primary">
   <div class="flex flex-wrap items-center justify-between max-w-screen-xl p-4 mx-auto">
 
     <a href="/" class="flex items-center space-x-3 rtl:space-x-reverse">
-      <img
-        src="/img/ESPRACINGLogo.webp"
-        class="h-8"
+      <Image
+        src={ESPRacing}
+        class="h-8 w-auto"
         alt="ESP Racing Logo Logo"
       />
       <span
@@ -57,7 +66,7 @@ import Chevron from "../icons/Chevron.astro";
     <button
       data-collapse-toggle="navbar-dropdown"
       type="button"
-      class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-white rounded-lg md:hidden hover:bg-white hover:text-[#da392b] focus:outline-none focus:ring-2 focus:ring-white"
+      class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-lightPrimary rounded-lg md:hidden hover:bg-lightPrimary hover:text-primary focus:outline-none focus:ring-2 focus:ring-lightPrimary"
       aria-controls="navbar-dropdown"
       aria-expanded="false"
     >
@@ -65,7 +74,6 @@ import Chevron from "../icons/Chevron.astro";
       <svg
         class="w-5 h-5"
         aria-hidden="true"
-        xmlns="http://www.w3.org/2000/svg"
         fill="none"
         viewBox="0 0 17 14"
       >
@@ -87,16 +95,16 @@ import Chevron from "../icons/Chevron.astro";
             data-dropdown-toggle="dropdownInicio"
             aria-expanded="true"
             aria-haspopup="true"
-            class ="flex items-center justify-between w-full py-2 px-3 text-white rounded hover:bg-white hover:text-[#da392b] md:hover:bg-white md:border-0 md:hover:text-[#da392b] md:p-1 md:w-auto">
+            class ="flex items-center justify-between w-full py-2 px-3 text-lightPrimary rounded hover:bg-lightPrimary hover:text-primary md:hover:bg-lightPrimary md:border-0 md:hover:text-primary md:p-1 md:w-auto">
             Inicio
             <Chevron />
           </button>
           <!-- Dropdown Inicio -->
           <div
             id="dropdownInicio"
-            class="z-10 hidden font-normal bg-white divide-y divide-gray-100 rounded-lg shadow w-44">
+            class="z-10 hidden font-normal bg-lightPrimary divide-y divide-gray-100 rounded-lg shadow w-44">
             <ul
-              class = "py-2 text-sm text-[#da392b]"
+              class = "py-2 text-sm text-primary"
               aria-labelledby="dropdownInicioLink">
               <li>
                 <a
@@ -136,16 +144,16 @@ import Chevron from "../icons/Chevron.astro";
             data-dropdown-toggle="dropdownCampeonatoActual"
             aria-expanded="true"
             aria-haspopup="true"
-            class ="flex items-center justify-between w-full py-2 px-3 text-white rounded hover:bg-white hover:text-[#da392b] md:hover:bg-white md:border-0 md:hover:text-[#da392b] md:p-1 md:w-auto">
+            class ="flex items-center justify-between w-full py-2 px-3 text-lightPrimary rounded hover:bg-lightPrimary hover:text-primary md:hover:bg-lightPrimary md:border-0 md:hover:text-primary md:p-1 md:w-auto">
             Campeonato Actual
             <Chevron />
           </button>
           <!-- Dropdown CampetoActual -->
           <div
             id="dropdownCampeonatoActual"
-            class="z-10 hidden font-normal bg-white divide-y divide-gray-100 rounded-lg shadow w-44">
+            class="z-10 hidden font-normal bg-lightPrimary divide-y divide-gray-100 rounded-lg shadow w-44">
             <ul
-              class = "py-2 text-sm text-[#da392b]"
+              class = "py-2 text-sm text-primary"
               aria-labelledby="dropdownLargeButton">
               <li>
                 <a
@@ -165,83 +173,6 @@ import Chevron from "../icons/Chevron.astro";
 
               <li>
                 <a
-                  href = "/resultsactualchampsraces"
-                  class = "block px-4 py-2 hover:bg-gray-100">
-                  Resultados de Carreras
-                </a>
-              </li>
-
-              <li>
-                <a
-                  href = "/resultsactualchamps"
-                  class = "block px-4 py-2 hover:bg-gray-100">
-                  Resultados de Campeonatos
-                </a>
-              </li>
-
-              <li>
-                <a
-                  href = "#"
-                  class = "block px-4 py-2 hover:bg-gray-100">
-                  Inscripciones
-                </a>
-              </li>
-
-            </ul>
-          </div>
-        </li>
-
-        <li>
-          <button
-            id="dropdownPasadoLink"
-            data-dropdown-toggle="dropdownPasado"
-            aria-expanded="true"
-            aria-haspopup="true"
-            class ="flex items-center justify-between w-full py-2 px-3 text-white rounded hover:bg-white hover:text-[#da392b] md:hover:bg-white md:border-0 md:hover:text-[#da392b] md:p-1 md:w-auto">
-            Carreras Pasadas
-            <Chevron />
-          </button>
-          <!-- Dropdown CampetoActual -->
-          <div
-            id="dropdownPasado"
-            class="z-10 hidden font-normal bg-white divide-y divide-gray-100 rounded-lg shadow w-44">
-            <ul
-              class = "py-2 text-sm text-[#da392b]"
-              aria-labelledby="dropdownLargeButton">
-              <li>
-                <a
-                  href = "/pastchamps/2021"
-                  class = "block px-4 py-2 hover:bg-gray-100">
-                  Año 2021
-                </a>
-              </li>
-
-              <li>
-                <a
-                  href = "/pastchamps/2022"
-                  class = "block px-4 py-2 hover:bg-gray-100">
-                  Año 2022
-                </a>
-              </li>
-
-              <li>
-                <a
-                  href = "/pastchamps/2023"
-                  class = "block px-4 py-2 hover:bg-gray-100">
-                  Año 2023
-                </a>
-              </li>
-
-              <li>
-                <a
-                  href = "/pastchamps/2024"
-                  class = "block px-4 py-2 hover:bg-gray-100">
-                  Año 2024
-                </a>
-              </li>
-
-              <li>
-                <a
                   href = "/globalresults"
                   class = "block px-4 py-2 hover:bg-gray-100">
                   Estadisticas de Carreras
@@ -256,24 +187,40 @@ import Chevron from "../icons/Chevron.astro";
                 </a>
               </li>
 
+              <li>
+                <a
+                  href = "/inscriptions"
+                  class = "block px-4 py-2 hover:bg-gray-100">
+                  Inscripciones
+                </a>
+              </li>
+
             </ul>
           </div>
+        </li>
+
+        <li>
+          <a
+            href="/pastchamps"
+            class ="flex items-center justify-between w-full py-2 px-3 text-lightPrimary rounded hover:bg-white hover:text-primary md:hover:bg-lightPrimary md:border-0 md:hover:text-primary md:p-1 md:w-auto">
+            El Pasado de ESP Racing
+          </a>
         </li>
 
         <li>
           <button
             id="dropdownPilotosEquiposLink"
             data-dropdown-toggle="dropdownPilotosEquipos"
-            class ="flex items-center justify-between w-full py-2 px-3 text-white rounded hover:bg-white hover:text-[#da392b] md:hover:bg-white md:border-0 md:hover:text-[#da392b] md:p-1 md:w-auto">
+            class ="flex items-center justify-between w-full py-2 px-3 text-lightPrimary rounded hover:bg-lightPrimary hover:text-primary md:hover:bg-lightPrimary md:border-0 md:hover:text-primary md:p-1 md:w-auto">
             Extras
             <Chevron />
           </button>
           <!-- Dropdown PilotosEquipos -->
           <div
             id="dropdownPilotosEquipos"
-            class="z-10 hidden font-normal bg-white divide-y divide-gray-100 rounded-lg shadow w-44">
+            class="z-10 hidden font-normal bg-lightPrimary divide-y divide-gray-100 rounded-lg shadow w-44">
             <ul
-              class = "py-2 text-sm text-[#da392b]"
+              class = "py-2 text-sm text-primary"
               aria-labelledby="dropdownLargeButton">
               <li>
                 <a
@@ -305,7 +252,7 @@ import Chevron from "../icons/Chevron.astro";
         <li>
           <a
             href="/login"
-            class ="flex items-center justify-between w-full py-2 px-3 text-white rounded hover:bg-white hover:text-[#da392b] md:hover:bg-white md:border-0 md:hover:text-[#da392b] md:p-1 md:w-auto">
+            class ="flex items-center justify-between w-full py-2 px-3 text-lightPrimary rounded hover:bg-white hover:text-primary md:hover:bg-lightPrimary md:border-0 md:hover:text-primary md:p-1 md:w-auto">
             Mi Perfil
           </a>
         </li>

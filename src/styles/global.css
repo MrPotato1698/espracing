@@ -1,0 +1,263 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+@plugin "tailwind-corner-smoothing";
+
+@theme{
+  /* Colores originales */
+  --color-primary: #da392b; /*redESP: #da392b*/
+  --color-second: #fcba02; /*yellowESP: #fcba02*/
+  --color-darkPrimary: #0f0f0f; /*black0f*/
+  --color-darkSecond: #19191c; /*black19*/
+  --color-lightPrimary: #f9f9f9; /*whitef9*/
+  --color-lightSecond: #f7f7f7; /*whitef7*/
+
+  --color-accent1: #6a1b9a; /*Violeta Oscuro*/
+  --color-accent2: #81c784; /*Verde Menta*/
+
+  /* Variables para shadcn/ui */
+  --color-background: var(--color-darkPrimary);
+  --color-foreground: var(--color-lightPrimary);
+
+  --color-card: var(--color-darkSecond);
+  --color-card-foreground: var(--color-lightPrimary);
+
+  --color-popover: var(--color-darkSecond);
+  --color-popover-foreground: var(--color-lightPrimary);
+
+  --color-primary-foreground: white;
+
+  --color-secondary: var(--color-darkSecond);
+  --color-secondary-foreground: var(--color-lightPrimary);
+
+  --color-muted: var(--color-darkSecond);
+  --color-muted-foreground: var(--color-lightSecond);
+
+  --color-accent: var(--color-darkSecond);
+  --color-accent-foreground: var(--color-lightPrimary);
+
+  --color-destructive: #ff4d4f;
+  --color-destructive-foreground: white;
+
+  --color-border: var(--color-primary);
+  --color-input: var(--color-lightSecond);
+  --color-ring: var(--color-primary);
+
+  --radius: 0.5rem;
+
+  /* Animaciones para componentes */
+  --animation-accordion-down: accordion-down 0.2s ease-out;
+  --animation-accordion-up: accordion-up 0.2s ease-out;
+}
+
+/* Keyframes para animaciones */
+@keyframes accordion-down {
+  from { height: 0; }
+  to { height: var(--radix-accordion-content-height); }
+}
+
+@keyframes accordion-up {
+  from { height: var(--radix-accordion-content-height); }
+  to { height: 0; }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes slide-in-from-right {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes slide-out-to-right {
+  from { transform: translateX(0); }
+  to { transform: translateX(100%); }
+}
+
+@keyframes slide-in-from-left {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes slide-out-to-left {
+  from { transform: translateX(0); }
+  to { transform: translateX(-100%); }
+}
+
+@keyframes slide-in-from-top {
+  from { transform: translateY(-100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes slide-out-to-top {
+  from { transform: translateY(0); }
+  to { transform: translateY(-100%); }
+}
+
+@keyframes slide-in-from-bottom {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes slide-out-to-bottom {
+  from { transform: translateY(0); }
+  to { transform: translateY(100%); }
+}
+
+/* Clases para Sheet */
+.fixed {
+  position: fixed;
+}
+
+.inset-0 {
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+.z-50 {
+  z-index: 50;
+}
+
+.bg-black\/80 {
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+.data-\[state\=open\]\:animate-in {
+  animation-name: fade-in;
+  animation-duration: 0.2s;
+  animation-timing-function: ease-out;
+  animation-fill-mode: forwards;
+}
+
+.data-\[state\=closed\]\:animate-out {
+  animation-name: fade-out;
+  animation-duration: 0.2s;
+  animation-timing-function: ease-in;
+  animation-fill-mode: forwards;
+}
+
+.data-\[state\=closed\]\:fade-out-0 {
+  animation-name: fade-out;
+}
+
+.data-\[state\=open\]\:fade-in-0 {
+  animation-name: fade-in;
+}
+
+/* Variantes de Sheet */
+.inset-y-0 {
+  top: 0;
+  bottom: 0;
+}
+
+.right-0 {
+  right: 0;
+}
+
+.left-0 {
+  left: 0;
+}
+
+.h-full {
+  height: 100%;
+}
+
+.w-3\/4 {
+  width: 75%;
+}
+
+.border-l {
+  border-left-width: 1px;
+}
+
+.border-r {
+  border-right-width: 1px;
+}
+
+.data-\[state\=closed\]\:slide-out-to-right {
+  animation-name: slide-out-to-right;
+}
+
+.data-\[state\=open\]\:slide-in-from-right {
+  animation-name: slide-in-from-right;
+}
+
+.data-\[state\=closed\]\:slide-out-to-left {
+  animation-name: slide-out-to-left;
+}
+
+.data-\[state\=open\]\:slide-in-from-left {
+  animation-name: slide-in-from-left;
+}
+
+.inset-x-0 {
+  left: 0;
+  right: 0;
+}
+
+.top-0 {
+  top: 0;
+}
+
+.bottom-0 {
+  bottom: 0;
+}
+
+.border-b {
+  border-bottom-width: 1px;
+}
+
+.border-t {
+  border-top-width: 1px;
+}
+
+.data-\[state\=closed\]\:slide-out-to-top {
+  animation-name: slide-out-to-top;
+}
+
+.data-\[state\=open\]\:slide-in-from-top {
+  animation-name: slide-in-from-top;
+}
+
+.data-\[state\=closed\]\:slide-out-to-bottom {
+  animation-name: slide-out-to-bottom;
+}
+
+.data-\[state\=open\]\:slide-in-from-bottom {
+  animation-name: slide-in-from-bottom;
+}
+
+@media (min-width: 640px) {
+  .sm\:max-w-sm {
+    max-width: 24rem;
+  }
+}
+
+.pagination-link {
+  @apply bg-darkSecond text-lightPrimary border-lightSecond;
+}
+
+.pagination-link:hover {
+  @apply bg-darkPrimary border-primary;
+}
+
+.pagination-link-active {
+  @apply bg-primary text-white border-primary;
+}
+
+.pagination-link-active:hover {
+  @apply bg-primary/90 text-white;
+}
+
+.pagination-ellipsis {
+  @apply text-lightSecond;
+}

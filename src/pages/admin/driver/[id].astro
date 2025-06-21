@@ -1,0 +1,197 @@
+---
+import Layout from "@/layouts/ProfileLayout.astro";
+import { supabase } from "@/db/supabase";
+import DriverAvatarUpload from "@/components/DriverAvatarUpload";
+
+const { id } = Astro.params;
+const { cookies, redirect } = Astro;
+
+if (!id) {
+  return redirect("/admin/adminraces");
+}
+
+const accessToken = cookies.get("sb-access-token");
+const refreshToken = cookies.get("sb-refresh-token");
+
+if (!accessToken || !refreshToken) {
+  return redirect("/login");
+}
+
+// Set the session with the cookies
+const { data: dataAuth, error: errorAuth } = await supabase.auth.setSession({
+  refresh_token: refreshToken.value,
+  access_token: accessToken.value,
+});
+
+// If there is an error, delete the cookies and redirect to login
+if (errorAuth) {
+  cookies.delete("sb-access-token", {
+    path: "/",
+  });
+  cookies.delete("sb-refresh-token", {
+    path: "/",
+  });
+
+  return redirect("/login");
+}
+
+const idAuth = dataAuth?.user?.id || "";
+
+const { data: roleData } = await supabase
+  .from("profiles")
+  .select("roleesp")
+  .eq("id", idAuth)
+  .single();
+
+if (roleData == null || roleData.roleesp == null || roleData.roleesp > 1) {
+  return redirect("/index");
+}
+
+const minRole = roleData.roleesp;
+
+const { data: profileData } = await supabase
+  .from("profiles")
+  .select("full_name, steam_id, roleesp!inner(id), avatar")
+  .eq("id", id)
+  .single();
+
+const { data: rolesData } = await supabase
+  .from("role")
+  .select("*")
+  .gte("id", minRole)
+  .neq("id", 2)
+  .neq("id", 0)
+  .order("id", { ascending: true });
+
+// Nueva lógica para el renderizado del select de roles
+const isSuperAdmin = minRole === 0;
+const isAdmin = minRole === 1;
+const isEditingAdmin = profileData?.roleesp?.id === 1;
+const availableRoles = rolesData?.filter((role) => {
+  if (role.id === 2) return false; // nunca mostrar el rol 2
+  if (isSuperAdmin) return true; // SuperAdmin puede ver todos (menos 2)
+  if (isAdmin) {
+    if (isEditingAdmin) { // Si el usuario a editar es Admin, solo puede ver el rol 1
+      return role.id === 1;
+    } else { // Si el usuario a editar NO es Admin, puede ver 1 y 3
+      return role.id === 1 || role.id === 3;
+    }
+  }
+  return false;
+});
+const disableRoleSelect = isAdmin && isEditingAdmin;
+---
+
+<Layout title="ESP Racing: Modificación datos de piloto">
+  <h2 class="text-5xl font-bold border-b border-primary w-fit mx-auto">
+    Modificar Datos de Piloto
+  </h2>
+  <form id="editDriverForm" class="flex flex-col mt-5">
+    <label class="mt-5 text-lg font-semibold" for="name">
+      Nombre de Piloto
+    </label>
+    <input
+      type="text"
+      name="name"
+      value={profileData?.full_name}
+      class="bg-darkSecond text-lightPrimary text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
+    />
+
+    <label class="mt-5 text-lg font-semibold" for="steamID">
+      Steam ID del piloto
+    </label>
+    <input
+      type="text"
+      id="steamID"
+      name="steamID"
+      value={profileData?.steam_id}
+      class="bg-darkSecond text-lightPrimary text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
+    />
+
+    <label class="mt-5 text-lg font-semibold" for="role">
+      Rol del piloto
+    </label>
+    <select
+      name="role"
+      id="role"
+      class="bg-darkSecond text-lightPrimary text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
+      disabled={disableRoleSelect}
+    >
+      {availableRoles?.map((role: any) => {
+        return (
+          <option value={role.id} selected={role.id === profileData?.roleesp.id}>
+            {role.name}
+          </option>
+        );
+      })}
+    </select>
+
+    <input type="hidden" name="driver_id" value={id} />
+    <div>
+      <button
+        type="submit"
+        class="py-1.5 px-3 w-fit mr-2 bg-darkPrimary text-white border-[#29dd38] border-2 rounded-md my-4 font-medium text-lg hover:bg-[#29dd38] hover:text-darkPrimary"
+      >
+        Aceptar
+      </button>
+
+      <button
+        type="button"
+        onclick="window, location.href = '/admin/admindrivers'"
+        class="py-1.5 px-3 w-fit bg-darkPrimary text-white border-primary border-2 rounded-md my-4 font-medium text-lg hover:bg-primary hover:text-darkPrimary"
+      >
+        Cancelar
+      </button>
+    </div>
+  </form>
+  <div class="w-11/12">
+    <DriverAvatarUpload
+      client:load
+      driverId={id}
+      currentAvatarUrl={profileData?.avatar || "https://tavjuyhbdqnkgsosdymq.supabase.co/storage/v1/object/public/avatars//default.webp"}
+      onUploadComplete={(imageUrl: string) => {
+        console.log("Upload complete:", imageUrl)
+        return null;
+      }}
+    />
+  </div>
+
+</Layout>
+
+<script>
+import { showToast } from "@/lib/utils";
+
+  const form = document.getElementById("editDriverForm") as HTMLFormElement;
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const formData = new FormData(form);
+
+    try {
+      const response = await fetch("/api/admin/driver/editdriver", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        console.error("Error en la respuesta del servidor:", response.status);
+        showToast(`Error en la respuesta del servidor: ${response.status}`, "error");
+        throw new Error(`Error en la respuesta del servidor: ${response.status}`);
+      }
+
+      const result = await response.json();
+
+      if (result.success) {
+        showToast("Piloto actualizado con éxito", "success");
+        window.location.href = "/admin/admindrivers";
+      } else {
+        console.error("Error al actualizar el piloto:", result.error);
+        showToast(`Error al actualizar el piloto: ${result.error || "Error desconocido"}`, "error");
+        throw new Error(result.error || "Error desconocido");
+      }
+    } catch (error) {
+      console.error("Error al actualizar el piloto:", error);
+      showToast(`Error al actualizar el piloto: ${error}`, "error");
+    }
+  });
+</script>

@@ -1,0 +1,132 @@
+---
+import Layout from "@/layouts/ProfileLayout.astro";
+import { supabase } from "@/db/supabase";
+import { DataTable } from "@/components/data-table";
+import NewRace from "@/components/NewRace";
+
+const { cookies, redirect } = Astro;
+
+const accessToken = cookies.get("sb-access-token");
+const refreshToken = cookies.get("sb-refresh-token");
+
+if (!accessToken || !refreshToken) {
+  return redirect("/login");
+}
+
+// Set the session with the cookies
+const { data: dataAuth, error: errorAuth } = await supabase.auth.setSession({
+  refresh_token: refreshToken.value,
+  access_token: accessToken.value,
+});
+
+// If there is an error, delete the cookies and redirect to login
+if (errorAuth) {
+  cookies.delete("sb-access-token", {
+    path: "/",
+  });
+  cookies.delete("sb-refresh-token", {
+    path: "/",
+  });
+
+  return redirect("/login");
+}
+
+const id = dataAuth?.user?.id || "";
+
+const { data: userData } = await supabase
+  .from("profiles")
+  .select("roleesp")
+  .eq("id", id)
+  .single();
+
+if (userData == null || userData.roleesp == null || userData.roleesp > 1) {
+  return redirect("/index");
+}
+
+const { data: raceData } = await supabase
+  .from("race")
+  .select("id, name, championship!inner(id, name), pointsystem!inner(name)")
+  .order("championship, orderinchamp", { ascending: true });
+
+const uniqueChampionships = Array.from(
+  new Set((raceData || []).map(race => race.championship?.name).filter(Boolean))
+);
+
+const serializedRaceData = raceData ? JSON.parse(JSON.stringify(raceData)) : [];
+const serializedChampsData = uniqueChampionships ? uniqueChampionships.map(champ => champ || '').filter(Boolean) as string[] : [];
+
+const columns = [
+  { header: "Nombre", accessor: "name" },
+  { header: "Campeonato", accessor: "championship.name" },
+  { header: "Sistema de Puntuación", accessor: "pointsystem.name" }
+];
+
+// NUEVO: Obtener datos para NewRace
+const { data: championshipContent } = await supabase
+  .from("championship")
+  .select("id, name")
+  .order("id", { ascending: true });
+
+const { data: pointsystemContent } = await supabase
+  .from("pointsystem")
+  .select("id, name")
+  .order("id", { ascending: true });
+
+const { data: raceCodeNotes } = await supabase
+  .from("racenotecode")
+  .select("id, name")
+  .order("id", { ascending: true });
+
+const { data: allRaces } = await supabase
+  .from("race")
+  .select("id, name, championship!inner(name)")
+  .order("championship, orderinchamp", { ascending: true });
+
+const raceNames = allRaces
+  ? allRaces.map(race => ({
+      label: race.name + " (" + race.championship.name + ")",
+      value: race.id.toString()
+    }))
+  : [];
+
+---
+
+<Layout title="ESP Racing: Administrar Carreras">
+  <h2 class="text-5xl font-extrabold border-b-2 border-primary w-full">
+    Administración de Carreras
+  </h2>
+
+  <div class="py-4 mx-auto text-center" style="width: 99%">
+    <p class="text-5xl font-bold border-b border-primary w-fit mx-auto">
+      Lista de Carreras del Sistema
+    </p>
+
+    <DataTable
+      client:only="react"
+      data={serializedRaceData}
+      columns={columns}
+      onEdit={{ path: "race" }}
+      onDelete={{ path: "race" }}
+      pageSize={10}
+      filterOptions={serializedChampsData}
+      filterAccessor={"championship.name"}
+      searchable={true}
+      searchPlaceholder="Buscar por nombre de carrera o campeonato"
+      searchableColumns={[
+        {accessor: "name"},
+        {accessor: "championship.name"}
+      ]}
+    />
+    </div>
+  </div>
+
+  <div class="py-4 mx-auto text-center" style="width: 99%">
+    <NewRace
+      client:load
+      championshipContent={(championshipContent || []).map(c => ({ id: c.id, name: c.name ?? "" }))}
+      pointsystemContent={pointsystemContent || []}
+      raceNames={raceNames}
+      raceCodeNotes={raceCodeNotes || []}
+    />
+  </div>
+</Layout>

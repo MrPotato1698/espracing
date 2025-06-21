@@ -1,0 +1,143 @@
+---
+import Layout from "@/layouts/ProfileLayout.astro";
+import { supabase } from "@/db/supabase";
+import { showToast } from "@/lib/utils";
+import { DataTable } from "@/components/data-table";
+import PointSystemManager from "@/components/PointSystemManager";
+import CarBrandManager from "@/components/CarBrandManager";
+import CarClassManager from "@/components/CarClassManager";
+
+const { cookies, redirect } = Astro;
+
+const accessToken = cookies.get("sb-access-token");
+const refreshToken = cookies.get("sb-refresh-token");
+
+if (!accessToken || !refreshToken) {
+  return redirect("/login");
+}
+
+// Set the session with the cookies
+const { data: dataAuth, error: errorAuth } = await supabase.auth.setSession({
+  refresh_token: refreshToken.value,
+  access_token: accessToken.value,
+});
+
+// If there is an error, delete the cookies and redirect to login
+if (errorAuth) {
+  cookies.delete("sb-access-token", {
+    path: "/",
+  });
+  cookies.delete("sb-refresh-token", {
+    path: "/",
+  });
+
+  return redirect("/login");
+}
+
+const id = dataAuth?.user?.id || "";
+
+const { data: userData } = await supabase
+  .from("profiles")
+  .select("roleesp")
+  .eq("id", id)
+  .single();
+
+if (userData == null || userData.roleesp == null || userData.roleesp > 1) {
+  return redirect("/index");
+}
+
+const { data: globalData, error: globalError } = await supabase
+  .from("global_adjust")
+  .select("*");
+
+if (globalError) {
+  showToast("Error al cargar los ajustes globales", "error");
+  console.error("Error al cargar los ajustes globales:", globalError);
+}
+
+const { data: pointsData, error: pointsError } = await supabase
+  .from("pointsystem")
+  .select("*");
+
+if (pointsError) {
+  showToast("Error al cargar el sistema de puntos", "error");
+  console.error("Error al cargar el sistema de puntos:", pointsError);
+}
+
+const dataTransformed = globalData?.map((item) => ({ id: item.key, value: item.value, name: item.name })) || [];
+const serializedGlobalData = dataTransformed ? JSON.parse(JSON.stringify(dataTransformed)) : [];
+
+const serializedPointsData = pointsData ? JSON.parse(JSON.stringify(pointsData)) : [];
+
+const columnsGlobals = [
+  { header: "Nombre", accessor:"name" },
+  { header: "Valor", accessor:"value" }
+];
+
+const columnsPoints = [
+  { header: "Nombre", accessor:"name" },
+  { header: "Puntos", accessor:"points" },
+  { header: "Ptos. Vuelta Rápida", accessor:"points_fast_lap" }
+];
+
+---
+<Layout title="ESP Racing: Administración Global">
+  <h2 class="text-5xl font-extrabold border-b-2 border-primary w-full">
+    Administración Global de ESP Racing
+  </h2>
+
+  <div class="py-4 mx-auto text-center" style="width: 99%">
+    <p class="mb-2 text-5xl font-bold w-fit mx-auto">
+      Ajuste de Marcas de Coches
+    </p>
+    <CarBrandManager
+      client:only="react"
+    />
+  </div>
+
+  <div class="py-4 mx-auto text-center" style="width: 99%">
+    <p class="mb-2 text-5xl font-bold w-fit mx-auto">
+      Ajuste de Clases de Coches
+    </p>
+    <CarClassManager
+      client:only="react"
+    />
+  </div>
+
+  <div class="mt-4 border border-primary" style="width: 99%" />
+
+  <div class="py-4 mx-auto text-center" style="width: 99%">
+    <p class="text-5xl font-bold w-fit mx-auto">
+      Ajuste de Puntuaciones de Campeonatos
+    </p>
+    <PointSystemManager
+      client:only="react"
+      initialData={serializedPointsData}
+    />
+  </div>
+
+    <div class="mt-4 border border-primary" style="width: 99%" />
+
+  <div class="py-4 mx-auto text-center" style="width: 99%">
+    <p class="text-5xl font-bold w-fit mx-auto">
+      Otros Ajuste Global Actuales
+    </p>
+    <DataTable
+      client:only="react"
+      data={serializedGlobalData}
+      columns={columnsGlobals}
+      onEdit={{ path: "globaladjust" }}
+      onDelete={{ path: "globaladjust" }}
+      pageSize={10}
+      searchable={true}
+      searchPlaceholder="Buscar por nombre o valor"
+      searchableColumns={[
+        {accessor: "name"},
+        {accessor: "value"}
+      ]}
+    />
+  </div>
+
+  <div class="mb-8"></div>
+
+</Layout>

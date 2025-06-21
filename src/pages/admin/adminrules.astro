@@ -1,0 +1,133 @@
+---
+import Layout from "@/layouts/ProfileLayout.astro";
+import RulesEditor from "@/components/RulesEditor";
+import { supabase } from "@/db/supabase";
+import AdminRulesControl from "@/components/AdminRulesControl";
+import RulesImagesManager from "@/components/RulesImagesManager";
+
+
+const { cookies, redirect } = Astro;
+
+const accessToken = cookies.get("sb-access-token");
+const refreshToken = cookies.get("sb-refresh-token");
+
+if (!accessToken || !refreshToken) {
+  return redirect("/login");
+}
+
+// Set the session with the cookies
+const { data: dataAuth, error: errorAuth } = await supabase.auth.setSession({
+  refresh_token: refreshToken.value,
+  access_token: accessToken.value,
+});
+
+// If there is an error, delete the cookies and redirect to login
+if (errorAuth) {
+  cookies.delete("sb-access-token", {
+    path: "/",
+  });
+  cookies.delete("sb-refresh-token", {
+    path: "/",
+  });
+
+  return redirect("/login");
+}
+
+const id = dataAuth?.user?.id || "";
+
+const { data: userData } = await supabase
+  .from("profiles")
+  .select("roleesp")
+  .eq("id", id)
+  .single();
+
+if (userData == null || userData.roleesp == null || userData.roleesp > 1) {
+  return redirect("/index");
+}
+
+const profileData = {
+  id: id,
+  roleesp: userData?.roleesp || null,
+};
+
+// Asegurarse de que existan las normativas principal y secundaria
+const { data: existingRules } = await supabase
+  .from("racerules")
+  .select("id")
+  .in("id", [1, 2]);
+
+// Si no existe la normativa principal, crearla
+if (!existingRules?.some(rule => rule.id === 1)) {
+  await supabase.from("racerules").insert({
+    id: 1,
+    content: "# Normativa Principal\n\nEscribe aquí el contenido de la normativa principal.",
+    championship: 1,
+    isVisible: true,
+    updated_at: new Date().toISOString(),
+    updated_by: id
+  });
+}
+
+// Si no existe la normativa secundaria, crearla
+if (!existingRules?.some(rule => rule.id === 2)) {
+  await supabase.from("racerules").insert({
+    id: 2,
+    content: "# Normativa Secundaria\n\nEscribe aquí el contenido de la normativa secundaria.",
+    championship: 1,
+    isVisible: false,
+    updated_at: new Date().toISOString(),
+    updated_by: id
+  });
+}
+
+// Obtener el estado de visibilidad de la normativa secundaria
+const { data: secondaryRule } = await supabase
+  .from("racerules")
+  .select("isVisible")
+  .eq("id", 2)
+  .single();
+
+const isSecondaryVisible = secondaryRule?.isVisible || false;
+---
+
+<Layout title="ESP Racing: Administrar Normativa">
+  <h2 class="text-5xl font-extrabold border-b-2 border-primary w-full">
+    Modificación de Normativa
+  </h2>
+
+  <div class="container py-8">
+    <!-- Panel de control para gestionar las normativas -->
+    <AdminRulesControl
+      userId={profileData.id}
+      isSecondaryVisible={isSecondaryVisible}
+      client:load
+    />
+
+    <!-- Editor de la normativa principal -->
+    <div class="container py-8">
+      <RulesEditor
+      client:load
+      normativaId={1}
+      userId = {profileData.id}
+      userRole = {profileData.roleesp}
+      />
+    </div>
+
+    <div class ='border border-primary mx-16' />
+
+    <!-- Editor de la normativa secundaria -->
+    <div class="container py-8">
+      <RulesEditor
+      client:load
+      normativaId={2}
+      userId = {profileData.id}
+      userRole = {profileData.roleesp}
+      />
+    </div>
+  </div>
+
+  <div class="container py-8">
+    <RulesImagesManager client:load />
+  </div>
+
+</Layout>

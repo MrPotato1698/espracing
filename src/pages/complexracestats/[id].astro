@@ -1,0 +1,100 @@
+---
+import Layout from "@/layouts/NormalLayout.astro";
+import { supabase } from "@/db/supabase";
+import RaceCharts from "@/components/race-charts";
+
+const { id } = Astro.params;
+
+let raceData;
+
+if(id){
+  const {data} = await supabase
+  .from('race')
+  .select('name, championship!inner(name)')
+  .eq('filename', id)
+  .single();
+
+  raceData = data;
+}
+---
+
+<Layout title="ESP Racing: Estadisticas Completas">
+  <button
+      onclick="window.location.href = '/globalresults'"
+      class="no-underline bg-darkSecond rounded-xl my-4 font-medium text-white text-lg py-4 px-8 block mx-auto hover:text-darkPrimary hover:bg-primary"
+    >
+      Volver atras
+    </button>
+
+  <div class="container mx-auto" style="witdh: 99%">
+    <p class="py-4 w-11/12 mx-auto text-4xl font-bold text-center">
+      Estadistica completas de {raceData?.championship.name}: {raceData?.name}
+    </p>
+
+    <div id = "datosCircuito"></div>
+    <div id = "tablaResultados"></div>
+
+    <!-- Mantenemos los divs originales para que el script no falle, pero los ocultamos visualmente -->
+    <div class="hidden">
+      <div id="chartChangePosition">
+        <div id="chartChangePosition1"></div>
+        <div id="chartChangePosition2"></div>
+      </div>
+      <div id="chartGaps">
+        <div id="chartGaps1"></div>
+        <div id="chartGaps2"></div>
+      </div>
+    </div>
+
+    <!-- Nuestro componente React para los gráficos -->
+    <div class = "w-full mt-8">
+      <RaceCharts raceId={id ?? ""} client:load />
+    </div>
+
+    <div id = "sectorTableR1">
+      <div id = "titleSectorR1"></div>
+      <div class="grid gap-2 mx-auto sectorTables">
+        <div id="tablaS1R1"></div>
+        <div id="tablaS2R1"></div>
+        <div id="tablaS3R1"></div>
+        <div id="tablaS4R1"></div>
+        <div id="tablaS5R1"></div>
+      </div>
+    </div>
+    <div id = "sectorTableR2" class="mt-4 hidden">
+      <div id = "titleSectorR2"></div>
+      <div class="grid gap-2 mx-auto sectorTables">
+        <div id="tablaS1R2"></div>
+        <div id="tablaS2R2"></div>
+        <div id="tablaS3R2"></div>
+        <div id="tablaS4R2"></div>
+        <div id="tablaS5R2"></div>
+      </div>
+    </div>
+    <div id="tableIndividualLaps1"></div>
+    <div id="tableIndividualLaps2" class = "hidden mt-4"></div>
+  </div>
+</Layout>
+
+<script>
+  import "@/pages/api/raceresults/getRaceResultsComplex.ts";
+</script>
+
+<style>
+  /* Añadir un estado de carga */
+  .loading {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  .sectorTables {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+    gap: 1rem;
+    @media (min-width: 800px) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    @media (min-width: 1210px) {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+</style>

@@ -1,42 +1,35 @@
 ---
-import { turso } from "@/turso";
+import { supabase } from "@/db/supabase";
 
 interface Race {
-  ChampID: string;
-  ChampName: string;
   RaceName: string;
   filename: string;
-  pointsystem: string;
+  ChampID: string;
+  ChampName: string;
+  Season: string;
 }
 
 interface Championship {
   name: string;
   races: Race[];
+  season: string;
 }
 
-interface Props {
-  actualchamp: string;
-}
+const { data: resultSetData } = await supabase
+  .from("race")
+  .select("name, filename, championship!inner(id, name, season)")
+  .order("orderinchamp", { ascending: true });
 
-const { actualchamp } = Astro.props;
+const resultSet = resultSetData;
 
-let resultSet;
 
-if (actualchamp==="true") {
-  const lastchamp = await turso.execute(
-    "SELECT MAX(championship) AS lastchamp FROM Race"
-  );
-
-  resultSet = await turso.execute(
-    `SELECT DISTINCT R.name AS RaceName, R.filename, R.pointsystem, C.name AS ChampName, C.id AS ChampID FROM Championship AS C INNER JOIN Race AS R ON C.id = R.championship WHERE C.id = ${lastchamp.rows[0].lastchamp}`
-  );
-} else {
-  resultSet = await turso.execute(
-    "SELECT DISTINCT R.name AS RaceName, R.filename, R.pointsystem, C.name AS ChampName, C.id AS ChampID FROM Championship AS C INNER JOIN Race AS R ON C.id = R.championship"
-  );
-}
-
-const RacesData: Race[] = resultSet.rows as unknown as Race[];
+const RacesData: Race[] = (resultSet ?? []).map((race) => ({
+  RaceName: race.name ?? "",
+  filename: race.filename,
+  ChampID: race.championship.id.toString(),
+  ChampName: race.championship.name ?? "",
+  Season: race.championship.season ?? "",
+}));
 
 let racesByChampionship: { [key: string]: Championship } = {};
 
@@ -50,6 +43,7 @@ if (RacesData.length == 0) {
         acc[String(race.ChampID)] = {
           name: String(race.ChampName) ?? "Unknown Championship",
           races: [],
+          season: String(race.Season) ?? "Unknown Season",
         };
       }
       acc[String(race.ChampID)].races.push(race);
@@ -59,194 +53,167 @@ if (RacesData.length == 0) {
   );
 }
 ---
-{actualchamp === "true" ? (
-  <p class="py-4 text-4xl font-bold text-center">
-    Selecciona la carrera a revisar
-  </p>
-) : (
-  <p class="py-4 text-4xl font-bold text-center">
-    Selecciona el campeonato y carrera pasada a revisar
-  </p>
-)}
 
-<select
-  id="select-champs"
-  class="block m-auto w-4/5 px-4 py-3 text-lg font-medium rounded-xl pe-9 focus:border-[#da392b] disabled:opacity-50 disabled:pointer-events-none bg-[#19191c] border-neutral-700 text-[#f9f9f9] placeholder-neutral-500"
->
-  {
-    Object.entries(racesByChampionship).map(([champId, champData]) => (
-      <optgroup label={champData.name} class="py-2 font-semibold">
-        {champData.races.map((race) => (
-          <option
-            value={
-              race.filename?.toString() + "@" + race.pointsystem?.toString()
-            }
-            class="text-[#f7f7f7]"
-            data-champ={champData.name}
-          >
-            {race.RaceName}
+<div class="grid grid-cols-1 gap-4 mx-2 md:grid-cols-2 lg:grid-cols-3">
+  <div>
+    <p class = "font-semibold text-xl pl-2 pb-2">Temporada</p>
+    <select
+      id="select-season"
+      class="block m-auto w-full px-4 py-3 text-lg font-medium rounded-xl pe-9 focus:border-primary disabled:opacity-50 disabled:pointer-events-none bg-darkSecond border-neutral-700 text-lightPrimary placeholder-neutral-500"
+    >
+      {
+        [
+          ...new Set(
+            Object.values(racesByChampionship).map((champ) => champ.season)
+          ),
+        ].map((season) => (
+          <option value={season} class="text-lightSecond">
+            {season}
           </option>
-        ))}
-      </optgroup>
-    ))
-  }
-</select>
+        ))
+      }
+    </select>
+  </div>
+
+  <div>
+    <p class = "font-semibold text-xl pl-2 pb-2">Campeonato</p>
+    <select
+      id="select-champ"
+      class="block m-auto w-full px-4 py-3 text-lg font-medium rounded-xl pe-9 focus:border-primary disabled:opacity-50 disabled:pointer-events-none bg-darkSecond border-neutral-700 text-lightPrimary placeholder-neutral-500"
+    >
+      {
+        Object.values(racesByChampionship).map((champ) => (
+          <option
+            value={champ.name}
+            class="text-lightSecond"
+            data-season={champ.season}
+          >
+            {champ.name}
+          </option>
+        ))
+      }
+    </select>
+  </div>
+
+  <div>
+    <p class = "font-semibold text-xl pl-2 pb-2">Carrera</p>
+    <select
+      id="select-race"
+      class="block m-auto w-full px-4 py-3 text-lg font-medium rounded-xl pe-9 focus:border-primary disabled:opacity-50 disabled:pointer-events-none bg-darkSecond border-neutral-700 text-lightPrimary placeholder-neutral-500"
+    >
+      {
+        Object.values(racesByChampionship).flatMap((champ) =>
+          champ.races.map((race) => (
+            <option
+              value={race.filename}
+              class="text-lightSecond"
+              data-season={champ.season}
+              data-championship={champ.name}
+            >
+              {race.RaceName}
+            </option>
+          ))
+        )
+      }
+    </select>
+  </div>
+</div>
 
 <!-- Tabla de resultados -->
-<div class="container mx-auto">
-  <div class="section">
+<div class="container mx-auto w-auto">
+  <section>
+    <div class="mt-8 grid grid-cols-1 gap-4 mx-2 md:grid-cols-2">
     <button
-      id="loadButtonRace"
-      class="no-underline bg-[#19191c] rounded-xl my-4 font-medium text-white text-lg py-4 px-8 block mx-auto hover:text-[#0f0f0f] hover:bg-[#da392b]"
+      id="loadButtonSimpleResults"
+      class="no-underline bg-darkSecond rounded-xl my-4 font-medium text-white text-lg py-4 px-8 block mx-auto hover:text-darkPrimary hover:bg-primary"
     >
-      Cargar Datos
+      Cargar Resultados de Carrera
     </button>
 
+    <button
+      id="loadButtonComplexResults"
+      onclick="window.location.href = '/complexracestats/'+document.getElementById('select-race').value"
+      class="no-underline bg-darkSecond rounded-xl my-4 font-medium text-white text-lg py-4 px-8 block mx-auto hover:text-darkPrimary hover:bg-primary"
+    >
+      Ver Estadistica Completa
+    </button>
+
+  </div>
     <div id="datosCircuito"></div>
-    <table class="w-full border-collapse border border-[#f9f9f9]">
-      <thead class="font-medium bg-[#da392b]">
-        <tr class="tabletitle">
-          <th colspan="2"></th>
-          <th>Pos</th>
-          <th>Nombre</th>
-          <th>Clase</th>
-          <th colspan="2">Coche</th>
-          <th>Equipo</th>
-          <th>Vueltas</th>
-          <th>Tiempo Total</th>
-          <th>Gap to 1st</th>
-          <th>Intervalo</th>
-          <th>Vuelta Rápida</th>
-          <th>Ptos</th>
-        </tr>
-      </thead>
-      <tbody id="tablaResultados" class="font-normal"> </tbody>
-    </table>
-  </div>
-
-  <div class="w-11/12 mx-auto mt-4 tablecharts">
-    <div
-      id="chartCambiosPosiciones"
-      class="border-2 rounded-lg border-[#da392b]"
-    >
-    </div>
-  </div>
-
-  <div class="w-11/12 mx-auto mt-4 tablecharts">
-    <div
-      id="chartGaps"
-      class="border-2 rounded-lg border-[#da392b]"
-    >
-    </div>
-  </div>
-
-  <div class="grid gap-2 mx-auto mt-4 sectorTables">
-    <div id="tablaS1"></div>
-    <div id="tablaS2"></div>
-    <div id="tablaS3"></div>
-    <div id="tablaS4"></div>
-    <div id="tablaS5"></div>
-  </div>
-
-  <div id="tableIndividualLaps"></div>
+    <div id="tablaResultados"></div>
+    <div id="tablaSanciones"></div>
+    <div id="tablaNotas"></div>
+  </section>
 </div>
 
 <script>
   // Script para cargar los resultados de la carrera seleccionada
-  import "@/pages/api/raceresults/raceresults.ts";
+  import "@/pages/api/raceresults/getRaceResultsSimple.ts";
 </script>
 
-<script>
-  // Script para modificar el texto del select
-  const select = document.getElementById("select-champs") as HTMLSelectElement;
+<script is:inline data-astro-rerun>
+  function initializeSelects() {
+    const seasonSelect = document.getElementById("select-season");
+    const champSelect = document.getElementById("select-champ");
+    const raceSelect = document.getElementById("select-race");
 
-  function updateSelectText() {
-    const selectedOption = select.options[select.selectedIndex];
-    if (selectedOption) {
-      const champName = selectedOption.dataset.champ;
-      const raceName =
-        selectedOption.dataset.originalText || selectedOption.textContent;
+    if (!(seasonSelect instanceof HTMLSelectElement) ||
+        !(champSelect instanceof HTMLSelectElement) ||
+        !(raceSelect instanceof HTMLSelectElement)) {
+      return;
+    }
 
-      // Restaurar todos los textos originales
-      Array.from(select.options).forEach((opt) => {
-        opt.textContent = opt.dataset.originalText || opt.textContent;
+    if (!seasonSelect || !champSelect || !raceSelect) {
+      console.error("No se pudieron encontrar todos los elementos necesarios");
+      return;
+    }
+
+    function filterChampionships() {
+      const selectedSeason = seasonSelect.value;
+
+      Array.from(champSelect.options).forEach(option => {
+        const season = option.getAttribute('data-season');
+        option.hidden = season !== selectedSeason;
       });
 
-      // Actualizar solo la opción seleccionada
-      if (raceName && !raceName.includes(champName ?? "")) {
-        selectedOption.textContent = `${champName} - ${raceName}`;
+      const visibleOptions = Array.from(champSelect.options).filter(opt => !opt.hidden);
+      if (visibleOptions.length > 0) {
+        champSelect.value = visibleOptions[0].value;
+        filterRaces();
       }
     }
+
+    function filterRaces() {
+      const selectedSeason = seasonSelect.value;
+      const selectedChamp = champSelect.value;
+
+      Array.from(raceSelect.options).forEach(option => {
+        const season = option.getAttribute('data-season');
+        const champ = option.getAttribute('data-championship');
+        option.hidden = !(season === selectedSeason && champ === selectedChamp);
+      });
+
+      const visibleRaces = Array.from(raceSelect.options).filter(opt => !opt.hidden);
+      if (visibleRaces.length > 0) {
+        raceSelect.value = visibleRaces[0].value;
+      }
+    }
+
+    // Limpiar event listeners anteriores
+    seasonSelect.removeEventListener('change', filterChampionships);
+    champSelect.removeEventListener('change', filterRaces);
+
+    // Añadir nuevos event listeners
+    seasonSelect.addEventListener('change', filterChampionships);
+    champSelect.addEventListener('change', filterRaces);
+
+    // Inicializar filtros
+    filterChampionships();
   }
 
-  // Guardar los textos originales
-  Array.from(select.options).forEach((opt) => {
-    opt.dataset.originalText = opt.textContent ?? "";
-  });
+  // Inicializar al cargar
+  initializeSelects();
 
-  select.addEventListener("change", updateSelectText);
-  select.addEventListener("focus", () => {
-    Array.from(select.options).forEach((opt) => {
-      opt.textContent = opt.dataset.originalText || opt.textContent;
-    });
-  });
-  select.addEventListener("blur", updateSelectText);
-
-  // Inicializar el texto del select
-  updateSelectText();
-
-  // Observar cambios en el valor del select (para manejar cambios programáticos)
-  const observer = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-      if (
-        mutation.type === "attributes" &&
-        mutation.attributeName === "value"
-      ) {
-        updateSelectText();
-      }
-    });
-  });
-
-  observer.observe(select, { attributes: true });
+  // Reinicializar en navegación
+  document.addEventListener('astro:page-load', initializeSelects);
 </script>
-
-<style>
-  .container {
-    width: 99%;
-  }
-
-  .sectorTables {
-    grid-template-columns: repeat(1, minmax(0, 1fr));
-    gap: 1rem;
-    @media (min-width: 800px) {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-    @media (min-width: 1210px) {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-  }
-
-  &::-ms-expand {
-    display: none;
-  }
-
-  /* Remove focus outline */
-  &:focus {
-    outline: none;
-  }
-  td {
-    text-align: center;
-  }
-
-  tbody tr td:nth-child(1) {
-    font-family: "500";
-  }
-
-  tbody tr:nth-child(odd) {
-    background-color: "#0f0f0f";
-  }
-
-  tbody tr:nth-child(even) {
-    background-color: "#19191c";
-  }
-</style>

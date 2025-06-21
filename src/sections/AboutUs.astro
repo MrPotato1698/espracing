@@ -1,8 +1,22 @@
 ---
 import Card from "@/components/Card.astro";
 
+import Negan from "@/assets/social/Negan.webp";
+import ManuGonzalez from "@/assets/social/ManuGonzalez.webp";
+import RoyalHunt from "@/assets/social/royal.webp";
+import DCoro from "@/assets/social/coro.webp";
+import Jjojuanjo from "@/assets/social/jjojuanjo.webp";
+import Sergig from "@/assets/social/Sergig.webp";
+import Twitter from "@/assets/social/brand-x-white.svg";
+import Instagram from "@/assets/social/brand-instagram-white.svg";
+import Discord from "@/assets/social/brand-discord-white.svg";
+import Youtube from "@/assets/social/brand-youtube-white.svg";
+import FunAC from "@/assets/social/FUNAC.webp";
+import NF from "@/assets/social/NF.webp";
+import Kalendas from "@/assets/social/Kalendas.webp";
+
 ---
-<h2 class = "py-4 text-2xl font-bold text-center text-white sm:text-5xl">
+<h2 class = "py-4 text-2xl font-bold text-center text-lightPrimary sm:text-5xl">
   Adminisitradores de ESP Racing
 </h2>
 <div class="grid grid-cols-1 gap-4 p-3 mb-24 max-w-screen-3xl md:grid-cols-3 md:gap-8 xl:grid-cols-5">
@@ -11,7 +25,7 @@ import Card from "@/components/Card.astro";
       title="Negan"
       subtitle="Administrador Supremo de ESP Racing"
       body="El más veterano de ESP Racing, es el unico que queda de la administración anterior, y es el creador de este rinconcito de carreras renovado. Gracias a él, podemos seguir disfrutando de carreras maravillosas, y es el encargado de mantener la paz y la armonia entre los pilotos."
-      imgbg="/img/aboutus/Negan.webp"
+      imgbg={Negan.src}
       linkbutton="#"
       buttonname="Contactar"
       altimg="Card Negan"
@@ -24,7 +38,7 @@ import Card from "@/components/Card.astro";
       title="Manu Gonzalez"
       subtitle="Administrador y Organizador Principal de ESP Racing"
       body="Empezó en ESP Racing como corredor en 2020, y en la nueva gestión, pasó de ser un consultor en los campeonatos, a realizar por completo las combinaciones y estructura de campeonatos, asi como reglamentación y diseños para la comunidad."
-      imgbg="/img/aboutus/ManuGonzalez.webp"
+      imgbg={ManuGonzalez.src}
       linkbutton="#"
       buttonname="Contactar"
       altimg="Card Manu Gonzalez"
@@ -37,7 +51,7 @@ import Card from "@/components/Card.astro";
       title="Royal Hunt"
       subtitle="Administrador y Especilista en clásicos de ESP Racing"
       body="Royal Hunt se caracteriza principalmente por ser la mano dura de las sanciones. Es la persona indicada para hablar sobre carreras con coches clásicos. Tambien, es uno de los organizadores en la comunidad FunAC."
-      imgbg="/img/aboutus/royalhunt.webp"
+      imgbg={RoyalHunt.src}
       linkbutton="#"
       buttonname="Contactar"
       altimg="Card Royal Hunt"
@@ -50,7 +64,7 @@ import Card from "@/components/Card.astro";
       title="David Coro"
       subtitle="Administrador de ESP Racing y antiguo caster"
       body="David Coro es uno de los administradores que tomaron el testigo de la nueva administración junto a Negan, Royal Hunt y Jjojuanjo. Antes de nuestro caster oficial, junto con Negan se encargaba de la narración de las carreras."
-      imgbg="/img/aboutus/dcoro.webp"
+      imgbg={DCoro.src}
       linkbutton="#"
       buttonname="Contactar"
       altimg="Card DCoro"
@@ -63,7 +77,7 @@ import Card from "@/components/Card.astro";
       title="Jjojuanjo"
       subtitle="Administrador de ESP Racing y preparador de coches tuning"
       body="Jjojuanjo es parte de la administración de ESP Racing y FunAC. Organiza carreras en la comunidad de FunAC, y es nuestro experto en coches con modificaciones dignas de ver en los poligonos más reconditos de España."
-      imgbg="/img/aboutus/jjojuanjo.webp"
+      imgbg={Jjojuanjo.src}
       linkbutton="#"
       buttonname="Contactar"
       altimg="Card jjojuanjo"
@@ -81,7 +95,7 @@ import Card from "@/components/Card.astro";
       title="Sergig_"
       subtitle="Caster Oficial de ESP Racing"
       body="Sergig_ es nuestro encargado para la realización de la retransmisión de las carreras por su canal de Twitch desde 2022."
-      imgbg="/img/aboutus/Sergig.webp"
+      imgbg={Sergig.src}
       linkbutton="https://www.twitch.tv/sergig_"
       buttonname="Contactar"
       altimg="Card Negan"
@@ -91,7 +105,7 @@ import Card from "@/components/Card.astro";
 
 </div>
 
-<h2 class = "py-4 text-2xl font-bold text-center text-white sm:text-5xl">
+<h2 class = "py-4 text-2xl font-bold text-center text-lightPrimary sm:text-5xl">
   Redes Sociales Esp Racing
 </h2>
 <div class="grid grid-cols-1 gap-4 p-3 mb-24 max-w-screen-3xl md:grid-cols-3 md:gap-8 xl:grid-cols-4">
@@ -100,8 +114,8 @@ import Card from "@/components/Card.astro";
       title="Discord"
       subtitle="Donde se encuentra la comunidad"
       body = ""
-      imgbg = "/img/social/brand-discord-white.svg"
-      linkbutton="https://www.twitch.tv/sergig_"
+      imgbg = {Discord.src}
+      linkbutton="https://discord.gg/hjawMXGU6k"
       buttonname="Discord"
       altimg="Card Discord"
       targetpage="_black"
@@ -113,7 +127,7 @@ import Card from "@/components/Card.astro";
       title="Youtube"
       subtitle="Donde se ver carreras pasadas"
       body = ""
-      imgbg = "/img/social/brand-youtube-white.svg"
+      imgbg = {Youtube.src}
       linkbutton="https://www.youtube.com/@esp-racing-com-es"
       buttonname="Youtube"
       altimg="Card Youtube"
@@ -126,7 +140,7 @@ import Card from "@/components/Card.astro";
       title="X / Twitter"
       subtitle="Donde enterarse de lo ultimo"
       body = ""
-      imgbg = "/img/social/brand-x-white.svg"
+      imgbg = {Twitter.src}
       linkbutton="https://www.x.com/EspRacingCom"
       buttonname="X/Twitter"
       altimg="Card Twitter"
@@ -139,7 +153,7 @@ import Card from "@/components/Card.astro";
       title="Instagram"
       subtitle="Para ver las fotos de las carreras"
       body = ""
-      imgbg = "/img/social/brand-instagram-white.svg"
+      imgbg = {Instagram.src}
       linkbutton="https://www.instagram.com/espsimracingoficial/"
       buttonname="Instagram"
       altimg="Card Instagram"
@@ -149,7 +163,7 @@ import Card from "@/components/Card.astro";
 
 </div>
 
-<h2 class = "py-4 text-2xl font-bold text-center text-white sm:text-5xl">
+<h2 class = "py-4 text-2xl font-bold text-center text-lightPrimary sm:text-5xl">
   Comunidades amigas de ESP Racing
 </h2>
 <div class="grid grid-cols-1 gap-4 p-3 mb-24 max-w-screen-3xl md:grid-cols-3 md:gap-8">
@@ -158,7 +172,7 @@ import Card from "@/components/Card.astro";
       title="FunAC Community"
       subtitle="Comunidad hermana de ESP Racing"
       body="Comunidad llevada por varios administradores de ESP Racing, donde las carreras realizadas son más tranquilas y sin tanta seriedad, pero no por ello, menos divertidas."
-      imgbg="/img/social/FUNAC.webp"
+      imgbg={FunAC.src}
       linkbutton="https://discord.com/invite/pFBPuxt28g"
       buttonname="Visitar"
       altimg="Card FunAC"
@@ -171,7 +185,7 @@ import Card from "@/components/Card.astro";
       title="Nacho&Factor"
       subtitle="Comunidad de diseño y modelado de coches"
       body="Comunidad de diseño de coches y modelado 3D, donde hay una gran comunidad de modders y diseñadores para poder contactar y poder hacer realidad tus proyectos con grandes profesionales."
-      imgbg="/img/aboutus/NF.webp"
+      imgbg={NF.src}
       linkbutton="https://discord.gg/ekrzrYdXan"
       buttonname="Visitar"
       altimg="Card NF"
@@ -184,7 +198,7 @@ import Card from "@/components/Card.astro";
       title="Kalendas"
       subtitle="Comunidad para buscar que y donde correr"
       body="Comunidad dedicada a recolectar información sobre campeonatos, para que pilotos que quieran correr en sitios diferentes, u horarios distintos, puedan encontrar cualquier carrera que se acomode a sus necesidades."
-      imgbg="/img/aboutus/Kalendas.webp"
+      imgbg={Kalendas.src}
       linkbutton="https://discord.com/invite/3eACDgA7Xu"
       buttonname="Visitar"
       altimg="Card Kalendas"

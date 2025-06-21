@@ -1,0 +1,201 @@
+---
+import Layout from "@/layouts/ProfileLayout.astro";
+import { supabase } from "@/db/supabase";
+
+const { id } = Astro.params;
+const { cookies, redirect } = Astro;
+
+if (!id) {
+  return redirect("/admin/adminraces");
+}
+
+const accessToken = cookies.get("sb-access-token");
+const refreshToken = cookies.get("sb-refresh-token");
+
+if (!accessToken || !refreshToken) {
+  return redirect("/login");
+}
+
+// Set the session with the cookies
+const { data: dataAuth, error: errorAuth } = await supabase.auth.setSession({
+  refresh_token: refreshToken.value,
+  access_token: accessToken.value,
+});
+
+// If there is an error, delete the cookies and redirect to login
+if (errorAuth) {
+  cookies.delete("sb-access-token", {
+    path: "/",
+  });
+  cookies.delete("sb-refresh-token", {
+    path: "/",
+  });
+
+  return redirect("/login");
+}
+
+const idAuth = dataAuth?.user?.id || "";
+
+const { data: roleData } = await supabase
+  .from("profiles")
+  .select("roleesp")
+  .eq("id", idAuth)
+  .single();
+
+if (roleData == null || roleData.roleesp == null || roleData.roleesp > 1) {
+  return redirect("/index");
+}
+
+const { data: dataRaceNote, error: errorRaceNote } = await supabase
+  .from("racenotes")
+  .select("id, race!inner(id, name), code!inner(id, name), description, penalty")
+  .eq("id", parseInt(id))
+  .single();
+
+if(!dataRaceNote) {
+  return redirect("/admin/adminraces");
+}
+
+const { data: dataRaceNoteCode, error: errorRaceNoteCode } = await supabase
+  .from("racenotecode")
+  .select("id, name")
+  .order("id", { ascending: true });
+
+if(errorRaceNoteCode) {
+  return redirect("/admin/adminraces");
+}
+
+const { data: dataRaces, error: errorRaces } = await supabase
+  .from("race")
+  .select("id, name, championship(name)")
+  .order("id", { ascending: true });
+
+if(errorRaces) {
+  return redirect("/admin/adminraces");
+}
+---
+
+<Layout title="ESP Racing: Modificación datos de carrera">
+  <h2 class="text-5xl font-bold border-b border-primary w-fit mx-auto">
+    Modificar Datos de Carrera
+  </h2>
+  <form id="editRaceNoteForm" class="flex flex-col mt-5">
+    <label class="mt-5 text-lg font-semibold" for="raceID">
+      Carrera al que pertenece:
+    </label>
+    <select
+      class="w-11/12 p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkSecond hover:border-primary"
+      id="raceID"
+      name="raceID"
+    >
+      {
+        dataRaces?.map((race) => (
+          <option value={race.id?.toString()} selected={dataRaceNote.race.id === race.id}>{race.name}</option>
+        ))
+      }
+    </select>
+
+    <label class="mt-5 text-lg font-semibold" for="noteID">
+      Código de Nota:
+    </label>
+    <select
+      class="w-11/12 p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkSecond hover:border-primary"
+      id="noteID"
+      name="noteID"
+    >
+      {
+        dataRaceNoteCode?.map((note) => (
+          <option value={note.id?.toString()} selected={dataRaceNote.code.id === note.id}>{note.name}</option>
+        ))
+      }
+    </select>
+
+    <label class="mt-5 text-lg font-semibold" for="description">
+      Descripción:
+    </label>
+    <input
+      type="text"
+      name="description"
+      value={dataRaceNote?.description}
+      class="bg-darkSecond text-lightPrimary text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
+    />
+
+    <label class="mt-5 text-lg font-semibold" for="penalty">
+      Penalización:
+    </label>
+    <div class="relative group w-11/12">
+      <input
+        type="text"
+        name="penalty"
+        id="penalty"
+        value={dataRaceNote?.penalty}
+        class="bg-darkSecond text-lightPrimary text-lg w-full border-none rounded-md p-2 ml-1 mt-px opacity-60 cursor-not-allowed"
+        disabled
+        aria-disabled="true"
+        tabindex="-1"
+      />
+      <div id="penalty-tooltip" class="absolute left-0 top-full mt-1 w-max bg-darkSecond text-lightPrimary text-xs rounded px-3 py-2 border border-primary opacity-0 group-hover:opacity-100 pointer-events-none z-10 transition-opacity duration-200">
+        Solo puedes añadir una sanción si el código de nota es distinto de "Notas de Carrera".
+      </div>
+    </div>
+
+    <input type="hidden" name="racenoteID" value={id} />
+
+    <div>
+      <button
+        type="submit"
+        class="py-1.5 px-3 w-fit mr-2 bg-darkPrimary text-white border-[#29dd38] border-2 rounded-md my-4 font-medium text-lg hover:bg-[#29dd38] hover:text-darkPrimary"
+      >
+        Aceptar
+      </button>
+
+      <button
+        onclick="window, location.href = '/admin/adminraces'"
+        class="py-1.5 px-3 w-fit bg-darkPrimary text-white border-primary border-2 rounded-md my-4 font-medium text-lg hover:bg-primary hover:text-darkPrimary"
+      >
+        Cancelar
+      </button>
+    </div>
+  </form>
+</Layout>
+
+<script>
+  import { initEditRaceNote } from "@/lib/admin/races/raceManagment";
+  initEditRaceNote()
+  document.addEventListener("astro:page-load", initEditRaceNote);
+</script>
+<script is:inline data-astro-rerun>
+  // Script para habilitar/deshabilitar el input de penalización dinámicamente
+  document.addEventListener("DOMContentLoaded", function() {
+    const noteSelect = document.getElementById("noteID");
+    const penaltyInput = document.getElementById("penalty");
+    const tooltip = document.getElementById("penalty-tooltip");
+    function updatePenaltyState() {
+      if (noteSelect && penaltyInput && tooltip) {
+        if (noteSelect.value === "0") {
+          penaltyInput.disabled = true;
+          penaltyInput.classList.add("opacity-60", "cursor-not-allowed");
+          penaltyInput.setAttribute("aria-disabled", "true");
+          penaltyInput.setAttribute("tabindex", "-1");
+        } else {
+          penaltyInput.disabled = false;
+          penaltyInput.classList.remove("opacity-60", "cursor-not-allowed");
+          penaltyInput.removeAttribute("aria-disabled");
+          penaltyInput.removeAttribute("tabindex");
+        }
+      }
+    }
+    if (noteSelect && penaltyInput && tooltip) {
+      updatePenaltyState();
+      noteSelect.addEventListener("change", updatePenaltyState);
+    }
+  });
+</script>
+
+<style>
+  /* Tooltip solo visible en hover y si el input está deshabilitado */
+  .group:hover #penalty:disabled + #penalty-tooltip {
+    opacity: 1;
+    pointer-events: auto;
+  }
+</style>

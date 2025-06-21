@@ -1,0 +1,422 @@
+<div class="w-2/4 mt-7 border-2 border-primary mx-auto py-2 rounded-lg">
+  <h1 class="text-center font-black text-xl">DEV ZONE</h1>
+  <div class="grid grid-cols-2">
+    <button
+      class="bg-green-500 text-darkPrimary font-bold py-3 px-2 w-72 mt-4 mx-auto border-solid border-green-500 border-2 rounded-md hover:bg-darkSecond hover:text-lightPrimary"
+      onclick="window.showToast('Operación exitosa', 'success')"
+    >
+      Mostrar notificación de éxito
+    </button>
+
+    <button
+      class="bg-primary text-lightPrimary font-bold py-3 px-2 w-72 mt-4 mx-auto border-solid border-primary border-2 rounded-md hover:bg-darkSecond hover:text-lightPrimary"
+      onclick="window.showToast('Ha ocurrido un error', 'error')"
+    >
+      Mostrar notificación de error
+    </button>
+
+    <button
+      class="bg-yellow-400 text-darkPrimary font-bold py-3 px-2 w-72 mt-4 mx-auto border-solid border-yellow-400 border-2 rounded-md hover:bg-darkSecond hover:text-lightPrimary"
+      onclick="window.showToast('Mensaje de advertencia', 'warning')"
+    >
+      Mostrar notificación de advertencia
+    </button>
+
+    <button
+      class="bg-sky-500 text-darkPrimary font-bold py-3 px-2 w-72 mt-4 mx-auto border-solid border-sky-500 border-2 rounded-md hover:bg-darkSecond hover:text-lightPrimary"
+      onclick="window.showToast('Información importante', 'info')"
+    >
+      Mostrar notificación de información
+    </button>
+  </div>
+  <div class = "grid grid-cols-2 gap-2 mt-4 mx-4">
+    <div class="mb-2 py-2 px-6 border-2 border-primary rounded-lg bg-darkSecond">
+      <div class="mb-4">
+        <label for="fileInputS1R1" class="block text-lightPrimary text-lg font-semibold mb-3">
+          JSON 1
+        </label>
+        <div class="relative">
+          <input
+            type="file"
+            id="fileInputS1R1"
+            name="fileInputS1R1"
+            accept=".json"
+            class="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
+          />
+          <div class="flex flex-col items-center justify-center p-4 border-2 border-dashed border-primary rounded-lg bg-darkSecond text-lightPrimary cursor-pointer min-h-[150px] transition-colors hover:border-primary-dark">
+            <div class="flex items-center gap-2">
+              <svg class="w-12 h-12 mb-3 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+              </svg>
+              <span class="text-sm font-medium">Arrastra y suelta tu JSON aquí</span>
+              <span class="text-xs text-lightSecond mt-1">o haz clic para seleccionar</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="fileInfoS1R1" class="mb-4 hidden">
+        <p class="text-sm text-lightPrimary bg-darkPrimary p-3 rounded-lg border border-primary">
+          Archivo seleccionado:
+          <span id="fileNameS1R1" class="font-medium"></span>
+        </p>
+      </div>
+      <button
+        class="bg-red-500 text-lightPrimary font-bold py-2 px-4 w-full mt-2 rounded-md hover:bg-red-700"
+        id="clearFileS1R1Btn"
+        type="button"
+      >
+        Limpiar
+      </button>
+    </div>
+
+    <div class="mb-2 py-2 px-6 border-2 border-primary rounded-lg bg-darkSecond" id="split2R1File">
+      <div class="mb-4">
+        <label for="split2R1File" class="block text-lightPrimary text-lg font-semibold mb-3">
+          JSON 2
+        </label>
+        <div class="relative">
+          <input
+            type="file"
+            id="fileInputS2R1"
+            name="fileInputS2R1"
+            accept=".json"
+            class="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
+          />
+          <div class="flex flex-col items-center justify-center p-4 border-2 border-dashed border-primary rounded-lg bg-darkSecond text-lightPrimary cursor-pointer min-h-[150px] transition-colors hover:border-primary-dark">
+            <div class="flex items-center gap-2">
+              <svg class="w-12 h-12 mb-3 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+              </svg>
+              <span class="text-sm font-medium">Arrastra y suelta tu JSON aquí</span>
+              <span class="text-xs text-lightSecond mt-1">o haz clic para seleccionar</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="fileInfoS2R1" class="mb-4 hidden">
+        <p class="text-sm text-lightPrimary bg-darkPrimary p-3 rounded-lg border border-primary">
+          Archivo seleccionado:
+          <span id="fileNameS2R1" class="font-medium"></span>
+        </p>
+      </div>
+      <button
+        class="bg-red-500 text-lightPrimary font-bold py-2 px-4 w-full mt-2 rounded-md hover:bg-red-700"
+        id="clearFileS2R1Btn"
+        type="button"
+      >
+        Limpiar
+      </button>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-2">
+    <button
+      class="bg-primary text-lightPrimary font-bold py-3 px-2 w-72 mt-4 mx-auto border-solid border-primary border-2 rounded-md hover:bg-darkSecond hover:text-lightPrimary"
+      id="test1jsonBtn"
+      type="button"
+    >
+      Probar 1 JSON
+    </button>
+
+    <button
+      class="bg-primary text-lightPrimary font-bold py-3 px-2 w-72 mt-4 mx-auto border-solid border-primary border-2 rounded-md hover:bg-darkSecond hover:text-lightPrimary"
+      id="test2jsonBtn"
+      type="button"
+    >
+      Probar 2 JSON
+    </button>
+  </div>
+
+  <h2 class="mt-4 text-center font-semibold text-lg">V Inscripciones V</h2>
+
+  <div class="grid grid-cols-2">
+    <button
+      class="bg-accent1 text-lightPrimary font-bold py-3 px-2 w-72 mt-4 mx-auto border-solid border-accent1 border-2 rounded-md hover:bg-darkSecond hover:text-lightPrimary"
+      id="testInscriptions"
+      type="button"
+      >
+      Test Inscripciones
+    </button>
+  </div>
+</div>
+
+<script>
+  import { supabase } from '@/db/supabase';
+  import { createRaceData, createRaceDataMultipleSplits } from '@/lib/results/resultConverter';
+  import { TimingData } from '@/mock/TimingData';
+
+  const btn1 = document.getElementById('test1jsonBtn');
+  const btn2 = document.getElementById('test2jsonBtn');
+  const input1 = document.getElementById('fileInputS1R1') as HTMLInputElement | null;
+  const input2 = document.getElementById('fileInputS2R1') as HTMLInputElement | null;
+  const fileNameS1R1 = document.getElementById('fileNameS1R1');
+  const fileNameS2R1 = document.getElementById('fileNameS2R1');
+  const clearBtn1 = document.getElementById('clearFileS1R1Btn');
+  const clearBtn2 = document.getElementById('clearFileS2R1Btn');
+  const testInscriptionsBtn = document.getElementById('testInscriptions');
+
+  input1?.addEventListener('change', () => {
+    const file = input1.files?.[0];
+    if (file) {
+      if (fileNameS1R1) {
+        fileNameS1R1.textContent = file.name;
+      }
+      document.getElementById('fileInfoS1R1')?.classList.remove('hidden');
+      window.showToast?.(`Archivo seleccionado: ${file.name}`, 'info');
+    } else {
+      document.getElementById('fileInfoS1R1')?.classList.add('hidden');
+    }
+  });
+  input2?.addEventListener('change', () => {
+    const file = input2.files?.[0];
+    if (file) {
+      if (fileNameS2R1) {
+        fileNameS2R1.textContent = file.name;
+      }
+      document.getElementById('fileInfoS2R1')?.classList.remove('hidden');
+      window.showToast?.(`Archivo seleccionado: ${file.name}`, 'info');
+    } else {
+      document.getElementById('fileInfoS2R1')?.classList.add('hidden');
+    }
+  });
+
+  clearBtn1?.addEventListener('click', () => {
+    if (input1) input1.value = '';
+    document.getElementById('fileInfoS1R1')?.classList.add('hidden');
+    if (fileNameS1R1) fileNameS1R1.textContent = '';
+  });
+  clearBtn2?.addEventListener('click', () => {
+    if (input2) input2.value = '';
+    document.getElementById('fileInfoS2R1')?.classList.add('hidden');
+    if (fileNameS2R1) fileNameS2R1.textContent = '';
+  });
+
+  btn1?.addEventListener('click', async () => {
+    const file = input1?.files?.[0];
+    if (!file) {
+      window.showToast?.('Selecciona un archivo JSON para probar.', 'error');
+      return;
+    }
+    window.showToast?.('Procesando archivo...','info');
+    try {
+      const text = await file.text();
+      const json = JSON.parse(text);
+      const result = createRaceData(json);
+      console.log('Resultado 1 JSON:', result);
+      window.showToast?.('Conversión exitosa. Revisa la consola.', 'success');
+    } catch (e) {
+      window.showToast?.('Error procesando el JSON.', 'error');
+      console.error(e);
+    }
+  });
+
+  btn2?.addEventListener('click', async () => {
+    const fileA = input1?.files?.[0];
+    const fileB = input2?.files?.[0];
+    if (!fileA || !fileB) {
+      window.showToast?.('Selecciona ambos archivos JSON para probar.', 'error');
+      return;
+    }
+    window.showToast?.('Procesando archivos...','info');
+    try {
+      const [textA, textB] = await Promise.all([fileA.text(), fileB.text()]);
+      const jsonA = JSON.parse(textA);
+      const jsonB = JSON.parse(textB);
+      const result = createRaceDataMultipleSplits(jsonA, jsonB);
+      console.log('Resultado 2 JSON:', result);
+      window.showToast?.('Conversión exitosa. Revisa la consola.', 'success');
+    } catch (e) {
+      window.showToast?.('Error procesando los JSON.', 'error');
+      console.error(e);
+    }
+  });
+
+  testInscriptionsBtn?.addEventListener('click', async () => {
+    console.log("Iniciando prueba de inscripciones...");
+    const corsHeaders = {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type'
+    };
+
+    const now = new Date();
+    const gmtPlus1Time = new Date(now.getTime() + 60*60000); // Sumar 1 hora (60 minutos * 60 segundos * 1000 milisegundos)
+
+    // Crear rango de tiempo (entre 15 minutos antes y 15 minutos después de las 21:00)
+    const startTime = new Date(gmtPlus1Time);
+    startTime.setHours(20, 45, 0, 0);
+    const endTime = new Date(gmtPlus1Time);
+    endTime.setHours(21, 15, 0, 0);
+
+    console.log("Rango de tiempo:", startTime.toISOString(), "a", endTime.toISOString());
+
+    // Buscar registros en el rango
+    const { data: records, error } = await supabase
+      .from('inscriptionscalendar')
+      .select('id, inscriptions_open, url_time')
+      .eq('is_open', false)
+      .gte('inscriptions_open', startTime.toISOString())
+      .lte('inscriptions_open', endTime.toISOString());
+
+    console.log("Registros encontrados:", records, " \nError:", error);
+
+    if (error) {
+      console.error('Error al obtener inscripciones:', error);
+      window.showToast?.('Error al obtener inscripciones.', 'error');
+      return;
+    }
+    if (Array.isArray(records) && records.length !== 0) {
+      const recordId = records[0].id;
+      // Obtener HTML usando ScraperAPI
+      //const targetUrl = records[0].url_time;
+      //const html = await fetchWithScraperAPI(targetUrl);
+      const html = TimingData; // Usar datos mock en desarrollo
+      console.log("HTML obtenido:", html.length, "caracteres");
+      const optimizedData = extractOptimizedData(html);
+      console.log("Datos optimizados extraídos:", optimizedData.length, "registros");
+      console.log("Datos optimizados:", optimizedData[11]);
+
+      console.log("Guardaremos los datos en el registro: ", recordId);
+      const { error: updateError } = await supabase.from('inscriptionscalendar').update({
+        inscriptions_times_register: optimizedData,
+        is_open: true
+      }).eq('id', recordId);
+
+      if (updateError) {
+        console.error('Error al actualizar el registro de inscripciones:', updateError);
+        window.showToast?.('Error al actualizar inscripciones.', 'error');
+        return;
+      }
+    }
+  });
+
+function timeToMs(timeStr: string): number | null {
+  // Soporta formatos como "01:42.942" o "00:36.745" o "+01:23.456"
+  if (!timeStr || typeof timeStr !== 'string') return null;
+  // Elimina el "+" si existe
+  timeStr = timeStr.replace(/^\+/, '');
+  const parts = timeStr.split(':');
+  if (parts.length === 2) {
+    // mm:ss.mmm
+    const [min, secMs] = parts;
+    const [sec, ms] = secMs.split('.');
+    if (isNaN(Number(min)) || isNaN(Number(sec)) || isNaN(Number(ms))) return null;
+    return Number(min) * 60000 + Number(sec) * 1000 + Number(ms.padEnd(3, '0'));
+  } else if (parts.length === 1 && timeStr.includes('.')) {
+    // ss.mmm
+    const [sec, ms] = timeStr.split('.');
+    if (isNaN(Number(sec)) || isNaN(Number(ms))) return null;
+    return Number(sec) * 1000 + Number(ms.padEnd(3, '0'));
+  }
+  return null;
+}
+
+function extractOptimizedData(html: string) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+  const document = doc;
+  const optimizedData: Array<{
+    position: number;
+    driver: string;
+    car: string;
+    bestLap: number | null;
+    gap: number | null;
+    sectors: number[];
+    tyres: string;
+    vMax: number;
+    laps: number;
+    date: string;
+  }> = [];
+  // Encontrar todas las filas de datos
+  const rows = document.querySelectorAll('table tr.clickableRow');
+  rows.forEach((row) => {
+    const cells = row.querySelectorAll('td');
+    if (!cells || cells.length < 6) return; // Asegura que hay suficientes celdas
+    const data: any = {};
+    // Extraer datos esenciales con comprobación de existencia
+    data.position = cells[0]?.textContent?.trim() || '';
+    data.driver = cells[1]?.textContent?.trim() || '';
+    data.car = cells[2]?.textContent?.trim() || '';
+    data.bestLap = cells[3]?.textContent?.trim() || '';
+    data.gap = cells[4]?.textContent?.trim() || '';
+    // Identificar sectores dinámicamente
+    data.sectors = [];
+    let sectorIndex = 5;
+    // Buscar hasta encontrar la columna "Valid"
+    while (sectorIndex < cells.length) {
+      const cellContent = cells[sectorIndex]?.textContent?.trim() || '';
+      // Detectar fin de sectores (columna "Valid")
+      if (cellContent.toLowerCase() === "yes" || cellContent.toLowerCase() === "no") {
+        break;
+      }
+      data.sectors.push(cellContent);
+      sectorIndex++;
+    }
+    // Saltar campo "Valid"
+    sectorIndex += 1;
+    // Neumáticos
+    if (sectorIndex < cells.length) {
+      data.tyres = cells[sectorIndex]?.textContent?.trim() || '';
+      sectorIndex++;
+    } else {
+      data.tyres = '';
+    }
+    // Velocidad máxima (optimizada: quitamos " km/h")
+    if (sectorIndex < cells.length) {
+      const vMaxText = cells[sectorIndex]?.textContent?.trim() || '';
+      if (vMaxText.endsWith('km/h')) {
+        data.vMax = parseInt(vMaxText.replace(' km/h', '')) || vMaxText.replace(' km/h', '');
+      } else {
+        data.vMax = vMaxText;
+      }
+      sectorIndex++;
+    } else {
+      data.vMax = '';
+    }
+    // Vueltas
+    if (sectorIndex < cells.length) {
+      const lapsText = cells[sectorIndex]?.textContent?.trim() || '';
+      data.laps = parseInt(lapsText) || 0;
+      sectorIndex++;
+    } else {
+      data.laps = 0;
+    }
+    // Saltar aids (no lo guardamos)
+    sectorIndex += 1;
+    // Fecha
+    if (sectorIndex < cells.length) {
+      data.date = cells[sectorIndex]?.textContent?.trim() || '';
+    } else {
+      data.date = '';
+    }
+    // Conversión de tiempos a milisegundos y asegurando tipo number o null
+    const bestLapMs = typeof timeToMs(data.bestLap) === 'number' ? timeToMs(data.bestLap) : null;
+    const gapMs = typeof timeToMs(data.gap) === 'number' ? timeToMs(data.gap) : null;
+    const sectorsMs = Array.isArray(data.sectors)
+      ? data.sectors.map((s: string) => {
+          const ms = timeToMs(s);
+          return typeof ms === 'number' ? ms : null;
+        })
+      : [];
+    // Procesar position para dejar solo el número
+    let posStr = cells[0]?.textContent?.trim() || '';
+    posStr = posStr.replace(/\.$/, '').trim(); // Quita punto final
+    const positionNum = parseInt(posStr);
+    data.position = isNaN(positionNum) ? null : positionNum;
+
+    optimizedData.push({
+      position: data.position,
+      driver: data.driver,
+      car: data.car,
+      bestLap: bestLapMs,
+      gap: gapMs,
+      sectors: sectorsMs,
+      tyres: data.tyres,
+      vMax: data.vMax,
+      laps: data.laps,
+      date: data.date
+    });
+  });
+  return optimizedData;
+}
+
+</script>

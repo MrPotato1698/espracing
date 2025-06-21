@@ -1,0 +1,475 @@
+---
+import Layout from "@/layouts/ProfileLayout.astro";
+import { supabase } from "@/db/supabase";
+import { DataTable } from "@/components/data-table";
+
+const { id } = Astro.params;
+const { cookies, redirect } = Astro;
+
+if (!id) {
+  return redirect("/admin/adminraces");
+}
+
+const accessToken = cookies.get("sb-access-token");
+const refreshToken = cookies.get("sb-refresh-token");
+
+if (!accessToken || !refreshToken) {
+  return redirect("/login");
+}
+
+// Set the session with the cookies
+const { data: dataAuth, error: errorAuth } = await supabase.auth.setSession({
+  refresh_token: refreshToken.value,
+  access_token: accessToken.value,
+});
+
+// If there is an error, delete the cookies and redirect to login
+if (errorAuth) {
+  cookies.delete("sb-access-token", {
+    path: "/",
+  });
+  cookies.delete("sb-refresh-token", {
+    path: "/",
+  });
+
+  return redirect("/login");
+}
+
+const idAuth = dataAuth?.user?.id || "";
+
+const { data: roleData } = await supabase
+  .from("profiles")
+  .select("roleesp")
+  .eq("id", idAuth)
+  .single();
+
+if (roleData == null || roleData.roleesp == null || roleData.roleesp > 1) {
+  return redirect("/index");
+}
+
+const { data: raceData, error: errorRaceData } = await supabase
+  .from("race")
+  .select("name, orderinchamp, championship!inner(id), pointsystem!inner(id)")
+  .eq("id", parseInt(id))
+  .single();
+
+if(!raceData) {
+  return redirect("/admin/adminraces");
+}
+
+const { data: champsData } = await supabase
+  .from("championship")
+  .select("id, name")
+  .order("id", { ascending: true });
+
+if(!champsData) {
+  return redirect("/admin/adminraces");
+}
+
+const { data: pointsystemData } = await supabase
+  .from("pointsystem")
+  .select("id, name")
+  .order("id", { ascending: true });
+
+if(!pointsystemData) {
+  return redirect("/admin/adminraces");
+}
+
+const { data: raceNoteData } = await supabase
+  .from("racenotes")
+  .select("id, code!inner(name), description, penalty")
+  .eq("race", parseInt(id))
+  .order("id", { ascending: true });
+
+if(!raceNoteData) {
+  return redirect("/admin/adminraces");
+}
+
+const { data: raceNoteCodeData } = await supabase
+  .from("racenotecode")
+  .select("name")
+  .order("id", { ascending: true });
+
+if(!raceNoteCodeData) {
+  return redirect("/admin/adminraces");
+}
+
+const serializedRaceNoteData = raceNoteData ? JSON.parse(JSON.stringify(raceNoteData)) : [];
+const serializableRaceNoteCodeData = raceNoteCodeData ? JSON.parse(JSON.stringify(raceNoteCodeData)) : [];
+
+const columns = [
+  { header: "Tipo", accessor: "code.name" },
+  { header: "Penalización", accessor: "penalty" },
+  { header: "Description", accessor: "description" }
+];
+---
+
+<Layout title="ESP Racing: Modificación datos de carrera">
+  <h2 class="text-5xl font-bold border-b border-primary w-fit mx-auto">
+    Modificar Datos de Carrera
+  </h2>
+  <form id="editRaceForm" class="flex flex-col mt-5">
+    <label class="mt-5 text-lg font-semibold" for="name">
+      Nombre de Carrera:
+    </label>
+    <input
+      type="text"
+      name="name"
+      value={raceData?.name}
+      class="bg-darkSecond text-lightPrimary text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
+    />
+
+    <label class="mt-5 text-lg font-semibold" for="orderChamp">
+      Orden en el campeonato:
+    </label>
+    <input
+      type="text"
+      name="orderChamp"
+      value={raceData?.orderinchamp}
+      class="bg-darkSecond text-lightPrimary text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
+    />
+
+    <label class="mt-5 text-lg font-semibold" for="champID">
+      Campeonato al que pertenece:
+    </label>
+    <select
+      class="w-11/12 p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkSecond hover:border-primary"
+      id="champID"
+      name="champID"
+    >
+      {
+        champsData?.map((champ) => (
+          <option value={champ.id?.toString()} selected={raceData.championship.id === champ.id}>{champ.name}</option>
+        ))
+      }
+    </select>
+
+    <label class="mt-5 text-lg font-semibold" for="pointsystem">
+      Sistema de Puntuación:
+    </label>
+    <select
+      class="w-11/12 p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkSecond hover:border-primary"
+      id="pointsystem"
+      name="pointsystem"
+    >
+      {
+        pointsystemData?.map((ps) => (
+          <option value={ps.id?.toString()} selected={raceData.pointsystem.id === ps.id}>{ps.name}</option>
+        ))
+      }
+      <option value="0">Evento / Sin Puntuación</option>
+    </select>
+
+    <div class="flex items-center gap-2">
+      <label class="relative inline-flex cursor-pointer">
+        <input id="switch-Races" type="checkbox" class="peer sr-only" />
+        <label for="switch-Races" class="hidden"></label>
+        <div
+          class="peer h-4 w-11 rounded-full border bg-slate-200 after:absolute after:-top-1 after:left-0 after:h-6 after:w-6 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-full peer-focus:ring-primary"
+        >
+        </div>
+      </label>
+      <label class="text-[#f0f0f0] text-lg font-medium" for="switch-S2">
+        ¿Editar archivos de carrera?
+      </label>
+    </div>
+
+    <div
+      class="flex items-center gap-2"
+      id= "switch-S2-DIV"
+      style="display: none;">
+      <label class="relative inline-flex cursor-pointer">
+        <input id="switch-S2" type="checkbox" class="peer sr-only" />
+        <label for="switch-S2" class="hidden"></label>
+        <div
+          class="peer h-4 w-11 rounded-full border bg-slate-200 after:absolute after:-top-1 after:left-0 after:h-6 after:w-6 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-full peer-focus:ring-primary"
+        >
+        </div>
+      </label>
+      <label class="text-[#f0f0f0] text-lg font-medium" for="switch-S2">
+        ¿1 o 2 splits?
+      </label>
+    </div>
+
+    <div
+      class="flex items-center gap-2 mb-6"
+      id= "switch-R2-DIV"
+      style="display: none;">
+      <label class="relative inline-flex cursor-pointer">
+        <input id="switch-R2" type="checkbox" class="peer sr-only" />
+        <label for="switch-R2" class="hidden"></label>
+        <div
+          class="peer h-4 w-11 rounded-full border bg-slate-200 after:absolute after:-top-1 after:left-0 after:h-6 after:w-6 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-full peer-focus:ring-primary"
+        >
+        </div>
+      </label>
+      <label class="text-[#f0f0f0] text-lg font-medium" for="switch-R2">
+        ¿1 o 2 carreras por GP?
+      </label>
+    </div>
+
+    <div class="w-11/12 grid grid-cols-1 gap-4 lg:grid-cols-2">
+      <div
+        class="mb-6 p-6 border-2 border-primary rounded-lg bg-darkSecond"
+        id="split1R1File"
+        style="display: none;">
+        <div class="mb-4">
+          <label
+            for="fileInputS1R1"
+            class="block text-lightPrimary text-lg font-semibold mb-3"
+          >
+            Selecciona el archivo JSON de la carrera de Split 1 - Carrera 1 (si
+            se desea actualizar)
+          </label>
+          <div class="relative">
+            <input
+              type="file"
+              id="fileInputS1R1"
+              name="fileInputS1R1"
+              accept=".json"
+              class="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
+            />
+            <div
+              class="flex items-center justify-between p-4 border-2 border-dashed border-primary rounded-lg bg-darkSecond text-lightPrimary"
+            >
+              <div class="flex items-center gap-2">
+                <svg
+                  class="w-8 h-8"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 4v16m8-8H4"></path>
+                </svg>
+                <span class="text-sm font-medium"
+                  >Arrastra y suelta tu archivo aquí o haz click para
+                  seleccionar</span
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="fileInfoS1R1" class="mb-4 hidden">
+          <p
+            class="text-sm text-lightPrimary bg-darkPrimary p-3 rounded-lg border border-primary"
+          >
+            Archivo seleccionado:
+            <span id="fileNameS1R1" class="font-medium"></span>
+          </p>
+        </div>
+      </div>
+
+      <div
+        class="mb-6 p-6 border-2 border-primary rounded-lg bg-darkSecond"
+        id="split2R1File"
+        style="display: none;"
+      >
+        <div class="mb-4">
+          <label
+            for="split2R1File"
+            class="block text-lightPrimary text-lg font-semibold mb-3"
+          >
+            Selecciona el archivo JSON de la carrera de Split 2 - Carrera 1
+            (opcional)
+          </label>
+          <div class="relative">
+            <input
+              type="file"
+              id="fileInputS2R1"
+              name="fileInputS2R1"
+              accept=".json"
+              class="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
+            />
+            <div
+              class="flex items-center justify-between p-4 border-2 border-dashed border-primary rounded-lg bg-darkSecond text-lightPrimary"
+            >
+              <div class="flex items-center gap-2">
+                <svg
+                  class="w-8 h-8"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 4v16m8-8H4"></path>
+                </svg>
+                <span class="text-sm font-medium"
+                  >Arrastra y suelta tu archivo aquí o haz click para
+                  seleccionar</span
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="fileInfoS2R1" class="mb-4 hidden">
+          <p
+            class="text-sm text-lightPrimary bg-darkPrimary p-3 rounded-lg border border-primary"
+          >
+            Archivo seleccionado:
+            <span id="fileNameS2R1" class="font-medium"></span>
+          </p>
+        </div>
+      </div>
+    </div>
+    <div id="race2Files" style="display: none;">
+      <div class="w-11/12 grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <div class="mb-6 p-6 border-2 border-primary rounded-lg bg-darkSecond">
+          <div class="mb-4">
+            <label
+              for="fileInputS1R2"
+              class="block text-lightPrimary text-lg font-semibold mb-3"
+            >
+              Selecciona el archivo JSON de la carrera de Split 1 - Carrera 2
+              (opcional)
+            </label>
+            <div class="relative">
+              <input
+                type="file"
+                id="fileInputS1R2"
+                name="fileInputS1R2"
+                accept=".json"
+                class="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
+              />
+              <div
+                class="flex items-center justify-between p-4 border-2 border-dashed border-primary rounded-lg bg-darkSecond text-lightPrimary"
+              >
+                <div class="flex items-center gap-2">
+                  <svg
+                    class="w-8 h-8"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M12 4v16m8-8H4"></path>
+                  </svg>
+                  <span class="text-sm font-medium"
+                    >Arrastra y suelta tu archivo aquí o haz click para
+                    seleccionar</span
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+          <div id="fileInfoS1R2" class="mb-4 hidden">
+            <p
+              class="text-sm text-lightPrimary bg-darkPrimary p-3 rounded-lg border border-primary"
+            >
+              Archivo seleccionado:
+              <span id="fileNameS1R2" class="font-medium"></span>
+            </p>
+          </div>
+        </div>
+
+        <div
+          class="mb-6 p-6 border-2 border-primary rounded-lg bg-darkSecond"
+          id="split2R2File"
+          style="display: none;"
+        >
+          <div class="mb-4">
+            <label
+              for="split2R2File"
+              class="block text-lightPrimary text-lg font-semibold mb-3"
+            >
+              Selecciona el archivo JSON de la carrera de Split 2 - Carrera 2
+              (opcional)
+            </label>
+            <div class="relative">
+              <input
+                type="file"
+                id="fileInputS2R2"
+                name="fileInputS2R2"
+                accept=".json"
+                class="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
+              />
+              <div
+                class="flex items-center justify-between p-4 border-2 border-dashed border-primary rounded-lg bg-darkSecond text-lightPrimary"
+              >
+                <div class="flex items-center gap-2">
+                  <svg
+                    class="w-8 h-8"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M12 4v16m8-8H4"></path>
+                  </svg>
+                  <span class="text-sm font-medium"
+                    >Arrastra y suelta tu archivo aquí o haz click para
+                    seleccionar</span
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+          <div id="fileInfoS2R2" class="mb-4 hidden">
+            <p
+              class="text-sm text-lightPrimary bg-darkPrimary p-3 rounded-lg border border-primary"
+            >
+              Archivo seleccionado:
+              <span id="fileNameS2R2" class="font-medium"></span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <input type="hidden" name="race_id" value={id} />
+
+    <div>
+      <button
+        type="submit"
+        class="py-1.5 px-3 w-fit mr-2 bg-darkPrimary text-white border-[#29dd38] border-2 rounded-md my-4 font-medium text-lg hover:bg-[#29dd38] hover:text-darkPrimary"
+      >
+        Aceptar
+      </button>
+
+      <button
+        onclick="window, location.href = '/admin/adminraces'"
+        class="py-1.5 px-3 w-fit bg-darkPrimary text-white border-primary border-2 rounded-md my-4 font-medium text-lg hover:bg-primary hover:text-darkPrimary"
+      >
+        Cancelar
+      </button>
+    </div>
+  </form>
+
+  <h3 class="mt-4 text-4xl font-bold w-fit mx-auto">
+    Modificar Notas de Carrera
+  </h3>
+
+  <DataTable
+    client:only="react"
+    data={serializedRaceNoteData}
+    columns={columns}
+    onEdit={{ path: "race/racenote" }}
+    onDelete={{ path: "note" }}
+    pageSize={10}
+    filterOptions={serializableRaceNoteCodeData}
+    filterAccessor={"code.name"}
+    searchable={true}
+    searchPlaceholder="Buscar por penalización"
+    searchableColumns={[
+      {accessor: "penalty"}
+    ]}
+  />
+</Layout>
+
+<script>
+  import { initEditRace } from "@/lib/admin/races/raceManagment";
+  initEditRace()
+  document.addEventListener("astro:page-load", initEditRace);
+</script>

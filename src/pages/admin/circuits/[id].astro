@@ -1,0 +1,112 @@
+---
+import Layout from "@/layouts/ProfileLayout.astro";
+import { supabase } from "@/db/supabase";
+
+const { id } = Astro.params;
+const { cookies, redirect } = Astro;
+
+if (!id) {
+  return redirect("/admin/adminraces");
+}
+
+const accessToken = cookies.get("sb-access-token");
+const refreshToken = cookies.get("sb-refresh-token");
+
+if (!accessToken || !refreshToken) {
+  return redirect("/login");
+}
+
+// Set the session with the cookies
+const { data: dataAuth, error: errorAuth } = await supabase.auth.setSession({
+  refresh_token: refreshToken.value,
+  access_token: accessToken.value,
+});
+
+// If there is an error, delete the cookies and redirect to login
+if (errorAuth) {
+  cookies.delete("sb-access-token", {
+    path: "/",
+  });
+  cookies.delete("sb-refresh-token", {
+    path: "/",
+  });
+
+  return redirect("/login");
+}
+
+const idAuth = dataAuth?.user?.id || "";
+
+const { data: roleData } = await supabase
+  .from("profiles")
+  .select("roleesp")
+  .eq("id", idAuth)
+  .single();
+
+if (roleData == null || roleData.roleesp == null || roleData.roleesp > 1) {
+  return redirect("/index");
+}
+
+const { data: circuitData } = await supabase
+  .from("circuit")
+  .select("*")
+  .eq("id", parseInt(id))
+  .single();
+---
+
+<Layout title="ESP Racing: Modificación datos de circuito">
+  <h2 class="text-5xl font-bold border-b border-primary w-fit mx-auto">
+    Modificar Datos de Circuito*
+  </h2>
+
+  <form id="editCircuitForm" class="flex flex-col mt-5">
+    <label class="mt-5 text-lg font-semibold" for="name">
+      Nombre de Circuito:
+    </label>
+    <input
+      type="text"
+      name="name"
+      value={circuitData?.name}
+      class="bg-darkSecond text-lightPrimary text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
+    />
+
+    <label class="mt-5 text-lg font-semibold" for="location">
+      Localización:
+    </label>
+    <input
+      type="text"
+      name="name"
+      value={circuitData?.location}
+      class="bg-darkSecond text-lightPrimary text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
+    />
+
+    <input type="hidden" name="circuit_id" value={id} />
+
+    <div>
+      <button
+        type="submit"
+        class="py-1.5 px-3 w-fit mr-2 bg-darkPrimary text-white border-[#29dd38] border-2 rounded-md my-4 font-medium text-lg hover:bg-[#29dd38] hover:text-darkPrimary"
+      >
+        Aceptar
+      </button>
+
+      <button
+        type="button"
+        onclick="window, location.href = '/admin/admincircuits'"
+        class="py-1.5 px-3 w-fit bg-darkPrimary text-white border-primary border-2 rounded-md my-4 font-medium text-lg hover:bg-primary hover:text-darkPrimary"
+      >
+        Cancelar
+      </button>
+    </div>
+  </form>
+
+  <p class = "mt-4 text-base font-normal">
+    (*solo se puede cambiar el nombre en estas opciones, para una actualización mayor, sube el fichero de nuevo con una instalación limpia)
+  </p>
+
+</Layout>
+
+<script>
+  import { initEditCircuit } from "@/lib/admin/circuits/circuitManagment";
+  initEditCircuit()
+  document.addEventListener("astro:page-load", initEditCircuit);
+</script>

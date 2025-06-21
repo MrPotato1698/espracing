@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { turso } from "@/turso";
+import { supabase } from "@/db/supabase";
 
 
 export const POST: APIRoute = async ({ request, cookies, redirect }) => {
@@ -14,10 +14,33 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     return new Response("Todos los campos son obligatorios", { status: 400 });
   }
 
-  await turso.execute({
-    sql: 'INSERT INTO  Message (name_emissor, name_receiver, discord, region, description) VALUES ( ?, ?, ?,?, ?);',
-    args: [name_emissor, name_receiver, discord, region, description],
-  });
+  const {data: UserIDbyEmail} = await supabase
+    .from('profiles')
+    .select('id')
+    .eq('email', name_receiver)
+    .single();
+
+  const { data: lastIDMessage } = await supabase
+    .from('message')
+    .select('id')
+    .order('id', { ascending: false })
+    .limit(1)
+    .single();
+
+  const lastMessageID = lastIDMessage ? (lastIDMessage.id + 1) : 1;
+
+  const { data: insertData, error: insertError } = await supabase
+    .from('message')
+    .insert({
+      id: Number(lastMessageID),
+      name_emissor: name_emissor,
+      name_receiver: UserIDbyEmail?.id,
+      discord: discord,
+      region: region,
+      description: description,
+      readed: false,
+    });
+  if (insertError) throw insertError;
 
   return redirect("/");
 };

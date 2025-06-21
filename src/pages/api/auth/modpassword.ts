@@ -1,11 +1,45 @@
 import type { APIRoute } from "astro";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/db/supabase";
 
-export const POST: APIRoute = async ({ request, redirect }) => {
-  const formData = await request.formData();
-  const old_pass = formData.get("old_pass")?.toString();
-  const new_pass = formData.get("new_pass")?.toString();
-  const repeat_new_pass = formData.get("repeat_new_pass")?.toString();
+export const POST: APIRoute = async ({ request }) => {
+  const { access_token, new_password } = await request.json();
 
-  return redirect("/");
+  if (!access_token) {
+    return new Response(
+      JSON.stringify({ error: 'Token no proporcionado' }),
+      { status: 400 }
+    );
+  }
+
+  try {
+    // Establecer la sesión con el token
+    const { data: { session }, error: sessionError } = await supabase.auth.setSession({
+      access_token,
+      refresh_token: access_token,
+    });
+
+    if (sessionError) throw sessionError;
+
+    // Actualizar la contraseña
+    const { error: updateError } = await supabase.auth.updateUser({
+      password: new_password
+    });
+
+    if (updateError) throw updateError;
+
+    return new Response(
+      JSON.stringify({ success: true }), 
+      { status: 200 }
+    );
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error('Error al actualizar contraseña:', error.message);
+    } else {
+      console.error('Error al actualizar contraseña:', error);
+    }
+    return new Response(
+      JSON.stringify({ error: 'Error al actualizar contraseña' + (error instanceof Error ? error.message : '') }), 
+      { status: 500 }
+    );
+  }
 };

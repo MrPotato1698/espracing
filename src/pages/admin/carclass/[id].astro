@@ -1,0 +1,140 @@
+---
+import Layout from "@/layouts/ProfileLayout.astro";
+import { supabase } from "@/db/supabase";
+import ColorPreviewClassEdit from "@/components/ColorPreviewClassEdit";
+
+const { id } = Astro.params;
+const { cookies, redirect } = Astro;
+
+if (!id) {
+  return redirect("/admin/adminglobal");
+}
+
+const accessToken = cookies.get("sb-access-token");
+const refreshToken = cookies.get("sb-refresh-token");
+
+if (!accessToken || !refreshToken) {
+  return redirect("/login");
+}
+
+const { data: dataAuth, error: errorAuth } = await supabase.auth.setSession({
+  refresh_token: refreshToken.value,
+  access_token: accessToken.value,
+});
+
+if (errorAuth) {
+  cookies.delete("sb-access-token", { path: "/" });
+  cookies.delete("sb-refresh-token", { path: "/" });
+  return redirect("/login");
+}
+
+const idAuth = dataAuth?.user?.id || "";
+const { data: roleData } = await supabase
+  .from("profiles")
+  .select("roleesp")
+  .eq("id", idAuth)
+  .single();
+if (roleData == null || roleData.roleesp == null || roleData.roleesp > 1) {
+  return redirect("/index");
+}
+
+const { data: classData } = await supabase
+  .from("carclass")
+  .select("id, name, short_name, class_design")
+  .eq("id", parseInt(id))
+  .single();
+if (!classData) {
+  return redirect("/admin/adminglobal");
+}
+
+const designMatch = classData.class_design?.match(/bg-\[(#[0-9a-fA-F]{6})\] text-\[(#[0-9a-fA-F]{6})\]/);
+const backgroundColor = designMatch ? designMatch[1] : "#006fba";
+const textColor = designMatch ? designMatch[2] : "#f9f9f9";
+---
+
+<Layout title="ESP Racing: Modificación datos de clase">
+  <h2 class="text-5xl font-bold border-b border-primary w-fit mx-auto">
+    Modificar Datos de Clase
+  </h2>
+  <form id="editClassForm" class="flex flex-col mt-5">
+    <input type="hidden" name="class_id" value={id} />
+    <label class="mt-5 text-lg font-semibold" for="name">
+      Nombre de la Clase:
+    </label>
+    <input
+      type="text"
+      name="name"
+      value={classData?.name}
+      class="bg-darkSecond text-lightPrimary text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
+      required
+    />
+    <div id="color-preview-edit" class="w-full">
+      <ColorPreviewClassEdit
+        client:only="react"
+        initialName={classData?.short_name || ''}
+        initialBackground={backgroundColor}
+        initialText={textColor}
+        onChange={(data) => {
+          (window as any).__classEditData = data;
+        }}
+      />
+    </div>
+    <div>
+      <button
+        type="submit"
+        class="py-1.5 px-3 w-fit mr-2 bg-darkPrimary text-white border-[#29dd38] border-2 rounded-md my-4 font-medium text-lg hover:bg-[#29dd38] hover:text-darkPrimary"
+      >
+        Aceptar
+      </button>
+      <button
+        type="button"
+        onclick="window.location.href = '/admin/adminglobal'"
+        class="py-1.5 px-3 w-fit bg-darkPrimary text-white border-primary border-2 rounded-md my-4 font-medium text-lg hover:bg-primary hover:text-darkPrimary"
+      >
+        Cancelar
+      </button>
+    </div>
+  </form>
+</Layout>
+
+<script>
+import { showToast } from "@/lib/utils";
+
+const form = document.getElementById("editClassForm") as HTMLFormElement;
+if (form) {
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const formData = new FormData(form);
+    const id = formData.get("class_id");
+    const name = formData.get("name");
+    // Recoger datos del componente React
+    const reactData = (window as any).__classEditData || {};
+    const short_name = reactData.name || "";
+    const backgroundColor = reactData.backgroundColor || "#006fba";
+    const textColor = reactData.textColor || "#f9f9f9";
+    const class_design = `bg-[${backgroundColor}] text-[${textColor}]`;
+    try {
+      const response = await fetch("/api/admin/carclass", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, name, short_name, class_design })
+      });
+      if (!response.ok) {
+        showToast("Error en la respuesta del servidor", "error");
+        throw new Error("Error en la respuesta del servidor");
+      }
+      const result = await response.json();
+      if (result.success) {
+        showToast("Clase actualizada con éxito", "success");
+        window.location.href = "/admin/adminglobal";
+      } else {
+        showToast(result.error || "Error desconocido", 'error');
+        throw new Error(result.error || "Error desconocido");
+      }
+    } catch (error) {
+      showToast("Hubo un error al actualizar la clase. Por favor, inténtalo de nuevo.", 'error');
+    }
+  });
+}
+</script>
+

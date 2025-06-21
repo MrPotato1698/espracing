@@ -13,11 +13,11 @@ interface Props {
 const { title, subtitle, body, imgbg, linkbutton, buttonname, altimg, targetpage } = Astro.props;
 ---
 
-<a href={linkbutton} target={targetpage} class="group relative block bg-[#0f0f0f]">
+<a href={linkbutton} target={targetpage} class="group relative block bg-darkPrimary">
   {<img
     alt = {altimg}
     src = {imgbg}
-    class = "absolute inset-0 object-cover w-full h-full transition-opacity rounded-lg opacity-75 group-hover:opacity-50"
+    class = "absolute inset-0 object-cover w-full h-full transition-opacity rounded-lg opacity-65 group-hover:opacity-30"
   />}
 
   <div class = "relative p-4 sm:p-6 lg:p-8">
@@ -28,7 +28,7 @@ const { title, subtitle, body, imgbg, linkbutton, buttonname, altimg, targetpage
     <div class = "mt-32 sm:mt-48 lg:mt-64">
       <div class = "transition-all transform translate-y-8 opacity-0 group-hover:translate-y-0 group-hover:opacity-100">
         <p class = "text-sm text-white">{body}</p>
-        <p class = "inline-block rounded border border-[#da392b] bg-[#da392b] mt-1 px-12 py-3 text-sm font-medium text-white hover:bg-transparent hover:text-white focus:outline-none focus:ring active:text-[#da392b]">
+        <p class = "inline-block rounded border border-primary bg-primary mt-1 px-12 py-3 text-sm font-medium text-lightPrimary hover:bg-transparent hover:text-lightPrimary focus:outline-none focus:ring active:text-primary">
           {buttonname}
         </p>
 

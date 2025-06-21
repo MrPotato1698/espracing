@@ -1,7 +1,7 @@
 ---
 import Header from "@/sections/HeaderProfile.astro";
-import Footer from "@/sections/FooterMain.astro";
-import { ViewTransitions } from "astro:transitions";
+import { ClientRouter } from "astro:transitions";
+import "@/styles/global.css";
 
 import  SpeedInsights  from "@vercel/speed-insights/astro"
 
@@ -16,22 +16,33 @@ const { title } = Astro.props;
 ---
 
 <!doctype html>
-<html class = "bg-[#0f0f0f]" lang="es">
+<html class = "bg-darkPrimary" lang="es">
   <head>
     <meta charset="UTF-8" />
     <meta name="description" content="Astro description" />
     <meta name="viewport" content="width=device-width" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link href="https://cdn.jsdelivr.net/npm/flowbite@2.5.1/dist/flowbite.min.css"  rel="stylesheet" />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
-    <ViewTransitions />
-    <script type="module" src="https://cdn.jsdelivr.net/npm/@justinribeiro/lite-youtube@1.5.0/lite-youtube.js"></script>
+    <ClientRouter />
   </head>
   <body>
     <Header />
-    <main class="pt-4 pl-3 ml-64">
+    <main class="pt-4 px-3 sm:ml-64">
       <slot />
+      <script>
+        import { showToast, checkAndShowSavedToast, type ToastType } from '@/lib/utils';
+
+        declare global {
+          interface Window {
+            showToast: (message: string, type: 'success' | 'error' | 'warning' | 'info') => void;
+            checkAndShowSavedToast: typeof checkAndShowSavedToast;
+          }
+        }
+        window.showToast = showToast;
+        window.checkAndShowSavedToast = checkAndShowSavedToast;
+        document.addEventListener('DOMContentLoaded', checkAndShowSavedToast);
+      </script>
     </main>
 
   </body>

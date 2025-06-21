@@ -1,0 +1,101 @@
+---
+import Layout from "@/layouts/ProfileLayout.astro";
+import { supabase } from "@/db/supabase";
+import { AdminInscriptionsManager } from "@/components/AdminInscriptionsManager";
+
+const { cookies, redirect } = Astro;
+
+const accessToken = cookies.get("sb-access-token");
+const refreshToken = cookies.get("sb-refresh-token");
+
+if (!accessToken || !refreshToken) {
+  return redirect("/login");
+}
+
+// Set the session with the cookies
+const { data: dataAuth, error: errorAuth } = await supabase.auth.setSession({
+  refresh_token: refreshToken.value,
+  access_token: accessToken.value,
+});
+
+// If there is an error, delete the cookies and redirect to login
+if (errorAuth) {
+  cookies.delete("sb-access-token", {
+    path: "/",
+  });
+  cookies.delete("sb-refresh-token", {
+    path: "/",
+  });
+
+  return redirect("/login");
+}
+
+const id = dataAuth?.user?.id || "";
+
+const { data: userData } = await supabase
+  .from("profiles")
+  .select("roleesp")
+  .eq("id", id)
+  .single();
+
+if (userData == null || userData.roleesp == null || userData.roleesp > 1) {
+  return redirect("/index");
+}
+
+const { data: inscriptionData, error: inscriptionError } = await supabase
+  .from("inscription")
+  .select("id, race, profile!inner(id, full_name, steam_id, team!inner(name)), valid_laps, car!inner(brand!inner(name), model, class!inner(short_name, class_design))")
+  .order("position", { ascending: true });
+
+if (inscriptionError) {
+  console.error("Error fetching inscriptions:", inscriptionError);
+}
+
+const { data: inscriptionCalendarData, error: inscriptionCalendarError } = await supabase
+  .from("inscriptionscalendar")
+.select("*, championship!inner(id, name)")
+  .order("id", { ascending: true });
+
+if (inscriptionCalendarError) {
+  console.error("Error fetching inscription calendar:", inscriptionCalendarError);
+}
+
+const { data: allChamps, error: allChampsError } = await supabase
+  .from("championship")
+  .select("id, name")
+  .order("name", { ascending: true });
+
+const championships = (allChamps ?? []).map((champ) => ({
+  id: champ.id,
+  name: champ.name ?? "",
+})).filter((champ) => champ.name !== "");
+
+---
+
+<Layout title="ESP Racing: Administrar Inscripciones">
+  <h2 class="text-5xl font-extrabold border-b-2 border-primary w-full">
+    Administración de Inscripciones
+  </h2>
+  <div class="mt-8">
+    <AdminInscriptionsManager
+      client:load
+      inscriptions={(inscriptionData ?? []).map((item: any) => ({
+        id: item.id,
+        race: item.race,
+        profile: item.profile,
+        valid_laps: item.valid_laps,
+        car: item.car,
+        profileId: item.profile?.id,
+        fullName: item.profile?.full_name,
+        steamId: item.profile?.steam_id,
+        teamName: item.profile?.team?.name,
+        carBrand: item.car?.brand?.name,
+        carModel: item.car?.model,
+        carClassShortName: item.car?.class?.short_name,
+        carClassDesign: item.car?.class?.class_design,
+      }))}
+      calendar={inscriptionCalendarData ?? []}
+      championships={championships}
+    />
+  </div>
+</Layout>

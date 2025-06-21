@@ -1,0 +1,162 @@
+---
+import Layout from "@/layouts/ProfileLayout.astro";
+import { supabase } from "@/db/supabase";
+import TeamImageUpload from "@/components/TeamImageUpload";
+
+const { id } = Astro.params;
+const { cookies, redirect } = Astro;
+
+if (!id) {
+  return redirect("/admin/adminraces");
+}
+
+const accessToken = cookies.get("sb-access-token");
+const refreshToken = cookies.get("sb-refresh-token");
+
+if (!accessToken || !refreshToken) {
+  return redirect("/login");
+}
+
+// Set the session with the cookies
+const { data: dataAuth, error: errorAuth } = await supabase.auth.setSession({
+  refresh_token: refreshToken.value,
+  access_token: accessToken.value,
+});
+
+// If there is an error, delete the cookies and redirect to login
+if (errorAuth) {
+  cookies.delete("sb-access-token", {
+    path: "/",
+  });
+  cookies.delete("sb-refresh-token", {
+    path: "/",
+  });
+
+  return redirect("/login");
+}
+
+const idAuth = dataAuth?.user?.id || "";
+
+const { data: roleData } = await supabase
+  .from("profiles")
+  .select("roleesp")
+  .eq("id", idAuth)
+  .single();
+
+if (roleData == null || roleData.roleesp == null || roleData.roleesp > 1) {
+  return redirect("/index");
+}
+
+const { data: teamData } = await supabase
+  .from("team")
+  .select("*")
+  .eq("id", parseInt(id))
+  .single();
+---
+
+<Layout title="ESP Racing: Modificación datos de equipo">
+  <h2 class="text-5xl font-bold border-b border-primary w-fit mx-auto">
+    Modificar Datos de Equipo
+  </h2>
+  <form id="editTeamForm" class="flex flex-col mt-5">
+    <label class="mt-5 text-lg font-semibold" for="name">
+      Nombre del Equipo:
+    </label>
+    <input
+      type="text"
+      name="name"
+      value={teamData?.name}
+      class="bg-darkSecond text-lightPrimary text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
+    />
+
+    <label class="mt-5 text-lg font-semibold" for="imageTeam">
+      Imagen de equipo
+    </label>
+    <input
+      type="text"
+      id="imageTeam"
+      name="imageTeam"
+      value={teamData?.image}
+      class="bg-darkSecond text-lightPrimary text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
+    />
+
+    <label class="mt-5 text-lg font-semibold" for="descriptionTeam">
+      Descripción del equipo
+    </label>
+    <textarea
+      id="descriptionTeam"
+      name="descriptionTeam"
+      placeholder="Descripción del equipo"
+      class="bg-darkSecond text-lightPrimary text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px max-h-96 min-h-28 resize-y"
+    >{teamData?.description}
+    </textarea>
+
+    <input type="hidden" name="team_id" value={id} />
+
+    <div>
+      <button
+        type="submit"
+        class="py-1.5 px-3 w-fit mr-2 bg-darkPrimary text-white border-[#29dd38] border-2 rounded-md my-4 font-medium text-lg hover:bg-[#29dd38] hover:text-darkPrimary"
+      >
+        Aceptar
+      </button>
+
+      <button
+        type="button"
+        onclick="window, location.href = '/admin/adminteams'"
+        class="py-1.5 px-3 w-fit bg-darkPrimary text-white border-primary border-2 rounded-md my-4 font-medium text-lg hover:bg-primary hover:text-darkPrimary"
+      >
+        Cancelar
+      </button>
+    </div>
+  </form>
+  <div class="w-11/12">
+    <TeamImageUpload
+      client:load
+      teamId={parseInt(id || "0")}
+      currentImageUrl={teamData?.image || "https://tavjuyhbdqnkgsosdymq.supabase.co/storage/v1/object/public/teamavatar//default.webp"}
+      onUploadComplete={(imageUrl: string) => {
+        console.log("Upload complete:", imageUrl)
+        return null;
+      }}
+    />
+  </div>
+
+</Layout>
+
+<script>
+import { showToast } from "@/lib/utils";
+
+  const form = document.getElementById("editTeamForm") as HTMLFormElement;
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const formData = new FormData(form);
+
+    try {
+      const response = await fetch("/api/admin/team/editteam", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        console.error("Error en la respuesta del servidor:", response.statusText);
+        showToast("Error en la respuesta del servidor", "error");
+        throw new Error("Error en la respuesta del servidor");
+      }
+
+      const result = await response.json();
+
+      if (result.success) {
+        showToast("Equipo actualizada con éxito", "success");
+        window.location.href = "/admin/adminteams";
+      } else {
+        console.error("Error al actualizar el equipo:", result.error);
+        showToast(result.error || "Error desconocido", 'error');
+        throw new Error(result.error || "Error desconocido");
+      }
+    } catch (error) {
+      console.error("Error al actualizar el equipo:", error);
+      showToast("Hubo un error al actualizar el equipo. Por favor, inténtalo de nuevo.", 'error');
+    }
+  });
+</script>

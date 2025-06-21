@@ -1,0 +1,206 @@
+---
+import Layout from "@/layouts/ProfileLayout.astro";
+import { supabase } from "@/db/supabase";
+import { DataTable } from "@/components/data-table";
+import { showToast } from "@/lib/utils";
+
+const { cookies, redirect } = Astro;
+
+const accessToken = cookies.get("sb-access-token");
+const refreshToken = cookies.get("sb-refresh-token");
+
+if (!accessToken || !refreshToken) {
+  return redirect("/login");
+}
+
+// Set the session with the cookies
+const { data: dataAuth, error: errorAuth } = await supabase.auth.setSession({
+  refresh_token: refreshToken.value,
+  access_token: accessToken.value,
+});
+
+// If there is an error, delete the cookies and redirect to login
+if (errorAuth) {
+  cookies.delete("sb-access-token", {
+    path: "/",
+  });
+  cookies.delete("sb-refresh-token", {
+    path: "/",
+  });
+
+  return redirect("/login");
+}
+
+const id = dataAuth?.user?.id || "";
+
+const { data: userData } = await supabase
+  .from("profiles")
+  .select("roleesp")
+  .eq("id", id)
+  .single();
+
+if (userData == null || userData.roleesp == null || userData.roleesp > 1) {
+  return redirect("/index");
+}
+
+
+// get_circuit_layouts_count (función Supabase)
+//   SELECT c.id, c.name, c.location, COUNT(cl.id) AS layouts_count
+//   FROM circuit c
+//   LEFT JOIN circuitLayout cl ON c.id = cl.circuit
+//   GROUP BY c.id;
+const { data: circuitData, error: circuitDataError } = await supabase
+  .rpc('get_circuit_layouts_count');
+
+if(circuitDataError) {
+  console.error(circuitDataError);
+}
+
+circuitData?.sort((a, b) => a.circuit_name.localeCompare(b.circuit_name));
+
+// Extraer países únicos de las ubicaciones
+const extractCountry = (location: string | null) => {
+  if (!location) return '';
+  // Dividir por coma y tomar el último elemento (o el penúltimo si el último es un código de estado)
+  const parts = location.split(',').map(part => part.trim());
+  if (parts.length === 1) return parts[0];
+  else return parts[parts.length - 1];
+};
+
+// Obtener países únicos
+const countries = [...new Set(circuitData?.map(circuit =>
+  extractCountry(circuit.circuit_location)).filter(Boolean))].sort();
+
+const circuitDataWithCountry = circuitData?.map(circuit => ({
+  ...circuit,
+  country: extractCountry(circuit.circuit_location)
+})) || [];
+
+// Definición de columnas para el DataTable
+const columns = [
+  { header: "Nombre", accessor: "circuit_name" },
+  { header: "Lugar", accessor: "circuit_location" },
+  { header: "Nº Layouts", accessor: "layouts_count" }
+];
+---
+
+<Layout title="ESP Racing: Administrar Circuitos">
+  <h2 class="text-5xl font-extrabold border-b-2 border-primary w-full">
+    Administración de Circuitos
+  </h2>
+
+  <div class="py-4 mx-auto text-center" style="width: 99%">
+    <p class="text-5xl font-bold border-b border-primary w-fit mx-auto">
+      Lista de Circuitos del Sistema
+    </p>
+
+    <div class="mt-6">
+      <DataTable
+        client:only="react"
+        data={circuitDataWithCountry || []}
+        columns={columns}
+        onEdit={{ path: "circuits" }}
+        onDelete={{ path: "circuit" }}
+        pageSize={10}
+        filterOptions={countries}
+        filterAccessor="country"
+        initialSortConfig={{key: "circuit_name", direction: "asc"}}
+        searchable={true}
+        searchPlaceholder="Buscar por nombre del circuito o localización"
+        searchableColumns={[
+          {accessor: "circuit_name"},
+          {accessor: "circuit_location"}
+        ]}
+      />
+    </div>
+  </div>
+
+  <div class="py-4 mx-auto text-center" style="width: 99%">
+    <p class="text-5xl font-bold border-b border-primary w-fit mx-auto">
+      Añadir Nuevo Circuito
+    </p>
+
+    <div class="box-border p-5 m-auto bg-darkPrimary rounded-md max-w-screen-2xl border border-primary">
+      <form id="uploadForm" data-astro-reload>
+        <div class="mb-6 p-6 border-2 border-primary rounded-lg bg-darkSecond">
+          <div class="mb-4">
+            <label class="block text-lightPrimary text-lg font-semibold mb-3">
+              Arrastra la carpeta del circuito aquí
+            </label>
+            <div
+              id="dropZone"
+              class="flex flex-col items-center justify-center p-8 border-2 border-dashed border-primary rounded-lg bg-darkSecond text-lightPrimary cursor-pointer min-h-[150px] transition-colors hover:border-primary-dark"
+              >
+              <svg class="w-12 h-12 mb-3 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+              </svg>
+              <span class="text-sm font-medium">Arrastra y suelta tu carpeta aquí</span>
+              <span class="text-xs text-lightSecond mt-1">o haz clic para seleccionar</span>
+            </div>
+          </div>
+        </div>
+
+        <label class="text-lightPrimary text-lg font-medium" for="circuitshotname">
+          Nombre corto del circuito
+        </label>
+        <input
+          class="w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkSecond hover:border-primary"
+          type="text"
+          id="circuitshotname"
+          name="circuitshotname"
+          placeholder="ej: Hockenheimring Baden-Württemberg -> Hockenheim"
+        />
+
+        <div class="flex items-center gap-2">
+          <label class="relative inline-flex cursor-pointer">
+            <input id="switch-clean_install" type="checkbox" class="peer sr-only" />
+            <label for="switch-clean_install" class="hidden"></label>
+            <div
+              class="peer h-4 w-11 rounded-full border bg-slate-200 after:absolute after:-top-1 after:left-0 after:h-6 after:w-6 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-full peer-focus:ring-primary"
+            >
+            </div>
+          </label>
+          <label class="text-lightPrimary text-lg font-medium" for="switch-clean_install">
+            Instalación limpia
+          </label>
+          <lable class = "text-lightSecond text-sm from-thin">
+          *(Recomendado activar para actualización de circuitos ya en el sistema)
+        </lable>
+        </div>
+
+        <input
+          class="bg-primary text-white font-bold py-3 px-5 border-solid border-primary border-2 rounded-md hover:bg-darkSecond hover:text-lightPrimary mt-4"
+          type="submit"
+          value="Añadir"
+        />
+
+        <div id="fileInfo" class="my-4 hidden">
+          <div class="text-sm text-lightPrimary bg-darkPrimary p-3 rounded-lg border border-primary">
+            <h3 class="text-lg font-bold mb-2">Información detectada:</h3>
+            <div id="preview">
+              <div class="grid grid-cols-2 gap-4 text-left">
+                <div>
+                  <p><span class="font-semibold">Nombre del circuito:</span> <span id="previewName"></span></p>
+                  <p><span class="font-semibold">Ubicación:</span> <span id="previewLocation"></span></p>
+                  <p><span class="font-semibold">Carpeta:</span> <span id="previewFolder"></span></p>
+                </div>
+                <div>
+                  <p class="font-semibold mb-2">Variantes detectadas:</p>
+                  <ul id="previewVariants" class="list-disc pl-4"></ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  import { initCircuitManagement } from "@/lib/admin/circuits/circuitManagment";
+
+  initCircuitManagement();
+  document.addEventListener("astro:page-load", initCircuitManagement);
+</script>

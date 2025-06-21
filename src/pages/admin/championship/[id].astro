@@ -1,0 +1,333 @@
+---
+import Layout from "@/layouts/ProfileLayout.astro";
+import { supabase } from "@/db/supabase";
+import { DataTable } from "@/components/data-table";
+import EditChampCars from "@/components/EditChampCars";
+import ChampionshipPosterUpload from "@/components/ChampionshipPosterUpload";
+
+const { id } = Astro.params;
+const { cookies, redirect } = Astro;
+
+if (!id) {
+  return redirect("/admin/adminraces");
+}
+
+const accessToken = cookies.get("sb-access-token");
+const refreshToken = cookies.get("sb-refresh-token");
+
+if (!accessToken || !refreshToken) {
+  return redirect("/login");
+}
+
+// Set the session with the cookies
+const { data: dataAuth, error: errorAuth } = await supabase.auth.setSession({
+  refresh_token: refreshToken.value,
+  access_token: accessToken.value,
+});
+
+// If there is an error, delete the cookies and redirect to login
+if (errorAuth) {
+  cookies.delete("sb-access-token", {
+    path: "/",
+  });
+  cookies.delete("sb-refresh-token", {
+    path: "/",
+  });
+
+  return redirect("/login");
+}
+
+const idAuth = dataAuth?.user?.id || "";
+
+const { data: roleData } = await supabase
+  .from("profiles")
+  .select("roleesp")
+  .eq("id", idAuth)
+  .single();
+
+if (roleData == null || roleData.roleesp == null || roleData.roleesp > 1) {
+  return redirect("/index");
+}
+
+const { data: champsData } = await supabase
+  .from("championship")
+  .select("*")
+  .eq("id", parseInt(id))
+  .single();
+
+const {data: champWinnersData} = await supabase
+  .from("champwinners")
+  .select("id, winner, isTeam, category, car_name")
+  .eq("championship", parseInt(id))
+  .order("id", { ascending: true });
+
+const isTeamData = champWinnersData?.map((winner) => {
+  return {
+    ...winner,
+    isTeam: winner.isTeam ? "Equipo" : "Piloto",
+  };
+});
+
+const columns = [
+  { header: "Nombre", accessor: "winner" },
+  { header: "Tipo", accessor: "isTeam" },
+  { header: "Categoría", accessor: "category" },
+  { header: "Coche", accessor: "car_name" },
+];
+
+const serializedChampWinnersData = isTeamData? JSON.parse(JSON.stringify(isTeamData)): [];
+
+let publicPosterUrl: string | null = null;
+if (champsData?.champ_img) {
+  // Usar la API interna para obtener la URL pública del póster
+  publicPosterUrl = `/api/admin/championship/getposter?name=poster_${id}.webp`;
+}
+
+// Función para formatear la temporada igual que en adminchampionship.astro
+const formatSeason = (season: string) => {
+  if (season === "0") return "Sin Temporada / Otra";
+  if (season.length === 4 && !isNaN(Number(season))) {
+    const firstPart = parseInt(season.substring(0, 2));
+    const secondPart = parseInt(season.substring(2, 4));
+    const startYear = 2000 + firstPart;
+    const endYear = 2000 + secondPart;
+    return `${startYear}/${endYear}`;
+  }
+  return season;
+};
+
+// Obtener temporadas únicas del sistema (solo para el select)
+const { data: allChamps } = await supabase
+  .from("championship")
+  .select("season")
+  .order("season", { ascending: true });
+
+const seasons = [...new Set((allChamps || []).map(item => item.season))].filter(Boolean).sort();
+const seasonOptions = seasons.map(season => ({ value: season, label: formatSeason(season ? season : "0") }));
+---
+
+<Layout title="ESP Racing: Modificación datos de campeonato">
+  <h2 class="text-5xl font-bold border-b border-primary w-fit mx-auto">
+    Modificar Datos de Campeonato
+  </h2>
+  <form id="editChampForm" class="flex flex-col mt-5">
+    <label class="mt-5 text-lg font-semibold" for="name">
+      Nombre de Campeonato:
+    </label>
+    <input
+      type="text"
+      name="name"
+      value={champsData?.name}
+      class="bg-darkSecond text-lightPrimary text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
+    />
+
+    <label class="mt-5 text-lg font-semibold" for="keySearchAPI">
+      Keysearch del campeonato (sentencia para buscar el campeonato en la API
+      del servidor)
+    </label>
+    <input
+      type="text"
+      id="keySearchAPI"
+      name="keySearchAPI"
+      value={champsData?.key_search}
+      class="bg-darkSecond text-lightPrimary text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
+    />
+
+    <label class="mt-5 text-lg font-semibold" for="numbertotalraces">
+      Número de carreras totales del campeonato
+    </label>
+    <input
+      type="number"
+      step="1"
+      min="1"
+      max="32760"
+      name="numbertotalraces"
+      value={champsData?.number_of_races_total}
+      class="bg-darkSecond text-lightPrimary text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
+    />
+
+    <label class="mt-5 text-lg font-semibold" for="season">
+      Temporada a la que pertenece
+    </label>
+    <select
+      class="w-11/12 p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkSecond hover:border-primary"
+      id="season"
+      name="season"
+      value={champsData?.season}
+    >
+      {seasonOptions.map(opt => (
+        <option value={opt.value} selected={champsData?.season === opt.value}>{opt.label}</option>
+      ))}
+    </select>
+
+    <label class="mt-5 text-lg font-semibold" for="yearChamp">
+      Año de inicio del campeonato
+    </label>
+    <input
+      type="number"
+      step="1"
+      min="1"
+      max="32760"
+      name="yearChamp"
+      value={champsData?.year}
+      class="bg-darkSecond text-lightPrimary text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
+    />
+
+    <div class="mb-4">
+      <label class="text-lightPrimary text-lg font-medium" for="champORevent">
+        ¿Es un evento suelto o un campeonato completo?
+      </label>
+      <div class="flex items-center gap-2 mt-2">
+        <label class="relative inline-flex cursor-pointer">
+          <input
+            id="champORevent"
+            name="champORevent"
+            type="checkbox"
+            class="sr-only peer"
+            checked={champsData?.ischampionship}
+          />
+          <div
+            class="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-primary dark:peer-focus:ring-primary dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary"
+          >
+          </div>
+        </label>
+        <span id="eventTypeText" class="text-lightPrimary text-sm font-medium">
+          {champsData?.ischampionship ? "Campeonato completo" : "Evento suelto"}
+        </span>
+      </div>
+    </div>
+
+    <div class="mb-4"></div>
+    <label class="text-lightPrimary text-lg font-medium" for="isFinished">
+      ¿El campeonato ha finalizado?
+    </label>
+    <div class="flex items-center gap-2 mt-2">
+      <label class="relative inline-flex cursor-pointer">
+        <input
+          id="isFinished"
+          name="isFinished"
+          type="checkbox"
+          class="sr-only peer"
+          checked={champsData?.isfinished}
+        />
+        <div
+          class="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-primary dark:peer-focus:ring-primary dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary"
+        >
+        </div>
+      </label>
+      <span id="isFinishedText" class="text-lightPrimary text-sm font-medium">
+        {champsData?.isfinished ? "Finalizado" : "No finalizado"}
+      </span>
+    </div>
+
+    <input type="hidden" name="champ_id" value={id} />
+    <div>
+      <button
+        type="submit"
+        class="py-1.5 px-3 w-fit mr-2 bg-darkPrimary text-white border-[#29dd38] border-2 rounded-md my-4 font-medium text-lg hover:bg-[#29dd38] hover:text-darkPrimary"
+      >
+        Aceptar
+      </button>
+
+      <button
+        type="button"
+        onclick="window, location.href = '/admin/adminchampionship'"
+        class="py-1.5 px-3 w-fit bg-darkPrimary text-white border-primary border-2 rounded-md my-4 font-medium text-lg hover:bg-primary hover:text-darkPrimary"
+      >
+        Volver / Cancelar
+      </button>
+    </div>
+  </form>
+  <div class="w-11/12">
+    <ChampionshipPosterUpload
+      client:load
+      championshipId={Number(id)}
+      currentPosterUrl={publicPosterUrl}
+      onUploadComplete={(imageName: string) => {
+        console.log("Upload complete:", imageName)
+        return null;
+      }}
+    />
+  </div>
+  <div class = 'w-11/12'>
+    <h3 class="mt-4 text-4xl font-bold w-fit mx-auto">
+      Modificar Campeones del Campeonato
+    </h3>
+    <div class="text-center">
+      <DataTable
+        client:only="react"
+        data={serializedChampWinnersData}
+        columns={columns}
+        onDelete={{ path: "champwinner" }}
+        pageSize={10}
+        searchable={false}
+      />
+    </div>
+
+    <EditChampCars champId={parseInt(id)} client:load />
+  </div>
+
+</Layout>
+
+<script>
+import { showToast } from "@/lib/utils";
+
+  
+  const form = document.getElementById("editChampForm") as HTMLFormElement;
+
+  const isEventSwitch = document.getElementById("champORevent") as HTMLInputElement;
+  const eventTypeText = document.getElementById("eventTypeText");
+
+  if (isEventSwitch && eventTypeText) {
+    isEventSwitch.addEventListener("change", () => {
+      if (isEventSwitch.checked) {
+        eventTypeText.textContent = "Campeonato completo";
+      } else {
+        eventTypeText.textContent = "Evento suelto";
+      }
+    });
+  }
+
+  const isFinishedSwitch = document.getElementById("isFinished") as HTMLInputElement;
+  const isFinishedText = document.getElementById("isFinishedText");
+
+  if (isFinishedSwitch && isFinishedText) {
+    isFinishedSwitch.addEventListener("change", () => {
+      if (isFinishedSwitch.checked) {
+        isFinishedText.textContent = "Finalizado";
+      } else {
+        isFinishedText.textContent = "No finalizado";
+      }
+    });
+  }
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const formData = new FormData(form);
+    // Obtener coches seleccionados
+    const selectedCars = formData.getAll("carsChamp");
+
+    try {
+      const response = await fetch("/api/admin/championship/editchampionship", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error en la respuesta del servidor: ${response.status}`);
+      }
+
+      const result = await response.json();
+
+      if (result.success) {
+        showToast("Campeonato actualizado con éxito", "success");
+        window.location.href = "/admin/adminchampionship";
+      } else {
+        throw new Error(result.error || "Error desconocido");
+      }
+    } catch (error) {
+      console.error("Error al actualizar el campeonato:", error);
+      showToast(`Error al actualizar el campeonato: ${error}`, "error");
+    }
+  });
+</script>

@@ -1,15 +1,20 @@
 import type { APIRoute } from "astro";
-import { supabase } from "@/lib/supabase";
-import { turso } from "@/turso";
-
+import { supabase } from "@/db/supabase";
+import type { Provider } from "@supabase/supabase-js";
 
 export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const formData = await request.formData();
-  const email = formData.get("email")?.toString();
-  const password = formData.get("password")?.toString();
+  const emailValue = formData.get("email");
+  const passwordValue = formData.get("password");
+
+  const email = typeof emailValue === "string" ? emailValue : undefined;
+  const password = typeof passwordValue === "string" ? passwordValue : undefined;
 
   if (!email || !password) {
-    return new Response("Correo electrónico y contraseña obligatorios", { status: 400 });
+    return new Response(
+      JSON.stringify({ error: "Correo electrónico y contraseña obligatorios" }),
+      { status: 400 }
+    );
   }
 
   const { data, error } = await supabase.auth.signInWithPassword({
@@ -18,16 +23,36 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   });
 
   if (error) {
-    return new Response(error.message, { status: 500 });
+    return new Response(
+      JSON.stringify({ error: "Credenciales incorrectas" }),
+      { status: 401 }
+    );
   }
 
   const { access_token, refresh_token } = data.session;
-  cookies.set("sb-access-token", access_token, {
-    path: "/",
-  });
-  cookies.set("sb-refresh-token", refresh_token, {
-    path: "/",
-  });
+  cookies.set("sb-access-token", access_token, { path: "/" });
+  cookies.set("sb-refresh-token", refresh_token, { path: "/" });
 
-  return redirect("/myprofile");
+  return new Response(JSON.stringify({ success: true }), { status: 200 });
+};
+
+export const GET: APIRoute = async ({ request, redirect }) => {
+  const url = new URL(request.url);
+  const baseUrl = url.origin;
+  const provider = url.searchParams.get("provider");
+  const validProviders = ["google", "github", "apple"];
+
+  if (provider && validProviders.includes(provider)) {
+    const { data: signInOAuth, error: signInOAuthError } = await supabase.auth.signInWithOAuth({
+      provider: provider as Provider,
+      options: {
+        redirectTo: `${baseUrl}/api/auth/callback`,
+      },
+    });
+    if (signInOAuthError) {
+      return new Response(JSON.stringify({ error: signInOAuthError.message }), { status: 500 });
+    }
+    return redirect(signInOAuth.url);
+  }
+  return new Response("Provider inválido o no especificado", { status: 400 });
 };

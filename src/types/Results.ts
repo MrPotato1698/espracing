@@ -6,6 +6,8 @@ export interface RaceData{
   BestSector: BestSector [];
   Incident: Incident [];
   RaceConfig: RaceConfig;
+  RaceDriversResume: RaceDriversResume [];
+  RaceCarResume: RaceCarResume [];
 }
 
 export interface RaceResult {
@@ -26,11 +28,13 @@ export interface RaceResult {
   LedLaps: number;
   Ballast: number;
   Restrictor: number;
+  Split: number;
 }
 
 export interface RaceLap{
   DriverName: string;
   SteamID: string;
+  Split: number;
   Laps: Lap [];
   Average: number[];
   Best: number[];
@@ -69,6 +73,7 @@ export interface BestSector{
   SectorNumber: number;
   DriverName: string;
   SteamID: string;
+  Split: number;
   CarFileName: string;
   BestSector: number;
 }
@@ -92,4 +97,18 @@ export interface RaceConfig{
   RaceDurationTime: number;
   RaceDurationLaps: number;
   DisableP2P: boolean;
+  NumberofSplits: number;
+}
+
+export interface RaceDriversResume{
+  DriverName: string;
+  SteamID: string;
+  Position: number;
+  PolePosition: boolean;
+  BestLap: Boolean;
+}
+
+export interface RaceCarResume{
+  CarFileName: string;
+  numberOfCars: number;
 }

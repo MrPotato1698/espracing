@@ -1,16 +1,25 @@
 ---
+import { Image } from "astro:assets";
+import Twitter from "@/assets/social/brand-x.svg";
+import Instagram from "@/assets/social/brand-instagram.svg";
+import Paypal from "@/assets/social/brand-paypal.svg";
+import Discord from "@/assets/social/brand-discord.svg";
+import Youtube from "@/assets/social/brand-youtube.svg";
+import Twitch from "@/assets/social/brand-twitch.svg";
+import ESPRacing from "@/assets/imgresource/ESPRACINGLogoBlanco.webp";
+
 const { cookies, redirect } = Astro;
 
 const accessToken = cookies.get("sb-access-token");
 const refreshToken = cookies.get("sb-refresh-token");
 ---
 
-<footer class="bg-[#0f0f0f] relative">
+<footer class="bg-darkPrimary relative">
   <div class="px-4 py-16 mx-auto space-y-8 max-w-screen-2xl sm:px-6 lg:space-y-16 lg:px-8">
     <div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
       <div>
         <div>
-          <a href ="/"><img src="/img/ESPRACINGLogoBlanco.webp" alt="ESP Racing Logo" class="w-auto h-56" /></a>
+          <a href ="/"><Image src={ESPRacing} alt="ESP Racing Logo" class="w-auto h-56" /></a>
         </div>
 
         <ul class="flex gap-6 mt-8">
@@ -18,7 +27,7 @@ const refreshToken = cookies.get("sb-refresh-token");
             <a
               href="https://x.com/EspRacingCom" target="_blank">
               <span class="sr-only">X (previously Twitter)</span>
-              <img class="w-8 .p-2 invert" src="/img/social/brand-x.svg" alt="Twitter ESP Racing" />
+              <Image class="w-8 .p-2 invert" src={Twitter} alt="Twitter ESP Racing" />
             </a>
           </li>
 
@@ -26,35 +35,35 @@ const refreshToken = cookies.get("sb-refresh-token");
             <a
             href="https://www.instagram.com/espsimracingoficial/" target="_blank">
             <span class="sr-only">Instagram</span>
-            <img class="w-8 .p-2 invert" src="/img/social/brand-instagram.svg" alt="Instagram ESP Racing" />
+            <Image class="w-8 .p-2 invert" src={Instagram} alt="Instagram ESP Racing" />
           </a>
           </li>
 
           <li>
             <a href="https://discord.gg/hjawMXGU6k" target="_blank">
               <span class="sr-only">Discord</span>
-              <img class="w-8 .p-2 invert" src="/img/social/brand-discord.svg" alt="Discord ESP Racing" />
+              <Image class="w-8 .p-2 invert" src={Discord} alt="Discord ESP Racing" />
             </a>
           </li>
 
           <li>
             <a href="https://www.youtube.com/@esp-racing-com-es" target="_blank">
               <span class="sr-only">Youtube</span>
-              <img class="w-8 .p-2 invert" src="/img/social/brand-youtube.svg" alt="Youtube ESP Racing" />
+              <Image class="w-8 .p-2 invert" src={Youtube} alt="Youtube ESP Racing" />
             </a>
           </li>
 
           <li>
             <a href="https://www.twitch.tv/sergig_" target="_blank">
               <span class="sr-only">Twitch</span>
-              <img class="w-8 .p-2 invert" src="/img/social/brand-twitch.svg" alt="Twitch ESP Racing" />
+              <Image class="w-8 .p-2 invert" src={Twitch} alt="Twitch ESP Racing" />
             </a>
           </li>
 
           <li>
             <a href="https://www.paypal.com/es/home" target="_blank">
               <span class="sr-only">Paypal</span>
-              <img class="w-8 .p-2 invert" src="/img/social/brand-paypal.svg" alt="Paypal ESP Racing" />
+              <Image class="w-8 .p-2 invert" src={Paypal} alt="Paypal ESP Racing" />
             </a>
           </li>
 
@@ -63,124 +72,104 @@ const refreshToken = cookies.get("sb-refresh-token");
 
       <div class="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:col-span-2 lg:grid-cols-5">
         <div>
-          <p class="font-medium text-white">Inicio</p>
+          <p class="font-medium text-lightPrimary">Inicio</p>
 
           <ul class="mt-6 space-y-4 text-sm">
             <li>
-              <a href="/news" class="text-gray-300 transition hover:text-[#da392b]"> Noticias </a>
+              <a href="/news" class="text-gray-300 transition hover:text-primary"> Noticias </a>
             </li>
 
             <li>
-              <a href="/about" class="text-gray-300 transition hover:text-[#da392b]"> Sobre Nosotros </a>
+              <a href="/about" class="text-gray-300 transition hover:text-primary"> Sobre Nosotros </a>
             </li>
 
             <li>
-              <a href="/faq" class="text-gray-300 transition hover:text-[#da392b]"> Preguntas Frecuentes </a>
+              <a href="/faq" class="text-gray-300 transition hover:text-primary"> Preguntas Frecuentes </a>
             </li>
 
             <li>
-              <a href="/contact" class="text-gray-300 transition hover:text-[#da392b]"> Contacto </a>
+              <a href="/contact" class="text-gray-300 transition hover:text-primary"> Contacto </a>
             </li>
 
           </ul>
         </div>
 
         <div>
-          <p class="font-medium text-white">Campeonato Actual</p>
+          <p class="font-medium text-lightPrimary">Campeonato Actual</p>
 
           <ul class="mt-6 space-y-4 text-sm">
             <li>
-              <a href="/actualchamp" class="text-gray-300 transition hover:text-[#da392b]"> Información </a>
+              <a href="/actualchamp" class="text-gray-300 transition hover:text-primary"> Información </a>
             </li>
 
             <li>
-              <a href="/rules" class="text-gray-300 transition hover:text-[#da392b]"> Normativa </a>
+              <a href="/rules" class="text-gray-300 transition hover:text-primary"> Normativa </a>
             </li>
 
             <li>
-              <a href="/resultsactualchampsraces" class="text-gray-300 transition hover:text-[#da392b]"> Resultados de Carreras </a>
+              <a href="/globalresults" class="text-gray-300 transition hover:text-primary"> Estadisticas de Carreras </a>
             </li>
 
             <li>
-              <a href="/resultsactualchamps" class="text-gray-300 transition hover:text-[#da392b]"> Resultados de Campeonatos </a>
+              <a href="/globalchampresults" class="text-gray-300 transition hover:text-primary"> Estadisticas de Campeonatos </a>
             </li>
 
             <li>
-              <a href="#" class="text-gray-300 transition hover:text-[#da392b]"> Incripciones </a>
+              <a href="/inscriptions" class="text-gray-300 transition hover:text-primary"> Incripciones </a>
             </li>
           </ul>
         </div>
 
         <div>
-          <p class="font-medium text-white">Carreras Pasadas</p>
+          <p class="font-medium text-lightPrimary">El Pasado de ESP Racing</p>
 
           <ul class="mt-6 space-y-4 text-sm">
             <li>
-              <a href="/pastchamps/2021" class="text-gray-300 transition hover:text-[#da392b]"> Año 2021 </a>
-            </li>
-
-            <li>
-              <a href="/pastchamps/2022" class="text-gray-300 transition hover:text-[#da392b]"> Año 2022 </a>
-            </li>
-
-            <li>
-              <a href="/pastchamps/2023" class="text-gray-300 transition hover:text-[#da392b]"> Año 2023 </a>
-            </li>
-
-            <li>
-              <a href="/pastchamps/2024" class="text-gray-300 transition hover:text-[#da392b]"> Año 2024 </a>
-            </li>
-
-            <li>
-              <a href="/globalresults" class="text-gray-300 transition hover:text-[#da392b]"> Estadisticas de Carreras </a>
-            </li>
-
-            <li>
-              <a href="/globalchampresults" class="text-gray-300 transition hover:text-[#da392b]"> Estadisticas de Campeonatos </a>
+              <a href="/pastchamps" class="text-gray-300 transition hover:text-primary"> Ver Pasado </a>
             </li>
 
           </ul>
         </div>
 
         <div>
-          <p class="font-medium text-white">Extras</p>
+          <p class="font-medium text-lightPrimary">Extras</p>
 
           <ul class="mt-6 space-y-4 text-sm">
             <li>
-              <a href="/drivers" class="text-gray-300 transition hover:text-[#da392b]"> Pilotos </a>
+              <a href="/drivers" class="text-gray-300 transition hover:text-primary"> Pilotos </a>
             </li>
 
             <li>
-              <a href="/teams" class="text-gray-300 transition hover:text-[#da392b]"> Equipos </a>
+              <a href="/teams" class="text-gray-300 transition hover:text-primary"> Equipos </a>
             </li>
 
             <li>
-              <a href="/fuelCalculator" class="text-gray-300 transition hover:text-[#da392b]"> Calculadora de Combustible </a>
+              <a href="/fuelCalculator" class="text-gray-300 transition hover:text-primary"> Calculadora de Combustible </a>
             </li>
 
           </ul>
         </div>
 
         <div>
-          <p class="font-medium text-white">Perfil Usuario</p>
+          <p class="font-medium text-lightPrimary">Perfil Usuario</p>
 
           <ul class="mt-6 space-y-4 text-sm">
           {
             accessToken && refreshToken ? (
               <li>
-                <a href="/myprofile" class="text-gray-300 transition hover:text-[#da392b]"> Mi Perfil </a>
+                <a href="/myprofile" class="text-gray-300 transition hover:text-primary"> Mi Perfil </a>
               </li>
               <form action="/api/auth/signout">
               <li>
-                <button type="submit" class="text-gray-300 transition hover:text-[#da392b]"> Cerrar Sesión </a>
+                <button type="submit" class="text-gray-300 transition hover:text-primary"> Cerrar Sesión </a>
               </li>
               </form>
             ) : (
               <li>
-                <a href="/login" class="text-gray-300 transition hover:text-[#da392b]"> Iniciar Sesión </a>
+                <a href="/login" class="text-gray-300 transition hover:text-primary"> Iniciar Sesión </a>
               </li>
               <li>
-                <a href="/register" class="text-gray-300 transition hover:text-[#da392b]"> Registrase </a>
+                <a href="/register" class="text-gray-300 transition hover:text-primary"> Registrase </a>
               </li>
             )
           }
@@ -191,6 +180,6 @@ const refreshToken = cookies.get("sb-refresh-token");
       </div>
     </div>
 
-    <p class="text-xs text-gray-500">&copy; 2024. ESP Racing. All rights reserved.</p>
+    <p class="text-xs text-gray-500">&copy; 2024-2025. ESP Racing. All rights reserved.</p>
   </div>
 </footer>

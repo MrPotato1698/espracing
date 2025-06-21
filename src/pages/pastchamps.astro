@@ -1,0 +1,20 @@
+---
+import Layout from '@/layouts/NormalLayout.astro';
+import PastChampsViewer from '@/components/PastChampsViewer';
+import { supabase } from '@/db/supabase';
+
+// Obtener años únicos de la tabla championship
+const { data: yearsData } = await supabase
+  .from('championship')
+  .select('year');
+
+const years = Array
+  .from(new Set((yearsData || [])
+  .map((d: any) => d.year)
+  .filter((y: number) => y != null)))
+  .sort((a, b) => a - b);
+---
+
+<Layout title = "ESP Racing: Normativa">
+  <PastChampsViewer years={years} client:only="react" />
+</Layout>

@@ -2,6 +2,7 @@
 import Layout from "@/layouts/NormalLayout.astro";
 import OpenEye from "@/icons/OpenEye.astro";
 import CloseEye from "@/icons/CloseEye.astro";
+import GoogleColor from "@/icons/GoogleColor.astro";
 
 const { cookies, redirect } = Astro;
 
@@ -15,7 +16,7 @@ if (accessToken && refreshToken) {
 
 <Layout title="ESP Racing: Login">
   <div
-    class="absolute bottom-0 left-0 w-full h-full overflow-hidden leading-5 bg-[#f0f0f0] top-72 -z-10 bg-gradient-to-b from-[#da392b] via-[#da392b] to-[#0f0f0f]"
+    class="absolute bottom-0 left-0 w-full h-full overflow-hidden leading-5 bg-[#f0f0f0] top-72 -z-10 bg-gradient-to-b from-primary via-primary to-darkPrimary"
   >
   </div>
 
@@ -25,7 +26,7 @@ if (accessToken && refreshToken) {
     <div
       class="z-10 flex flex-col self-center lg:px-14 sm:max-w-4xl xl:max-w-md"
     >
-      <div class="flex-col self-start hidden text-[#f9f9f9] lg:flex">
+      <div class="flex-col self-start hidden text-lightPrimary lg:flex">
         <h1 class="my-3 text-4xl font-semibold">Bienvenido de vuelta</h1>
         <p class="pr-3 text-sm opacity-90">
           En ESP Racing nos alegra volver a verte de nuevo por aquí, esperando a que
@@ -35,18 +36,16 @@ if (accessToken && refreshToken) {
     </div>
 
     <form
-      action="/api/auth/signin"
-      method="post"
-      class="z-10 flex self-center justify-center"
-      data-astro-reload
+  id="loginForm"
+  class="z-10 flex self-center justify-center"
     >
-      <div class="p-12 mx-auto bg-white rounded-3xl w-96">
+      <div class="p-12 mx-auto bg-lightPrimary rounded-3xl w-96">
         <div class="mb-7">
           <h3 class="text-2xl font-semibold text-gray-800">Inicia Sesión</h3>
           <p class="text-gray-400">
             ¿Aun no tienes cuenta? <a
               href="/register"
-              class="text-sm text-[#0f0f0f] hover:text-[#da392b]">Registrate</a
+              class="text-sm text-darkPrimary hover:text-primary">Registrate</a
             >
           </p>
         </div>
@@ -54,7 +53,7 @@ if (accessToken && refreshToken) {
         <div class="space-y-6">
           <div class="">
             <input
-              class="w-full px-4 py-3 text-sm text-black bg-gray-200 border border-gray-200 rounded-lg focus:bg-gray-100 focus:outline-none focus:border-[#0f0f0f] focus:text-black"
+              class="w-full px-4 py-3 text-sm text-darkPrimary bg-gray-200 border border-gray-200 rounded-lg focus:bg-gray-100 focus:outline-none focus:border-darkPrimary focus:text-darkSecond"
               type="text"
               name="email"
               id="email"
@@ -67,7 +66,7 @@ if (accessToken && refreshToken) {
               :type="show ? 'password' : 'text'"
               name="password"
               id="password"
-              class="w-full px-4 py-3 text-sm text-black bg-gray-200 border border-gray-200 rounded-lg focus:bg-gray-100 focus:outline-none focus:border-[#0f0f0f] focus:text-black"
+              class="w-full px-4 py-3 text-sm text-darkPrimary bg-gray-200 border border-gray-200 rounded-lg focus:bg-gray-100 focus:outline-none focus:border-darkPrimary focus:text-darkSecond"
               placeholder="Contraseña"
               />
             <div
@@ -80,7 +79,7 @@ if (accessToken && refreshToken) {
 
           <div class="flex items-center justify-between">
             <div class="ml-auto text-sm">
-              <a href="/modpassword" class="text-[#0f0f0f] hover:text-[#da392b]">
+              <a href="/recoverpassword" class="text-darkPrimary hover:text-primary">
                 ¿Olvidaste tu contraseña?
               </a>
             </div>
@@ -89,7 +88,7 @@ if (accessToken && refreshToken) {
             <button
               id="login"
               type="submit"
-              class="flex justify-center w-full p-3 font-semibold tracking-wide text-gray-100 transition duration-300 ease-in bg-[#da392b] border-2 border-white rounded-lg cursor-pointer hover:border-[#da392b] hover:bg-white hover:text-[#da392b]"
+              class="flex justify-center w-full p-3 font-semibold tracking-wide text-gray-100 transition duration-300 ease-in bg-primary border-2 border-lightPrimary rounded-lg cursor-pointer hover:border-primary hover:bg-lightPrimary hover:text-primary"
             >
               Inicia Sesión
             </button>
@@ -103,11 +102,12 @@ if (accessToken && refreshToken) {
           </div>
           <div class="flex justify-center w-full gap-5">
             <button
-              id="loginGoogle"
-              type="submit"
-              class="flex items-center justify-center w-full p-3 mb-6 text-sm font-medium tracking-wide text-gray-500 transition duration-300 ease-in border border-gray-300 rounded-lg cursor-pointer md:mb-0 hover:border-white hover:bg-[#EA4335] hover:text-white"
+              value="google" name="provider" type="button"
+              id="googleLogin"
+              class="flex items-center justify-center w-full p-3 mb-6 text-sm font-medium tracking-wide text-gray-500 transition duration-300 ease-in border border-gray-300 rounded-lg cursor-pointer md:mb-0 hover:border-lightPrimary hover:bg-[#EA4335] hover:text-lightPrimary"
             >
-              <span>Google</span>
+            <GoogleColor />
+              <span class = "ml-2">Google</span>
             </button>
           </div>
         </div>
@@ -121,3 +121,40 @@ if (accessToken && refreshToken) {
   data-astro-rerun
   src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.js"
 ></script>
+<script>
+  const form = document.getElementById('loginForm') as HTMLFormElement;
+  const googleBtn = document.getElementById('googleLogin') as HTMLButtonElement;
+
+  if (form) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+
+      try {
+        const response = await fetch('/api/auth/signin', {
+          method: 'POST',
+          body: formData
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error);
+        }
+
+        // Redireccionar en caso de éxito
+        window.location.href = '/myprofile';
+      } catch (error: Error | any) {
+        alert(error.message || 'Error al iniciar sesión');
+      }
+    });
+  }
+
+  if (googleBtn) {
+    googleBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      // Redirigir directamente al endpoint con provider=google para evitar CORS
+      window.location.href = '/api/auth/signin?provider=google';
+    });
+  }
+</script>

@@ -1,0 +1,140 @@
+---
+import Layout from "@/layouts/ProfileLayout.astro";
+import { supabase } from "@/db/supabase";
+import { DataTable } from "@/components/data-table";
+import { showToast } from "@/lib/utils";
+
+const { cookies, redirect } = Astro;
+
+const accessToken = cookies.get("sb-access-token");
+const refreshToken = cookies.get("sb-refresh-token");
+
+if (!accessToken || !refreshToken) {
+  return redirect("/login");
+}
+
+// Set the session with the cookies
+const { data: dataAuth, error: errorAuth } = await supabase.auth.setSession({
+  refresh_token: refreshToken.value,
+  access_token: accessToken.value,
+});
+
+// If there is an error, delete the cookies and redirect to login
+if (errorAuth) {
+  cookies.delete("sb-access-token", {
+    path: "/",
+  });
+  cookies.delete("sb-refresh-token", {
+    path: "/",
+  });
+
+  return redirect("/login");
+}
+
+const id = dataAuth?.user?.id || "";
+
+const { data: userData } = await supabase
+  .from("profiles")
+  .select("roleesp")
+  .eq("id", id)
+  .single();
+
+if (userData == null || userData.roleesp == null || userData.roleesp > 1) {
+  return redirect("/index");
+}
+
+const { data: teamData } = await supabase
+  .from("team")
+  .select("id, name")
+  .order("id", { ascending: true });
+
+let numberOFDrivers: number[] = [];
+
+for (const team of teamData || []) {
+  const { data: teamMembers } = await supabase
+    .from("profiles")
+    .select('*', { count: 'exact', head: false })
+    .eq("team", team.id);
+  numberOFDrivers.push(teamMembers?.length || 0);
+}
+
+// Definición de columnas para el DataTable
+const columns = [
+  { header: "Nombre", accessor: "name" },
+  { header: "Nº Pilotos", accessor: "driverCount" }
+];
+
+// Preparar datos para el DataTable
+const tableData = teamData?.map((team, index) => ({
+  id: team.id,
+  name: team.name,
+  driverCount: numberOFDrivers[index]
+})) || [];
+
+---
+
+<Layout title="ESP Racing: Administrar Equipos">
+  <h2 class="text-5xl font-extrabold border-b-2 border-primary w-full">
+    Administración de Equipos
+  </h2>
+
+  <div class="py-4 mx-auto text-center" style="width: 99%">
+    <p class="text-5xl font-bold border-b border-primary w-fit mx-auto">
+      Lista de Equipos del Sistema
+    </p>
+    <div class="mt-6">
+      <DataTable
+        client:only="react"
+        data={tableData}
+        columns={columns}
+        onEdit={{ path: "teams" }}
+        onDelete={{ path: "team" }}
+        pageSize={10}
+        searchable={true}
+        searchPlaceholder="Buscar por nombre de equipo"
+        searchableColumns={[
+          {accessor: "name"}
+        ]}
+      />
+    </div>
+  </div>
+
+</Layout>
+
+<script>
+import { showToast } from "@/lib/utils";
+
+  document.addEventListener("astro:page-load", () => {
+    const deleteButtons = document.querySelectorAll(".delete-item");
+
+    deleteButtons.forEach((button) => {
+      button.addEventListener("click", async (e) => {
+        e.preventDefault();
+        const id = button.getAttribute("data-id");
+
+        if (confirm("¿Estás seguro de que quieres eliminar este equipo?")) {
+          try {
+            const response = await fetch("/api/admin/team/deleteteam", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ id }),
+            });
+
+            if (response.ok) {
+              window.location.reload();
+              showToast("Equipo eliminado correctamente", "success");
+            } else {
+              showToast("Error eliminando equipo", "error");
+              console.error("Error eliminando equipo");
+            }
+          } catch (error) {
+            showToast("Error: "+ error, "error");
+            console.error("Error:", error);
+          }
+        }
+      });
+    });
+  });
+</script>
