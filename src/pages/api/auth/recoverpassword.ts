@@ -13,7 +13,7 @@ export const POST: APIRoute = async ({ request }) => {
   }
 
   try {
-    const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${new URL(request.url).origin}/modpassword`,
     });
 
@@ -24,14 +24,9 @@ export const POST: APIRoute = async ({ request }) => {
       );
     }
 
-    return new Response(
-      JSON.stringify({ success: true }),
-      { status: 200 }
-    );
+    return new Response(JSON.stringify({ success: true }), { status: 200 });
   } catch (error) {
-    return new Response(
-      JSON.stringify({ message: "Error interno del servidor" }),
-      { status: 500 }
-    );
+    console.error("Error en recoverpassword API:", error);
+    return new Response(JSON.stringify({ message: "Error interno del servidor" }), { status: 500 });
   }
 };

@@ -32,9 +32,13 @@ export const POST: APIRoute = async ({ request }) => {
       { status: 200 }
     );
   } catch (error) {
-    console.error('Error al actualizar contraseña:', error);
+    if (error instanceof Error) {
+      console.error('Error al actualizar contraseña:', error.message);
+    } else {
+      console.error('Error al actualizar contraseña:', error);
+    }
     return new Response(
-      JSON.stringify({ error: 'Error al actualizar contraseña' }), 
+      JSON.stringify({ error: 'Error al actualizar contraseña' + (error instanceof Error ? error.message : '') }), 
       { status: 500 }
     );
   }
