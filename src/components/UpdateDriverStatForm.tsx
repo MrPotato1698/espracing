@@ -19,8 +19,8 @@ export function UpdateDriverStatForm({ driverOptions }: Readonly<UpdateDriverSta
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await fetch("/api/admin/stats/newUserStats", {
-        method: "POST",
+      const response = await fetch("/api/admin/stats", { //newUserStats
+        method: "PUT",
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: selectedDriver }),
       });

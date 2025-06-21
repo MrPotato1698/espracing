@@ -234,7 +234,7 @@ const canUpdateFlag: boolean = diffHours > 48;
         </div>
       </>
     )
-    
+
   }
   <div class="grid grid-flow-col mt-8">
           {canUpdateFlag ? (
@@ -255,7 +255,6 @@ const canUpdateFlag: boolean = diffHours > 48;
     </div>
 
   <script>
-    import { showToast } from '@/lib/utils';
     function initializeProfileButton() {
       const disabledButton = document.getElementById('disabledProfileButton');
       if (disabledButton) {
@@ -273,8 +272,8 @@ const canUpdateFlag: boolean = diffHours > 48;
           if (loadingStats) loadingStats.style.display = 'flex';
           updateStatsBtn.classList.add('pointer-events-none', 'opacity-60');
           const userId = updateStatsBtn.getAttribute('data-id');
-          const response = await fetch('/api/admin/stats/newUserStats', {
-            method: 'POST',
+          const response = await fetch('/api/admin/stats', {
+            method: 'PUT',
             headers: {
               'Content-Type': 'application/json'
             },

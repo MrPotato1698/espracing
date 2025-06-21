@@ -168,7 +168,7 @@ import { showToast } from "@/lib/utils";
     const formData = new FormData(form);
 
     try {
-      const response = await fetch("/api/admin/driver/editdriver", {
+      const response = await fetch("/api/admin/driver", {
         method: "POST",
         body: formData,
       });
