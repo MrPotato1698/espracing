@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
-import { supabase } from "@/db/supabase";
 import { showToast } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Combobox } from "@/components/ui/combobox";
 import MultiSelect from "@/components/ui/multiselect";
 import { FilePlus2, Trophy } from 'lucide-react';
 
-export default function NewChamp({ championships, cars, carClasses, races }: {
+export default function NewChamp({ championships, cars, carClasses, races, championshipCars }: {
   readonly championships: any[] | null;
   readonly cars: any[] | null;
   readonly carClasses: any[] | null;
   readonly races: any[] | null;
+  readonly championshipCars: any[] | null;
 }) {
   // Estados para pestañas
   const [activeTab, setActiveTab] = useState<string>('addChamp');
@@ -63,83 +63,25 @@ export default function NewChamp({ championships, cars, carClasses, races }: {
 
   // Cargar coches y clases del campeonato seleccionado
   React.useEffect(() => {
-    const fetchChampCarsAndClasses = async () => {
-      if (!selectedChamp) {
-        setChampCars([]);
-        setChampClasses([]);
-        return;
-      }
-      // Obtener los coches asociados al campeonato
-      const { data: champCarsRows } = await supabase
-        .from("championshipcars")
-        .select("car")
-        .eq("championship", Number(selectedChamp));
-      if (!champCarsRows) {
-        setChampCars([]);
-        setChampClasses([]);
-        return;
-      }
-      const champCarIds = champCarsRows.map(row => row.car);
-      // Filtrar los coches globales
-      const filteredCars = cars?.filter(car => champCarIds.includes(car.id));
-      setChampCars(filteredCars || []);
-      // Obtener las clases únicas de esos coches
-      const classIds = Array.from(new Set(filteredCars?.map(car => car.class)));
-      const filteredClasses = carClasses?.filter(cl => classIds.includes(cl.id));
-      setChampClasses(filteredClasses || []);
-    };
-    fetchChampCarsAndClasses();
-  }, [selectedChamp, cars, carClasses]);
-
-  // Helper: Obtener nuevo ID de champwinner
-  const getNewChampWinnerID = async () => {
-    const { data: getLastChampWinner } = await supabase
-        .from('champwinners')
-        .select('id')
-        .order('id', { ascending: true });
-
-      if(getLastChampWinner?.length === 0) return 1;
-
-      let findID = false;
-      let i = 1;
-      if (!getLastChampWinner) throw new Error("Error al obtener el último ID de ganador de campeonato");
-      while (!findID && i < getLastChampWinner.length) {
-        if (getLastChampWinner[i - 1].id === i) {
-          i++;
-        } else {
-          findID = true;
-        }
-      }
-      if (!findID) i++;
-      return getLastChampWinner ? i : 1;
-  };
-
-  const insertChampion = async (lastID: number, winnerName: string, isTeam: boolean, carId: number | null, classId: number | null, selectedChamp: number) =>{
-    const { error } = await supabase.from('champwinners').insert({
-      id: lastID,
-      winner: winnerName,
-      isTeam: isTeam,
-      car_name: carId,
-      category: classId,
-      championship: Number(selectedChamp)
-    });
-    if (error) throw error;
-  };
-
-  const getTeamWinnerData = () => {
-    return {
-      carId: null,
-      classId: Number(selectedClass),
-    };
-  };
-
-  const getIndividualWinnerData = (carId: number | null) => {
-    const car = cars?.find(c => c.id === carId);
-    return {
-      carId: Number(selectedCar),
-      classId: car ? car.class : null,
-    };
-  };
+    if (!selectedChamp) {
+      setChampCars([]);
+      setChampClasses([]);
+      return;
+    }
+    // Filtrar los coches asociados al campeonato usando championshipCars
+    const champCarsRows = championshipCars?.filter(row => row.championship === Number(selectedChamp));
+    if (!champCarsRows) {
+      setChampCars([]);
+      setChampClasses([]);
+      return;
+    }
+    const champCarIds = champCarsRows.map(row => row.car);
+    const filteredCars = cars?.filter(car => champCarIds.includes(car.id));
+    setChampCars(filteredCars || []);
+    const classIds = Array.from(new Set(filteredCars?.map(car => car.class)));
+    const filteredClasses = carClasses?.filter(cl => classIds.includes(cl.id));
+    setChampClasses(filteredClasses || []);
+  }, [selectedChamp, cars, carClasses, championshipCars]);
 
   // Handler submit campeón de campeonato
   const handleSubmitWinner = async (e: React.FormEvent) => {
@@ -151,17 +93,20 @@ export default function NewChamp({ championships, cars, carClasses, races }: {
         setErrorMsg("Por favor, completa todos los campos obligatorios.");
         return;
       }
-      const lastID = await getNewChampWinnerID();
-
-      let carIdResult: number | null;
-      let classIdResult: number | null;
-      if (isTeam) {
-        ({ carId: carIdResult, classId: classIdResult } = getTeamWinnerData());
-      } else {
-        ({ carId: carIdResult, classId: classIdResult } = getIndividualWinnerData(Number(selectedCar)));
-      }
-
-      await insertChampion(lastID, winnerName, isTeam, carIdResult, classIdResult, Number(selectedChamp));
+      // Llamada a la API champwinner
+      const response = await fetch('/api/admin/champwinner', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          winner: winnerName,
+          isTeam,
+          carId: isTeam ? null : Number(selectedCar),
+          classId: isTeam ? Number(selectedClass) : (cars?.find(c => c.id === Number(selectedCar))?.class ?? null),
+          championship: Number(selectedChamp)
+        })
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error ?? 'Error desconocido');
       setSuccessMsg("Campeón añadido con éxito");
       showToast("Campeón añadido con éxito", "success");
       setWinnerName(""); setSelectedCar(""); setSelectedClass("");
@@ -169,42 +114,6 @@ export default function NewChamp({ championships, cars, carClasses, races }: {
       setErrorMsg("Error al añadir campeón: " + (err?.message ?? err));
       showToast("Error al añadir campeón: " + (err?.message ?? err), "error");
     }
-  };
-
-  const getNewChampID = async () => {
-      const { data: getLastChamp } = await supabase
-        .from('championship')
-        .select('id')
-        .order('id', { ascending: true });
-
-      if(getLastChamp?.length === 0) return 1;
-
-      let findID = false;
-      let i = 1;
-      if (!getLastChamp) throw new Error("Error al obtener el último ID de campeonato");
-      while (!findID && i < getLastChamp.length) {
-        if (getLastChamp[i - 1].id === i) {
-          i++;
-        } else {
-          findID = true;
-        }
-      }
-      if (!findID) i++;
-      return getLastChamp ? i : 1;
-  };
-
-  const insertChamp = async (lastID: number, champname: string, keySearchAPI: string, yearChamp: number, season: string, champORevent: boolean, numberTotalRaces: number) => {
-    const { error } = await supabase.from('championship').insert({
-      id: lastID,
-      name: champname,
-      key_search: keySearchAPI,
-      year: yearChamp,
-      season: season,
-      number_of_races_total: Number(numberTotalRaces),
-      ischampionship: champORevent,
-      isfinished: false
-    });
-    if (error) throw error;
   };
 
   const formatSeason = (season: string) => {
@@ -230,17 +139,23 @@ export default function NewChamp({ championships, cars, carClasses, races }: {
         setErrorMsg("Por favor, completa todos los campos obligatorios.");
         return;
       }
-
-      const lastID = await getNewChampID();
       const formattedSeason = season === '0' ? '0' : formatSeason(season);
-      await insertChamp(lastID, champname, keySearchAPI, Number(yearChamp), formattedSeason, champORevent, Number(numbertotalraces));
-      // Insertar coches en championshipcars
-      if (selectedCars.length > 0) {
-        const champId = lastID;
-        const carRows = selectedCars.map(carId => ({ championship: champId, car: Number(carId) }));
-        await supabase.from('championshipcars').insert(carRows);
-      }
-
+      // Llamada a la API championship
+      const response = await fetch('/api/admin/championship', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: champname,
+          key_search: keySearchAPI,
+          year: Number(yearChamp),
+          season: formattedSeason,
+          number_of_races_total: Number(numbertotalraces),
+          ischampionship: champORevent,
+          cars: selectedCars.map(id => Number(id))
+        })
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error ?? 'Error desconocido');
       setSuccessMsg("Campeonato/Evento añadido con éxito");
       showToast("Campeonato/Evento añadido con éxito", "success");
       form.reset();

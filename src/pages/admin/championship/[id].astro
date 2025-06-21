@@ -271,8 +271,6 @@ const seasonOptions = seasons.map(season => ({ value: season, label: formatSeaso
 
 <script>
 import { showToast } from "@/lib/utils";
-
-  
   const form = document.getElementById("editChampForm") as HTMLFormElement;
 
   const isEventSwitch = document.getElementById("champORevent") as HTMLInputElement;
@@ -304,12 +302,9 @@ import { showToast } from "@/lib/utils";
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const formData = new FormData(form);
-    // Obtener coches seleccionados
-    const selectedCars = formData.getAll("carsChamp");
-
     try {
-      const response = await fetch("/api/admin/championship/editchampionship", {
-        method: "POST",
+      const response = await fetch("/api/admin/championship", {
+        method: "PUT",
         body: formData,
       });
 

@@ -1,9 +1,7 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useRef, useCallback } from "react"
-import { supabase } from "@/db/supabase"
 import { Upload, X, ImageIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
@@ -130,46 +128,24 @@ export default function ChampionshipPosterUpload({
 
   const uploadImage = async () => {
     if (!file) return;
-
     try {
       setUploading(true);
       setProgress(10);
-
       // Comprimir la imagen
       const compressedImage = await compressImage(file);
       setProgress(40);
-
-      // Crear el fichero con el nombre del campeonato
-      const fileName = `poster_${championshipId}.webp`;
-
-      // Comprobar si ya existe un poster y eliminarlo
-      if (currentPosterUrl) {
-        await supabase.storage.from("championshipposter")
-          .remove([`poster_${championshipId}.webp`]);
-        setProgress(60);
-      }
-
-      // Subir la imagen comprimida a Supabase Storage
-      const { error: uploadError } = await supabase.storage
-        .from("championshipposter")
-        .upload(fileName, compressedImage, {
-          cacheControl: "3600",
-          upsert: true,
-          contentType: "image/webp",
-        });
-
-      if (uploadError) throw uploadError;
+      // Subir la imagen comprimida a la API
+      const formData = new FormData();
+      formData.append("championshipId", championshipId.toString());
+      formData.append("file", compressedImage, `poster_${championshipId}.webp`);
+      const res = await fetch("/api/admin/championshipposter", {
+        method: "POST",
+        body: formData
+      });
       setProgress(90);
-
-      // LLamar a la función de callback con el nuevo nombre de la imagen
-      if (typeof onUploadComplete === "function") onUploadComplete(fileName);
-
-      const { error: updateErrorTable } = await supabase
-        .from("championship")
-        .update({ champ_img: fileName })
-        .eq("id", championshipId);
-      if (updateErrorTable) throw updateErrorTable;
-
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Error desconocido");
+      if (typeof onUploadComplete === "function") onUploadComplete(data.fileName);
       setSuccess("Imagen subida correctamente");
       setProgress(100);
     } catch (error) {
@@ -182,21 +158,16 @@ export default function ChampionshipPosterUpload({
 
   const deleteImage = async () => {
     if (!currentPosterUrl && !preview) return;
-
     try {
       setUploading(true);
-
-      // Eliminar el poster actual de Supabase Storage
-      const fileName = `poster_${championshipId}.webp`;
-      const { error } = await supabase
-        .storage.from("championshipposter")
-        .remove([fileName]);
-
-      if (error) throw error;
-
-      // Actualizar el registro del campeonato para eliminar la referencia a la imagen
+      const res = await fetch("/api/admin/championshipposter", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ championshipId })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Error desconocido");
       if (typeof onUploadComplete === "function") onUploadComplete("");
-
       setFile(null);
       setPreview(null);
       setSuccess("Imagen eliminada correctamente");
