@@ -1,4 +1,3 @@
-import { supabase } from '@/db/supabase';
 import { showToast } from "@/lib/utils";
 
 interface CircuitLayoutData {
@@ -211,152 +210,21 @@ export function initCircuitManagement() {
     circuitData.shortname = shortNameCircuit.value;
     circuitData.cleanInstall = switchCleanInstall?.checked || false;
     try {
-      let lastRaceID = await getNextCircuitId(circuitData);
-
-      const { error: insertError } = await supabase
-        .from('circuit')
-        .insert({
-          id: lastRaceID,
-          name: circuitData.name,
-          shortname: circuitData.shortname,
-          filename: circuitData.filename,
-          location: circuitData.location,
-        });
-
-      if (insertError) throw insertError;
-
-      await insertLayouts(circuitData.layouts, lastRaceID);
-
+      const response = await fetch('/api/admin/circuit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ circuitData }),
+      });
+      if (!response.ok) {
+        const result = await response.json();
+        throw new Error(result.error ?? 'Error desconocido');
+      }
       showToast("Circuito creado con éxito, junto a sus variantes", "success");
       form.reset();
       window.location.reload();
     } catch (error) {
       console.error("Error al procesar el archivo:", error);
       showToast("Hubo un error al procesar el archivo. Por favor, inténtalo de nuevo.", "error");
-    }
-  });
-
-  async function getNextCircuitId(circuitData: ProcessedCircuitData): Promise<number> {
-    let lastRaceID = -1;
-    if (circuitData.cleanInstall) {
-      const { data: cleanInstallData } = await supabase
-        .from('circuit')
-        .delete()
-        .eq('filename', circuitData.filename)
-        .select('id')
-        .single();
-      lastRaceID = cleanInstallData?.id ?? -1;
-    }
-
-    if (!circuitData.cleanInstall || lastRaceID === -1) {
-      const { data: getLastRace } = await supabase
-        .from('circuit')
-        .select('id')
-        .order('id', { ascending: true });
-
-      if (!getLastRace) throw new Error("Error al obtener el último ID de campeonato");
-      const length = getLastRace.length;
-      let i = 1;
-      let findID = false;
-      console.log('Circuit: ',getLastRace);
-      while (!findID && i < length) {
-        if (getLastRace[i - 1].id === i) {
-          i++;
-        } else {
-          findID = true;
-        }
-      }
-      if (!findID) i++;
-
-      console.log('Circuit NEW ID: ',i);
-      console.log('Circuit LAST ID: ',getLastRace[length-1].id);
-
-      lastRaceID = getLastRace ? i : 1;
-    }
-    return lastRaceID;
-  }
-
-  async function insertLayouts(layouts: CircuitLayoutData[], lastRaceID: number) {
-    // Obtener todos los IDs existentes ordenados
-    const { data: allLayouts } = await supabase
-      .from('circuitLayout')
-      .select('id')
-      .order('id', { ascending: true });
-
-    const existingIds = allLayouts ? allLayouts.map((l: any) => l.id) : [];
-    const needed = layouts.length;
-    const startId = findConsecutiveStartId(existingIds, needed);
-
-    for (let index = 0; index < layouts.length; index++) {
-      const layout = layouts[index];
-      const { error: insertLayoutError } = await supabase
-        .from('circuitLayout')
-        .insert({
-          id: Number(startId + index),
-          name: layout.name,
-          filename: layout.filename,
-          circuit: lastRaceID,
-          length: Number(String(layout.length).replace(/\D/g, '')),
-          capacity: Number(String(layout.capacity).replace(/\D/g, ''))
-        });
-
-      if (insertLayoutError) throw insertLayoutError;
-    }
-  }
-
-  function findConsecutiveStartId(existingIds: number[], needed: number): number {
-    console.log('Layouts: ',existingIds);
-    if (existingIds.length === 0) {
-      return 1;
-    }
-    let i = 1;
-    while (true) {
-      let fits = true;
-      for (let j = 0; j < needed; j++) {
-        if (existingIds.includes(i + j)) {
-          fits = false;
-          break;
-        }
-      }
-      if (fits) {
-        return i;
-      }
-      i++;
-    }
-  }
-}
-
-
-
-export function initEditCircuit() {
-
-  const form = document.getElementById('editCircuitForm') as HTMLFormElement;
-
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const formData = new FormData(form);
-
-    try {
-      const response = await fetch('/api/admin/circuit/editcircuit', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error('Error en la respuesta del servidor: ' + response.statusText);
-      }
-
-      const result = await response.json();
-
-      if (result.success) {
-        showToast('Circuito actualizado con éxito', 'success');
-        window.location.href = '/admin/admincircuits';
-      } else {
-        throw new Error(result.error ?? 'Error desconocido');
-      }
-    } catch (error) {
-      showToast('Error al actualizar el circuito: ' + error, 'error');
-      console.error('Error:', error);
     }
   });
 }
