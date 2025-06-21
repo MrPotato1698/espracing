@@ -33,10 +33,10 @@ function createRaceResults( dcars: CarJSON[], devents: EventJSON[], dlaps: LapJS
 
     // Validar que el coche existe y obtener información del driver
     const car = dcars.find(c => c.CarId === itemR.CarId);
-    const driverName = itemR.DriverName || car?.Driver?.Name || `Unknown Driver ${itemR.CarId}`;
-    const driverGuid = itemR.DriverGuid || car?.Driver?.Guid || `unknown_guid_${itemR.CarId}`;
-    const driverTeam = car?.Driver?.Team || "Unknown Team";
-    const carModel = itemR.CarModel || car?.Model || "Unknown Car";
+    const driverName = itemR.DriverName ?? car?.Driver?.Name ?? `Unknown Driver ${itemR.CarId}`;
+    const driverGuid = itemR.DriverGuid ?? car?.Driver?.Guid ?? `unknown_guid_${itemR.CarId}`;
+    const driverTeam = car?.Driver?.Team ?? "Unknown Team";
+    const carModel = itemR.CarModel ?? car?.Model ?? "Unknown Car";
 
     uniqueRR.SteamID = driverGuid;
     uniqueRR.CarId = itemR.CarId;
@@ -47,8 +47,8 @@ function createRaceResults( dcars: CarJSON[], devents: EventJSON[], dlaps: LapJS
     uniqueRR.Laps = itemR.NumLaps || 0;
     uniqueRR.BestLap = (itemR.BestLap || 0) / 1000;
     uniqueRR.LedLaps = 0;
-    uniqueRR.Ballast = itemR.BallastKG || car?.BallastKG || 0;
-    uniqueRR.Restrictor = itemR.Restrictor || car?.Restrictor || 0;
+    uniqueRR.Ballast = itemR.BallastKG ?? car?.BallastKG ?? 0;
+    uniqueRR.Restrictor = itemR.Restrictor ?? car?.Restrictor ?? 0;
     uniqueRR.Split = split;
 
     uniqueRR.GridPosition = getGridPosition(itemR.GridPosition || 0);
@@ -62,7 +62,7 @@ function createRaceResults( dcars: CarJSON[], devents: EventJSON[], dlaps: LapJS
 
   for (let itemdC of dcars) {
     // Validar que el Driver existe y tiene las propiedades necesarias
-    if (!itemdC.Driver || !itemdC.Driver.Name || !itemdC.CarId === undefined) {
+    if (!itemdC.Driver?.Name || itemdC.CarId === undefined) {
       console.warn(`Car missing required data - CarId: ${itemdC.CarId}, Driver: ${JSON.stringify(itemdC.Driver)}`);
       continue;
     }
@@ -75,7 +75,8 @@ function createRaceResults( dcars: CarJSON[], devents: EventJSON[], dlaps: LapJS
       uniqueRR.CarId = itemdC.CarId;
       uniqueRR.DriverName = itemdC.Driver.Name;
       uniqueRR.Team = itemdC.Driver.Team || "Unknown Team";
-      uniqueRR.CarFileName = itemdC.Model || "Unknown Car";      uniqueRR.TotalTime = 0;
+      uniqueRR.CarFileName = itemdC.Model || "Unknown Car";
+      uniqueRR.TotalTime = 0;
       uniqueRR.Penalties = 0;
       uniqueRR.Laps = 0;
       uniqueRR.BestLap = 0;
