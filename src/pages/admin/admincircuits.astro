@@ -73,6 +73,7 @@ const countries = [...new Set(circuitData?.map(circuit =>
 
 const circuitDataWithCountry = circuitData?.map(circuit => ({
   ...circuit,
+  id: circuit.circuit_id, // Asegura que 'id' esté presente para DataTable
   country: extractCountry(circuit.circuit_location)
 })) || [];
 
