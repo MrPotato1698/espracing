@@ -1,6 +1,7 @@
 ---
 import Layout from "@/layouts/ProfileLayout.astro";
 import { supabase } from "@/db/supabase";
+import { TeamPilotsTable as TeamDriversTable } from "@/components/team-drivers-table";
 
 const { cookies, redirect } = Astro;
 
@@ -58,6 +59,8 @@ const {data: TeamUsersData} = await supabase
 
 
 const roleEditingPrivileges = roleData?.roleesp === 0 ||roleData?.roleesp === 1 || roleData?.roleesp === 2 ? true : false;
+
+const serializedTeamUsersData = TeamUsersData ? JSON.parse(JSON.stringify(TeamUsersData)) : [];
 ---
 
 <Layout title="ESP Racing: Mi Equipo">
@@ -85,53 +88,17 @@ const roleEditingPrivileges = roleData?.roleesp === 0 ||roleData?.roleesp === 1 
     </div>
 
     <div class="py-4 mx-auto text-center" style="width: 99%">
-      <p2 class="text-5xl font-bold border-b border-primary w-fit mx-auto"
-        >Tabla de Pilotos</p2
-      >
-      <table class="mt-6 w-full border-collapse border border-lightPrimary">
-        <thead class="font-medium bg-primary">
-          <tr>
-            <th>Nº</th>
-            <th>Nombre</th>
-            {roleData?.roleesp === 1 || roleData?.roleesp === 2 ? <th>Jefe de Equipo</th> : null}
-            <th>Carreras</th>
-            <th>Victorias</th>
-            <th>Podios</th>
-            <th>Poles</th>
-            <th>Top 5</th>
-            <th>Top 10</th>
-          </tr>
-        </thead>
-        <tbody>
-          {
-            TeamUsersData?.map((user, index) => (
-              <tr class="bg-darkSecond align-middle">
-                <td class="font-semibold">{index + 1}</td>
-                <td>{user.full_name}</td>
-                {roleData?.roleesp === 1 || roleData?.roleesp === 2 ? (
-                  <td class = "align-middle pt-1">
-                    <input
-                      type="checkbox"
-                      checked={user.is_team_manager}
-                      class="accent-primary bg-darkPrimary cursor-pointer size-4"
-                      data-userid={user.id}
-                      data-usermodifcator={id}
-                      disabled={roleData?.roleesp !== 1 && roleData?.roleesp !== 2}
-                      id={`teamManager-${user.id}`}
-                    />
-                  </td>
-                ) : null}
-                <td>{user.races}</td>
-                <td>{user.wins}</td>
-                <td>{user.podiums}</td>
-                <td>{user.poles}</td>
-                <td>{user.top5}</td>
-                <td>{user.top10}</td>
-              </tr>
-            ))
-          }
-        </tbody>
-      </table>
+      <p2 class="text-5xl font-bold border-b border-primary w-fit mx-auto">
+        Tabla de Pilotos
+      </p2>
+      <TeamDriversTable
+        client:load
+        pilots={serializedTeamUsersData}
+        currentUserId={id}
+        isCurrentUserManager={TeamUsersData?.find(u => u.id === id)?.is_team_manager || false}
+        teamId={idTeam}
+        adminMode={false}
+      />
     </div>
 
     <div class="grid grid-flow-col mt-8">

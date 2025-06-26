@@ -1,7 +1,7 @@
-import type { APIRoute } from "astro";
+import type { APIRoute } from "astro"
 import { supabase } from "@/db/supabase";
 
-export const POST: APIRoute = async ({ request }) => {
+export const PUT: APIRoute = async ({ request }) => {
   const formData = await request.formData();
   const team_id = formData.get('team_id');
   const team_name = formData.get('name');
@@ -30,4 +30,19 @@ export const POST: APIRoute = async ({ request }) => {
     console.error('Error al actualizar el equipo:', error);
     return new Response(JSON.stringify({ error: 'Error al actualizar el equipo' }), { status: 500 });
   }
+};
+
+export const DELETE: APIRoute = async ({ request }) => {
+  const { id } = await request.json();
+  if (!id) {
+    return new Response("Id is required", { status: 400 });
+  }
+  const { error } = await supabase
+    .from('team')
+    .delete()
+    .eq('id', id);
+  if (error) {
+    return new Response("Error al eliminar el equipo: " + error.message , { status: 500 });
+  }
+  return new Response("Equipo eliminado con exito", { status: 200 });
 }

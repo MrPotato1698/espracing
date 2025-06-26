@@ -2,6 +2,7 @@
 import Layout from "@/layouts/ProfileLayout.astro";
 import { supabase } from "@/db/supabase";
 import TeamImageUpload from "@/components/TeamImageUpload";
+import { TeamPilotsTable as TeamDriversTable } from "@/components/team-drivers-table";
 
 const { id } = Astro.params;
 const { cookies, redirect } = Astro;
@@ -52,6 +53,12 @@ const { data: teamData } = await supabase
   .select("*")
   .eq("id", parseInt(id))
   .single();
+
+// Obtener los pilotos del equipo
+const { data: teamDrivers } = await supabase
+  .from("profiles")
+  .select("id, full_name, races, wins, top5, top10, avatar, poles, podiums, is_team_manager")
+  .eq("team", parseInt(id));
 ---
 
 <Layout title="ESP Racing: Modificación datos de equipo">
@@ -66,17 +73,6 @@ const { data: teamData } = await supabase
       type="text"
       name="name"
       value={teamData?.name}
-      class="bg-darkSecond text-lightPrimary text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
-    />
-
-    <label class="mt-5 text-lg font-semibold" for="imageTeam">
-      Imagen de equipo
-    </label>
-    <input
-      type="text"
-      id="imageTeam"
-      name="imageTeam"
-      value={teamData?.image}
       class="bg-darkSecond text-lightPrimary text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
     />
 
@@ -122,6 +118,20 @@ const { data: teamData } = await supabase
     />
   </div>
 
+  <div class="py-4 text-center w-11/12">
+    <p2 class="text-4xl font-bold border-b border-primary w-fit mx-auto">
+      Pilotos del equipo
+    </p2>
+    <TeamDriversTable
+      client:load
+      pilots={teamDrivers ? JSON.parse(JSON.stringify(teamDrivers)) : []}
+      currentUserId={idAuth}
+      isCurrentUserManager={true}
+      teamId={parseInt(id)}
+      adminMode={true}
+    />
+  </div>
+
 </Layout>
 
 <script>
@@ -133,8 +143,8 @@ import { showToast } from "@/lib/utils";
     const formData = new FormData(form);
 
     try {
-      const response = await fetch("/api/admin/team/editteam", {
-        method: "POST",
+      const response = await fetch("/api/admin/team", {
+        method: "PUT",
         body: formData,
       });
 
