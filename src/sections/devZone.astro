@@ -132,10 +132,36 @@
   <div class="grid grid-cols-2">
     <button
       class="bg-accent1 text-lightPrimary font-bold py-3 px-2 w-72 mt-4 mx-auto border-solid border-accent1 border-2 rounded-md hover:bg-darkSecond hover:text-lightPrimary"
-      id="testInscriptions"
+      id="testInscriptionsOpen"
       type="button"
       >
-      Test Inscripciones
+      Test Inscripciones Apertura
+    </button>
+
+    <button
+      class="bg-accent1 text-lightPrimary font-bold py-3 px-2 w-72 mt-4 mx-auto border-solid border-accent1 border-2 rounded-md hover:bg-darkSecond hover:text-lightPrimary"
+      id="testInscriptionsClose"
+      type="button"
+      >
+      Test Inscripciones Cierre
+    </button>
+  </div>
+
+  <div class="grid grid-cols-2">
+    <button
+      class="bg-accent1 text-lightPrimary font-bold py-3 px-2 w-72 mt-4 mx-auto border-solid border-accent1 border-2 rounded-md hover:bg-darkSecond hover:text-lightPrimary"
+      id="testFunctionInscriptionsOpen"
+      type="button"
+      >
+      Llamar Función Apertura Inscripciones
+    </button>
+
+    <button
+      class="bg-accent1 text-lightPrimary font-bold py-3 px-2 w-72 mt-4 mx-auto border-solid border-accent1 border-2 rounded-md hover:bg-darkSecond hover:text-lightPrimary"
+      id="testFunctionInscriptionsClose"
+      type="button"
+      >
+      Llamar Función Cierre Inscripciones
     </button>
   </div>
 </div>
@@ -153,7 +179,10 @@
   const fileNameS2R1 = document.getElementById('fileNameS2R1');
   const clearBtn1 = document.getElementById('clearFileS1R1Btn');
   const clearBtn2 = document.getElementById('clearFileS2R1Btn');
-  const testInscriptionsBtn = document.getElementById('testInscriptions');
+  const testInscriptionsOpenBtn = document.getElementById('testInscriptionsOpen');
+  const testInscriptionsCloseBtn = document.getElementById('testInscriptionsClose');
+  const testFunctionInscriptionsOpenBtn = document.getElementById('testFunctionInscriptionsOpen');
+  const testFunctionInscriptionsCloseBtn = document.getElementById('testFunctionInscriptionsClose');
 
   input1?.addEventListener('change', () => {
     const file = input1.files?.[0];
@@ -231,7 +260,7 @@
     }
   });
 
-  testInscriptionsBtn?.addEventListener('click', async () => {
+  testInscriptionsOpenBtn?.addEventListener('click', async () => {
     console.log("Iniciando prueba de inscripciones...");
     const corsHeaders = {
       'Access-Control-Allow-Origin': '*',
@@ -239,13 +268,12 @@
     };
 
     const now = new Date();
-    const gmtPlus1Time = new Date(now.getTime() + 60*60000); // Sumar 1 hora (60 minutos * 60 segundos * 1000 milisegundos)
 
-    // Crear rango de tiempo (entre 15 minutos antes y 15 minutos después de las 21:00)
-    const startTime = new Date(gmtPlus1Time);
-    startTime.setHours(20, 45, 0, 0);
-    const endTime = new Date(gmtPlus1Time);
-    endTime.setHours(21, 15, 0, 0);
+    // Crear rango de tiempo (todo el día)
+    const startTime = new Date(now);
+    startTime.setHours(0, 0, 0, 1);
+    const endTime = new Date(now);
+    endTime.setHours(23, 59, 59, 999);
 
     console.log("Rango de tiempo:", startTime.toISOString(), "a", endTime.toISOString());
 
@@ -286,7 +314,76 @@
         window.showToast?.('Error al actualizar inscripciones.', 'error');
         return;
       }
+    }else{
+      console.log("No hay inscripciones cerradas para abrir en el día de hoy.");
+      window.showToast?.('No hay inscripciones cerradas para abrir hoy.', 'info');
+      return;
     }
+  });
+
+  testInscriptionsCloseBtn?.addEventListener('click', async () => {
+    console.log("Iniciando prueba de inscripciones...");
+    const corsHeaders = {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type'
+    };
+
+    const now = new Date();
+
+    // Crear rango de tiempo (todo el día)
+    const startTime = new Date(now);
+    startTime.setHours(0, 0, 0, 1);
+    const endTime = new Date(now);
+    endTime.setHours(23, 59, 59, 999);
+
+    // 1. Cerrar inscripciones
+    const { data: records, error: closeError } = await supabase.from('inscriptionscalendar')
+      .select('id')
+      .eq('is_open', true)
+      .gte('inscriptions_close', startTime.toISOString())
+      .lte('inscriptions_close', endTime.toISOString());
+    if (closeError) {
+      console.error('Error al obtener inscripciones:', closeError);
+      window.showToast?.('Error al obtener inscripciones.', 'error');
+      return;
+    }
+    if (records?.length){
+      const { error: updateError } = await supabase.from('inscriptionscalendar')
+        .update({is_open: false})
+        .in('id', records.map((r)=>r.id));
+      if (updateError) throw updateError;
+    }else{
+      console.log("No hay inscripciones abiertas para cerrar en el día de hoy.");
+      window.showToast?.('No hay inscripciones abiertas para cerrar hoy.', 'info');
+      return;
+    }
+
+    // 2. Limpiar registros antiguos (2 semanas)
+    const twoWeeksAgo = new Date(now);
+    twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
+    const { error: deleteError } = await supabase.from('inscriptionscalendar').delete().lt('inscriptions_close', twoWeeksAgo.toISOString());
+    if (deleteError) throw deleteError;
+  });
+
+  testFunctionInscriptionsOpenBtn?.addEventListener('click', async () => {
+    const { data, error } = await supabase.functions.invoke('open-inscriptions', {body: { name: 'Functions' },});
+    if (error) {
+      console.error('Error al invocar la función de apertura de inscripciones:', error);
+      window.showToast?.('Error al invocar la función de apertura de inscripciones.', 'error');
+      return;
+    }
+    console.log('Respuesta de la función de apertura de inscripciones:', data);
+    window.showToast?.('Función de apertura de inscripciones ejecutada con éxito.', 'success');
+  });
+  testFunctionInscriptionsCloseBtn?.addEventListener('click', async () => {
+    const { data, error } = await supabase.functions.invoke('close-inscriptions', {body: { name: 'Functions' },});
+    if (error) {
+      console.error('Error al invocar la función de cierre de inscripciones:', error);
+      window.showToast?.('Error al invocar la función de cierre de inscripciones.', 'error');
+      return;
+    }
+    console.log('Respuesta de la función de cierre de inscripciones:', data);
+    window.showToast?.('Función de cierre de inscripciones ejecutada con éxito.', 'success');
   });
 
 function timeToMs(timeStr: string): number | null {
