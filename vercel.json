@@ -18,5 +18,16 @@
         { "key": "Access-Control-Allow-Headers", "value": "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version" }
       ]
     }
+  ],
+  "crons": [
+    {
+      "path": "/api/admin/inscriptions/close",
+      "schedule": "0 16 * * 6"
+    },
+    {
+      "path": "/api/admin/inscriptions/open",
+      "schedule": "0 19 * * 4"
+    }
+
   ]
 }
