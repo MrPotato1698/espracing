@@ -45,7 +45,7 @@ export const GET: APIRoute = async ({ request, redirect }) => {
     const { data: signInOAuth, error: signInOAuthError } = await supabase.auth.signInWithOAuth({
       provider: provider as Provider,
       options: {
-        redirectTo: `${new URL(request.url).origin}/api/auth/callback`,
+        redirectTo: `espracing.vercel.app/api/auth/callback`,
       },
     });
     if (signInOAuthError) {
