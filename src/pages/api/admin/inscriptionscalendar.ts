@@ -22,9 +22,26 @@ export const POST: APIRoute = async ({ request }) => {
   try {
     const body = await request.json();
     const { name, championship, order, inscriptions_open, inscriptions_close, url_time } = body;
+        const { data: getLastCalendarInscription } = await supabase
+      .from('inscriptionscalendar')
+      .select('id')
+      .order('id', { ascending: true });
+
+    if(!getLastCalendarInscription) throw new Error("Error al obtener el último ID de la ultima fecha de inscripción");
+    let findID = false;
+    let i = 1;
+    while (!findID && i < getLastCalendarInscription.length) {
+      if (getLastCalendarInscription[i-1].id === i) {
+        i++;
+      } else {
+        findID = true;
+      }
+    }
+    if (!findID && getLastCalendarInscription[i-1].id === i) i++;
+    const lastCalendarInscriptionID = getLastCalendarInscription ? i : 1;
     const { data, error } = await supabase
       .from("inscriptionscalendar")
-      .insert([{ name, championship, order, inscriptions_open, inscriptions_close, url_time }])
+      .insert([{ id: lastCalendarInscriptionID, name, championship, order, inscriptions_open, inscriptions_close, url_time }])
       .select()
       .single();
     if (error) {
