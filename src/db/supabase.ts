@@ -3,7 +3,7 @@ import type { Database } from "database.types";
 
 const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL
 const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY
-const supabaseServiceKey = import.meta.env.PUBLIC_SUPABASE_SERVICE_KEY
+const supabaseServiceKey = import.meta.env.SUPABASE_SERVICE_KEY
 
 if (!supabaseUrl) {
   throw new Error('Falta la URL  de Supabase')
@@ -27,7 +27,7 @@ export const supabase = createClient<Database>(
     auth: {
       autoRefreshToken: false,
       persistSession: false,
-      detectSessionInUrl: false,
+      detectSessionInUrl: true,
       flowType: 'pkce'
     }
   }
@@ -39,11 +39,6 @@ export const supabaseAdmin = createClient<Database>(
   {
     db:{
       schema: 'public',
-    },
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-      detectSessionInUrl: false
     }
   }
 )

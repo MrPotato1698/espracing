@@ -4,14 +4,28 @@ import OpenEye from "@/icons/OpenEye.astro";
 import CloseEye from "@/icons/CloseEye.astro";
 import GoogleColor from "@/icons/GoogleColor.astro";
 
-const { cookies, redirect } = Astro;
+const { cookies, redirect, url } = Astro;
 
 const accessToken = cookies.get("sb-access-token");
 const refreshToken = cookies.get("sb-refresh-token");
 
-if (accessToken && refreshToken) {
-  return redirect("/myprofile");
+
+// Obtener parámetros de error de la URL
+const errorMessages = {
+  no_code: "Error en la autenticación: código no recibido",
+  session_exchange_failed: "Error al procesar la autenticación",
+  unexpected_error: "Error inesperado durante la autenticación",
+  oauth_error: "Error al iniciar sesión con Google"
+};
+type ErrorParam = keyof typeof errorMessages;
+const errorParam = url.searchParams.get("error") as ErrorParam | null;
+
+function handleRedirect() {
+  if (accessToken && refreshToken) {
+    redirect("/myprofile");
+  }
 }
+handleRedirect();
 ---
 
 <Layout title="ESP Racing: Login">
@@ -19,7 +33,6 @@ if (accessToken && refreshToken) {
     class="absolute bottom-0 left-0 w-full h-full overflow-hidden leading-5 bg-[#f0f0f0] top-72 -z-10 bg-gradient-to-b from-primary via-primary to-darkPrimary"
   >
   </div>
-
   <div
     class="relative justify-center min-h-screen bg-transparent shadow-xl sm:flex sm:flex-row rounded-3xl"
   >
@@ -35,10 +48,7 @@ if (accessToken && refreshToken) {
       </div>
     </div>
 
-    <form
-  id="loginForm"
-  class="z-10 flex self-center justify-center"
-    >
+    <div class="z-10 flex self-center justify-center">
       <div class="p-12 mx-auto bg-lightPrimary rounded-3xl w-96">
         <div class="mb-7">
           <h3 class="text-2xl font-semibold text-gray-800">Inicia Sesión</h3>
@@ -50,69 +60,81 @@ if (accessToken && refreshToken) {
           </p>
         </div>
 
+        <!-- Mostrar errores si existen -->
+        {errorParam && errorMessages[errorParam] && (
+          <div class="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+            {errorMessages[errorParam]}
+          </div>
+        )}
+
         <div class="space-y-6">
-          <div class="">
-            <input
-              class="w-full px-4 py-3 text-sm text-darkPrimary bg-gray-200 border border-gray-200 rounded-lg focus:bg-gray-100 focus:outline-none focus:border-darkPrimary focus:text-darkSecond"
-              type="text"
-              name="email"
-              id="email"
-              placeholder="Email"
-            />
-          </div>
-
-          <div class="relative" x-data="{ show: true }">
-            <input
-              :type="show ? 'password' : 'text'"
-              name="password"
-              id="password"
-              class="w-full px-4 py-3 text-sm text-darkPrimary bg-gray-200 border border-gray-200 rounded-lg focus:bg-gray-100 focus:outline-none focus:border-darkPrimary focus:text-darkSecond"
-              placeholder="Contraseña"
-              />
-            <div
-              class="absolute inset-y-0 right-0 flex items-center mr-3 text-sm leading-5"
-            >
-              <OpenEye />
-              <CloseEye />
+          <!-- Formulario para email/password -->
+          <form id="emailLoginForm">
+            <div class="space-y-6">
+              <div class="">
+                <input
+                  class="w-full px-4 py-3 text-sm text-darkPrimary bg-gray-200 border border-gray-200 rounded-lg focus:bg-gray-100 focus:outline-none focus:border-darkPrimary focus:text-darkSecond"
+                  type="email"
+                  name="email"
+                  id="email"
+                  placeholder="Email"
+                  required
+                />
+              </div>
+              <div class="relative" x-data="{ show: true }">
+                <input
+                  :type="show ? 'password' : 'text'"
+                  name="password"
+                  id="password"
+                  class="w-full px-4 py-3 text-sm text-darkPrimary bg-gray-200 border border-gray-200 rounded-lg focus:bg-gray-100 focus:outline-none focus:border-darkPrimary focus:text-darkSecond"
+                  placeholder="Contraseña"
+                  required
+                />
+                <div
+                  class="absolute inset-y-0 right-0 flex items-center mr-3 text-sm leading-5 cursor-pointer"
+                  @click="show = !show"
+                >
+                  <OpenEye x-show="show" />
+                  <CloseEye x-show="!show" />
+                </div>
+              </div>
+              <div class="flex items-center justify-between">
+                <div class="ml-auto text-sm">
+                  <a href="/recoverpassword" class="text-darkPrimary hover:text-primary">
+                    ¿Olvidaste tu contraseña?
+                  </a>
+                </div>
+              </div>
+              <div>
+                <button
+                  type="submit"
+                  class="flex justify-center w-full p-3 font-semibold tracking-wide text-gray-100 transition duration-300 ease-in bg-primary border-2 border-lightPrimary rounded-lg cursor-pointer hover:border-primary hover:bg-lightPrimary hover:text-primary disabled:opacity-50"
+                  id="emailSubmitBtn"                >
+                  Inicia Sesión
+                </button>
+              </div>
             </div>
-          </div>
+          </form>
 
-          <div class="flex items-center justify-between">
-            <div class="ml-auto text-sm">
-              <a href="/recoverpassword" class="text-darkPrimary hover:text-primary">
-                ¿Olvidaste tu contraseña?
-              </a>
-            </div>
-          </div>
-          <div>
-            <button
-              id="login"
-              type="submit"
-              class="flex justify-center w-full p-3 font-semibold tracking-wide text-gray-100 transition duration-300 ease-in bg-primary border-2 border-lightPrimary rounded-lg cursor-pointer hover:border-primary hover:bg-lightPrimary hover:text-primary"
-            >
-              Inicia Sesión
-            </button>
-          </div>
           <div class="flex items-center justify-center my-5 space-x-2">
             <span class="w-8 h-px bg-gray-100"></span>
-            <span class="font-normal text-gray-300"
-              >o inicia sesión también</span
-            >
+            <span class="font-normal text-gray-300">o inicia sesión también</span>
             <span class="w-8 h-px bg-gray-100"></span>
           </div>
+
+          <!-- Botón separado para Google -->
           <div class="flex justify-center w-full gap-5">
             <button
-              value="google" name="provider" type="button"
               id="googleLogin"
-              class="flex items-center justify-center w-full p-3 mb-6 text-sm font-medium tracking-wide text-gray-500 transition duration-300 ease-in border border-gray-300 rounded-lg cursor-pointer md:mb-0 hover:border-lightPrimary hover:bg-[#EA4335] hover:text-lightPrimary"
-            >
-            <GoogleColor />
-              <span class = "ml-2">Google</span>
+              type="button"
+              class="flex items-center justify-center w-full p-3 mb-6 text-sm font-medium tracking-wide text-gray-500 transition duration-300 ease-in border border-gray-300 rounded-lg cursor-pointer md:mb-0 hover:border-lightPrimary hover:bg-[#EA4335] hover:text-lightPrimary disabled:opacity-50"            >
+              <GoogleColor />
+              <span class="ml-2">Google</span>
             </button>
           </div>
         </div>
       </div>
-    </form>
+    </div>
   </div>
 </Layout>
 
@@ -121,14 +143,16 @@ if (accessToken && refreshToken) {
   data-astro-rerun
   src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.js"
 ></script>
+
 <script>
-  const form = document.getElementById('loginForm') as HTMLFormElement;
+  // Manejo del formulario de email/password
+  const emailForm = document.getElementById('emailLoginForm') as HTMLFormElement;
   const googleBtn = document.getElementById('googleLogin') as HTMLButtonElement;
 
-  if (form) {
-    form.addEventListener('submit', async (e) => {
+  if (emailForm) {
+    emailForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const formData = new FormData(form);
+      const formData = new FormData(emailForm);
 
       try {
         const response = await fetch('/api/auth/signin', {
@@ -150,11 +174,16 @@ if (accessToken && refreshToken) {
     });
   }
 
+  // Manejo del botón de Google (redirección directa)
   if (googleBtn) {
-    googleBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      // Redirigir directamente al endpoint con provider=google para evitar CORS
-      window.location.href = '/api/auth/signin?provider=google';
+    googleBtn.addEventListener('click', async () => {
+      try {
+        // Redirigir directamente al endpoint de OAuth
+        window.location.href = '/api/auth/google';
+      } catch (error) {
+        console.error('Error al iniciar sesión con Google:', error);
+        alert('Error al iniciar sesión con Google');
+      }
     });
   }
 </script>

@@ -9,6 +9,12 @@ import { supabase } from "@/db/supabase";
 const { cookies, redirect } = Astro;
 
 const url = Astro.url;
+
+const code = url.searchParams.get("code");
+// Si hay un código en la página principal, redirigir al callback
+if (code) {
+  window.location.href = `/api/auth/callback?code=${code}`;
+}
 const access_token = url.searchParams.get('access_token');
 //console.log('url', url);
 if(access_token) {
