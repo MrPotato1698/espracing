@@ -95,15 +95,11 @@ const {data: TeamsData} = await supabase
     </p>
 
   ):(
-
     <p class="text-4xl font-bold border-b border-primary w-fit mx-auto mb-2">
     Selecciona un equipo al que quiera unirse
     </p>
 
-    <form action = "/api/teams/getInsideTeam"
-      method = "POST"
-      class = "grid grid-flow-col"
-    >
+    <form id="join-team-form" class = "grid grid-flow-col">
       <select
       id="select-team"
       name="select_team"
@@ -129,10 +125,7 @@ const {data: TeamsData} = await supabase
     O crea tu propio equipo
     </p>
 
-    <form action = "/api/teams/createTeam"
-      method = "POST"
-      class = "flex flex-col items-center gap-4 w-full"
-    >
+    <form id="create-team-form" class = "flex flex-col items-center gap-4 w-full">
       <input
         type="text"
         name="team_name"
@@ -155,6 +148,79 @@ const {data: TeamsData} = await supabase
         Enviar solicitud de creación
       </button>
     </form>
-    )}
+  )
+  }
 
 </Layout>
+
+<script>
+import { showToast } from "@/lib/utils";
+
+document.addEventListener("astro:page-load", () => {
+  // Unirse a un equipo
+  const joinForm = document.getElementById('join-team-form') as HTMLFormElement | null;
+  if (joinForm) {
+    joinForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(joinForm);
+      try {
+        const response = await fetch('/api/teams/getInsideTeam', {
+          method: 'POST',
+          body: formData
+        });
+        if (response.ok) {
+          // Si la respuesta es JSON y requiere confirmación de manager
+          const data = await response.json().catch(() => ({}));
+          if (data && data.require_manager_confirmation) {
+            if (confirm(data.message || '¿Deseas continuar y ser el jefe de equipo?')) {
+              formData.append('confirm_manager', 'true');
+              const confirmResponse = await fetch('/api/teams/getInsideTeam', {
+                method: 'POST',
+                body: formData
+              });
+              if (confirmResponse.ok) {
+                location.reload();
+              } else {
+                const confirmData = await confirmResponse.json().catch(() => ({}));
+                alert(confirmData?.error || 'Error al enviar la solicitud para unirse al equipo.');
+              }
+            }
+            return;
+          }
+          location.reload();
+        } else {
+          const data = await response.json().catch(() => ({}));
+          const errorMessage = data?.error || 'Error al enviar la solicitud para unirse al equipo.';
+          showToast(errorMessage, 'error');
+        }
+      } catch (err) {
+        showToast('Error al enviar la solicitud', 'error');
+      }
+    });
+  }
+
+  const createForm = document.getElementById('create-team-form') as HTMLFormElement | null;
+  if (createForm) {
+    createForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(createForm);
+      try {
+        const response = await fetch('/api/teams/createTeam', {
+          method: 'POST',
+          body: formData
+        });
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}));
+          const errorMessage = data?.error || 'Error al crear el equipo.';
+          showToast(errorMessage, 'error');
+        } else {
+          location.reload();
+        }
+      } catch (err) {
+        showToast('Error al enviar la solicitud', 'error');
+      }
+    });
+  }
+});
+</script>
+
