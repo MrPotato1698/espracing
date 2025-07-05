@@ -104,6 +104,15 @@ const { data: allChamps } = await supabase
 
 const seasons = [...new Set((allChamps || []).map(item => item.season))].filter(Boolean).sort();
 const seasonOptions = seasons.map(season => ({ value: season, label: formatSeason(season ? season : "0") }));
+
+// Obtener todos los coches y los coches seleccionados para el campeonato
+const { data: allCarsData } = await supabase.from("car").select("id, model, brand:brand(id, name)");
+const { data: champCarsData } = await supabase
+  .from("championshipcars")
+  .select("car")
+  .eq("championship", parseInt(id));
+const allCars = allCarsData || [];
+const selectedCarIds = champCarsData ? champCarsData.map(row => row.car.toString()) : [];
 ---
 
 <Layout title="ESP Racing: Modificación datos de campeonato">
@@ -258,13 +267,14 @@ const seasonOptions = seasons.map(season => ({ value: season, label: formatSeaso
         client:only="react"
         data={serializedChampWinnersData}
         columns={columns}
+        onEdit={false}
         onDelete={{ path: "champwinner" }}
         pageSize={10}
         searchable={false}
       />
     </div>
 
-    <EditChampCars champId={parseInt(id)} client:load />
+    <EditChampCars champId={parseInt(id)} allCars={allCars} selectedCarIds={selectedCarIds} client:load />
   </div>
 
 </Layout>

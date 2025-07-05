@@ -1,47 +1,31 @@
-import React, { useEffect, useState } from "react";
-import { supabase } from "@/db/supabase";
+import React, { useState } from "react";
 import MultiSelect from "@/components/ui/multiselect";
 
 interface EditChampCarsProps {
   champId: number;
+  allCars: { id: number; model: string | null; brand: { id: number; name: string | null } | null }[];
+  selectedCarIds: string[];
 }
 
-export default function EditChampCars({ champId }: Readonly<EditChampCarsProps>) {
-  const [allCars, setAllCars] = useState<{ id: number; model: string | null; brand: { id: number; name: string | null } | null }[]>([]);
-  const [selectedCarIds, setSelectedCarIds] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
+export default function EditChampCars({ champId, allCars, selectedCarIds: initialSelectedCarIds }: Readonly<EditChampCarsProps>) {
+  const [selectedCarIds, setSelectedCarIds] = useState<string[]>(initialSelectedCarIds);
   const [saving, setSaving] = useState(false);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      // Traer también la marca (brand) para mostrar brand.name + model
-      const { data: allCarsData } = await supabase.from("car").select("id, model, brand:brand(id, name)");
-      setAllCars(allCarsData || []);
-
-      const { data: champCarsData } = await supabase
-        .from("championshipcars")
-        .select("car")
-        .eq("championship", champId);
-      setSelectedCarIds(champCarsData ? champCarsData.map(row => row.car.toString()) : []);
-      setLoading(false);
-    };
-    fetchData();
-  }, [champId]);
 
   const handleSave = async () => {
     setSaving(true);
     setErrorMsg(null);
     setSuccessMsg(null);
     try {
-      // Eliminar todos los coches actuales
-      await supabase.from("championshipcars").delete().eq("championship", champId);
-      // Insertar los nuevos
-      if (selectedCarIds.length > 0) {
-        const carRows = selectedCarIds.map(carId => ({ championship: champId, car: Number(carId) }));
-        await supabase.from("championshipcars").insert(carRows);
+      const response = await fetch("/api/admin/champcars", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ champId, carIds: selectedCarIds.map(Number) })
+      });
+      const result = await response.json();
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || "Error desconocido");
       }
       setSuccessMsg("Coches actualizados correctamente");
     } catch (err: any) {
@@ -49,8 +33,6 @@ export default function EditChampCars({ champId }: Readonly<EditChampCarsProps>)
     }
     setSaving(false);
   };
-
-  if (loading) return <div className="text-lightSecond">Cargando coches...</div>;
 
   return (
     <div className="my-6">
