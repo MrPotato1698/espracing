@@ -75,9 +75,9 @@ if(errorRaces) {
 }
 ---
 
-<Layout title="ESP Racing: Modificación datos de carrera">
+<Layout title="ESP Racing: Modificación nota de carrera">
   <h2 class="text-5xl font-bold border-b border-primary w-fit mx-auto">
-    Modificar Datos de Carrera
+    Modificar Nota de Carrera
   </h2>
   <form id="editRaceNoteForm" class="flex flex-col mt-5">
     <label class="mt-5 text-lg font-semibold" for="raceID">
@@ -150,7 +150,8 @@ if(errorRaces) {
       </button>
 
       <button
-        onclick="window, location.href = '/admin/adminraces'"
+        type="button"
+        onclick={`window.location.href = '/admin/race/${dataRaceNote.race.id?.toString()}'`}
         class="py-1.5 px-3 w-fit bg-darkPrimary text-white border-primary border-2 rounded-md my-4 font-medium text-lg hover:bg-primary hover:text-darkPrimary"
       >
         Cancelar
