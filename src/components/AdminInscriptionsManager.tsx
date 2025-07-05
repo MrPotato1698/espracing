@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Edit2, Trash2, Plus, Save, X, Download } from "lucide-react";
+import { Edit2, Trash2, Download, Loader2 } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
@@ -50,7 +50,7 @@ function downloadCSV(rows: AdminInscriptionRow[], raceName: string) {
   const csvRows = rows.map(row => [
     row.profile.full_name,
     row.profile.steam_id,
-    row.profile.team?.name || '',
+    row.profile.team?.name ?? '',
     row.car.class.short_name,
     `${row.car.brand.name} ${row.car.model}`,
     row.valid_laps
@@ -149,6 +149,40 @@ export const AdminInscriptionsManager: React.FC<AdminInscriptionsManagerProps> =
     }
   };
 
+  // Determina si la inscripción está abierta según el campo is_open
+  function isInscriptionOpen(row: any) {
+    return !!row.is_open;
+  }
+
+  // Forzar abrir/cerrar inscripciones
+  const [loadingForceAction, setLoadingForceAction] = useState(false);
+  const [forceActionMsg, setForceActionMsg] = useState("");
+  async function handleForceInscription(row: any, action: 'open' | 'close') {
+    setLoadingForceAction(true);
+    setForceActionMsg(
+      action === 'open'
+        ? 'La función para abrir inscripciones se está realizando. En unos minutos estará completa.'
+        : 'La función para cerrar inscripciones se está realizando. En unos minutos estará completa.'
+    );
+    try {
+      const endpoint = action === 'open' ? '/api/admin/inscriptions/forceopen' : '/api/admin/inscriptions/forceclose';
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: row.id })
+      });
+      if (response.ok) {
+        window.location.reload();
+      } else {
+        setForceActionMsg('Error al cambiar el estado de inscripciones');
+      }
+    } catch (error) {
+      setForceActionMsg('Error al cambiar el estado de inscripciones');
+    } finally {
+      setLoadingForceAction(false);
+    }
+  }
+
   return (
     <div className="space-y-8">
       <div>
@@ -243,41 +277,80 @@ export const AdminInscriptionsManager: React.FC<AdminInscriptionsManagerProps> =
                           <TableCell className="text-center">{row.inscriptions_close ? new Date(row.inscriptions_close).toLocaleString() : '-'}</TableCell>
                           <TableCell className="truncate max-w-[180px]">{row.url_time}</TableCell>
                           <TableCell className="flex gap-2 justify-center">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => {
-                                window.location.href = `/admin/inscriptions/${row.id}`;
-                              }}
-                              className="text-blue-500 border-blue-500 hover:bg-blue-500 hover:text-white"
-                            >
-                              <Edit2 className="h-4 w-4 mr-1" />
-                            </Button>
-                            <AlertDialog>
-                              <AlertDialogTrigger asChild>
+                            {loadingForceAction ? (
+                              <span className="flex items-center gap-2 text-primary"><Loader2 className="animate-spin" />Cargando...</span>
+                            ) : (
+                              <>
                                 <Button
                                   variant="outline"
                                   size="sm"
-                                  className="text-red-500 border-red-500 hover:bg-red-500 hover:text-white"
+                                  onClick={() => {
+                                    window.location.href = `/admin/inscriptions/${row.id}`;
+                                  }}
+                                  className="text-blue-500 border-blue-500 hover:bg-blue-500 hover:text-white"
+                                  disabled={loadingForceAction}
                                 >
-                                  <Trash2 className="h-4 w-4 mr-1" />
+                                  <Edit2 className="h-4 w-4 mr-1" />
                                 </Button>
-                              </AlertDialogTrigger>
-                              <AlertDialogContent>
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
-                                  <AlertDialogDescription>
-                                    Esta acción no se puede deshacer. Se eliminará permanentemente la fecha de inscripción "{row.name}".
-                                  </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                  <AlertDialogAction onClick={() => handleDelete(row)}>
-                                    Eliminar
-                                  </AlertDialogAction>
-                                </AlertDialogFooter>
-                              </AlertDialogContent>
-                            </AlertDialog>
+                                {/* Botón abrir/cerrar inscripciones con confirmación */}
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className={isInscriptionOpen(row) ? "text-red-500 border-red-500 hover:bg-red-500 hover:text-white" : "text-green-600 border-green-600 hover:bg-green-600 hover:text-white"}
+                                      disabled={loadingForceAction}
+                                    >
+                                      {isInscriptionOpen(row) ? "Cerrar inscripciones" : "Abrir inscripciones"}
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>
+                                        {isInscriptionOpen(row) ? "¿Cerrar inscripciones?" : "¿Abrir inscripciones?"}
+                                      </AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        {isInscriptionOpen(row)
+                                          ? `Esta acción cerrará las inscripciones para "${row.name}". ¿Deseas continuar?`
+                                          : `Esta acción abrirá las inscripciones para "${row.name}". ¿Deseas continuar?`}
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel disabled={loadingForceAction}>Cancelar</AlertDialogCancel>
+                                      <AlertDialogAction onClick={() => handleForceInscription(row, isInscriptionOpen(row) ? 'close' : 'open')} disabled={loadingForceAction}>
+                                        {isInscriptionOpen(row) ? "Cerrar inscripciones" : "Abrir inscripciones"}
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className="text-red-500 border-red-500 hover:bg-red-500 hover:text-white"
+                                      disabled={loadingForceAction}
+                                    >
+                                      <Trash2 className="h-4 w-4 mr-1" />
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        Esta acción no se puede deshacer. Se eliminará permanentemente la fecha de inscripción "{row.name}".
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel disabled={loadingForceAction}>Cancelar</AlertDialogCancel>
+                                      <AlertDialogAction onClick={() => handleDelete(row)} disabled={loadingForceAction}>
+                                        Eliminar
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                              </>
+                            )}
                           </TableCell>
                         </TableRow>
                     ))}
@@ -405,6 +478,7 @@ export const AdminInscriptionsManager: React.FC<AdminInscriptionsManagerProps> =
           </TabsContent>
         </Tabs>
       </div>
+      {forceActionMsg && <div className="text-center text-lg font-semibold py-2">{forceActionMsg}</div>}
     </div>
   );
 };
