@@ -73,7 +73,15 @@ export const InscriptionsTableFusion: React.FC<InscriptionsTableFusionProps> = (
 
   // Cálculo de mejores sectores y mejores coches
   const bestLap = useMemo(() => Math.min(...data.map(d => d.bestLap).filter(Boolean)), [data]);
-  const bestSectors = useMemo(() => [0, 1, 2].map(i => Math.min(...data.map(d => d.sectors[i] || Infinity))), [data]);
+  // Calcular el número máximo de sectores en los datos
+  const maxSectors = useMemo(
+    () => Math.max(0, ...data.map(d => d.sectors?.length ?? 0)),
+    [data]
+  );
+  // Cálculo de mejores sectores dinámico según maxSectors
+  const bestSectors = useMemo(() => (
+    Array.from({ length: maxSectors }).map((_, i) => Math.min(...data.map(d => d.sectors?.[i] ?? Infinity)))
+  ), [data, maxSectors]);
   const bestCarTimes: Record<string, number> = useMemo(() => {
     const carBest: Record<string, number> = {};
     data.forEach(d => {
@@ -104,8 +112,6 @@ export const InscriptionsTableFusion: React.FC<InscriptionsTableFusionProps> = (
     );
   }
 
-  // Para mostrar el nombre legible en la tabla
-  const carIdToName = Object.fromEntries(cars.map(c => [c.id, `${c.brand} ${c.model} ${c.class}`]));
   // Para el combobox
   const filteredCars = cars.filter(car => `${car.brand} ${car.model} ${car.class}`.toLowerCase().includes(searchCar.toLowerCase()));
 
@@ -399,9 +405,11 @@ export const InscriptionsTableFusion: React.FC<InscriptionsTableFusionProps> = (
               <TableHead className="text-white text-center">Mejor Vuelta</TableHead>
               <TableHead className="text-white text-center">v. MAX</TableHead>
               <TableHead className="text-white text-center">Diferencia</TableHead>
-              <TableHead className="text-white text-center">S1</TableHead>
-              <TableHead className="text-white text-center">S2</TableHead>
-              <TableHead className="text-white text-center">S3</TableHead>
+              {Array.from({ length: maxSectors }).map((_, i) => (
+                <TableHead key={`sector-head-${i}`} className="text-white text-center">
+                  S{i + 1}
+                </TableHead>
+              ))}
               <TableHead className="text-white text-center">Vueltas</TableHead>
               <TableHead className="text-white text-center">Fecha</TableHead>
             </TableRow>
@@ -426,7 +434,7 @@ export const InscriptionsTableFusion: React.FC<InscriptionsTableFusionProps> = (
                   <TableCell className="text-center">{row.driver}</TableCell>
                   <TableCell className="text-center">
                     {(() => {
-                      if (!car) return row.car;
+                      if (!car) return "";
                       // Extraer color de fondo y texto de class_design
                       const bgMatch = car?.class_design?.match(/bg-\[#([0-9a-fA-F]{6})\]/);
                       const textMatch = car?.class_design?.match(/text-\[#([0-9a-fA-F]{6})\]/);
