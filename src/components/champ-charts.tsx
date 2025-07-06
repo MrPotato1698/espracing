@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-const { supabase } = await import("@/db/supabase");
+import { supabase }  from "@/db/supabase";
 import ChampionshipProgressionChart from "@/components/championship-progression-chart";
 import { showToast } from "@/lib/utils";
 
