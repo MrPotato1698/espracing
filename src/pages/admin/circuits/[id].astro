@@ -69,6 +69,16 @@ const { data: circuitData } = await supabase
       class="bg-darkSecond text-lightPrimary text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
     />
 
+    <label class="mt-5 text-lg font-semibold" for="shortname">
+      Nombre Corto:
+    </label>
+    <input
+      type="text"
+      name="shortname"
+      value={circuitData?.shortname}
+      class="bg-darkSecond text-lightPrimary text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
+    />
+
     <label class="mt-5 text-lg font-semibold" for="location">
       Localización:
     </label>

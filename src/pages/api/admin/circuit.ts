@@ -45,6 +45,7 @@ export const PUT: APIRoute = async ({ request }) => {
   const formData = await request.formData();
   const race_id = formData.get("circuit_id");
   const name = formData.get("name");
+  const shortname = formData.get("shortname");
   const location = formData.get("location");
 
   if (!race_id) {
@@ -58,6 +59,7 @@ export const PUT: APIRoute = async ({ request }) => {
       const updateData: any = {
         ...(name && { name: name }),
         ...(location && { location: location }),
+        ...(shortname && { shortname: shortname }),
       };
 
       if (Object.keys(updateData).length > 0) {
