@@ -29,7 +29,7 @@
       Mostrar notificación de información
     </button>
   </div>
-  <div class = "grid grid-cols-2 gap-2 mt-4 mx-4">
+  <div class="grid grid-cols-2 gap-2 mt-4 mx-4">
     <div class="mb-2 py-2 px-6 border-2 border-primary rounded-lg bg-darkSecond">
       <div class="mb-4">
         <label for="fileInputS1R1" class="block text-lightPrimary text-lg font-semibold mb-3">
@@ -109,6 +109,12 @@
     </div>
   </div>
 
+  <!-- Checkbox multicategoría -->
+  <div class="flex items-center justify-center mt-4">
+    <input id="isMultiCategory" type="checkbox" class="mr-2 w-5 h-5 accent-primary" />
+    <label for="isMultiCategory" class="text-lightPrimary text-lg font-semibold">¿Multicategoría?</label>
+  </div>
+
   <div class="grid grid-cols-2">
     <button
       class="bg-primary text-lightPrimary font-bold py-3 px-2 w-72 mt-4 mx-auto border-solid border-primary border-2 rounded-md hover:bg-darkSecond hover:text-lightPrimary"
@@ -183,6 +189,7 @@
   const testInscriptionsCloseBtn = document.getElementById('testInscriptionsClose');
   const testFunctionInscriptionsOpenBtn = document.getElementById('testFunctionInscriptionsOpen');
   const testFunctionInscriptionsCloseBtn = document.getElementById('testFunctionInscriptionsClose');
+  const isMultiCategoryCheckbox = document.getElementById('isMultiCategory') as HTMLInputElement | null;
 
   input1?.addEventListener('change', () => {
     const file = input1.files?.[0];
@@ -230,7 +237,8 @@
     try {
       const text = await file.text();
       const json = JSON.parse(text);
-      const result = createRaceData(json);
+      const isMultiCategory = isMultiCategoryCheckbox?.checked || false;
+      const result = createRaceData(json, isMultiCategory);
       console.log('Resultado 1 JSON:', result);
       window.showToast?.('Conversión exitosa. Revisa la consola.', 'success');
     } catch (e) {
@@ -251,7 +259,8 @@
       const [textA, textB] = await Promise.all([fileA.text(), fileB.text()]);
       const jsonA = JSON.parse(textA);
       const jsonB = JSON.parse(textB);
-      const result = createRaceDataMultipleSplits(jsonA, jsonB);
+      const isMultiCategory = isMultiCategoryCheckbox?.checked || false;
+      const result = createRaceDataMultipleSplits(jsonA, jsonB, isMultiCategory);
       console.log('Resultado 2 JSON:', result);
       window.showToast?.('Conversión exitosa. Revisa la consola.', 'success');
     } catch (e) {
@@ -429,7 +438,7 @@ function extractOptimizedData(html: string) {
     const cells = row.querySelectorAll('td');
     if (!cells || cells.length < 6) return; // Asegura que hay suficientes celdas
     const data: any = {};
-    // Extraer datos esenciales con comprobación de existencia
+    // Extraer datos esenciales with comprobación de existencia
     data.position = cells[0]?.textContent?.trim() || '';
     data.driver = cells[1]?.textContent?.trim() || '';
     data.car = cells[2]?.textContent?.trim() || '';

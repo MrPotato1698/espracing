@@ -1,7 +1,7 @@
 ---
 import Layout from "@/layouts/NormalLayout.astro";
 import CardIndex from "@/sections/CardsIndex.astro";
-import DevZone from "@/sections/devZone.astro";
+// import DevZone from "@/sections/devZone.astro";
 
 // ****************************************************************************
 // Para mostrar la dev zone
@@ -25,14 +25,14 @@ if(access_token) {
 	//redirect(`${pathname}${search}`);
 }
 
-let devZone = false;
+//let devZone = false;
 
 const accessToken = cookies.get("sb-access-token");
 const refreshToken = cookies.get("sb-refresh-token");
 
-if (!accessToken || !refreshToken) {
-  devZone = false;
-}
+// if (!accessToken || !refreshToken) {
+//   devZone = false;
+// }
 
 // Set the session with the cookies
 const { data: dataAuth, error: errorAuth } = await supabase.auth.setSession({
@@ -58,14 +58,14 @@ const { data: userData, error: errorUserData } = await supabase
   .eq('id', id)
   .single();
 
-if(userData?.email === 'manueljgonzalezg1698@gmail.com') {
-	devZone = true;
-}
+// if(userData?.email === '') {
+// 	devZone = true;
+// }
 // ****************************************************************************
 ---
 
 <Layout title="ESP Racing: Inicio">
-	{devZone ? <DevZone />: null}
+	<!-- {devZone ? <DevZone />: null} -->
 
 	<section>
 		<div class = "max-w-screen-xl px-4 mx-auto py-28 lg:items-center">
