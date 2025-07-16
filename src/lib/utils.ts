@@ -130,7 +130,7 @@ export function getResultFastestLap(datos: RaceData, pointArray: Points, cars: C
       : "",
     carClass: car?.classShortName ?? "",
     carBrand: car?.imgbrand ?? "",
-    carName: car?.brand && car?.model ? car?.brand + " " + car?.model : "",
+    carName: car?.model ? car?.model : "",
     team: driver?.Team ?? "",
     time: `${minutes}:${seconds}`,
     tyre: bestLap.Tyre,
@@ -220,7 +220,7 @@ function getCarInfo(carFileName: string, cars: CarData[]) {
   const car = cars.find((c) => c.filename === carFileName);
   if (car) {
     return {
-      carName: `${car.brand} ${car.model}`,
+      carName: `${car.model}`,
       carBrand: car.imgbrand,
       carClass: car.classShortName,
       carColorClass: `style="background-color: ${car.classColor.split(' ')[0].replace('bg-[', '').replace(']', '')}; color: ${car.classColor.split(' ')[1].replace('text-[', '').replace(']', '')}" class = "rounded text-xs font-bold px-1 py-0.5 ml-1"`
