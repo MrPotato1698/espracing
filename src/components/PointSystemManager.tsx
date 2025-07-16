@@ -10,21 +10,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Edit, Trash2, Plus, Save, X, AlertTriangle } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, showToast } from "@/lib/utils";
 
 interface PointSystem {
   id: number;
   name: string;
   points: string;
   fastestlap: number;
+  race_count?: number;
 }
 
-interface PointSystemManagerProps {
-  readonly initialData: PointSystem[];
-}
-
-export default function PointSystemManager({ initialData }: PointSystemManagerProps) {
-  const [pointSystems, setPointSystems] = useState<PointSystem[]>(initialData);
+export default function PointSystemManager() {
+  const [pointSystems, setPointSystems] = useState<PointSystem[]>([]);
   const [selectedSystem, setSelectedSystem] = useState<PointSystem | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editingSystem, setEditingSystem] = useState<PointSystem | null>(null);
@@ -61,6 +58,24 @@ export default function PointSystemManager({ initialData }: PointSystemManagerPr
     window.addEventListener("resize", updateColumns);
     return () => window.removeEventListener("resize", updateColumns);
   }, [getColumnsPerRow]);
+
+  // Cargar sistemas de puntos desde la API al montar
+  useEffect(() => {
+    const fetchPointSystems = async () => {
+      try {
+        const response = await fetch('/api/admin/pointsystem?action=list', {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        if (!response.ok) throw new Error("Error al cargar los sistemas de puntuación");
+        const data = await response.json();
+        setPointSystems(data || []);
+      } catch (error) {
+        console.error("Error al cargar los sistemas de puntuación:", error);
+      }
+    };
+    fetchPointSystems();
+  }, []);
 
   useEffect(() => {
     if (pointSystems.length > 0 && !selectedSystem) {
@@ -241,7 +256,12 @@ export default function PointSystemManager({ initialData }: PointSystemManagerPr
 
   const handleDelete = async (system: PointSystem) => {
     if (system.id === 0) {
-      alert("No se puede eliminar el sistema de puntuación especial");
+      showToast("No se puede eliminar el sistema de puntuación especial", "error");
+      return;
+    }
+
+    if(system.race_count && system.race_count > 0){
+      showToast("No se puede eliminar un sistema de puntuación que ya ha sido utilizado en carreras", "error");
       return;
     }
 
@@ -259,13 +279,13 @@ export default function PointSystemManager({ initialData }: PointSystemManagerPr
         if (selectedSystem?.id === system.id) {
           setSelectedSystem(pointSystems.find((ps) => ps.id !== system.id) || null);
         }
-        alert("Sistema de puntuación eliminado correctamente");
+        showToast("Sistema de puntuación eliminado correctamente", "success");
       } else {
-        alert("Error al eliminar el sistema de puntuación");
+        showToast("Error al eliminar el sistema de puntuación", "error");
       }
     } catch (error) {
       console.error("Error:", error);
-      alert("Error al eliminar el sistema de puntuación");
+      showToast("Error al eliminar el sistema de puntuación", "error");
     }
   };
 

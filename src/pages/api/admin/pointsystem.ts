@@ -1,19 +1,30 @@
 import type { APIRoute } from "astro"
 import { supabase } from "@/db/supabase"
 
+export const GET: APIRoute = async ({ request }) => {
+  try {
+    const { data, error: getListError } = await supabase.rpc("get_point_system_with_race_count");
+
+    if (getListError) throw getListError;
+
+    return new Response(JSON.stringify(data), { status: 200, headers: { "Content-Type": "application/json" } });
+  } catch (error) {
+    console.error('Error al leer el sistema de puntos:', error);
+    return new Response(JSON.stringify({ error: 'Error al leer el sistema de puntos' }), { status: 500 });
+  }
+};
+
+
 export const POST: APIRoute = async ({ request }) => {
   try {
     const body = await request.json()
     const { name, points, fastestlap } = body
-
-    console.log("Received data:", { name, points, fastestlap });
 
     const { data: getLastPS } = await supabase
         .from('pointsystem')
         .select('id')
         .order('id', { ascending: true });
 
-    console.log("Last pointsystem IDs:", getLastPS);
 
       if(!getLastPS) throw new Error("Error al obtener el último ID de Sistema de Puntos");
       let findID = false;
@@ -29,15 +40,11 @@ export const POST: APIRoute = async ({ request }) => {
       if (!findID) i++;
       const lastPSID = getLastPSfix ? i : 1;
 
-    console.log("Calculated lastPSID:", lastPSID);
-
     const { data, error } = await supabase
       .from("pointsystem")
       .insert([{ id: lastPSID, name, points, fastestlap }])
       .select()
       .single();
-
-    console.log("Insert result:", { data, error });
 
     if (error) {
       return new Response(JSON.stringify({ error: error.message }), {
