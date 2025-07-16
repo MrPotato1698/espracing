@@ -97,7 +97,7 @@ export const TeamPilotsTable: React.FC<TeamPilotsTableProps> = ({
       const response = await fetch('/api/admin/myteam', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: pilotId, teamId }),
+        body: JSON.stringify({ userId: pilotId, teamId, isCurrentUserManager }),
       });
       if (!response.ok) {
         window.showToast('Error expulsando piloto', 'error');
