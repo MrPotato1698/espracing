@@ -88,6 +88,38 @@ const { data: secondaryRule } = await supabase
   .single();
 
 const isSecondaryVisible = secondaryRule?.isVisible || false;
+
+// Obtener campeonatos
+const { data: championshipsRaw } = await supabase
+  .from("championship")
+  .select("id, name");
+const championships = championshipsRaw ?? [];
+
+// Obtener normativa principal
+const { data: mainNormRaw } = await supabase
+  .from("racerules")
+  .select("content, championship(id)")
+  .eq("id", 1)
+  .single();
+
+const mainRules = mainNormRaw
+  ? {
+      content: mainNormRaw.content ?? "",
+      championship: mainNormRaw.championship,
+    }
+  : { content: "", championship: { id: 1 } };
+const { data: secondaryNormRaw } = await supabase
+  .from("racerules")
+  .select("content, championship(id)")
+  .eq("id", 2)
+  .single();
+
+const secondaryRules = secondaryNormRaw
+  ? {
+      content: secondaryNormRaw.content ?? "",
+      championship: secondaryNormRaw.championship,
+    }
+  : { content: "", championship: { id: 1 } };
 ---
 
 <Layout title="ESP Racing: Administrar Normativa">
@@ -110,6 +142,8 @@ const isSecondaryVisible = secondaryRule?.isVisible || false;
       normativaId={1}
       userId = {profileData.id}
       userRole = {profileData.roleesp}
+      championships={championships}
+      normativaData={mainRules}
       />
     </div>
 
@@ -122,6 +156,8 @@ const isSecondaryVisible = secondaryRule?.isVisible || false;
       normativaId={2}
       userId = {profileData.id}
       userRole = {profileData.roleesp}
+      championships={championships}
+      normativaData={secondaryRules}
       />
     </div>
   </div>

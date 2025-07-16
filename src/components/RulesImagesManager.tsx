@@ -1,11 +1,9 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { supabase } from "@/db/supabase"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Copy, Trash2, ImagePlus, Loader2 } from "lucide-react"
 
@@ -113,24 +111,13 @@ export default function RulesImagesManager() {
     const fetchImages = async () => {
       setLoading(true)
       setError(null)
-      // Imágenes de normativa
-      const { data, error } = await supabase.from("racerulesimg").select("id, name, img_url").order("id")
-      if (error) setError("Error al cargar imágenes: " + error.message)
-      else setImages(data || [])
-      // Imágenes de campeonatos activos
-      const { data: champData, error: champError } = await supabase.from("championship").select("id, name, champ_img").eq("isfinished", false)
-      if (champError) setError("Error al cargar campeonatos: " + champError.message)
-      else if (champData) {
-        // Obtener URL pública para cada imagen de campeonato
-        const champImgs: ChampionshipImg[] = champData.map((champ: any) => {
-          let img_url = "";
-          if (champ.champ_img) {
-            const { data: urlData } = supabase.storage.from("championshipposter").getPublicUrl(champ.champ_img);
-            img_url = urlData?.publicUrl || "";
-          }
-          return { ...champ, img_url };
-        });
-        setChampionshipImages(champImgs);
+      try {
+        const response = await fetch("/api/admin/rulesimages");
+        const result = await response.json();
+        setImages(result.images || []);
+        setChampionshipImages(result.championshipImages || []);
+      } catch (e: any) {
+        setError("Error al cargar imágenes: " + (e.message || e));
       }
       setLoading(false)
     }
@@ -154,14 +141,13 @@ export default function RulesImagesManager() {
     setSuccess(null)
     setUploading(true)
     try {
-      // Eliminar del bucket
-      const fileName = img.img_url.split("/").pop()
-      if (fileName) {
-        await supabase.storage.from("rulesimg").remove([fileName])
-      }
-      // Eliminar de la tabla
-      const { error } = await supabase.from("racerulesimg").delete().eq("id", img.id)
-      if (error) throw error
+      const response = await fetch("/api/admin/rulesimages", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: img.id, img_url: img.img_url }),
+      });
+      const result = await response.json();
+      if (!response.ok || !result.success) throw new Error(result.error || "Error al eliminar");
       setImages((prev) => prev.filter((i) => i.id !== img.id))
       setSuccess("Imagen eliminada correctamente")
       setTimeout(() => setSuccess(null), 2000)
@@ -184,17 +170,16 @@ export default function RulesImagesManager() {
     try {
       // Comprimir y convertir a webp
       const compressedImage = await compressImage(newFile);
-      // Subir imagen al bucket
-      const fileName = `rulesimg_${Date.now()}.webp`;
-      const { data: uploadData, error: uploadError } = await supabase.storage.from("rulesimg").upload(fileName, compressedImage, { upsert: true, contentType: "image/webp" })
-      if (uploadError) throw uploadError
-      // Obtener URL pública
-      const { data: publicUrlData } = supabase.storage.from("rulesimg").getPublicUrl(fileName)
-      const publicUrl = publicUrlData.publicUrl
-      // Insertar en la tabla
-      const { data: insertData, error: insertError } = await supabase.from("racerulesimg").insert({ name: newName, img_url: publicUrl }).select().single()
-      if (insertError) throw insertError
-      setImages((prev) => [...prev, insertData])
+      const formData = new FormData();
+      formData.append("name", newName);
+      formData.append("file", new File([compressedImage], `rulesimg_${Date.now()}.webp`, { type: "image/webp" }));
+      const response = await fetch("/api/admin/rulesimages", {
+        method: "POST",
+        body: formData,
+      });
+      const result = await response.json();
+      if (!response.ok || !result.image) throw new Error(result.error || "Error al subir");
+      setImages((prev) => [...prev, result.image])
       setSuccess("Imagen subida correctamente")
       setNewName("")
       setNewFile(null)
@@ -263,12 +248,14 @@ export default function RulesImagesManager() {
                 <div key={img.id} className="bg-darkPrimary rounded-lg p-4 border flex flex-col items-center">
                   <img src={img.img_url} alt={img.name} className="h-32 w-auto object-contain mb-2 rounded" />
                   <div className="text-sm font-medium mb-2 text-center break-all">{img.name}</div>
-                  <div className="flex gap-2">
-                    <Button size="sm" variant="outline" onClick={() => handleCopy(img.img_url)} disabled={uploading}>
-                      <Copy className="h-4 w-4 mr-1" /> Copiar URL
+                  <div className="flex gap-2 flex-col 2xl:flex-row 2xl:items-center w-full 2xl:w-auto mt-2 2xl:mt-0">
+                    <Button size="sm" variant="outline" onClick={() => handleCopy(img.img_url)} disabled={uploading} className="w-full 2xl:w-auto flex items-center justify-center">
+                      <Copy className="h-4 w-4 mr-1" />
+                      <span className="hidden sm:inline">Copiar URL</span>
                     </Button>
-                    <Button size="sm" variant="destructive" onClick={() => handleDelete(img)} disabled={uploading}>
-                      <Trash2 className="h-4 w-4 mr-1" /> Eliminar
+                    <Button size="sm" variant="destructive" onClick={() => handleDelete(img)} disabled={uploading} className="w-full 2xl:w-auto flex items-center justify-center">
+                      <Trash2 className="h-4 w-4 mr-1" />
+                      <span className="hidden sm:inline">Eliminar</span>
                     </Button>
                   </div>
                 </div>

@@ -1,7 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { supabase } from "@/db/supabase"
+import { useState } from "react"
 import MarkdownRenderer from "@/components/MarkdownRenderer"
 
 // Importaciones de UI
@@ -12,13 +11,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
 import { Loader2, Save, Eye, Edit } from "lucide-react"
-import { showToast } from "@/lib/utils"
-
-// Tipos
-type Profile = {
-  id: string
-  roleesp: number | null
-}
 
 type Championship = {
   id: number
@@ -29,55 +21,17 @@ type RulesEditorProps = {
   normativaId: number
   userId: string
   userRole: number | null
+  championships: Championship[]
+  normativaData: { content: string; championship: { id: number } }
 }
 
-export default function RulesEditor({ normativaId, userId, userRole }: Readonly<RulesEditorProps>) {
-  const [isLoading, setIsLoading] = useState(true)
+export default function RulesEditor({ normativaId, userId, championships, normativaData }: Readonly<RulesEditorProps>) {
+  const [isLoading] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
-  const [content, setContent] = useState<string>("")
-  const [championships, setChampionships] = useState<Championship[]>([])
-  const [selectedChampionship, setSelectedChampionship] = useState<number>(0)
+  const [content, setContent] = useState<string>(normativaData.content ?? "")
+  const [selectedChampionship, setSelectedChampionship] = useState<number>(normativaData.championship.id ?? 0)
   const [activeTab, setActiveTab] = useState<string>("edit")
   const [saveMessage, setSaveMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
-
-  // Cargar datos
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        // Cargar campeonatos
-        const { data: championshipsData, error: championshipsError } = await supabase
-          .from("championship")
-          .select("id, name")
-          .order("id")
-
-        if (championshipsError) {
-          console.error("Error al cargar campeonatos:", championshipsError)
-        } else if (championshipsData) {
-          setChampionships(championshipsData)
-        }
-
-        // Cargar normativa
-        const { data: normativaData, error: normativaError } = await supabase
-          .from("racerules")
-          .select("content, championship!inner(id)")
-          .eq("id", normativaId)
-          .single()
-
-        if (normativaError) {
-          console.error("Error al cargar normativa:", normativaError)
-        } else if (normativaData) {
-          setContent(normativaData.content ?? "")
-          setSelectedChampionship(normativaData.championship.id ?? null)
-        }
-      } catch (error) {
-        console.error("Error:", error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    loadData()
-  }, [normativaId])
 
   // Guardar cambios en la normativa
   const saveContent = async () => {
@@ -88,44 +42,36 @@ export default function RulesEditor({ normativaId, userId, userRole }: Readonly<
       })
       return
     }
-
     setIsSaving(true)
     setSaveMessage(null)
-
     try {
-      const now = new Date().toISOString()
-
-      const { error } = await supabase
-        .from("racerules")
-        .update({
+      const response = await fetch("/api/admin/rules", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          normativaId,
           content,
           championship: selectedChampionship,
-          updated_at: now,
-          updated_by: userId,
-        })
-        .eq("id", normativaId)
-
-      if (error) {
-        showToast("Error al guardar los cambios: "+ error.message, "error")
-        console.error("Error al guardar:" + error.message, error)
+          userId,
+        }),
+      })
+      const result = await response.json()
+      if (!response.ok || !result.success) {
         setSaveMessage({
           type: "error",
           text: "Error al guardar los cambios. Inténtalo de nuevo.",
         })
         return
       }
-
       setSaveMessage({
         type: "success",
         text: "Cambios guardados correctamente.",
       })
-
-      // Ocultar mensaje después de 3 segundos
       setTimeout(() => {
         setSaveMessage(null)
       }, 3000)
     } catch (error) {
-      console.error("Error:", error)
+      console.error("Error guardando la normativa:", error);
       setSaveMessage({
         type: "error",
         text: "Error al guardar los cambios. Inténtalo de nuevo.",
