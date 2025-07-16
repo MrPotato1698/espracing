@@ -131,13 +131,22 @@ export default function NewChamp({ championships, cars, carClasses, races, champ
       const form = document.getElementById("uploadChampForm") as HTMLFormElement;
       const formData = new FormData(form);
       const champname = formData.get('champname') as string;
-      const keySearchAPI = formData.get('keySearchAPI') as string;
       const yearChamp = formData.get('yearChamp') as string;
       const season = formData.get('season') as string;
       const numbertotalraces = formData.get('numbertotalraces') as string;
       if (!champname || !yearChamp || !season || !numbertotalraces) {
         setErrorMsg("Por favor, completa todos los campos obligatorios.");
         return;
+      }
+      // Validación: el año debe estar dentro de la temporada seleccionada (si no es '0')
+      if (season !== '0') {
+        const seasonStart = 2000 + parseInt(season.slice(0, 2));
+        const seasonEnd = 2000 + parseInt(season.slice(2, 4));
+        const yearNum = Number(yearChamp);
+        if (yearNum !== seasonStart && yearNum !== seasonEnd) {
+          setErrorMsg(`El año de inicio debe coincidir con alguno de los años de la temporada seleccionada (${seasonStart}/${seasonEnd}).`);
+          return;
+        }
       }
       const formattedSeason = season === '0' ? '0' : formatSeason(season);
       // Llamada a la API championship
@@ -146,7 +155,6 @@ export default function NewChamp({ championships, cars, carClasses, races, champ
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: champname,
-          key_search: keySearchAPI,
           year: Number(yearChamp),
           season: formattedSeason,
           number_of_races_total: Number(numbertotalraces),
@@ -195,17 +203,6 @@ export default function NewChamp({ championships, cars, carClasses, races, champ
               name="champname"
               placeholder="Campeonato X en cualquier sitio..."
               required
-            />
-
-            <label className="text-lightPrimary text-lg font-medium" htmlFor="keySearchAPI">
-              Keysearch del campeonato/evento (sentencia para buscar el campeonato en la API del servidor)
-            </label>
-            <input
-              className="w-full p-3 border border-solid border-lightSecond rounded-md mt-2 mb-4 resize-y text-white bg-darkSecond hover:border-primary"
-              type="text"
-              id="keySearchAPI"
-              name="keySearchAPI"
-              placeholder="+car_filename_1 +car_filename_2 +RACE"
             />
 
             <label className="text-lightPrimary text-lg font-medium" htmlFor="yearChamp">
