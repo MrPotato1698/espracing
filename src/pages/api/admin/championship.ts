@@ -21,55 +21,44 @@ export const GET: APIRoute = async ({ request }) => {
 export const POST: APIRoute = async ({ request }) => {
   try {
     const body = await request.json();
-    const { carData, carClassValue, carBrandValue } = body;
-    if (!carData) throw new Error("No se recibieron datos del coche");
+    const { name, year, season, number_of_races_total, ischampionship, cars } = body;
 
-    // Solo permitir IDs existentes
-    const lastBrandID = carBrandValue === "-1" ? carData.brandID : Number(carBrandValue);
-    const lastClassID = carClassValue === "-1" ? carData.classID : Number(carClassValue);
-
-    if (lastBrandID === -1) {
-      return new Response(JSON.stringify({ error: "La marca seleccionada no existe en la base de datos. Vaya a ajustes globales para crearla" }), { status: 400 });
-    }
-
-    const { data: getLastCar } = await supabase
-      .from('car')
+    const { data: getLastChamp } = await supabase
+      .from('championship')
       .select('id')
       .neq('id', 0)
       .order('id', { ascending: true });
 
-    if(!getLastCar) throw new Error("Error al obtener el último ID de coche");
+    if(!getLastChamp) throw new Error("Error al obtener el último ID de campeonato");
     let findID = false;
     let i = 1;
-    while (!findID && i < getLastCar.length) {
-      if (getLastCar[i-1].id === i) {
+    while (!findID && i < getLastChamp.length) {
+      if (getLastChamp[i-1].id === i) {
         i++;
       } else {
         findID = true;
       }
     }
-    if (!findID && getLastCar[i-1].id === i) i++;
-    const lastCarID = getLastCar ? i : 1;
+    if (!findID && getLastChamp[i-1].id === i) i++;
+    const lastChampID = getLastChamp ? i : 1;
 
     const { error: insertError } = await supabase
-      .from('car')
+      .from('championship')
       .insert({
-        id: Number(lastCarID),
-        filename: carData.filename,
-        brand: Number(lastBrandID),
-        model: carData.model,
-        year: carData.year,
-        class: Number(lastClassID),
-        power: carData.power,
-        torque: carData.torque,
-        weight: carData.weight,
-        description: carData.description,
-        tyreTimeChange: carData.tyreTimeChange,
-        fuelLiterTime: carData.fuelLiterTime,
-        maxLiter: carData.maxLiter,
+        id: Number(lastChampID),
+        name: name,
+        year: Number(year),
+        season: season,
+        number_of_races_total: Number(number_of_races_total),
+        ischampionship: ischampionship,
       });
 
     if (insertError) throw insertError;
+    if (cars && cars.length > 0) {
+      const carRows = cars.map((carId: number) => ({ championship: lastChampID, car: carId }));
+      const { error: insertCarsError } = await supabase.from("championshipcars").insert(carRows);
+      if (insertCarsError) throw insertCarsError;
+    }
     return new Response(JSON.stringify({ success: true }), { status: 201, headers: { "Content-Type": "application/json" } });
   } catch (error) {
     console.error("Error al crear el coche:", error);
@@ -84,7 +73,6 @@ export const PUT: APIRoute = async ({ request }) => {
   const formData = await request.formData();
   const champ_id = formData.get('champ_id');
   const champ_name = formData.get('name');
-  const keySearchAPI = formData.get('keySearchAPI');
   const yearChamp = formData.get('yearChamp');
   const season = formData.get('season') as string;
   const champORevent = formData.get('champORevent')  !== null;
@@ -98,7 +86,6 @@ export const PUT: APIRoute = async ({ request }) => {
   try {
     const updateData: any = {
       ...(champ_name && { name: champ_name }),
-      ...(keySearchAPI && { key_search: keySearchAPI }),
       ...(yearChamp && { year: Number(yearChamp) }),
       ...(season && { season: season }),
       ischampionship: champORevent,

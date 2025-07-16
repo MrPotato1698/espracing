@@ -26,6 +26,8 @@ export default function NewRace({ championshipContent = [], pointsystemContent =
   // Estados para switches
   const [split2, setSplit2] = useState(false);
   const [race2, setRace2] = useState(false);
+  // Estado para multicategoría
+  const [isMultiCategory, setIsMultiCategory] = useState(false);
 
   // Estados para archivos
   const [fileS1R1, setFileS1R1] = useState<File|null>(null);
@@ -98,6 +100,7 @@ export default function NewRace({ championshipContent = [], pointsystemContent =
       if (fileS2R2) formData.append("fileS2R2", fileS2R2);
       formData.append("split2", split2 ? "1" : "0");
       formData.append("race2", race2 ? "1" : "0");
+      formData.append("isMultiCategory", isMultiCategory ? "1" : "0");
 
       const res = await fetch("/api/admin/race/uploadracefile", {
         method: "POST",
@@ -249,6 +252,18 @@ export default function NewRace({ championshipContent = [], pointsystemContent =
               ></div>
               <span className="ml-3 text-lightPrimary text-lg font-medium">¿1 o 2 carreras por GP?</span>
             </label>
+          </div>
+
+          <div className="flex items-center gap-2 mb-4">
+            <input
+              id="isMultiCategory"
+              name="isMultiCategory"
+              type="checkbox"
+              className="mr-2 w-5 h-5 accent-primary"
+              checked={isMultiCategory}
+              onChange={e => setIsMultiCategory(e.target.checked)}
+            />
+            <label htmlFor="isMultiCategory" className="text-lightPrimary text-lg font-semibold">¿Multicategoría?</label>
           </div>
 
           {/* Split 1 - Carrera 1 */}

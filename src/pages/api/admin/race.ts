@@ -22,7 +22,7 @@ export const GET: APIRoute = async ({ request }) => {
 
 export const POST: APIRoute = async ({ request }) => {
   const body = await request.json();
-  const {racename, champID, numrace, pointsystem, splits, race_data_1, race_data_2, race_date, filename } = body;
+  const {racename, champID, numrace, pointsystem, splits, race_data_1, race_data_2, race_date, filename, isMultiCategory } = body;
   const lastRaceID = await getNextRaceId();
   const insertObj: any = {
     id: lastRaceID,
@@ -33,7 +33,8 @@ export const POST: APIRoute = async ({ request }) => {
     splits,
     race_data_1,
     race_date,
-    filename
+    filename,
+    multiclass: isMultiCategory
   };
   if (race_data_2) insertObj.race_data_2 = race_data_2;
   const { error } = await supabase.from('race').insert([insertObj]);
@@ -60,6 +61,7 @@ export const PUT: APIRoute = async ({ request }) => {
   const fileInputS2R1 = formData.get("fileInputS2R1") as File | null;
   const fileInputS1R2 = formData.get("fileInputS1R2") as File | null;
   const fileInputS2R2 = formData.get("fileInputS2R2") as File | null;
+  const isMultiCategory = formData.get("isMultiCategory") === "on" || formData.get("isMultiCategory") === "1";
 
   if (!race_id)
     return new Response(JSON.stringify({ error: "ID de carrera no proporcionado" }), { status: 400 });
@@ -69,7 +71,7 @@ export const PUT: APIRoute = async ({ request }) => {
       return new Response(JSON.stringify({ error: "No se ha proporcionado un archivo para la Carrera 1 del Split 1." }), { status: 400 });
     }
 
-    const result = await handleRaceEdit({race_id, name, orderChamp, champID, pointsystem, switchRaceElement, switchS2Element, switchR2Element, fileInputS1R1, fileInputS2R1, fileInputS1R2, fileInputS2R2,});
+    const result = await handleRaceEdit({race_id, name, orderChamp, champID, pointsystem, switchRaceElement, switchS2Element, switchR2Element, fileInputS1R1, fileInputS2R1, fileInputS1R2, fileInputS2R2, isMultiCategory });
 
     return result;
   } catch (error) {
@@ -152,10 +154,11 @@ type HandleRaceEditParams = {
   fileInputS2R1: File | null;
   fileInputS1R2: File | null;
   fileInputS2R2: File | null;
+  isMultiCategory?: boolean;
 };
 
 async function handleRaceEdit(params: HandleRaceEditParams): Promise<Response> {
-  const { race_id, name, orderChamp, champID, pointsystem, switchRaceElement, switchS2Element, switchR2Element, fileInputS1R1, fileInputS2R1, fileInputS1R2, fileInputS2R2, } = params;
+  const { race_id, name, orderChamp, champID, pointsystem, switchRaceElement, switchS2Element, switchR2Element, fileInputS1R1, fileInputS2R1, fileInputS1R2, fileInputS2R2, isMultiCategory } = params;
 
   if (!fileInputS1R1) {
     return new Response(JSON.stringify({ error: "Por favor, selecciona un archivo JSON para la Carrera 1 del Split 1." }), { status: 400 });
@@ -163,7 +166,7 @@ async function handleRaceEdit(params: HandleRaceEditParams): Promise<Response> {
 
   let editResult: EditRaceResult;
   if (switchRaceElement) {
-    editResult = await handleRaceFileEdit({ race_id, name, orderChamp, champID, fileInputS1R1, fileInputS2R1, fileInputS1R2, fileInputS2R2, switchS2Element, switchR2Element });
+    editResult = await handleRaceFileEdit({ race_id, name, orderChamp, champID, fileInputS1R1, fileInputS2R1, fileInputS1R2, fileInputS2R2, switchS2Element, switchR2Element, isMultiCategory });
     if (editResult.error) return editResult.response!;
   } else {
     editResult = {
@@ -186,6 +189,7 @@ async function handleRaceEdit(params: HandleRaceEditParams): Promise<Response> {
     URLBucketsResults: editResult.URLBucketsResults,
     switchR2Element,
     dateRace: editResult.dateRace,
+    isMultiCategory,
   });
 
   if (Object.keys(updateData).length > 0) {
@@ -206,7 +210,7 @@ type EditRaceResult = {
   response?: Response;
 };
 
-async function handleRaceFileEdit({ race_id, name, orderChamp, champID, fileInputS1R1, fileInputS2R1, fileInputS1R2, fileInputS2R2, switchS2Element, switchR2Element }: {
+async function handleRaceFileEdit({ race_id, name, orderChamp, champID, fileInputS1R1, fileInputS2R1, fileInputS1R2, fileInputS2R2, switchS2Element, switchR2Element, isMultiCategory }: {
   race_id: FormDataEntryValue | null;
   name: string;
   orderChamp: FormDataEntryValue | null;
@@ -217,6 +221,7 @@ async function handleRaceFileEdit({ race_id, name, orderChamp, champID, fileInpu
   fileInputS2R2: File | null;
   switchS2Element: boolean;
   switchR2Element: boolean;
+  isMultiCategory?: boolean;
 }): Promise<EditRaceResult> {
   let numSplits = 1;
   let transformedJsonR1 = "{}";
@@ -247,6 +252,7 @@ async function handleRaceFileEdit({ race_id, name, orderChamp, champID, fileInpu
     fileS2R2: fileInputS2R2,
     switchS2Element,
     switchR2Element,
+    isMultiCategory
   });
   if ("error" in jsonTransformResult) {
     return { numSplits, changeRaceJSONSwitch, URLBucketsResults, dateRace, fileS1R1: fileInputS1R1, error: true, response: jsonTransformResult.response ?? new Response(JSON.stringify({ error: "Unknown error" }), { status: 500 }) };
@@ -287,7 +293,7 @@ async function handleRaceFileEdit({ race_id, name, orderChamp, champID, fileInpu
   return { numSplits, changeRaceJSONSwitch, URLBucketsResults, dateRace, fileS1R1: fileInputS1R1 };
 }
 
-function buildUpdateData({ name, fileS1R1, champID, orderChamp, pointsystem, numSplits, changeRaceJSONSwitch, URLBucketsResults, switchR2Element, dateRace }: {
+function buildUpdateData({ name, fileS1R1, champID, orderChamp, pointsystem, numSplits, changeRaceJSONSwitch, URLBucketsResults, switchR2Element, dateRace, isMultiCategory }: {
   name: string;
   fileS1R1: File | null;
   champID: FormDataEntryValue | null;
@@ -298,6 +304,7 @@ function buildUpdateData({ name, fileS1R1, champID, orderChamp, pointsystem, num
   URLBucketsResults: string[];
   switchR2Element: boolean;
   dateRace: string;
+  isMultiCategory?: boolean;
 }) {
   return {
     ...(name && { name: name }),
@@ -309,6 +316,7 @@ function buildUpdateData({ name, fileS1R1, champID, orderChamp, pointsystem, num
     ...(changeRaceJSONSwitch && { race_data_1: URLBucketsResults[0] }),
     ...(changeRaceJSONSwitch && switchR2Element && { race_data_2: URLBucketsResults[1] }),
     ...(changeRaceJSONSwitch && { race_date: dateRace }),
+    ...(typeof isMultiCategory !== 'undefined' && { multiclass: !!isMultiCategory }),
   };
 }
 
@@ -369,13 +377,14 @@ function validateFiles({ fileS1R1, fileS1R2, fileS2R1, fileS2R2, switchS2Element
   return null;
 }
 
-async function transformRaceJsons({ fileS1R1, fileS1R2, fileS2R1, fileS2R2, switchS2Element, switchR2Element }: {
+async function transformRaceJsons({ fileS1R1, fileS1R2, fileS2R1, fileS2R2, switchS2Element, switchR2Element, isMultiCategory }: {
   fileS1R1: File | null;
   fileS1R2: File | null;
   fileS2R1: File | null;
   fileS2R2: File | null;
   switchS2Element: boolean;
   switchR2Element: boolean;
+  isMultiCategory?: boolean;
 }) {
   try {
     let transformedJsonR1 = "{}";
@@ -424,17 +433,17 @@ async function transformRaceJsons({ fileS1R1, fileS1R2, fileS2R1, fileS2R2, swit
         if (!contentS2R2)
           return { error: true, response: new Response(JSON.stringify({ error: "Sin contenido en el archivo de Carrera 2 Split 2." }), { status: 400 }) };
         const jsonS2R2 = JSON.parse(contentS2R2);
-        transformedJsonR2 = JSON.stringify(createRaceDataMultipleSplits(jsonS1R2, jsonS2R2));
+        transformedJsonR2 = JSON.stringify(createRaceDataMultipleSplits(jsonS1R2, jsonS2R2, !!isMultiCategory));
       }
       const contentS2R1 = await fileS2R1?.text();
       if (!contentS2R1)
         return { error: true, response: new Response(JSON.stringify({ error: "Sin contenido en el archivo de Carrera 1 Split 2." }), { status: 400 }) };
       const jsonS2R1 = JSON.parse(contentS2R1);
-      transformedJsonR1 = JSON.stringify(createRaceDataMultipleSplits(jsonS1R1, jsonS2R1));
+      transformedJsonR1 = JSON.stringify(createRaceDataMultipleSplits(jsonS1R1, jsonS2R1, !!isMultiCategory));
     } else {
-      transformedJsonR1 = JSON.stringify(createRaceData(jsonS1R1));
+      transformedJsonR1 = JSON.stringify(createRaceData(jsonS1R1, !!isMultiCategory));
       if (switchR2Element) {
-        transformedJsonR2 = JSON.stringify(createRaceData(jsonS1R2));
+        transformedJsonR2 = JSON.stringify(createRaceData(jsonS1R2, !!isMultiCategory));
       }
     }
     return { transformedJsonR1, transformedJsonR2, dateRace, numSplits };
