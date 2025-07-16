@@ -12,6 +12,7 @@ export const POST: APIRoute = async ({ request }) => {
     const pointsystem = formData.get('pointsystem') as string;
     const split2 = formData.get('split2') === '1';
     const race2 = formData.get('race2') === '1';
+    const isMultiCategory = formData.get('isMultiCategory') === '1';
     // Archivos
     const fileS1R1 = formData.get('fileS1R1') as File | null;
     const fileS2R1 = formData.get('fileS2R1') as File | null;
@@ -26,7 +27,7 @@ export const POST: APIRoute = async ({ request }) => {
     const { jsonS1R1, jsonS2R1, jsonS1R2, jsonS2R2 } = await readAllFiles({ fileS1R1, fileS2R1, fileS1R2, fileS2R2 });
 
     // Transformar JSONs
-    const { transformedJsonR1, transformedJsonR2 } = transformJsons({ split2, race2, jsonS1R1, jsonS2R1, jsonS1R2, jsonS2R2 });
+    const { transformedJsonR1, transformedJsonR2 } = transformJsons({ split2, race2, jsonS1R1, jsonS2R1, jsonS1R2, jsonS2R2, isMultiCategory });
 
     // Subir resultados a Supabase Storage
     const racenameFile = racename.replace(/\s/g, '');
@@ -36,7 +37,7 @@ export const POST: APIRoute = async ({ request }) => {
     const race_date = transformedJsonR1.RaceConfig.Date.slice(0, 10);
     const filename = fileS1R1?.name ?? "";
     const splits = split2 ? 2 : 1;
-    await insertRace({ supabase, racename, champID, numrace, pointsystem, splits, URLBucketsResults, race_date, filename });
+    await insertRace({ supabase, racename, champID, numrace, pointsystem, splits, URLBucketsResults, race_date, filename, isMultiCategory });
 
     // Obtener base URL del request
     const url = new URL(request.url);
@@ -75,20 +76,20 @@ async function readAllFiles({ fileS1R1, fileS2R1, fileS1R2, fileS2R2 }: any) {
 }
 
 // Auxiliar para transformar JSONs
-function transformJsons({ split2, race2, jsonS1R1, jsonS2R1, jsonS1R2, jsonS2R2 }: any) {
+function transformJsons({ split2, race2, jsonS1R1, jsonS2R1, jsonS1R2, jsonS2R2, isMultiCategory }: any) {
   let transformedJsonR1: any, transformedJsonR2: any = null;
   if (split2) {
     if (!jsonS2R1) throw new Error("Falta JSON Split 2 Carrera 1");
-    transformedJsonR1 = createRaceDataMultipleSplits(jsonS1R1, jsonS2R1);
+    transformedJsonR1 = createRaceDataMultipleSplits(jsonS1R1, jsonS2R1, isMultiCategory);
     if (race2) {
       if (!jsonS1R2 || !jsonS2R2) throw new Error("Falta JSON Split 2 Carrera 2");
-      transformedJsonR2 = createRaceDataMultipleSplits(jsonS1R2, jsonS2R2);
+      transformedJsonR2 = createRaceDataMultipleSplits(jsonS1R2, jsonS2R2, isMultiCategory);
     }
   } else {
-    transformedJsonR1 = createRaceData(jsonS1R1);
+    transformedJsonR1 = createRaceData(jsonS1R1, isMultiCategory);
     if (race2) {
       if (!jsonS1R2) throw new Error("Falta JSON Split 1 Carrera 2");
-      transformedJsonR2 = createRaceData(jsonS1R2);
+      transformedJsonR2 = createRaceData(jsonS1R2, isMultiCategory);
     }
   }
   return { transformedJsonR1, transformedJsonR2 };
@@ -115,7 +116,7 @@ async function uploadResults({ supabase, champID, numrace, racenameFile, transfo
 }
 
 // Auxiliar para insertar la carrera en la base de datos
-async function insertRace({ supabase, racename, champID, numrace, pointsystem, splits, URLBucketsResults, race_date, filename }: any) {
+async function insertRace({ supabase, racename, champID, numrace, pointsystem, splits, URLBucketsResults, race_date, filename, isMultiCategory }: any) {
   const insertObj: any = {
     name: racename,
     championship: champID,
@@ -125,7 +126,8 @@ async function insertRace({ supabase, racename, champID, numrace, pointsystem, s
     race_data_1: URLBucketsResults[0],
     race_data_2: URLBucketsResults[1] ?? null,
     race_date,
-    filename
+    filename,
+    isMultiCategory: isMultiCategory ? true : false
   };
   const { error: insertError } = await supabase.from('race').insert([insertObj]);
   if (insertError) throw insertError;

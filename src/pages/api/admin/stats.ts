@@ -161,7 +161,7 @@ function computeDriverUpdates(driver: any, driverData: RaceDriversResume): any {
   if (driverData.BestLap) updates.flaps = driver.flaps + 1;
   if (driverData.PolePosition) updates.poles = driver.poles + 1;
 
-  switch (driverData.Position) {
+  switch (driverData.PositionClass) {
     case -2: //DQ
     case -1: // DNF
       updates.dnf = driver.dnf + 1;
@@ -278,7 +278,7 @@ function updateStatsFromRace(steamID: string, raceResults: any[], stats: any) {
     if (driverResult.PolePosition) stats.poles++;
     if (driverResult.BestLap) stats.flaps++;
 
-    switch (driverResult.Position) {
+    switch (driverResult.PositionClass) {
       case -2: //DQ
       case -1: // DNF
         stats.dnf++;
@@ -321,7 +321,7 @@ function buildUpdates(driver: any, driverData: RaceDriversResume) {
   if (driverData.BestLap) updates.flaps = Math.max(0, (driver.flaps ?? 0) - 1);
   if (driverData.PolePosition) updates.poles = Math.max(0, (driver.poles ?? 0) - 1);
 
-  switch (driverData.Position) {
+  switch (driverData.PositionClass) {
     case -2: //DQ
     case -1: // DNF
       updates.dnf = Math.max(0, (driver.dnf ?? 0) - 1);

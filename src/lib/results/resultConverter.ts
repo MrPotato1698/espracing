@@ -1,3 +1,5 @@
+import { supabase } from "@/db/supabase";
+
 import type { RaceData, RaceResult, RaceLap, Lap, BestLap, Consistency, BestSector, Incident, RaceConfig, RaceDriversResume, RaceCarResume } from "@/types/Results";
 import type { GeneralDataJSON, CarJSON, EventJSON, LapJSON, ResultJSON } from "@/types/ResultsJSON";
 
@@ -35,7 +37,7 @@ function createRaceResults( dcars: CarJSON[], devents: EventJSON[], dlaps: LapJS
     const car = dcars.find(c => c.CarId === itemR.CarId);
     const driverName = itemR.DriverName ?? car?.Driver?.Name ?? `Unknown Driver ${itemR.CarId}`;
     const driverGuid = itemR.DriverGuid ?? car?.Driver?.Guid ?? `unknown_guid_${itemR.CarId}`;
-    const driverTeam = car?.Driver?.Team ?? "Unknown Team";
+    const driverTeam = car?.Driver?.Team ?? "";
     const carModel = itemR.CarModel ?? car?.Model ?? "Unknown Car";
 
     uniqueRR.SteamID = driverGuid;
@@ -74,7 +76,7 @@ function createRaceResults( dcars: CarJSON[], devents: EventJSON[], dlaps: LapJS
       uniqueRR.SteamID = itemdC.Driver.Guid || `unknown_guid_${itemdC.CarId}`;
       uniqueRR.CarId = itemdC.CarId;
       uniqueRR.DriverName = itemdC.Driver.Name;
-      uniqueRR.Team = itemdC.Driver.Team || "Unknown Team";
+      uniqueRR.Team = itemdC.Driver.Team || "";
       uniqueRR.CarFileName = itemdC.Model || "Unknown Car";
       uniqueRR.TotalTime = 0;
       uniqueRR.Penalties = 0;
@@ -659,12 +661,13 @@ function compareBestSectors(a: BestSector, b: BestSector): number {
  * @returns {Incident[]} - Array de objetos Incident
  */
 function createIncident(devents: EventJSON[]): Incident[] {
-  let i: Incident[] = [];
+  let incidents: Incident[] = [];
 
   for (let itemE of devents) {
     let uniqueI: Incident = {} as Incident;
-    let timestamp = new Date(itemE.Timestamp);
-    uniqueI.Date = timestamp.toString();
+    // Convert Unix timestamp (in seconds) to milliseconds for Date constructor
+    const date = new Date(itemE.Timestamp * 1000);
+    uniqueI.Date = date.toLocaleTimeString('es-ES', { hour12: false });
     let driverName = itemE.Driver.Name;
     let impactSpeed = itemE.ImpactSpeed.toFixed(3);
 
@@ -680,10 +683,9 @@ function createIncident(devents: EventJSON[]): Incident[] {
     }
 
     uniqueI.AfterSession = itemE.AfterSessionEnd;
-    i.push(uniqueI);
+    incidents.push(uniqueI);
   }
-
-  return i;
+  return incidents;
 }
 
 /**
@@ -693,53 +695,10 @@ function createIncident(devents: EventJSON[]): Incident[] {
  * @returns {Incident[]} - Array de objetos Incident
  */
 function createIncidentMultipleSplits(deventsS1: EventJSON[], deventsS2: EventJSON[]): Incident[] {
-  let i: Incident[] = [];
-
-  for (let itemE of deventsS1) {
-    let uniqueI: Incident = {} as Incident;
-    let timestamp = new Date(itemE.Timestamp);
-    uniqueI.Date = timestamp.toString();
-    let driverName = itemE.Driver.Name;
-    let impactSpeed = itemE.ImpactSpeed.toFixed(3);
-
-    let otherDriverName: string | undefined;
-    switch (itemE.Type) {
-      case "COLLISION_WITH_CAR":
-        otherDriverName = itemE.OtherDriver.Name;
-        uniqueI.Incident = `${driverName} colisionó contra el vehiculo de ${otherDriverName} a una velocidad de ${impactSpeed} km/h`;
-        break;
-      case "COLLISION_WITH_ENV":
-        uniqueI.Incident = `${driverName} colisionó con el entorno a una velocidad de ${impactSpeed} km/h`;
-        break;
-    }
-
-    uniqueI.AfterSession = itemE.AfterSessionEnd;
-    i.push(uniqueI);
-  }
-
-  for (let itemE of deventsS2) {
-    let uniqueI: Incident = {} as Incident;
-    let timestamp = new Date(itemE.Timestamp);
-    uniqueI.Date = timestamp.toString();
-    let driverName = itemE.Driver.Name;
-    let impactSpeed = itemE.ImpactSpeed.toFixed(3);
-    let otherDriverName: string | undefined;
-
-    switch (itemE.Type) {
-      case "COLLISION_WITH_CAR":
-        otherDriverName = itemE.OtherDriver.Name;
-        uniqueI.Incident = `${driverName} colisionó contra el vehiculo de ${otherDriverName} a una velocidad de ${impactSpeed} km/h`;
-        break;
-      case "COLLISION_WITH_ENV":
-        uniqueI.Incident = `${driverName} colisionó con el entorno a una velocidad de ${impactSpeed} km/h`;
-        break;
-    }
-
-    uniqueI.AfterSession = itemE.AfterSessionEnd;
-    i.push(uniqueI);
-  }
-
-  return i;
+  let incidents: Incident[] = [];
+  incidents.push(...createIncident(deventsS1));
+  incidents.push(...createIncident(deventsS2));
+  return incidents;
 }
 
 /**
@@ -1007,32 +966,6 @@ function isStaffOrStreaming(item: RaceResult): boolean {
 }
 
 /**
- * Función para crear el resumen de los pilotos de la carrera
- * @param rr - Array de objetos RaceResult
- * @param bl - Array de objetos BestLap
- * @param rl - Array de objetos RaceLap
- * @returns {RaceDriversResume[]} - Array de objetos RaceDriversResume
- */
-function createRaceDriversResume(rr: RaceResult[], bl: BestLap[], rl: RaceLap[]): RaceDriversResume[] {
-  let rdr: RaceDriversResume[] = [];
-
-  for (let item of rr) {
-    let uniqueRDR: RaceDriversResume = {} as RaceDriversResume;
-    const driverLaps = rl.find(itemRL => item.SteamID === itemRL.SteamID);
-    uniqueRDR.SteamID = item.SteamID;
-    uniqueRDR.DriverName = item.DriverName;
-    uniqueRDR.Position = item.Pos;
-    if(item.Pos > -3) {
-    uniqueRDR.PolePosition = driverLaps?.Laps[0].Position === 1;
-  }
-    uniqueRDR.BestLap = uniqueRDR.SteamID === bl[0].SteamID;
-    rdr.push(uniqueRDR);
-  }
-
-  return rdr;
-}
-
-/**
  * Función para crear el resumen de los coches de la carrera
  * @param rr - Array de objetos RaceResult
  * @returns {RaceCarResume[]} - Array de objetos RaceCarResume
@@ -1045,6 +978,179 @@ function createRaceCarResume(rr: RaceResult[]): RaceCarResume[] {
   return rcr;
 }
 
+/**
+ * Función para crear el resumen de los pilotos de la carrera
+ * @param rr - Array de objetos RaceResult
+ * @param bl - Array de objetos BestLap
+ * @param rl - Array de objetos RaceLap
+ * @param rcr - Array de objetos RaceCarResume
+ * @param multicategory - Booleano que indica si hay múltiples categorías
+ * @returns {RaceDriversResume[]} - Array de objetos RaceDriversResume
+ */
+async function createRaceDriversResume( rr: RaceResult[], bl: BestLap[], rl: RaceLap[], rcr: RaceCarResume[], multicategory: boolean): Promise<RaceDriversResume[]> {
+  let rdr: RaceDriversResume[] = rr.map(item => createSingleDriverResume(item, bl, rl));
+
+  if (multicategory) {
+    await assignMultiCategoryPositions(rdr, rr, rcr);
+  }
+
+  return rdr;
+}
+
+/**
+ * Función auxiliar para crear un resumen de un solo piloto
+ * @param item datos de un piloto de la carrera
+ * @param bl Array de objetos BestLap
+ * @param rl Array de objetos RaceLap
+ * @returns resumen de datos de un piloto de la carrera
+ */
+
+function createSingleDriverResume( item: RaceResult, bl: BestLap[], rl: RaceLap[]): RaceDriversResume {
+  let uniqueRDR: RaceDriversResume = {} as RaceDriversResume;
+  const driverLaps = rl.find(itemRL => item.SteamID === itemRL.SteamID);
+  uniqueRDR.SteamID = item.SteamID;
+  uniqueRDR.DriverName = item.DriverName;
+  uniqueRDR.Position = item.Pos;
+  uniqueRDR.PositionClass = item.Pos;
+  uniqueRDR.CarFileName = item.CarFileName;
+  if (item.Pos > -3) {
+    uniqueRDR.PolePosition = driverLaps?.Laps[0].Position === 1;
+  }
+  uniqueRDR.BestLap = uniqueRDR.SteamID === bl[0].SteamID;
+  return uniqueRDR;
+}
+
+/**
+ * Función auxiliar para asignar posiciones de carreras con múltiples categorías
+ */
+async function assignMultiCategoryPositions(
+  rdr: RaceDriversResume[],
+  rr: RaceResult[],
+  rcr: RaceCarResume[]
+): Promise<void> {
+  try {
+    const { data, error } = await supabase
+      .from('car')
+      .select('filename, class')
+      .in('filename', rcr.map((car: any) => car.CarFileName))
+      .order('id', { ascending: true });
+
+    if (error) {
+      throw new Error('Error al obtener las categorías de los coches');
+    }
+    const carCategories = data;
+    if (!carCategories || carCategories.length === 0 || carCategories.length < rcr.length) {
+      rdr.forEach(item => {
+        item.PositionClass = item.Position;
+      });
+      return;
+    }
+
+    removeStaffCarsFromCategories(carCategories, rr, rcr);
+
+    const classMap = buildClassMap(carCategories, rdr);
+
+    assignClassPositions(classMap);
+
+    updateRdrWithClassPositions(rdr, classMap);
+  } catch (error) {
+    console.error("Error al encontrar los coches de las categorías:", error);
+  }
+}
+
+/**
+ * Función auxiliar para eliminar los coches del staff de las categorías
+ * @param carCategories categorías de coches
+ * @param rr Array de objetos RaceResult
+ * @param rcr Array de objetos RaceCarResume
+ */
+
+function removeStaffCarsFromCategories(carCategories: any[], rr: RaceResult[], rcr: RaceCarResume[]): void {
+  const staffCars = rr.filter(r => r.Pos === -4).reduce((acc, curr) => {
+    acc[curr.CarFileName] = (acc[curr.CarFileName] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+  const staffCarArray = Object.entries(staffCars).map(([CarFileName, numberOfCars]) => ({
+    CarFileName,
+    numberOfCars
+  }));
+  if (carCategories.length > 1) {
+    for (const staffCar of staffCarArray) {
+      const raceCar = rcr.find(car => car.CarFileName === staffCar.CarFileName);
+      if (raceCar && staffCar.numberOfCars === raceCar.numberOfCars) {
+        const index = carCategories.findIndex((cat: any) => cat.filename === staffCar.CarFileName);
+        if (index !== -1) {
+          carCategories.splice(index, 1);
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Función auxiliar para construir un mapa de clases con los diferentes coches y pilotos
+ * @param carCategories categorías de coches
+ * @param rdr Array de objetos RaceDriversResume
+ * @returns un mapa de clases con los pilotos
+ */
+function buildClassMap(carCategories: any[], rdr: RaceDriversResume[]): Record<string, RaceDriversResume[]> {
+  const classMap: Record<string, RaceDriversResume[]> = {};
+  for (const carCategory of carCategories) {
+    if (!classMap[carCategory.class]) {
+      classMap[carCategory.class] = [];
+    }
+    classMap[carCategory.class].push(
+      ...rdr.filter(driver => driver.CarFileName === carCategory.filename)
+    );
+  }
+  return classMap;
+}
+
+/**
+ * Función auxiliar para asignar posiciones a los pilotos dentro de cada clase
+ * @param classMap mapa de clases con los pilotos
+ */
+function assignClassPositions(classMap: Record<string, RaceDriversResume[]>): void {
+  for (const classDrivers of Object.values(classMap)) {
+    classDrivers.sort((a, b) => {
+      if (a.Position > 0 && b.Position > 0) {
+        return a.Position - b.Position;
+      } else if (a.Position > 0) {
+        return -1;
+      } else if (b.Position > 0) {
+        return 1;
+      } else {
+        return b.Position - a.Position;
+      }
+    });
+
+    classDrivers.forEach((driver, index) => {
+      if (driver.Position > 0)
+        driver.PositionClass = index + 1;
+    });
+  }
+}
+
+/**
+ * Función auxiliar para actualizar las posiciones de los pilotos en el resumen de la carrera
+ * @param rdr Array de objetos RaceDriversResume
+ * @param classMap mapa de clases con los pilotos
+ */
+function updateRdrWithClassPositions(
+  rdr: RaceDriversResume[],
+  classMap: Record<string, RaceDriversResume[]>
+): void {
+  for (const classDrivers of Object.values(classMap)) {
+    classDrivers.forEach(driverWithClass => {
+      const rdrDriver = rdr.find(d => d.SteamID === driverWithClass.SteamID);
+      if (rdrDriver) {
+        rdrDriver.PositionClass = driverWithClass.PositionClass;
+      }
+    });
+  }
+}
+
+
 // FUNCIONES A EXPORTAR
 
 /**
@@ -1052,7 +1158,7 @@ function createRaceCarResume(rr: RaceResult[]): RaceCarResume[] {
  * @param dataFile - Objeto GeneralDataJSON
  * @returns {RaceData} - Objeto RaceData
  */
-export function createRaceData(dataFile: any): RaceData{
+export async function createRaceData(dataFile: any, multicategory: boolean): Promise<RaceData>{
   let rd: RaceData = {} as RaceData;
   const dcars = dataFile.Cars as CarJSON[];
   const devents = dataFile.Events;
@@ -1092,8 +1198,8 @@ export function createRaceData(dataFile: any): RaceData{
 
   rd.RaceResult = recalculatePositions(rd.RaceResult, dataFile.SessionConfig.time);
 
-  rd.RaceDriversResume = createRaceDriversResume(rd.RaceResult, rd.BestLap, rd.RaceLaps);
   rd.RaceCarResume = createRaceCarResume(rd.RaceResult);
+  rd.RaceDriversResume = await createRaceDriversResume(rd.RaceResult, rd.BestLap, rd.RaceLaps, rd.RaceCarResume, multicategory);
 
   return rd;
 }
@@ -1104,7 +1210,7 @@ export function createRaceData(dataFile: any): RaceData{
  * @param dataFileS2 - Objeto GeneralDataJSON para el segundo split
  * @returns {RaceData} - Objeto RaceData
  */
-export function createRaceDataMultipleSplits(dataFileS1: any, dataFileS2: any): RaceData {
+export async function createRaceDataMultipleSplits(dataFileS1: any, dataFileS2: any, multicategory: boolean): Promise<RaceData> {
   let rd: RaceData = {} as RaceData;
   const dcarsS1 = dataFileS1.Cars as CarJSON[];
   const deventsS1 = dataFileS1.Events;
@@ -1154,8 +1260,9 @@ export function createRaceDataMultipleSplits(dataFileS1: any, dataFileS2: any): 
   });
 
   rd.RaceResult = recalculatePositions(rd.RaceResult, dataFileS1.SessionConfig.time);
-  rd.RaceDriversResume = createRaceDriversResume(rd.RaceResult, rd.BestLap, rd.RaceLaps);
+
   rd.RaceCarResume = createRaceCarResume(rd.RaceResult);
+  rd.RaceDriversResume = await createRaceDriversResume(rd.RaceResult, rd.BestLap, rd.RaceLaps, rd.RaceCarResume, multicategory);
 
   return rd;
 }
