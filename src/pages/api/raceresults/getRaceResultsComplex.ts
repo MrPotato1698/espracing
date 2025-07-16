@@ -19,14 +19,17 @@ function initializeScript() {
       const filenameRace = window.location.pathname.split("/").pop();
       if (!filenameRace) return;
 
-      const { datos, points, carData, flagMoreSplits } = await fetchRaceData(filenameRace);
+      const { raceID, datos, points, carData, flagMoreSplits } = await fetchRaceData(filenameRace);
 
       await renderCircuitData(dom.datosCircuito, datos[0]);
       renderResultsTable(dom.tablaResultados, datos, points, carData);
+      const raceNotes = await fetchRaceNotes(raceID);
+      if (dom.tablaNotas) buildNotesSection(dom.tablaNotas, raceNotes ?? []);
       renderPositionCharts(dom.chartChangePosition, datos);
       renderGapCharts(dom.chartGaps, datos);
       renderSectorTables(dom, datos, carData, flagMoreSplits);
       renderIndividualLaps(dom.tablasIndividuales, datos, carData, flagMoreSplits);
+      renderIncidents(dom.tablasIncidentes.filter((el): el is HTMLElement => el !== null), datos);
 
     } catch (error) {
       console.error("Error al cargar los datos de la carrera: ", error);
@@ -37,12 +40,15 @@ function initializeScript() {
   function getDomElements() {
   const datosCircuito = document.getElementById("datosCircuito")
   const tablaResultados = document.getElementById("tablaResultados")
+  const tablaNotas = document.getElementById("tablaNotas")
   const sectorTableR1 = document.getElementById("sectorTableR1")
   const sectorTableR2 = document.getElementById("sectorTableR2")
   const titleSectorR1 = document.getElementById("titleSectorR1")
   const titleSectorR2 = document.getElementById("titleSectorR2")
   const tablaIndividuales1 = document.getElementById("tableIndividualLaps1")
   const tablasIndividuales2 = document.getElementById("tableIndividualLaps2")
+  const tablasIncidentes1 = document.getElementById("tableIncidents1")
+  const tablasIncidentes2 = document.getElementById("tableIncidents2")
   const chartChangePosition = document.getElementById("chartChangePosition")
   const chartGaps = document.getElementById("chartGaps")
 
@@ -61,6 +67,7 @@ function initializeScript() {
   return {
     datosCircuito,
     tablaResultados,
+    tablaNotas,
     sectorTableR1,
     sectorTableR2,
     titleSectorR1,
@@ -70,22 +77,31 @@ function initializeScript() {
     chartChangePosition,
     chartGaps,
     tablasIndividuales: [tablaIndividuales1, tablasIndividuales2],
+    tablasIncidentes: [tablasIncidentes1, tablasIncidentes2],
   }
 }
 
   function clearDom(dom: any) {
     dom.datosCircuito.innerHTML = "";
     dom.tablaResultados.innerHTML = "";
+    dom.tablaNotas.innerHTML = "";
     dom.titleSectorR1.innerHTML = "";
     dom.titleSectorR2.innerHTML = "";
     dom.tablaIndividuales1.innerHTML = "";
     dom.tablasIndividuales2.innerHTML = "";
+    // Limpiar arrays de tablas individuales e incidentes
+    if (Array.isArray(dom.tablasIndividuales)) {
+      dom.tablasIndividuales.forEach((el: HTMLElement | null) => { if (el) el.innerHTML = ""; });
+    }
+    if (Array.isArray(dom.tablasIncidentes)) {
+      dom.tablasIncidentes.forEach((el: HTMLElement | null) => { if (el) el.innerHTML = ""; });
+    }
   }
 
   async function fetchRaceData(filenameRace: string) {
     const { data: resultSetData, error } = await supabase
       .from("race")
-      .select("pointsystem!inner(name, points, fastestlap), race_data_1, race_data_2")
+      .select("id, pointsystem!inner(name, points, fastestlap), race_data_1, race_data_2")
       .eq("filename", filenameRace)
       .single();
 
@@ -147,8 +163,16 @@ function initializeScript() {
       }
     }
 
-    return { datos, points, carData, flagMoreSplits };
+    return { raceID: resultSetData.id, datos, points, carData, flagMoreSplits };
   }
+
+  async function fetchRaceNotes(raceId: number) {
+		const { data: raceNotes } = await supabase
+			.from('racenotes')
+			.select('race!inner(name), code!inner(id, name), description, penalty')
+			.eq('race', raceId);
+		return raceNotes;
+	}
 
   async function renderCircuitData(datosCircuito: HTMLElement, raceData: RaceData) {
     const { data: isCircuitExists } = await supabase
@@ -254,6 +278,71 @@ function initializeScript() {
     }
     tablaResultados.innerHTML = tablaResultadosHTML;
   }
+
+  function buildNotesSection(tablaNotas: HTMLElement, raceNotes: any[]) {
+		let tablaSancionesString: string = "";
+		let tablaNotasString: string = "";
+
+		if(raceNotes){
+			const raceNotesPenalties = raceNotes.filter((note) => note.code.id > 1);
+			const raceNotesExtra = raceNotes.filter((note) => note.code.id == 0);
+
+			const createPenaltyRow = (note: any, index: number) => `
+				<tr class="bg-${index % 2 === 0 ? 'darkPrimary' : 'darkSecond'}">
+					<td class="text-center">${note.code.name}</td>
+					<td class="text-justify py-2">${note.description}</td>
+					<td class="font-medium text-center">${note.penalty}</td>
+				</tr>`;
+
+			const createNoteRow = (note: any, index: number) => `
+				<tr class="bg-${index % 2 === 0 ? 'darkPrimary' : 'darkSecond'}">
+					<td class="text-justify py-2 px-4">${note.description}</td>
+				</tr>`;
+
+			const createHeaderPenaltyRow = () => `
+				<p class="text-3xl font-bold border-b border-primary w-fit mx-auto mt-4 mb-2">Sanciones</p>
+				<table class="w-full border-collapse border border-lightPrimary">
+						<thead class="font-medium bg-primary">
+							<tr class="tabletitle">
+								<th>Tipo Sanción</th>
+								<th>Descripción Sanción</th>
+								<th class = "pr-1">Resultado</th>
+							</tr>
+							</thead>
+						<tbody class="font-normal">`;
+
+			const createHeaderNoteRow = () => `
+				<p class="text-3xl font-bold border-b border-primary w-fit mx-auto mt-4 mb-2">Notas de Carrera</p>
+				<table class="w-full border-collapse border border-lightPrimary">
+						<thead class="font-medium bg-primary">
+							<tr class="tabletitle">
+								<th>Descripción</th>
+							</tr>
+							</thead>
+						<tbody class="font-normal">`;
+
+			if (raceNotesPenalties.length > 0) {
+				tablaSancionesString += createHeaderPenaltyRow();
+				raceNotesPenalties.forEach((note, index) => {
+					tablaSancionesString += createPenaltyRow(note, index);
+				});
+				tablaSancionesString += '</tbody></table>';
+			}
+			if (raceNotesExtra.length > 0) {
+				tablaNotasString += createHeaderNoteRow();
+				raceNotesExtra.forEach((note, index) => {
+					tablaNotasString += createNoteRow(note, index);
+				});
+				tablaNotasString += '</tbody></table>';
+			}
+		}
+    const mixTable = tablaSancionesString + tablaNotasString;
+
+		tablaNotas.innerHTML = mixTable;
+	}
+
+
+
 
   function renderPositionCharts(chartChangePosition: HTMLElement, datos: RaceData[]) {
     chartChangePosition.classList.remove("hidden")
@@ -704,5 +793,47 @@ function loadIndividualTimes(datos: RaceData, carData: CarData[], flagMoreSplits
     }
   }
 
+  return result;
+}
+
+function renderIncidents(tablasIncidentes: HTMLElement[], datos: RaceData[]) {
+  for (let i = 0; i < datos.length; i++) {
+    if (datos.length > 1) {
+      tablasIncidentes[1].classList.remove('hidden');
+    }
+    tablasIncidentes[i].innerHTML = `<p class="text-3xl font-bold border-b border-primary w-fit mx-auto mt-4 mb-2">Incidentes (Carrera ${i + 1})</p>`;
+    const tablaIncidentes = loadIncidents(datos[i]);
+    tablasIncidentes[i].innerHTML += tablaIncidentes;
+    if (i < datos.length - 1)
+      tablasIncidentes[i].innerHTML += `<div class="mt-6"><p class='border-t-8 border-t-primary text-darkPrimary'></p></div>`;
+  }
+}
+
+function loadIncidents(datos: RaceData): string {
+  let result = "";
+  if (datos.Incident.length > 0) {
+    result += `
+    <table class="w-full border-collapse border border-lightPrimary">
+      <thead class="font-medium bg-primary">
+        <tr class="tabletitle">
+          <th>Incidente</th>
+          <th>Momento del accidente</th>
+        </tr>
+      </thead>
+      <tbody class="font-normal">`;
+    datos.Incident.forEach((incident, index) => {
+      result += `
+        <tr class="${index % 2 === 0 ? 'bg-darkPrimary' : 'bg-darkSecond'}">
+          <td class="text-justify py-2 px-4">${incident.Incident}</td>
+          <td class="text-center py-2 px-4">${incident.AfterSession ? "Después de Carrera" : "Durante la Carrera"}: ${incident.Date}</td>
+        </tr>`;
+    })
+    result += `
+      </tbody>
+    </table>`;
+  }
+  else {
+    result += `<p class="w-fit mx-auto font-medium text-xl">No se registraron incidentes en esta carrera.</p>`;
+  }
   return result;
 }
