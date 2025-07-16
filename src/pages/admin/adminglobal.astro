@@ -55,19 +55,9 @@ if (globalError) {
   console.error("Error al cargar los ajustes globales:", globalError);
 }
 
-const { data: pointsData, error: pointsError } = await supabase
-  .from("pointsystem")
-  .select("*");
-
-if (pointsError) {
-  showToast("Error al cargar el sistema de puntos", "error");
-  console.error("Error al cargar el sistema de puntos:", pointsError);
-}
-
 const dataTransformed = globalData?.map((item) => ({ id: item.key, value: item.value, name: item.name })) || [];
 const serializedGlobalData = dataTransformed ? JSON.parse(JSON.stringify(dataTransformed)) : [];
 
-const serializedPointsData = pointsData ? JSON.parse(JSON.stringify(pointsData)) : [];
 
 const columnsGlobals = [
   { header: "Nombre", accessor:"name" },
@@ -112,7 +102,6 @@ const columnsPoints = [
     </p>
     <PointSystemManager
       client:only="react"
-      initialData={serializedPointsData}
     />
   </div>
 

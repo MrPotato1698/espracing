@@ -65,7 +65,8 @@ export default function CarClassManager() {
         setClasses(data ?? []);
         setFilteredClasses(data ?? []);
       } catch (err) {
-        setError('Error al cargar las clases');
+        console.error('Error fetching classes:', err);
+        setError(err instanceof Error ? err.message : 'Error al cargar las clases');
       } finally {
         setLoading(false);
       }
@@ -280,7 +281,7 @@ export default function CarClassManager() {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-lightPrimary text-lg font-semibold mb-2">Nombre de la Clase *</label>
+                  <label className="block text-lightPrimary text-lg font-semibold mb-2">Nombre de la Clase</label>
                   <Input
                     type="text"
                     value={formData.name}
@@ -291,7 +292,7 @@ export default function CarClassManager() {
                   />
                 </div>
                 <div>
-                  <label className="block text-lightPrimary text-lg font-semibold mb-2">Shortname *</label>
+                  <label className="block text-lightPrimary text-lg font-semibold mb-2">Shortname</label>
                   <Input
                     type="text"
                     value={formData.short_name}

@@ -415,7 +415,7 @@ export default function CarBrandManager() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-lightPrimary text-lg font-semibold mb-2">
-                    Nombre de la Marca *
+                    Nombre de la Marca
                   </label>
                   <Input
                     type="text"
