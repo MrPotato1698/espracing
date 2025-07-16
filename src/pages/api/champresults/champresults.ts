@@ -199,8 +199,7 @@ async function initializeScript() {
         }
       } else if (!trackData) {
         headerHTML += `<th>${raceData.name.split('@')[0]}</th>`;
-      }
-      if (trackData) {
+      } else {
         headerHTML += `<th>${trackData?.shortname}</th>`;
       }
     }
@@ -237,7 +236,7 @@ async function initializeScript() {
     let carClass: string;
     let carColorClass: string;
     if (isCarExists) {
-      carName = isCarExists.brand + ' ' + isCarExists.model;
+      carName = isCarExists.model;
       carBrand = isCarExists.imgbrand;
       carClass = isCarExists.classShortName;
       carColorClass = `style="background-color: ${isCarExists.classColor.split(' ')[0].replace('bg-[', '').replace(']', '')}; color: ${isCarExists.classColor.split(' ')[1].replace('text-[', '').replace(']', '')}" class = "rounded text-xs font-bold px-1 py-0.5 ml-1"`;

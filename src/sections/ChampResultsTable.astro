@@ -105,22 +105,22 @@ const champsBySeason = seasons.reduce((acc, season) => {
     constructor() {
       super();
     }
-    
+
     static get observedAttributes() {
       return ['champid'];
     }
-    
+
     attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null) {
       if (name === 'champid' && oldValue !== newValue) {
         // Disparar evento para que React lo recoja
-        const event = new CustomEvent('champ-id-changed', { 
-          detail: { champId: newValue } 
+        const event = new CustomEvent('champ-id-changed', {
+          detail: { champId: newValue }
         });
         document.dispatchEvent(event);
       }
     }
   }
-  
+
   // Registrar el elemento si no está ya registrado
   if (typeof customElements !== 'undefined' && !customElements.get('espr-champ-charts')) {
     customElements.define('espr-champ-charts', ESPRChampCharts);
