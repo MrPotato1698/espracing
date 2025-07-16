@@ -10,6 +10,11 @@ import Ban from "@/icons/Ban.astro";
 
 const { cookies, redirect } = Astro;
 
+enum TeamRequestType {
+  Join = 'join',
+  Create = 'create',
+}
+
 const accessToken = cookies.get("sb-access-token");
 const refreshToken = cookies.get("sb-refresh-token");
 
@@ -64,20 +69,47 @@ const {data: MessageListData} = await supabase
 const {data: TeamRequestData} = await supabase
   .from("teamsapplication")
   .select("id, user_application, type")
-  .eq("team_manager", idAuth);
+  .or(`team_manager.eq.${idAuth}, type.eq.${TeamRequestType.Create}`);
 
 let users: { full_name: string }[] = [];
-if (TeamRequestData) {
-  const userIds = TeamRequestData.map(app => app.user_application);
+let combinedRequests = TeamRequestData ? [...TeamRequestData] : [];
 
-  const { data: fetchedUsers, error: userError } = await supabase
-    .from("profiles")
-    .select("full_name")
-    .in("id", userIds);
+// Primero, revisamos si el usuario es un Manager de Equipo
+const { data: profileData, error: profileError } = await supabase
+  .from('profiles')
+  .select('team, is_team_manager')
+  .eq('id', idAuth)
+  .single();
 
-  users = (fetchedUsers || []).filter(user => user.full_name !== null) as { full_name: string }[];
+if (profileError) {
+  console.error('Error fetching profile:', profileError);
+  return;
 }
 
+// Si es jefe de equipo, obtenemos las solicitudes de equipo
+let teamApplications = [];
+if (profileData.is_team_manager && profileData.team !== null && profileData.team !== undefined) {
+  const { data: fetchedTeamApplications, error } = await supabase
+    .from('teamsapplication')
+    .select('id, user_application, type')
+    .eq('team_requesting', profileData.team)
+    .eq('type', TeamRequestType.Join);
+
+  if (error) {
+    console.error('Error fetching team applications:', error);
+  } else if (fetchedTeamApplications) {
+    teamApplications = fetchedTeamApplications;
+    combinedRequests = [...combinedRequests, ...teamApplications];
+  }
+}
+
+// Obtener todos los user_application únicos de combinedRequests
+const userIds = combinedRequests.map(app => app.user_application);
+const { data: fetchedUsers, error: userError } = await supabase
+  .from("profiles")
+  .select("full_name")
+  .in("id", userIds);
+users = (fetchedUsers || []).filter(user => user.full_name !== null) as { full_name: string }[];
 ---
 
 <Layout title="ESP Racing: Bandeja de Mensajes">
@@ -148,12 +180,12 @@ if (TeamRequestData) {
     </thead>
     <tbody>
       {
-        TeamRequestData?.map((msg, index) => (
+        combinedRequests?.map((msg, index) => (
           <tr class="">
             <td class="font-semibold">
               {index + 1}
             </td>
-            <td>{users[index].full_name}</td>
+            <td>{users[index]?.full_name || msg.user_application}</td>
             <td>{msg.type == 'join' ? 'Unirse a equipo':'Crear equipo'}</td>
             <td>
               <button class = "align-middle accept-invitation" data-id={msg.id}>
