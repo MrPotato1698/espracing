@@ -29,9 +29,9 @@ export function initCarManagement() {
   const dropZone = document.getElementById("dropZone") as HTMLInputElement;
   const fileData = document.getElementById('fileData') as HTMLElement;
 
-  const previewName = document.getElementById('previewName') as HTMLElement;
-  const previewYear = document.getElementById('previewYear') as HTMLElement;
-  const previewLocation = document.getElementById('previewLocation') as HTMLElement;
+  const previewBrandName = document.getElementById('previewBrandName') as HTMLElement;
+  const previewModelName = document.getElementById('previewModelName') as HTMLElement;
+  const previewLocationYear = document.getElementById('previewLocationYear') as HTMLElement;
   const previewFolder = document.getElementById('previewFolder') as HTMLElement;
   const previewClass = document.getElementById('previewClass') as HTMLElement;
   const previewPower = document.getElementById('previewPower') as HTMLElement;
@@ -41,7 +41,7 @@ export function initCarManagement() {
   const previewMaxLiter = document.getElementById('previewMaxLiter') as HTMLElement;
   const previewFuelLiterTime = document.getElementById('previewFuelLiterTime') as HTMLElement;
 
-  // NUEVO: Referencias para el switch y contenedor de edición avanzada
+  // Referencias para el switch y contenedor de edición avanzada
   const switchMoreData = document.getElementById("switch-moreData") as HTMLInputElement;
   const moreDataContainer = document.getElementById("moreDataContainer") as HTMLElement;
   const carBrandSelect = document.getElementById("carbrand") as HTMLSelectElement;
@@ -74,7 +74,7 @@ export function initCarManagement() {
       carData = await processDroppedFolder(entry);
       updatePreview(carData);
       fileData.classList.remove('hidden');
-      // NUEVO: Mostrar el switch de edición avanzada
+      // Mostrar el switch de edición avanzada
       if (switchMoreData) switchMoreData.closest('.flex')?.classList.remove('hidden');
       if (moreDataContainer) moreDataContainer.classList.add('hidden'); // Ocultar campos avanzados por defecto
       // Resetear switches e inputs de edición avanzada
@@ -92,7 +92,7 @@ export function initCarManagement() {
     }
   });
 
-  // NUEVO: Mostrar/ocultar contenedor de switches de edición avanzada
+  // Mostrar/ocultar contenedor de switches de edición avanzada
   if (switchMoreData) {
     switchMoreData.addEventListener('change', () => {
       if (switchMoreData.checked) {
@@ -116,7 +116,7 @@ export function initCarManagement() {
     });
   }
 
-  // NUEVO: Observer global para detectar checkboxes y asociarles el observer de aria-checked
+  // Observer global para detectar checkboxes y asociarles el observer de aria-checked
   function setupEditFieldObservers() {
     const editFieldDivs = document.querySelectorAll('#moreDataContainer [data-edit-field]');
     editFieldDivs.forEach(div => {
@@ -406,9 +406,9 @@ export function initCarManagement() {
   }
 
   function updatePreview(data: ProcessedCarData){
-    previewName.textContent = data.brandName + " " + data.model;
-    previewYear.textContent = data.year?.toString();
-    previewLocation.textContent = data.location;
+    previewBrandName.textContent = data.brandName;
+    previewModelName.textContent = data.model;
+    previewLocationYear.textContent = data.location + ", " + data.year?.toString();
     previewFolder.textContent = data.filename;
 
     previewClass.textContent = data.className;
@@ -420,46 +420,7 @@ export function initCarManagement() {
     previewMaxLiter.textContent = data.maxLiter?.toString();
     previewFuelLiterTime.textContent = data.fuelLiterTime?.toString();
   }
-  async function getBrandId(carBrandValue: string, carData: ProcessedCarData): Promise<number> {
-    if (carBrandValue === "-1") {
-      return carData.brandID;
-    }
-    return Number(carBrandValue);
-  }
 
-  async function getClassId(carClassValue: string, carData: ProcessedCarData): Promise<number> {
-    switch (carClassValue) {
-      case "-1":
-        return carData.classID;
-      case "-2":
-        try {
-          const { data: getLastClass } = await supabase
-            .from('carclass')
-            .select('id')
-            .order('id', { ascending: false })
-            .limit(1)
-            .single();
-          const lastClassID = getLastClass ? (getLastClass.id + 1) : 1;
-          const newClassDesign = ` bg-[${newClassBackgroundColor.value}] text-[${newClassTextColor.value}]`;
-          const { error: insertClassError } = await supabase
-            .from('carclass')
-            .insert({
-              id: Number(lastClassID),
-              name: String(newClassName.value),
-              short_name: String(newClassShortName.value),
-              class_design: String(newClassDesign),
-            });
-          if (insertClassError) throw insertClassError;
-          return lastClassID;
-        } catch (error) {
-          showToast("Error al crear la clase: "+ error, "error");
-          console.error("Error al crear la clase: "+ error);
-          return carData.classID;
-        }
-      default:
-        return Number(carClassValue);
-    }
-  }
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -467,7 +428,7 @@ export function initCarManagement() {
     const carClassValue = carClassSelect?.value;
     const carBrandValue = carBrandSelect?.value;
 
-    // NUEVO: Sobrescribir carData con los valores de los campos editados si su checkbox está activo
+    // Sobrescribir carData con los valores de los campos editados si su checkbox está activo
     const editFieldDivs = document.querySelectorAll('#moreDataContainer [data-edit-field]');
     editFieldDivs.forEach(div => {
       const sw = div.querySelector('[id$="Switch"]');
