@@ -90,7 +90,7 @@ if(errorRaces) {
     >
       {
         dataRaces?.map((race) => (
-          <option value={race.id?.toString()} selected={dataRaceNote.race.id === race.id}>{race.name}</option>
+          <option value={race.id?.toString()} selected={dataRaceNote.race.id === race.id}>{race.name +" - "+race.championship.name}</option>
         ))
       }
     </select>

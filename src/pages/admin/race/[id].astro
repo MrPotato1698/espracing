@@ -100,7 +100,7 @@ const serializableRaceNoteCodeData = raceNoteCodeData ? JSON.parse(JSON.stringif
 const columns = [
   { header: "Tipo", accessor: "code.name" },
   { header: "Penalización", accessor: "penalty" },
-  { header: "Description", accessor: "description" }
+  { header: "Descripción", accessor: "description" }
 ];
 ---
 
@@ -426,6 +426,11 @@ const columns = [
           </div>
         </div>
       </div>
+    </div>
+
+    <div class="flex items-center gap-2 mt-4">
+      <input id="isMultiCategory" name="isMultiCategory" type="checkbox" class="mr-2 w-5 h-5 accent-primary" />
+      <label for="isMultiCategory" class="text-lightPrimary text-lg font-semibold">¿Multicategoría?</label>
     </div>
 
     <input type="hidden" name="race_id" value={id} />
