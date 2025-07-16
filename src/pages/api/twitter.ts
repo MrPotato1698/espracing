@@ -1,4 +1,5 @@
 import type { APIRoute } from "astro"
+import { supabase } from "@/db/supabase"
 
 interface TwitterUser {
   id: string
@@ -37,7 +38,87 @@ interface TwitterResponse {
   }
 }
 
-export const GET: APIRoute = async ({ url, request }) => {
+async function fetchTwitterUserId(username: string, token: string): Promise<string> {
+  const userResponse = await fetch(`https://api.twitter.com/2/users/by/username/${username}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
+
+  if (!userResponse.ok) {
+    const errorData = await userResponse.json()
+    throw new Error(`Error al obtener usuario: ${JSON.stringify(errorData)}`)
+  }
+
+  const userData = await userResponse.json()
+
+  if (!userData?.data.id) {
+    throw new Error(`No se encontró el usuario: ${username}`)
+  }
+
+  return userData.data.id
+}
+
+async function fetchTwitterTweets(userId: string, token: string): Promise<TwitterResponse> {
+  const tweetsResponse = await fetch(
+    `https://api.twitter.com/2/users/${userId}/tweets?` +
+      new URLSearchParams({
+        max_results: "10",
+        "tweet.fields": "created_at,public_metrics,attachments",
+        expansions: "author_id,attachments.media_keys",
+        "user.fields": "name,username,profile_image_url",
+        "media.fields": "type,url,preview_image_url",
+      }),
+    {
+      headers: {
+        Authorization: `Bearer ${token}`
+      },
+    },
+  )
+
+  if (!tweetsResponse.ok) {
+    const errorData = await tweetsResponse.json()
+    throw new Error(`Error al obtener tweets: ${JSON.stringify(errorData)}`)
+  }
+
+  return tweetsResponse.json()
+}
+
+async function fetchLastTweetsFromSupabase() {
+  const { data } = await supabase
+    .from('global_adjust')
+    .select('value')
+    .eq('key', 'last_tweet')
+    .single()
+  return data?.value
+}
+
+function transformTweets(tweetsData: TwitterResponse) {
+  return tweetsData.data.map((tweet) => {
+    const author = tweetsData.includes?.users?.find((user) => user.id === tweet.author_id)
+    const media = tweet.attachments?.media_keys
+      ?.map((key) => tweetsData.includes?.media?.find((m) => m.media_key === key))
+      .filter(Boolean).map((m) => ({
+        url: m?.type === "photo" ? m?.url : m?.preview_image_url,
+        type: m?.type ?? "photo",
+      }))
+
+    return {
+      id: tweet.id,
+      text: tweet.text,
+      created_at: tweet.created_at,
+      user: {
+        name: author?.name ?? "",
+        screen_name: author?.username ?? "",
+        profile_image_url: author?.profile_image_url ?? "",
+      },
+      media: media || [],
+      public_metrics: tweet.public_metrics,
+    }
+  })
+}
+
+export const GET: APIRoute = async ({ url }) => {
   const username = url.searchParams.get("username")
 
   if (!username) {
@@ -57,93 +138,61 @@ export const GET: APIRoute = async ({ url, request }) => {
   }
 
   try {
-    // Primero obtenemos el ID del usuario
-    const userResponse = await fetch(`https://api.twitter.com/2/users/by/username/${username}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
+    let tweetsData: TwitterResponse | null = null
+    let transformedTweets: any[] = []
 
-    if (!userResponse.ok) {
-      const errorData = await userResponse.json()
-      throw new Error(`Error al obtener usuario: ${JSON.stringify(errorData)}`)
+    const userId = await fetchTwitterUserId(username, token)
+
+    try {
+      tweetsData = await fetchTwitterTweets(userId, token)
+    } catch (err) {
+      const lastTweets = await fetchLastTweetsFromSupabase()
+      if (lastTweets) {
+        return new Response(lastTweets, {
+          status: 200,
+          headers: {
+            "Content-Type": "application/json",
+            "Cache-Control": "max-age=300",
+          },
+        })
+      }
+      throw err
     }
 
-    const userData = await userResponse.json()
-
-    if (!userData?.data.id) {
-      throw new Error(`No se encontró el usuario: ${username}`)
-    }
-
-    const userId = userData.data.id
-
-    // Ahora obtenemos los tweets del usuario
-    const tweetsResponse = await fetch(
-      `https://api.twitter.com/2/users/${userId}/tweets?` +
-        new URLSearchParams({
-          max_results: "10",
-          "tweet.fields": "created_at,public_metrics,attachments",
-          expansions: "author_id,attachments.media_keys",
-          "user.fields": "name,username,profile_image_url",
-          "media.fields": "type,url,preview_image_url",
-        }),
-      {
-        headers: {
-          Authorization: `Bearer ${token}`
-        },
-      },
-    )
-
-    if (!tweetsResponse.ok) {
-      const errorData = await tweetsResponse.json()
-      throw new Error(`Error al obtener tweets: ${JSON.stringify(errorData)}`)
-    }
-
-    const tweetsData: TwitterResponse = await tweetsResponse.json()
-
-    // Si no hay tweets, devolver un array vacío
     if (!tweetsData.data || tweetsData.data.length === 0) {
       return new Response(JSON.stringify([]), {
         status: 200,
         headers: {
           "Content-Type": "application/json",
-          "Cache-Control": "max-age=300", // Cache por 5 minutos
+          "Cache-Control": "max-age=300",
         },
       })
     }
 
-    // Transformar los datos para el frontend
-  const transformedTweets = tweetsData.data.map((tweet) => {
-        const author = tweetsData.includes?.users?.find((user) => user.id === tweet.author_id)
-        const media = tweet.attachments?.media_keys
-          ?.map((key) => tweetsData.includes?.media?.find((m) => m.media_key === key))
-          .filter(Boolean).map((m) => ({
-          url: m?.type === "photo" ? m?.url : m?.preview_image_url,
-          type: m?.type ?? "photo",
-        }))
+    transformedTweets = transformTweets(tweetsData)
 
-        return {
-          id: tweet.id,
-          text: tweet.text,
-          created_at: tweet.created_at,
-          user: {
-            name: author?.name ?? "",
-            screen_name: author?.username ?? "",
-            profile_image_url: author?.profile_image_url ?? "",
-          },
-          media: media || [],
-          public_metrics: tweet.public_metrics,
-        }
-      })
+    if (supabase) {
+      await supabase.from('global_adjust').upsert({ key: 'last_tweet', value: JSON.stringify(transformedTweets) }, { onConflict: 'key' })
+    }
 
     return new Response(JSON.stringify(transformedTweets), {
       status: 200,
       headers: {
         "Content-Type": "application/json",
-        "Cache-Control": "max-age=300", // Cache por 5 minutos
+        "Cache-Control": "max-age=300",
       },
     })
   } catch (error) {
+    const lastTweets = await fetchLastTweetsFromSupabase()
+    if (lastTweets) {
+      return new Response(lastTweets, {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": "max-age=300",
+        },
+      })
+    }
     console.error("Twitter API Error:", error)
     return new Response(
       JSON.stringify({
