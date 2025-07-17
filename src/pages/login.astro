@@ -144,10 +144,10 @@ handleRedirect();
   src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.js"
 ></script>
 
-<script>
+<script is:inline data-astro-rerun>
   // Manejo del formulario de email/password
-  const emailForm = document.getElementById('emailLoginForm') as HTMLFormElement;
-  const googleBtn = document.getElementById('googleLogin') as HTMLButtonElement;
+  const emailForm = document.getElementById('emailLoginForm');
+  const googleBtn = document.getElementById('googleLogin');
 
   if (emailForm) {
     emailForm.addEventListener('submit', async (e) => {
@@ -168,7 +168,7 @@ handleRedirect();
 
         // Redireccionar en caso de éxito
         window.location.href = '/myprofile';
-      } catch (error: Error | any) {
+      } catch (error) {
         alert(error.message || 'Error al iniciar sesión');
       }
     });
