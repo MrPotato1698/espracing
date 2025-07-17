@@ -9,6 +9,12 @@ import Youtube from "@/assets/social/brand-youtube.svg";
 import Twitch from "@/assets/social/brand-twitch.svg";
 import ESPRacing from "@/assets/imgresource/ESPRACINGLogo.webp";
 import Chevron from "@/icons/Chevron.astro";
+
+const { cookies, redirect } = Astro;
+
+const accessToken = cookies.get("sb-access-token");
+const refreshToken = cookies.get("sb-refresh-token");
+
 ---
 
 <!-- Nombre Inicial + Redes -->
@@ -249,14 +255,25 @@ import Chevron from "@/icons/Chevron.astro";
           </div>
         </li>
 
+        {
+            accessToken && refreshToken ? (
         <li>
           <a
-            href="/login"
+            href="/myprofile"
             class ="flex items-center justify-between w-full py-2 px-3 text-lightPrimary rounded hover:bg-white hover:text-primary md:hover:bg-lightPrimary md:border-0 md:hover:text-primary md:p-1 md:w-auto">
             Mi Perfil
           </a>
         </li>
-
+        ):(
+        <li>
+          <a
+            href="/login"
+            class ="flex items-center justify-between w-full py-2 px-3 text-lightPrimary rounded hover:bg-white hover:text-primary md:hover:bg-lightPrimary md:border-0 md:hover:text-primary md:p-1 md:w-auto">
+            Login
+          </a>
+        </li>
+        )
+        }
       </ul>
     </div>
   </div>
