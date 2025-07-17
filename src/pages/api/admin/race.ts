@@ -40,7 +40,7 @@ export const POST: APIRoute = async ({ request }) => {
   const { error } = await supabase.from('race').insert([insertObj]);
 
   if (error) {
-    console.log('Error inserting: ', error);
+    console.error('Error inserting: ', error);
     return new Response(JSON.stringify({ error: error.message }), { status: 500 });
   }
   return new Response(JSON.stringify({ success: true }), { status: 200 });
@@ -418,32 +418,42 @@ async function transformRaceJsons({ fileS1R1, fileS1R2, fileS2R1, fileS2R2, swit
       console.warn("No valid cars found in Cars array, but Results exist. Proceeding with Results data only.");
     }
 
-    dateRace = jsonS1R1.SessionFile.slice(0, 10).replace("_", "-").replace(/_/g, "-");
+    // Obtener la fecha en formato YYYY-MM-DD
+    if (jsonS1R1.SessionFile) {
+      const dateMatch = jsonS1R1.SessionFile.match(/(\d{4})[-_](\d{1,2})[-_](\d{1,2})/);
+      if (dateMatch) {
+        const year = dateMatch[1];
+        const month = dateMatch[2].padStart(2, "0");
+        const day = dateMatch[3].padStart(2, "0");
+        dateRace = `${year}-${month}-${day}`;
+      }
+    }
+
     let jsonS1R2: any = null;
-    if (switchR2Element) {
+    if (switchR2Element == true) {
       const contentS1R2 = await fileS1R2?.text();
       if (!contentS1R2)
         return { error: true, response: new Response(JSON.stringify({ error: "Sin contenido en el archivo de Carrera 2 Split 1." }), { status: 400 }) };
       jsonS1R2 = JSON.parse(contentS1R2);
     }
-    if (switchS2Element) {
+    if (switchS2Element == true) {
       numSplits = 2;
-      if (switchR2Element) {
+      if (switchR2Element == true) {
         const contentS2R2 = await fileS2R2?.text();
         if (!contentS2R2)
           return { error: true, response: new Response(JSON.stringify({ error: "Sin contenido en el archivo de Carrera 2 Split 2." }), { status: 400 }) };
         const jsonS2R2 = JSON.parse(contentS2R2);
-        transformedJsonR2 = JSON.stringify(createRaceDataMultipleSplits(jsonS1R2, jsonS2R2, !!isMultiCategory));
+        transformedJsonR2 = JSON.stringify(await createRaceDataMultipleSplits(jsonS1R2, jsonS2R2, !isMultiCategory));
       }
       const contentS2R1 = await fileS2R1?.text();
       if (!contentS2R1)
         return { error: true, response: new Response(JSON.stringify({ error: "Sin contenido en el archivo de Carrera 1 Split 2." }), { status: 400 }) };
       const jsonS2R1 = JSON.parse(contentS2R1);
-      transformedJsonR1 = JSON.stringify(createRaceDataMultipleSplits(jsonS1R1, jsonS2R1, !!isMultiCategory));
+      transformedJsonR1 = JSON.stringify(await createRaceDataMultipleSplits(jsonS1R1, jsonS2R1, !isMultiCategory));
     } else {
-      transformedJsonR1 = JSON.stringify(createRaceData(jsonS1R1, !!isMultiCategory));
-      if (switchR2Element) {
-        transformedJsonR2 = JSON.stringify(createRaceData(jsonS1R2, !!isMultiCategory));
+      transformedJsonR1 = JSON.stringify(await createRaceData(jsonS1R1, !isMultiCategory));
+      if (switchR2Element == true) {
+        transformedJsonR2 = JSON.stringify(await createRaceData(jsonS1R2, !isMultiCategory));
       }
     }
     return { transformedJsonR1, transformedJsonR2, dateRace, numSplits };
@@ -464,14 +474,14 @@ async function uploadRaceFiles({ champID, orderChamp, racenameFile, transformedJ
     const URLBucketsResults = new Array<string>(2).fill("");
     const { data: uploadRace1, error: uploadErrorR1 } = await supabase.storage
       .from("results")
-      .upload(`${champID}/${orderChamp}_${racenameFile}Race1`, transformedJsonR1, { upsert: true });
+      .upload(`${champID}/${orderChamp}_${racenameFile}Race1`, new Blob([transformedJsonR1], { type: "text/plain" }), { upsert: true });
     if (uploadErrorR1 || !uploadRace1) throw uploadErrorR1;
     URLBucketsResults[0] = uploadRace1.path;
 
-    if (switchR2Element) {
+    if (switchR2Element == true) {
       const { data: uploadRace2, error: uploadErrorR2 } = await supabase.storage
         .from("results")
-        .upload(`${champID}/${orderChamp}_${racenameFile}Race2`, transformedJsonR2, { upsert: true });
+        .upload(`${champID}/${orderChamp}_${racenameFile}Race2`, new Blob([transformedJsonR2], { type: "text/plain" }), { upsert: true });
       if (uploadErrorR2 || !uploadRace2) throw uploadErrorR2;
       URLBucketsResults[1] = uploadRace2.path;
     }
@@ -500,6 +510,12 @@ async function processRaceEditsIfNeeded({ oldRaceData, oldRaceFiles, URLBucketsR
 
 async function processRaceEdit(oldRaceDataJson: RaceData, newRaceDataJson: RaceData) {
   try {
+    if (!oldRaceDataJson?.RaceDriversResume || !newRaceDataJson?.RaceDriversResume) {
+      return new Response(
+        JSON.stringify({ error: "RaceDriversResume no está definido en los datos de la carrera." }),
+        { status: 400 },
+      );
+    }
     const oldResume: RaceDriversResume[] = oldRaceDataJson.RaceDriversResume;
     const newResume: RaceDriversResume[] = newRaceDataJson.RaceDriversResume;
 

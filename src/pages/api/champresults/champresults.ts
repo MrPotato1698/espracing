@@ -14,19 +14,13 @@ interface DriverDataChamp {
   totalPoints: number;
 }
 
-interface DriverPointsPerRace {
-  name: string;
-  guid: string;
-  racenumber: number;
-  points: number;
-}
-
 interface RaceDataChamp {
   raceNumber: number;
   name: string;
   results: RaceResult[];
   pointSystem: Points;
   driverFastestLapGuid: string;
+  splits: number;
 }
 
 interface TeamDataChamp {
@@ -122,7 +116,8 @@ async function initializeScript() {
           name: championshipData[i].raceData1?.RaceConfig.Track + '@' + championshipData[i].raceData1?.RaceConfig.TrackLayout || '',
           results: championshipData[i].raceData1?.RaceResult || [],
           pointSystem: championshipData[i].points,
-          driverFastestLapGuid: championshipData[i].raceData1?.BestLap[0].SteamID ?? ''
+          driverFastestLapGuid: championshipData[i].raceData1?.BestLap[0].SteamID ?? '',
+          splits: championshipData[i].raceData1?.RaceConfig.NumberofSplits || 1
         });
         numRaceProccesed++;
         RacesChamp.push({
@@ -130,7 +125,8 @@ async function initializeScript() {
           name: championshipData[i].raceData2?.RaceConfig.Track + '@' + championshipData[i].raceData2?.RaceConfig.TrackLayout || '',
           results: championshipData[i].raceData2?.RaceResult || [],
           pointSystem: championshipData[i].points,
-          driverFastestLapGuid: championshipData[i].raceData2?.BestLap[0].SteamID ?? ''
+          driverFastestLapGuid: championshipData[i].raceData2?.BestLap[0].SteamID ?? '',
+          splits: championshipData[i].raceData1?.RaceConfig.NumberofSplits || 1
         });
       } else {
         RacesChamp.push({
@@ -138,7 +134,8 @@ async function initializeScript() {
           name: championshipData[i].raceData1?.RaceConfig.Track + '@' + championshipData[i].raceData1?.RaceConfig.TrackLayout || '',
           results: championshipData[i].raceData1?.RaceResult || [],
           pointSystem: championshipData[i].points,
-          driverFastestLapGuid: championshipData[i].raceData1?.BestLap[0].SteamID ?? ''
+          driverFastestLapGuid: championshipData[i].raceData1?.BestLap[0].SteamID ?? '',
+          splits: championshipData[i].raceData1?.RaceConfig.NumberofSplits || 1
         });
       }
     }
@@ -263,20 +260,24 @@ async function initializeScript() {
     return rowHTML;
   }
 
+  function calculateDriverPoints(raceData: RaceDataChamp, DriverGUID: string): number | null {
+    const itemResults = raceData.results.find((result) => result.SteamID === DriverGUID);
+    if (!itemResults) return null;
+    const numPilotosSplits1 = raceData.splits === 2
+      ? raceData.results.filter(r => r.Split === 1 && r.Pos > 0).length : 0;
+    const flapPoint = (itemResults.SteamID === raceData.driverFastestLapGuid ? raceData.pointSystem.FastestLap : 0);
+    const plusSplit = (raceData.splits > 1 && itemResults.Split > 1) ? numPilotosSplits1 : 0;
+    return itemResults.Pos > 0 ? raceData.pointSystem.Puntuation[itemResults.Pos - 1 + plusSplit] + flapPoint : 0;
+  }
+
   async function renderDriverRaceCells(
     DriverGUID: string,
-    RacesChamp: RaceDataChamp[]
+    RacesChamp: RaceDataChamp[],
   ): Promise<string> {
     let cellsHTML = '';
     for (let raceData of RacesChamp) {
-      const itemResults = raceData.results.find((result) => result.SteamID === DriverGUID);
-      if (itemResults) {
-        const flapPoint = (itemResults.SteamID === raceData.driverFastestLapGuid ? raceData.pointSystem.FastestLap : 0);
-        const points = itemResults.Pos > 0 ? raceData.pointSystem.Puntuation[itemResults.Pos - 1] + flapPoint : 0;
-        cellsHTML += `<td class = "text-center">${points > 0 ? points : '-'}</td>`;
-      } else {
-        cellsHTML += `<td class = "text-center">-</td>`;
-      }
+      const points = calculateDriverPoints(raceData, DriverGUID);
+      cellsHTML += `<td class = "text-center">${points && points > 0 ? points : '-'}</td>`;
     }
     return cellsHTML;
   }
@@ -373,18 +374,21 @@ async function initializeScript() {
     let cellsHTML = '';
     for (let raceData of RacesChamp) {
       let pointsRace = 0;
-      pointsRace += getDriverPointsForRace(raceData, Driver1GUID);
-      pointsRace += getDriverPointsForRace(raceData, Driver2GUID);
+      const numPilotosSplits1 = raceData.splits === 2
+        ? raceData.results.filter(r => r.Split === 1 && r.Pos > 0).length : 0;
+      pointsRace += getDriverPointsForRace(raceData, Driver1GUID, numPilotosSplits1);
+      pointsRace += getDriverPointsForRace(raceData, Driver2GUID, numPilotosSplits1);
       cellsHTML += `<td class = "text-center">${pointsRace > 0 ? pointsRace : '-'}</td>`;
     }
     return cellsHTML;
   }
 
-  function getDriverPointsForRace(raceData: RaceDataChamp, driverGUID: string): number {
+  function getDriverPointsForRace(raceData: RaceDataChamp, driverGUID: string, numPilotosSplits1: number): number {
     const itemResult = raceData.results.find((result) => result.SteamID === driverGUID);
     if (itemResult) {
       const flapPoint = itemResult.SteamID === raceData.driverFastestLapGuid ? raceData.pointSystem.FastestLap : 0;
-      return itemResult.Pos > 0 ? raceData.pointSystem.Puntuation[itemResult.Pos - 1] + flapPoint : 0;
+      const plusSplit = (raceData.splits > 1 && itemResult.Split > 1) ? numPilotosSplits1 : 0;
+      return itemResult.Pos > 0 ? raceData.pointSystem.Puntuation[itemResult.Pos - 1 + plusSplit] + flapPoint : 0;
     }
     return 0;
   }
@@ -439,8 +443,13 @@ function addNewDriver(
   pointFL: number,
   respuesta: DriverDataChamp[]
 ) {
+  // Contar el número de pilotos con splits = 1 y Pos > 0 en esta carrera
+  const numPilotosSplits1 = raceData.splits === 2
+    ? raceData.results.filter(r => r.Split === 1 && r.Pos > 0).length : 0;
   const flapPoint = item.SteamID === raceData.driverFastestLapGuid ? pointFL : 0;
-  const points = pos > 0 ? pointArray[pos - 1] + flapPoint : 0;
+  const plusSplit = (raceData.splits > 1 && item.Split > 1) ? numPilotosSplits1 : 0;
+  console.log(`Driver: ${item.DriverName}, Pos: ${pos}, Points: ${pointArray[pos - 1 + plusSplit] + flapPoint}`);
+  const points = pos > 0 ? pointArray[pos - 1 + plusSplit] + flapPoint : 0;
   if (pos > 0 || pos !== -4) {
     respuesta.push({
       name: item.DriverName,
@@ -461,7 +470,10 @@ function addPointsToExistingDriver(
   respuesta: DriverDataChamp[],
   driverIndex: number
 ) {
-  const additionalPoints = pointArray[pos - 1] + (item.SteamID === raceData.driverFastestLapGuid ? pointFL : 0);
+  const numPilotosSplits1 = raceData.splits === 2
+    ? raceData.results.filter(r => r.Split === 1 && r.Pos > 0).length : 0;
+  const plusSplit = (raceData.splits > 1 && item.Split > 1) ? numPilotosSplits1 : 0;
+  const additionalPoints = pointArray[pos - 1 + plusSplit] + (item.SteamID === raceData.driverFastestLapGuid ? pointFL : 0);
   respuesta[driverIndex].totalPoints += additionalPoints;
 }
 
@@ -512,32 +524,6 @@ function getFirstBestPositionRaceNumber(driver: DriverDataChamp, result: RaceDat
     }
   }
   return Infinity;
-}
-
-function getDriverPointsPerRace(result: RaceDataChamp[], orderChamp: DriverDataChamp[]): DriverPointsPerRace[] {
-  let respuesta: DriverPointsPerRace[] = [];
-
-  for (let raceData of result) {
-    const nRace = raceData.raceNumber;
-    const pointSystem = raceData.pointSystem.Puntuation;
-    const pointSystemFastestLap = raceData.pointSystem.FastestLap;
-
-    for (let itemR of raceData.results) {
-      const flapPoint = itemR.SteamID === raceData.driverFastestLapGuid ? pointSystemFastestLap : 0;
-      respuesta.push({
-        name: itemR.DriverName,
-        guid: itemR.SteamID,
-        racenumber: nRace,
-        points: (itemR.Pos > 0 ? pointSystem[itemR.Pos - 1] + flapPoint : 0)
-      });
-    }
-  }
-
-  return respuesta.sort((a, b) => {
-    const indexA = orderChamp.findIndex(driver => driver.guid === a.guid);
-    const indexB = orderChamp.findIndex(driver => driver.guid === b.guid);
-    return indexA - indexB;
-  });
 }
 
 // Obtener los datos globales de los equipos

@@ -306,6 +306,10 @@ function createRaceLapMultipleSplits(dlapsS1: LapJSON[], dlapsS2: LapJSON[], rr:
     let uniqueRL: RaceLap = {} as RaceLap;
 
     if (driver.Pos === -3 || driver.Pos === -4) {
+      const repeatedDriver = rl.find(item => item.SteamID === driver.SteamID);
+      if (repeatedDriver) {
+        continue; // Saltar a piloto que ya está en la lista
+      }
       uniqueRL.DriverName = driver.DriverName;
       uniqueRL.SteamID = driver.SteamID;
       uniqueRL.Split = driver.Split;
@@ -481,7 +485,7 @@ function getPositionInEveryLap(rlAux: RaceLap[]): RaceLap[] {
 }
 
 /**
- * Función para crear los mejores tiempos de vueltas
+ * Función para guardar los 20 mejores tiempos de carrera
  * @param rl - Array de objetos RaceLap
  * @returns {BestLap[]} - Array de objetos BestLap
  */
@@ -490,6 +494,9 @@ function createBestLap(rl: RaceLap[]): BestLap[] {
 
   for (let itemRL of rl) {
     for (let itemL of itemRL.Laps) {
+      if( itemL.Cut > 0) {
+        continue; // Saltar vueltas con cut
+      }
       let uniqueBL: BestLap = {} as BestLap;
       uniqueBL.BestLap = itemL.LapTime;
       uniqueBL.DriverName = itemRL.DriverName;

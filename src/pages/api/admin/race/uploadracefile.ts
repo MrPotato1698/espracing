@@ -27,14 +27,24 @@ export const POST: APIRoute = async ({ request }) => {
     const { jsonS1R1, jsonS2R1, jsonS1R2, jsonS2R2 } = await readAllFiles({ fileS1R1, fileS2R1, fileS1R2, fileS2R2 });
 
     // Transformar JSONs
-    const { transformedJsonR1, transformedJsonR2 } = transformJsons({ split2, race2, jsonS1R1, jsonS2R1, jsonS1R2, jsonS2R2, isMultiCategory });
+    const { transformedJsonR1, transformedJsonR2 } = await transformJsons({ split2, race2, jsonS1R1, jsonS2R1, jsonS1R2, jsonS2R2, isMultiCategory });
 
     // Subir resultados a Supabase Storage
     const racenameFile = racename.replace(/\s/g, '');
     const URLBucketsResults = await uploadResults({ supabase, champID, numrace, racenameFile, transformedJsonR1, transformedJsonR2, race2 });
 
     // Insertar carrera en la tabla race
-    const race_date = transformedJsonR1.RaceConfig.Date.slice(0, 10);
+    // Obtener la fecha en formato YYYY-MM-DD desde el filename
+    let race_date = "";
+    if (fileS1R1?.name) {
+      const dateMatch = fileS1R1.name.match(/(\d{4})[-_](\d{1,2})[-_](\d{1,2})/);
+      if (dateMatch) {
+        const year = dateMatch[1];
+        const month = dateMatch[2].padStart(2, "0");
+        const day = dateMatch[3].padStart(2, "0");
+        race_date = `${year}-${month}-${day}`;
+      }
+    }
     const filename = fileS1R1?.name ?? "";
     const splits = split2 ? 2 : 1;
     await insertRace({ supabase, racename, champID, numrace, pointsystem, splits, URLBucketsResults, race_date, filename, isMultiCategory });
@@ -76,20 +86,20 @@ async function readAllFiles({ fileS1R1, fileS2R1, fileS1R2, fileS2R2 }: any) {
 }
 
 // Auxiliar para transformar JSONs
-function transformJsons({ split2, race2, jsonS1R1, jsonS2R1, jsonS1R2, jsonS2R2, isMultiCategory }: any) {
+async function transformJsons({ split2, race2, jsonS1R1, jsonS2R1, jsonS1R2, jsonS2R2, isMultiCategory }: any) {
   let transformedJsonR1: any, transformedJsonR2: any = null;
   if (split2) {
     if (!jsonS2R1) throw new Error("Falta JSON Split 2 Carrera 1");
-    transformedJsonR1 = createRaceDataMultipleSplits(jsonS1R1, jsonS2R1, isMultiCategory);
+    transformedJsonR1 = await createRaceDataMultipleSplits(jsonS1R1, jsonS2R1, isMultiCategory);
     if (race2) {
       if (!jsonS1R2 || !jsonS2R2) throw new Error("Falta JSON Split 2 Carrera 2");
-      transformedJsonR2 = createRaceDataMultipleSplits(jsonS1R2, jsonS2R2, isMultiCategory);
+      transformedJsonR2 = await createRaceDataMultipleSplits(jsonS1R2, jsonS2R2, isMultiCategory);
     }
   } else {
-    transformedJsonR1 = createRaceData(jsonS1R1, isMultiCategory);
+    transformedJsonR1 = await createRaceData(jsonS1R1, isMultiCategory);
     if (race2) {
       if (!jsonS1R2) throw new Error("Falta JSON Split 1 Carrera 2");
-      transformedJsonR2 = createRaceData(jsonS1R2, isMultiCategory);
+      transformedJsonR2 = await createRaceData(jsonS1R2, isMultiCategory);
     }
   }
   return { transformedJsonR1, transformedJsonR2 };
@@ -117,7 +127,9 @@ async function uploadResults({ supabase, champID, numrace, racenameFile, transfo
 
 // Auxiliar para insertar la carrera en la base de datos
 async function insertRace({ supabase, racename, champID, numrace, pointsystem, splits, URLBucketsResults, race_date, filename, isMultiCategory }: any) {
+  const id = await getNextRaceId();
   const insertObj: any = {
+    id,
     name: racename,
     championship: champID,
     orderinchamp: numrace,
@@ -127,7 +139,7 @@ async function insertRace({ supabase, racename, champID, numrace, pointsystem, s
     race_data_2: URLBucketsResults[1] ?? null,
     race_date,
     filename,
-    isMultiCategory: isMultiCategory ? true : false
+    multiclass: isMultiCategory
   };
   const { error: insertError } = await supabase.from('race').insert([insertObj]);
   if (insertError) throw insertError;
@@ -141,4 +153,25 @@ async function updateStats(baseUrl: string, resume: any) {
     body: JSON.stringify({ resume })
   });
   if (!response.ok) throw new Error('Error actualizando estadísticas');
+}
+
+async function getNextRaceId() {
+  const { data: getLastRace } = await supabase
+    .from('race')
+    .select('id')
+    .neq('id', 0)
+    .order('id', { ascending: true });
+  if (!getLastRace) throw new Error("Error al obtener el último ID de carrera");
+  const length = getLastRace.length;
+  let i = 1;
+  let findID = false;
+  while (!findID && i < length) {
+    if (getLastRace[i - 1].id === i) {
+      i++;
+    } else {
+      findID = true;
+    }
+  }
+  if (!findID) i++;
+  return getLastRace ? i : 1;
 }

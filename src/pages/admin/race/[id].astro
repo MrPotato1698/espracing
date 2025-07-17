@@ -49,7 +49,7 @@ if (roleData == null || roleData.roleesp == null || roleData.roleesp > 1) {
 
 const { data: raceData, error: errorRaceData } = await supabase
   .from("race")
-  .select("name, orderinchamp, championship!inner(id), pointsystem!inner(id)")
+  .select("name, filename, orderinchamp, championship!inner(id), pointsystem!inner(id), multiclass")
   .eq("id", parseInt(id))
   .single();
 
@@ -170,7 +170,7 @@ const columns = [
         </div>
       </label>
       <label class="text-[#f0f0f0] text-lg font-medium" for="switch-S2">
-        ¿Editar archivos de carrera?
+        ¿Editar archivos de carrera? <span class="text-sm font-light"> *(Archivo previo: {raceData.filename})</span>
       </label>
     </div>
 
@@ -429,7 +429,7 @@ const columns = [
     </div>
 
     <div class="flex items-center gap-2 mt-4">
-      <input id="isMultiCategory" name="isMultiCategory" type="checkbox" class="mr-2 w-5 h-5 accent-primary" />
+      <input id="isMultiCategory" name="isMultiCategory" type="checkbox" class="mr-2 w-5 h-5 accent-primary" checked={raceData?.multiclass === true} />
       <label for="isMultiCategory" class="text-lightPrimary text-lg font-semibold">¿Multicategoría?</label>
     </div>
 
