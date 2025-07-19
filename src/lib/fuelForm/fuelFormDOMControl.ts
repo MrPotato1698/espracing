@@ -48,12 +48,10 @@ export function initializeFuelFormControls() {
       }
       fuelTank = parseFloat(fuelTankInput.value);
     } else {
-      console.log('Car data:', carData);
       fuelTank = carData?.maxLiter ?? 0;
     }
 
     const fuelConsumption = parseFloat(formData.get('fuelConsumption') as string);
-    console.log('Fuel tank:', fuelTank);
     const isLapsBased = switchElement?.checked;
 
     let distance: number;
@@ -90,9 +88,6 @@ export function initializeFuelFormControls() {
     const minimumStints = Math.ceil(VueltasTotales / maxLapsperTank);
     const completeStints = Math.floor(VueltasTotales / maxLapsperTank);
 
-    console.log('Minimum stints:', minimumStints);
-    console.log('Complete stints:', completeStints);
-
     let stintLaps: number[] = [];
     let stintFuel: number[] = [];
     let extraLap: boolean = false;
@@ -117,8 +112,6 @@ export function initializeFuelFormControls() {
         stintFuel.push(completeStintLaps * fuelConsumption);
         remainingLaps -= completeStintLaps;
         extraLap = true;
-      } else {
-        extraLap = false;
       }
 
       stintLaps.push(remainingLaps);
@@ -128,7 +121,7 @@ export function initializeFuelFormControls() {
     // Calcular tiempo total de repostaje
     const totalFuelperStint = stintFuel.map(fuel => fuel * carFuelTimeperLiter);
 
-
+    const minimumLapsPerStint = Math.floor(maxLapsperTank);
     // Mostrar el resultado con AJAX
     if (!resultadoDiv) return;
 
@@ -145,7 +138,7 @@ export function initializeFuelFormControls() {
     const baseInfo = stints > 1 ? `
       ${createListItem(`${totalFuel.toFixed(2)} litros`)} de combustible para completar la carrera.</li>
       ${createListItem(`${fuelTank} litros`)} de tanque de combustible.</li>
-      ${createListItem(`${maxLapsperTank.toFixed(0)} vueltas`)} completas por deposito.</li>
+      ${createListItem(`${maxLapsperTank.toFixed(2)} (${minimumLapsPerStint}) vueltas`)} completas por deposito.</li>
     ` : ``;
 
     const singleStintInfo = stints <= 1 ? `
