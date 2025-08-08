@@ -65,6 +65,7 @@ const PastChampsViewer: React.FC<PastChampsViewerProps> = ({ years }) => {
       .from('championship')
       .select('*')
       .eq('year', selectedYear)
+      .eq('isactive', true)
       .order('ischampionship', { ascending: false })
       .order('id');
     if (!championships) {
