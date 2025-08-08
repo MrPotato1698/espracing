@@ -151,6 +151,7 @@ export type Database = {
         Row: {
           champ_img: string | null
           id: number
+          isactive: boolean
           ischampionship: boolean | null
           isfinished: boolean
           name: string | null
@@ -161,6 +162,7 @@ export type Database = {
         Insert: {
           champ_img?: string | null
           id: number
+          isactive?: boolean
           ischampionship?: boolean | null
           isfinished?: boolean
           name?: string | null
@@ -171,6 +173,7 @@ export type Database = {
         Update: {
           champ_img?: string | null
           id?: number
+          isactive?: boolean
           ischampionship?: boolean | null
           isfinished?: boolean
           name?: string | null
@@ -343,6 +346,7 @@ export type Database = {
           position: number
           profile: string | null
           race: string | null
+          team: string | null
           valid_laps: number | null
         }
         Insert: {
@@ -351,6 +355,7 @@ export type Database = {
           position?: number
           profile?: string | null
           race?: string | null
+          team?: string | null
           valid_laps?: number | null
         }
         Update: {
@@ -359,6 +364,7 @@ export type Database = {
           position?: number
           profile?: string | null
           race?: string | null
+          team?: string | null
           valid_laps?: number | null
         }
         Relationships: [
