@@ -59,6 +59,10 @@ const { data: circuitData } = await supabase
   </h2>
 
   <form id="editCircuitForm" class="flex flex-col mt-5">
+    <label class="mt-5 text-lg font-semibold" for="filename">
+      Nombre de fichero del Circuito: <span class="font-normal">{circuitData?.filename}</span>
+    </label>
+
     <label class="mt-5 text-lg font-semibold" for="name">
       Nombre de Circuito:
     </label>
@@ -84,7 +88,7 @@ const { data: circuitData } = await supabase
     </label>
     <input
       type="text"
-      name="name"
+      name="location"
       value={circuitData?.location}
       class="bg-darkSecond text-lightPrimary text-lg w-11/12 border-none rounded-md p-2 ml-1 mt-px"
     />
@@ -101,7 +105,7 @@ const { data: circuitData } = await supabase
 
       <button
         type="button"
-        onclick="window, location.href = '/admin/admincircuits'"
+        onclick="window.location.href = '/admin/admincircuits'"
         class="py-1.5 px-3 w-fit bg-darkPrimary text-white border-primary border-2 rounded-md my-4 font-medium text-lg hover:bg-primary hover:text-darkPrimary"
       >
         Cancelar
@@ -116,9 +120,11 @@ const { data: circuitData } = await supabase
 </Layout>
 
 <script>
-  async function handleEditCircuitSubmit(e: Event) {
+  import { showToast } from "@/lib/utils";
+  const form = document.getElementById("editCircuitForm") as HTMLFormElement;
+
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const form = e.target as HTMLFormElement;
     const formData = new FormData(form);
     try {
       const response = await fetch('/api/admin/circuit', {
@@ -126,20 +132,22 @@ const { data: circuitData } = await supabase
         body: formData,
       });
       if (!response.ok) {
-        const result = await response.json();
-        throw new Error(result.error ?? 'Error desconocido');
+        console.error("Error en la respuesta del servidor:", response.status);
+        showToast(`Error en la respuesta del servidor: ${response.status}`, "error");
+        throw new Error(`Error en la respuesta del servidor: ${response.status}`);
       }
       const result = await response.json();
       if (result.success) {
+        showToast("Circuito actualizado con éxito", "success");
         window.location.href = '/admin/admincircuits';
       } else {
-        throw new Error(result.error ?? 'Error desconocido');
+        console.error("Error al actualizar el circuito:", result.error);
+        showToast(`Error al actualizar el circuito: ${result.error || "Error desconocido"}`, "error");
+        throw new Error(result.error || "Error desconocido");
       }
     } catch (error) {
-      alert('Error al actualizar el circuito: ' + error);
+      console.error("Error al actualizar el cirucito:", error);
+      showToast(`Error al actualizar el circuito: ${error}`, "error");
     }
-  }
-  if (typeof window !== 'undefined') {
-    document.getElementById('editCircuitForm')?.addEventListener('submit', handleEditCircuitSubmit);
-  }
+  });
 </script>
