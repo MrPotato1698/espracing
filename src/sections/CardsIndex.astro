@@ -14,6 +14,7 @@ const { data: champDataDB, error: champErrorDB } = await supabase
   .select("id, name, champ_img, number_of_races_total")
   .eq("isfinished", false)
   .eq("ischampionship", true)
+  .eq("isactive", true)
   .order("id", { ascending: true })
   .limit(1);
 
@@ -22,6 +23,7 @@ if(champDataDB === null || champDataDB.length === 0){
   .from("championship")
   .select("id, name, champ_img, number_of_races_total")
   .eq("ischampionship", true)
+  .eq("isactive", true)
   .order("id", { ascending: false })
   .limit(1);
 
