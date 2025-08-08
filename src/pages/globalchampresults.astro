@@ -1,8 +1,183 @@
 ---
 import Layout from "@/layouts/NormalLayout.astro";
-import Result from "@/sections/ChampResultsTable.astro";
+import { supabase } from "@/db/supabase";
+import ChampCharts from "@/components/champ-charts";
+
+interface GroupedChamp {
+  ChampID: string;
+  ChampName: string;
+  ChampSeason: string;
+}
+
+// SELECT c.id, c.name, c.season, (c.number_of_races_total > COUNT(r.id) AND c.isfinished = TRUE) AS champCancel
+// FROM championship c LEFT JOIN race r ON c.id = r.championship
+// WHERE c.ischampionship = TRUE
+// GROUP BY c.id, c.name, c.season, c.number_of_races_total
+// ORDER BY c.id;
+const { data: dataChamp, error: dataChampError } = await supabase
+  .rpc('get_championship_list');
+
+if(dataChampError || !dataChamp) {
+  console.error(dataChampError);
+}
+
+// Get unique seasons and sort them
+const seasons = [...new Set(dataChamp?.map(champ => champ.season))].sort();
+
+// Group championships by season
+const champsBySeason = seasons.reduce((acc, season) => {
+  acc[season] = dataChamp?.filter(champ => champ.season === season).map(champ => ({
+    ChampID: champ.championship_id.toString(),
+    ChampName: champ.champcancel ? champ.name+' - CANCELADO' : champ.name,
+    ChampSeason: champ.season
+  })) || [];
+  return acc;
+}, {} as { [key: string]: GroupedChamp[] });
 ---
 
 <Layout title = "ESP Racing: Estadisticas de Campeonatos Pasados">
-  <Result/>
+  <div class="grid grid-cols-1 gap-4 w-11/12 mx-auto mt-2 md:grid-cols-2">
+<div>
+  <p class = "font-semibold text-xl pl-2 pb-2">Temporada</p>
+    <select
+      id="select-season"
+      class="block m-auto w-full px-4 py-3 text-lg font-medium rounded-xl pe-9 focus:border-primary disabled:opacity-50 disabled:pointer-events-none bg-darkSecond border-neutral-700 text-lightPrimary placeholder-neutral-500"
+    >
+      {
+        [
+          ...new Set(
+            Object.values(champsBySeason).flatMap((champs) => champs.map(champ => champ.ChampSeason))
+          ),
+        ].map((season) => (
+          <option value={season} class="text-lightSecond">
+            {season}
+          </option>
+        ))
+      }
+    </select>
+  </div>
+
+  <div>
+    <p class = "font-semibold text-xl pl-2 pb-2">Campeonato</p>
+    <select
+      id="select-champ"
+      class="block m-auto w-full px-4 py-3 text-lg font-medium rounded-xl pe-9 focus:border-primary disabled:opacity-50 disabled:pointer-events-none bg-darkSecond border-neutral-700 text-lightPrimary placeholder-neutral-500"
+    >
+      {
+        Object.values(champsBySeason).flatMap((champs) =>
+          champs.map((champ) => (
+            <option
+              value={champ.ChampID}
+              class="text-lightSecond"
+              data-season={champ.ChampSeason}
+            >
+              {champ.ChampName}
+            </option>
+          ))
+        )
+      }
+    </select>
+  </div>
+</div>
+<!-- Tabla de resultados -->
+<div class="container">
+  <div class="section">
+    <button
+      id="loadButtonChamp"
+      class="no-underline bg-darkSecond rounded-xl my-4 font-medium text-lightPrimary text-lg py-4 px-8 block mx-auto hover:text-darkPrimary hover:bg-primary"
+    >
+      Cargar Datos
+    </button>
+  </div>
+  <div id="resultsIndyChampsTable"></div>
+  <div id="resultsTeamsChampsTable"></div>
+  <div id="resultTableOtherPrizes"></div>  <!-- Componente React para los gráficos del campeonato -->
+  <div class="w-full mt-8" id="champChartsContainer">
+    <ChampCharts champId="" client:load />
+  </div>
+</div>
+
+<script>
+  // Script para cargar los resultados de los campeonatos
+  import "@/pages/api/champresults/champresults.ts";
+
+  // Registrar un componente web personalizado para la comunicación con React
+  class ESPRChampCharts extends HTMLElement {
+    constructor() {
+      super();
+    }
+
+    static get observedAttributes() {
+      return ['champid'];
+    }
+
+    attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null) {
+      if (name === 'champid' && oldValue !== newValue) {
+        // Disparar evento para que React lo recoja
+        const event = new CustomEvent('champ-id-changed', {
+          detail: { champId: newValue }
+        });
+        document.dispatchEvent(event);
+      }
+    }
+  }
+
+  // Registrar el elemento si no está ya registrado
+  if (typeof customElements !== 'undefined' && !customElements.get('espr-champ-charts')) {
+    customElements.define('espr-champ-charts', ESPRChampCharts);
+  }
+</script>
+
+<style>
+  .container {
+    margin: 0 auto;
+    width: auto;
+  }
+</style>
+
+<script is:inline data-astro-rerun>
+  function initializeSelects() {
+    const seasonSelect = document.getElementById('select-season');
+    const champSelect = document.getElementById('select-champ'); // Corregido el ID
+
+    if (!(seasonSelect instanceof HTMLSelectElement) ||
+        !(champSelect instanceof HTMLSelectElement)) {
+      return;
+    }
+
+    if (!seasonSelect || !champSelect) {
+      console.error("No se pudieron encontrar todos los elementos necesarios");
+      return;
+    }
+
+    function filterChampionships() {
+      const selectedSeason = seasonSelect.value;
+
+      Array.from(champSelect.options).forEach(option => {
+        const season = option.getAttribute('data-season');
+        option.hidden = season !== selectedSeason;
+      });
+
+      const visibleOptions = Array.from(champSelect.options).filter(opt => !opt.hidden);
+      if (visibleOptions.length > 0) {
+        champSelect.value = visibleOptions[0].value;
+      }
+    }
+
+    // Limpiar event listeners anteriores
+    seasonSelect.removeEventListener('change', filterChampionships);
+
+    // Añadir nuevos event listeners
+    seasonSelect.addEventListener('change', filterChampionships);
+
+    // Inicializar filtros
+    filterChampionships();
+  }
+
+  // Inicializar al cargar
+  initializeSelects();
+
+  // Reinicializar en navegación
+  document.addEventListener('astro:page-load', initializeSelects);
+</script>
 </Layout>
