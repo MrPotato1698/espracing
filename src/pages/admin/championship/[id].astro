@@ -217,6 +217,29 @@ const selectedCarIds = champCarsData ? champCarsData.map(row => row.car.toString
       </span>
     </div>
 
+        <div class="mb-4"></div>
+    <label class="text-lightPrimary text-lg font-medium" for="isActive">
+      ¿El campeonato está activo?
+    </label>
+    <div class="flex items-center gap-2 mt-2">
+      <label class="relative inline-flex cursor-pointer">
+        <input
+          id="isActive"
+          name="isActive"
+          type="checkbox"
+          class="sr-only peer"
+          checked={champsData?.isactive}
+        />
+        <div
+          class="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-primary dark:peer-focus:ring-primary dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary"
+        >
+        </div>
+      </label>
+      <span id="isFinishedText" class="text-lightPrimary text-sm font-medium">
+        {champsData?.isactive ? "Activo" : "No activo"}
+      </span>
+    </div>
+
     <input type="hidden" name="champ_id" value={id} />
     <div>
       <button

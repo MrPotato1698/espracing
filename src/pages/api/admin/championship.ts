@@ -51,6 +51,7 @@ export const POST: APIRoute = async ({ request }) => {
         season: season,
         number_of_races_total: Number(number_of_races_total),
         ischampionship: ischampionship,
+        isactive: false
       });
 
     if (insertError) throw insertError;
@@ -78,6 +79,7 @@ export const PUT: APIRoute = async ({ request }) => {
   const champORevent = formData.get('champORevent')  !== null;
   const numberTotalRaces = formData.get('numbertotalraces');
   const isfinished = formData.get('isFinished') !== null;
+  const isactive = formData.get('isActive') !== null;
 
   if (!champ_id) {
     return new Response(JSON.stringify({ error: 'ID de campeonato no proporcionado' }), { status: 400 });
@@ -90,7 +92,8 @@ export const PUT: APIRoute = async ({ request }) => {
       ...(season && { season: season }),
       ischampionship: champORevent,
       ...(numberTotalRaces && { number_of_races_total: Number(numberTotalRaces) }),
-      isfinished: isfinished
+      isfinished: isfinished,
+      isactive: isactive
     };
 
     const { error: updateError } = await supabase
