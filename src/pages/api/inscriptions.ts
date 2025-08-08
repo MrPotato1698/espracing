@@ -4,7 +4,7 @@ import { supabase } from '@/db/supabase';
 export const POST: APIRoute = async ({ request }) => {
   try {
     const body = await request.json();
-    const { userId, raceName, position, validLaps, car } = body;
+    const { userId, raceName, position, validLaps, car, team } = body;
     if (!userId || !raceName || !position || !validLaps || !car) {
       return new Response(JSON.stringify({ error: 'Faltan campos obligatorios.' }), { status: 400 });
     }
@@ -39,6 +39,7 @@ export const POST: APIRoute = async ({ request }) => {
           car: car, // Ya es el id del coche
           position: Number(position),
           valid_laps: Number(validLaps),
+          team: team || null // Guardar el equipo si existe
         }
       ]);
     if (insertError) {

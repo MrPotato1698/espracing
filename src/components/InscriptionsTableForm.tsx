@@ -67,6 +67,7 @@ export const InscriptionsTableFusion: React.FC<InscriptionsTableFusionProps> = (
   const [validLaps, setValidLaps] = useState("");
   const [selectedCar, setSelectedCar] = useState<number | null>(null);
   const [searchCar, setSearchCar] = useState("");
+  const [team, setTeam] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
@@ -134,6 +135,7 @@ export const InscriptionsTableFusion: React.FC<InscriptionsTableFusionProps> = (
           position: Number(position),
           validLaps: Number(validLaps),
           car: selectedCar, // id numérico
+          team: team || null, // Guardar el equipo si existe
         }),
       });
       if (!res.ok) throw new Error("Error al inscribirse");
@@ -488,7 +490,7 @@ export const InscriptionsTableFusion: React.FC<InscriptionsTableFusionProps> = (
           <div className="text-center text-green-400 font-bold text-lg">Ya estás inscrito en esta carrera.</div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               <div>
                 <label htmlFor="position" className="block text-lightPrimary font-medium mb-2">Posición</label>
                 <Input
@@ -528,6 +530,18 @@ export const InscriptionsTableFusion: React.FC<InscriptionsTableFusionProps> = (
                     label: `${car.brand} ${car.model}`
                   }))}
                   className="bg-darkSecond text-white"
+                />
+              </div>
+              <div>
+                <label htmlFor="team" className="block text-lightPrimary font-medium mb-2">Equipo (opcional)</label>
+                <Input
+                  id="team"
+                  type="text"
+                  value={team}
+                  onChange={e => setTeam(e.target.value)}
+                  className="bg-darkSecond text-white"
+                  placeholder="Nombre del equipo (opcional)"
+                  disabled={loading}
                 />
               </div>
             </div>
