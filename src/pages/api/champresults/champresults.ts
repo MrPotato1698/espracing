@@ -448,7 +448,6 @@ function addNewDriver(
     ? raceData.results.filter(r => r.Split === 1 && r.Pos > 0).length : 0;
   const flapPoint = item.SteamID === raceData.driverFastestLapGuid ? pointFL : 0;
   const plusSplit = (raceData.splits > 1 && item.Split > 1) ? numPilotosSplits1 : 0;
-  console.log(`Driver: ${item.DriverName}, Pos: ${pos}, Points: ${pointArray[pos - 1 + plusSplit] + flapPoint}`);
   const points = pos > 0 ? pointArray[pos - 1 + plusSplit] + flapPoint : 0;
   if (pos > 0 || pos !== -4) {
     respuesta.push({
