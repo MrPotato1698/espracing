@@ -91,7 +91,6 @@ export const TeamPilotsTable: React.FC<TeamPilotsTableProps> = ({
       window.showToast('Error: ID de usuario o equipo no definido', 'error');
       return;
     }
-    console.log('Expulsando piloto:', { userId: pilotId, teamId });
     setLoading(true);
     try {
       const response = await fetch('/api/admin/myteam', {
