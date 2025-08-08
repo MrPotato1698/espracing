@@ -7,6 +7,8 @@ import Discord from "@/assets/social/brand-discord.svg";
 import Youtube from "@/assets/social/brand-youtube.svg";
 import Twitch from "@/assets/social/brand-twitch.svg";
 import ESPRacing from "@/assets/imgresource/ESPRACINGLogoBlanco.webp";
+import Github from "@/assets/imgresource/github.svg";
+import Cup from "@/assets/imgresource/cup.svg";
 
 const { cookies, redirect } = Astro;
 
@@ -22,51 +24,93 @@ const refreshToken = cookies.get("sb-refresh-token");
           <a href ="/"><Image src={ESPRacing} alt="ESP Racing Logo" class="w-auto h-56" /></a>
         </div>
 
-        <ul class="flex gap-6 mt-8">
-          <li>
+        <ul class="pl-4 flex gap-4 mt-8">
+          <li class="group relative">
             <a
               href="https://x.com/EspRacingCom" target="_blank">
               <span class="sr-only">X (previously Twitter)</span>
               <Image class="w-8 .p-2 invert" src={Twitter} alt="Twitter ESP Racing" />
             </a>
+            <span class="absolute left-1/2 -translate-x-1/2 -top-8 px-2 py-1 text-xs text-white bg-primary rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap pointer-events-none before:content-[''] before:absolute before:top-full before:left-1/2 before:-translate-x-1/2 before:border-4 before:border-transparent before:border-t-primary">
+              ¡Síguenos en X!
+            </span>
           </li>
 
-          <li>
+          <li class="group relative">
             <a
             href="https://www.instagram.com/espsimracingoficial/" target="_blank">
             <span class="sr-only">Instagram</span>
             <Image class="w-8 .p-2 invert" src={Instagram} alt="Instagram ESP Racing" />
           </a>
+          <span class="absolute left-1/2 -translate-x-1/2 -top-8 px-2 py-1 text-xs text-white bg-primary rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap pointer-events-none before:content-[''] before:absolute before:top-full before:left-1/2 before:-translate-x-1/2 before:border-4 before:border-transparent before:border-t-primary">
+            ¡Síguenos en Instagram!
+          </span>
           </li>
 
-          <li>
+          <li class="group relative">
             <a href="https://discord.gg/hjawMXGU6k" target="_blank">
               <span class="sr-only">Discord</span>
               <Image class="w-8 .p-2 invert" src={Discord} alt="Discord ESP Racing" />
             </a>
+            <span class="absolute left-1/2 -translate-x-1/2 -top-8 px-2 py-1 text-xs text-white bg-primary rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap pointer-events-none before:content-[''] before:absolute before:top-full before:left-1/2 before:-translate-x-1/2 before:border-4 before:border-transparent before:border-t-primary">
+              ¡Unete a nuestro Discord!
+            </span>
           </li>
 
-          <li>
+          <li class="group relative">
             <a href="https://www.youtube.com/@esp-racing-com-es" target="_blank">
               <span class="sr-only">Youtube</span>
               <Image class="w-8 .p-2 invert" src={Youtube} alt="Youtube ESP Racing" />
             </a>
+            <span class="absolute left-1/2 -translate-x-1/2 -top-8 px-2 py-1 text-xs text-white bg-primary rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap pointer-events-none before:content-[''] before:absolute before:top-full before:left-1/2 before:-translate-x-1/2 before:border-4 before:border-transparent before:border-t-primary">
+              ¡Suscribete a nuestro canal de Youtube!
+            </span>
           </li>
 
-          <li>
+          <li class="group relative">
             <a href="https://www.twitch.tv/sergig_" target="_blank">
               <span class="sr-only">Twitch</span>
               <Image class="w-8 .p-2 invert" src={Twitch} alt="Twitch ESP Racing" />
             </a>
+            <span class="absolute left-1/2 -translate-x-1/2 -top-8 px-2 py-1 text-xs text-white bg-primary rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap pointer-events-none before:content-[''] before:absolute before:top-full before:left-1/2 before:-translate-x-1/2 before:border-4 before:border-transparent before:border-t-primary">
+              ¡Retransmisiones en directo!
+            </span>
           </li>
 
-          <li>
+          <li class="group relative">
             <a href="https://www.paypal.com/es/home" target="_blank">
               <span class="sr-only">Paypal</span>
               <Image class="w-8 .p-2 invert" src={Paypal} alt="Paypal ESP Racing" />
             </a>
+              <span class="absolute left-1/2 -translate-x-1/2 -top-8 px-2 py-1 text-xs text-white bg-primary rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap pointer-events-none before:content-[''] before:absolute before:top-full before:left-1/2 before:-translate-x-1/2 before:border-4 before:border-transparent before:border-t-primary">
+                Paypal de la comunidad
+              </span>
+          </li>
+        </ul>
+
+        <ul class="pl-10 flex gap-2 mt-2">
+          <li class="group relative my-auto">
+            <a class = "text-sm">Sobre el proyecto: </a>
+          </li>
+          <li class="group relative">
+            <a href="https://github.com/MrPotato1698/espracing" target="_blank">
+              <span class="sr-only">Proyecto Github</span>
+              <Image class="w-8 .p-2 invert" src={Github} alt="Cafe para el desarrollador" />
+            </a>
+            <span class="absolute left-1/2 -translate-x-1/2 -top-8 px-2 py-1 text-xs text-white bg-primary rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap pointer-events-none before:content-[''] before:absolute before:top-full before:left-1/2 before:-translate-x-1/2 before:border-4 before:border-transparent before:border-t-primary">
+              Proyecto en Github
+            </span>
           </li>
 
+          <li class="group relative">
+            <a href="https://paypal.me/MJGG1698" target="_blank">
+              <span class="sr-only">Paypal MJGG</span>
+              <Image class="w-8 .p-2 invert" src={Cup} alt="Cafe para el desarrollador" />
+            </a>
+            <span class="absolute left-1/2 -translate-x-1/2 -top-8 px-2 py-1 text-xs text-white bg-primary rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap pointer-events-none before:content-[''] before:absolute before:top-full before:left-1/2 before:-translate-x-1/2 before:border-4 before:border-transparent before:border-t-primary">
+              Un café para el desarrollador 🤍
+            </span>
+          </li>
         </ul>
       </div>
 
@@ -180,6 +224,6 @@ const refreshToken = cookies.get("sb-refresh-token");
       </div>
     </div>
 
-    <p class="text-xs text-gray-500">&copy; 2024-2025. ESP Racing. All rights reserved.</p>
+    <p class="text-xs text-gray-500 -mt-12">&copy; 2024-2026. ESP Racing. All rights reserved.</p>
   </div>
 </footer>
